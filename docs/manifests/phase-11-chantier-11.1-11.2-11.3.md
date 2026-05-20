@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-11-chantier-11.1-11.2-11.3-polish-lancement`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `eff5b0f`
 **Durée approximative** : 1 session Claude Code (audits + docs de lancement)
 
 ---
