@@ -1,0 +1,75 @@
+graph TD
+    A[Accueil /]:::racine
+
+    A --> B[S'informer]:::espace
+    A --> C[Mobiliser]:::espace
+    A --> D[S'entraider]:::espace
+    A --> E[Agir]:::espace
+    A --> F[Comprendre]:::transverse
+    A --> G[Carte unifiée]:::transverse
+    A --> H[Agenda agrégé]:::transverse
+    A --> P[Profil]:::utilitaire
+    A --> AD[Admin]:::utilitaire
+
+    B --> B1[Média Maintenant]
+    B --> B2[Maintenant Radio]
+    B --> B3[Maintenant Médias<br/>journal-affiche]
+    B --> B4[Réseau social]
+    B --> B5[Sondages]
+    B --> B6[Décider]:::important
+    B6 --> B6a[Salles communes/GT]
+    B6 --> B6b[Assemblée Confédérale]
+    B6 --> B6c[3 modes décision<br/>Consensus<br/>Levée d'objections<br/>Jugement majoritaire]
+
+    C --> C1[Pétitions<br/>modération a priori]
+    C --> C2[Campagnes<br/>modération a priori]
+    C --> C3[Mobilisations<br/>modération a posteriori]
+    C --> C4[Cagnottes]
+    C4 --> C4a[Ouvertes]
+    C4 --> C4b[Lutte et grève]
+    C4 --> C4c[Cotisations admin<br/>SS logement, mobilités,<br/>alimentation, RBU]
+
+    D --> D1[Hébergement]
+    D --> D2[Transport]
+    D --> D3[Qui prête tout<br/>+ Repair Café]
+    D --> D4[Fruits de la terre<br/>+ Frigos solidaires]
+    D --> D5[SEL<br/>1 T99CP = 1 € = 1 minute]
+    D --> D6[Marché solidaire]
+    D6 --> D6a[Produit]
+    D6 --> D6b[Boutique]
+    D6 --> D6c[Minimarché<br/>4 monnaies physique]
+
+    E --> E1[Adhérer<br/>gratuit / 12 € / 12 T99CP]
+    E --> E2[Communes libres]:::important
+    E2 --> E2a[2100-2300 communes<br/>pré-créées]
+    E2 --> E2b[Fédérations<br/>géo/théma/mixte]
+    E2 --> E2c[Confédérations]
+    E --> E3[Moments solidaires]
+    E3 --> E3a[Porte-à-porte<br/>7 moments]
+    E3 --> E3b[Autres formats<br/>maraude, vide-grenier,<br/>repas, soutien...]
+    E --> E4[D'autres moyens<br/>d'agir<br/>distance protectrice]
+
+    F --> F1[Monnaie 99-coin]
+    F --> F2[Doctrine]
+    F --> F3[FAQ]
+    F --> F4[Ressources]
+
+    P --> P1[Dashboard]
+    P --> P2[Informations]
+    P --> P3[Mes communes]
+    P --> P4[Contributions]
+    P --> P5[Notifications]
+    P --> P6[Wallet T99CP]
+    P --> P7[Confidentialité<br/>export + suppression]
+
+    AD --> AD1[Modération<br/>console unique]
+    AD --> AD2[Communes]
+    AD --> AD3[Membres]
+    AD --> AD4[Finances]
+    AD --> AD5[Journal admin]
+
+    classDef racine fill:#B83A2D,stroke:#82261C,color:#FAF7F2,font-weight:bold
+    classDef espace fill:#2D5F4A,stroke:#234B3A,color:#FAF7F2,font-weight:bold
+    classDef transverse fill:#C68E2C,stroke:#9C7022,color:#1A1817,font-weight:bold
+    classDef utilitaire fill:#4A4540,stroke:#1A1817,color:#FAF7F2
+    classDef important fill:#F2E1DD,stroke:#B83A2D,color:#1A1817,font-weight:bold
