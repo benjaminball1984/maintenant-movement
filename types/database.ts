@@ -76,6 +76,10 @@ export type MonnaieMarcheMinimarche = 'T99CP' | 'EUR' | 'G1' | 'MNLC';
 export type CheminAdhesion = 'gratuit' | 'euros' | 't99cp';
 export type StatutAdhesion = 'active' | 'expiree' | 'annulee';
 
+// Chantier 5.2 — Assemblée Confédérale.
+export type EntiteConfederal = 'commune' | 'federation' | 'confederation';
+export type StatutMandat = 'actif' | 'libere';
+
 // ============================================================
 // Database
 // ============================================================
@@ -938,6 +942,37 @@ export interface Database {
         Relationships: [];
       };
 
+      mandat_confederal: {
+        Row: {
+          id: string;
+          personne_id: string;
+          entite_type: EntiteConfederal;
+          entite_id: string;
+          tire_le: string;
+          tirage_seed: string | null;
+          statut: StatutMandat;
+          libere_le: string | null;
+          raison_liberation: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          personne_id: string;
+          entite_type: EntiteConfederal;
+          entite_id: string;
+          tire_le?: string;
+          tirage_seed?: string | null;
+          statut?: StatutMandat;
+          libere_le?: string | null;
+          raison_liberation?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['mandat_confederal']['Insert']>;
+        Relationships: [];
+      };
+
       adhesion: {
         Row: {
           id: string;
@@ -1093,6 +1128,14 @@ export interface Database {
         Args: { seuil_jours?: number };
         Returns: Array<Database['public']['Tables']['adhesion']['Row']>;
       };
+      nombre_communes_actives: {
+        Args: { personne_a_compter: string };
+        Returns: number;
+      };
+      candidates_pour_assemblee: {
+        Args: { entite_type_recherche: string; entite_id_recherche: string };
+        Returns: string[];
+      };
     };
 
     Enums: {
@@ -1139,3 +1182,4 @@ export type NotationMarche = Database['public']['Tables']['notation_marche']['Ro
 export type NotationMarcheStats = Database['public']['Views']['notation_marche_stats']['Row'];
 export type Adhesion = Database['public']['Tables']['adhesion']['Row'];
 export type AdherentActif = Database['public']['Views']['adherent_actif']['Row'];
+export type MandatConfederal = Database['public']['Tables']['mandat_confederal']['Row'];

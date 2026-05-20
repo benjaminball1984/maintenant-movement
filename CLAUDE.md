@@ -385,9 +385,9 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 5.1 — Adhérer (3 chemins gratuit/12 €/12 T99CP + mail de relance J+365) (voir `docs/manifests/phase-5-chantier-5.1.md`)
-**Chantier en cours** : 5.2 (Communes libres + Fédérations + Confédérations) ou 2.2 (pages éditoriales)
-**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md`. 5.2 demande le CSV de cartographie des 2100-2300 communes pré-créées. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-027 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures. Préalable Marché prod : poser un cron qui expire les annonces inactives 3 mois (chantier 11.3). Préalable Adhésion prod : poser un cron quotidien qui appelle `envoyerRelancesAdhesion(14)` (chantier 11.3).
+**Dernier chantier terminé** : 5.2 — Communes libres + Fédérations + Confédérations + Assemblée Confédérale (tirage au sort + incompatibilité cumul + script d'import CSV) (voir `docs/manifests/phase-5-chantier-5.2.md`)
+**Chantier en cours** : 5.3 (Moments solidaires) ou 2.2 (pages éditoriales)
+**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-028 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures. Préalable Marché prod : poser un cron qui expire les annonces inactives 3 mois (chantier 11.3). Préalable Adhésion prod : poser un cron quotidien qui appelle `envoyerRelancesAdhesion(14)` (chantier 11.3). Préalable Communes : Lilou/Ben fournit le CSV des 2100-2300 communes puis lancer `npx tsx scripts/import-communes.ts <fichier.csv>`.
 
 ### Branche principale
 
