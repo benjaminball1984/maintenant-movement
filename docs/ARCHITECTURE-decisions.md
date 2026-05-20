@@ -117,3 +117,73 @@ Les trois polices sont chargées via `next/font/google`. Next télécharge les f
 
 - **`@font-face` manuel avec fichiers WOFF2 dans `public/fonts/`** : plus de contrôle mais plus de maintenance (versions, mises à jour, sous-ensembles). On y reviendra si Next/font pose un problème spécifique.
 - **`next/font/local`** : nécessite de versionner les fichiers de polices dans le repo, augmente le poids du dépôt sans gain pour notre cas.
+
+---
+
+## ADR-005 — `personne.id` lié à `auth.users.id` via FK avec cascade (chantier 1.1)
+
+**Date** : 2026-05-20
+**Statut** : actée
+
+### Contexte
+
+Supabase Auth gère sa propre table `auth.users` (id UUID, email, mots de passe hashés, providers OAuth, etc.). Notre application a besoin d'une table `personne` qui porte tous les champs métier (nom, prénom, pronom, code_postal, statut RGPD, préférences, etc.) qui n'ont pas leur place dans `auth.users`.
+
+Deux conventions Supabase coexistent dans la littérature :
+1. `personne.user_id` (UUID) référence `auth.users(id)`, `personne.id` est un UUID applicatif distinct.
+2. `personne.id` (PK) **est** la même valeur que `auth.users(id)`.
+
+### Décision
+
+On retient la convention 2 : `personne.id uuid primary key references auth.users(id) on delete cascade`. Un seul UUID identifie une personne dans tout le schéma. `auth.uid()` (issu de Supabase Auth dans les politiques RLS) est directement comparable à `personne.id`, `appartenance_commune.personne_id`, etc.
+
+`on delete cascade` garantit que la suppression d'un compte Auth nettoie automatiquement les références applicatives. Le flux RGPD de suppression différée 30 jours (cf. 05_RGPD.md §5A) ne passe **pas** par `delete auth.users` ; il passe par anonymisation (`personne.statut = 'anonymise'` + nullification des champs identifiants), ce qui préserve les contributions sous « Membre anonyme ». Le cascade ne s'active donc que pour les rares cas de suppression directe via la console Supabase Studio.
+
+### Conséquences
+
+- Les politiques RLS sont très lisibles (`auth.uid() = id` pour les politiques « soi-même »).
+- Une jointure de moins par requête : pas besoin de résoudre `user_id → id` pour le mapping.
+- L'insertion d'une ligne `personne` se fait après le `auth.signUp()` et utilise le `user.id` retourné.
+- Si on devait un jour migrer hors Supabase Auth, il faudrait préserver les UUID. C'est de toute façon une bonne pratique.
+
+### Alternatives considérées
+
+- **`personne.user_id` distinct de `personne.id`** : ajoute une indirection sans bénéfice pour notre cas. Utile si on supporte plusieurs comptes Auth pour une même personne (pas notre besoin).
+
+---
+
+## ADR-006 — Anti-spam et max-3 sur `appartenance_commune` via triggers SQL (chantier 1.1)
+
+**Date** : 2026-05-20
+**Statut** : actée
+
+### Contexte
+
+Deux règles métier importantes sur l'appartenance d'une personne aux communes (cf. 01_ARCHITECTURE.md §7B) :
+1. **Maximum 3 communes actives par personne** (4 = refusé).
+2. **Anti-spam : 1 transition (entrée ou sortie) par mois glissant** pour éviter le « zapping ».
+
+Trois lieux possibles pour faire respecter ces règles :
+- Côté application (validation Zod + Server Action).
+- Triggers SQL Postgres `BEFORE INSERT/UPDATE`.
+- Contraintes d'exclusion Postgres (`EXCLUDE USING gist + btree`).
+
+### Décision
+
+On utilise des **triggers SQL `BEFORE INSERT/UPDATE`** dans la migration 004. La règle est posée au niveau le plus bas (base de données), ce qui :
+- garantit qu'aucune mutation directe SQL (via Supabase Studio, console, script d'admin) ne puisse la contourner ;
+- centralise la logique dans un seul fichier de migration auditable ;
+- expose une erreur SQL claire (avec `errcode = 'check_violation'`) que l'application peut traduire en message utilisateur·ice.
+
+L'application duplique la vérification au niveau Zod pour donner un retour avant l'appel BDD (UX), mais la BDD reste la source de vérité.
+
+### Conséquences
+
+- Les règles sont testables au niveau SQL (les futurs tests d'intégration avec Supabase local valideront leur comportement).
+- Toute modification de la règle (par exemple passer à 4 max, ou raccourcir l'anti-spam à 15 jours) se fait par une nouvelle migration, traçable dans git.
+- Les triggers ajoutent un coût de quelques requêtes supplémentaires par INSERT/UPDATE. Coût négligeable pour le volume attendu (le mouvement n'aura jamais des milliers d'inscriptions de communes par seconde).
+
+### Alternatives considérées
+
+- **Validation applicative seule** : non fiable (un script admin peut contourner).
+- **Contrainte d'exclusion** : trop subtile pour cette règle ; les triggers sont plus lisibles et plus pédagogiques.

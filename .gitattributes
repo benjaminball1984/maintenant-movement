@@ -1,0 +1,17 @@
+# Normalisation des fins de ligne.
+#
+# Toutes les sources de code, configuration et documentation utilisent LF
+# en interne, peu importe l'OS de la personne qui clone le repo. Évite le
+# cycle infini « Windows pose des CRLF au checkout / Biome se plaint en LF ».
+
+* text=auto eol=lf
+
+# Binaires explicites (pour ne jamais être convertis)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
