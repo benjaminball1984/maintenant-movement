@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-4-chantier-4.2-sel`
-**Commit final** : à renseigner après commit
+**Commit final** : `2ded716`
 **Durée approximative** : 1 session Claude Code
 
 ---
