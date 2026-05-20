@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-0-chantier-0.2-systeme-de-design`
-**Commit final** : à renseigner après commit
+**Commit final** : `e2d2576`
 **Durée approximative** : 1 session Claude Code (enchaînée avec le 0.1)
 
 ---
