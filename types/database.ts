@@ -49,6 +49,15 @@ export type StatutDon = 'en_attente' | 'confirme' | 'echoue' | 'rembourse';
 export type TypeOffreEntraide = 'hebergement' | 'transport' | 'pret_objet' | 'fruits_terre';
 export type SensOffreEntraide = 'propose' | 'cherche';
 export type StatutOffreEntraide = 'publiee' | 'retiree' | 'cloturee';
+export type CategorieServiceSel = 'service' | 'volontariat';
+export type SensServiceSel = 'propose' | 'cherche';
+export type StatutServiceSel = 'publie' | 'retire' | 'cloture';
+export type StatutPrestationSel =
+  | 'en_attente'
+  | 'en_moderation'
+  | 'creditee'
+  | 'contestee'
+  | 'annulee';
 
 // ============================================================
 // Database
@@ -646,6 +655,80 @@ export interface Database {
         Relationships: [];
       };
 
+      service_sel: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          categorie: CategorieServiceSel;
+          sens: SensServiceSel;
+          duree_minutes_estimee: number;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          createurice_id: string;
+          statut: StatutServiceSel;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          categorie: CategorieServiceSel;
+          sens: SensServiceSel;
+          duree_minutes_estimee: number;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          createurice_id: string;
+          statut?: StatutServiceSel;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['service_sel']['Insert']>;
+        Relationships: [];
+      };
+
+      prestation_sel: {
+        Row: {
+          id: string;
+          service_id: string;
+          prestataire_id: string;
+          beneficiaire_id: string;
+          duree_minutes_reelle: number | null;
+          statut: StatutPrestationSel;
+          reservee_le: string;
+          declaree_realisee_le: string | null;
+          creditee_le: string | null;
+          contestee_le: string | null;
+          annulee_le: string | null;
+          tx_hash_credit: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          service_id: string;
+          prestataire_id: string;
+          beneficiaire_id: string;
+          duree_minutes_reelle?: number | null;
+          statut?: StatutPrestationSel;
+          reservee_le?: string;
+          declaree_realisee_le?: string | null;
+          creditee_le?: string | null;
+          contestee_le?: string | null;
+          annulee_le?: string | null;
+          tx_hash_credit?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['prestation_sel']['Insert']>;
+        Relationships: [];
+      };
+
       don: {
         Row: {
           id: string;
@@ -756,6 +839,10 @@ export interface Database {
           nombre_dons: number;
         }[];
       };
+      prestations_a_crediter: {
+        Args: { seuil_minutes?: number };
+        Returns: Array<Database['public']['Tables']['prestation_sel']['Row']>;
+      };
     };
 
     Enums: {
@@ -792,3 +879,5 @@ export type Cagnotte = Database['public']['Tables']['cagnotte']['Row'];
 export type Don = Database['public']['Tables']['don']['Row'];
 export type CagnotteCompteur = Database['public']['Views']['cagnotte_compteur']['Row'];
 export type OffreEntraide = Database['public']['Tables']['offre_entraide']['Row'];
+export type ServiceSel = Database['public']['Tables']['service_sel']['Row'];
+export type PrestationSel = Database['public']['Tables']['prestation_sel']['Row'];

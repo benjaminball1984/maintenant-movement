@@ -385,9 +385,9 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 4.1 — S'entraider (4 sous-espaces) (voir `docs/manifests/phase-4-chantier-4.1.md`)
-**Chantier en cours** : 4.2 (SEL) ou 4.3 (Marché solidaire) ou 2.2 (pages éditoriales)
-**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-020 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...` pour activer les paiements euros réels (le mode mock fonctionne en attendant).
+**Dernier chantier terminé** : 4.2 — SEL (système d'échange local + workflow modération 2h + crédit T99CP) (voir `docs/manifests/phase-4-chantier-4.2.md`)
+**Chantier en cours** : 4.3 (Marché solidaire) ou 2.2 (pages éditoriales)
+**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-022 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures.
 
 ### Branche principale
 
