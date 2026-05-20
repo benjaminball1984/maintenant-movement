@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-5-chantier-5.3-moments`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `43ac44d`
 **Durée approximative** : 1 session Claude Code
 
 ---
