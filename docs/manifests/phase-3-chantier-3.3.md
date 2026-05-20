@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-3-chantier-3.3-cagnottes`
-**Commit final** : à renseigner après commit
+**Commit final** : `e0d657a`
 **Durée approximative** : 1 session Claude Code
 
 ---
