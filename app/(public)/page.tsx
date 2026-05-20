@@ -1,58 +1,48 @@
-import { Alert, Container, Heading } from '@/components/ui';
-import Link from 'next/link';
+import { BlocTitre } from '@/components/home/BlocTitre';
+import { PreFooterCompteurs } from '@/components/home/PreFooterCompteurs';
+import { UneArticle } from '@/components/home/UneArticle';
+import { UneCagnotte } from '@/components/home/UneCagnotte';
+import { UneMobilisation } from '@/components/home/UneMobilisation';
+import { UnePetition } from '@/components/home/UnePetition';
+import { getCompteursHome } from '@/lib/queries/home';
 
 /**
- * Page d'accueil temporaire.
+ * Page d'accueil définitive (chantier 2.1).
  *
- * Affiche les éléments de titre fixés par la spec (`01_ARCHITECTURE.md §3`) :
- * surtitre, titre, sous-titre. La structure complète (header, 4 unes
- * empilées, pré-footer, footer) sera implémentée au chantier 2.1.
+ * Structure (cf. 01_ARCHITECTURE.md §3) :
+ *   1. Header (depuis layout (public))
+ *   2. BlocTitre (surtitre / titre / sous-titre)
+ *   3. 4 unes empilées (pétition, article, mobilisation, cagnotte)
+ *   4. PreFooterCompteurs (newsletter, membres, signataires)
+ *   5. Footer (depuis layout (public))
  *
- * Aucun lien ne pointe vers une page inexistante (cf. CLAUDE.md §4) : seuls
- * sont exposés les pages déjà construites (system de design, inscription,
- * connexion).
+ * Pour 2.1, les 4 unes sont en état vide propre : les tables sources
+ * (petition, article, mobilisation, cagnotte) n'existent pas encore
+ * (phases 3 et 7). Chaque carte affiche un message d'attente + lien
+ * « voir tous » vers l'index de l'espace correspondant.
  */
-export default function PageAccueil() {
+export default async function PageAccueil() {
+  const compteurs = await getCompteursHome();
+
   return (
-    <Container taille="md" className="flex min-h-screen flex-col justify-center gap-8 py-16">
-      <header className="flex flex-col gap-3">
-        <p className="font-body text-sm font-bold uppercase tracking-cap text-text-3">
-          La plateforme citoyenne des 99 %
-        </p>
-        <Heading niveau={1}>Maintenant!</Heading>
-        <p className="text-lg text-text-2">
-          Pour une vie digne et heureuse pour tous et toutes, dans un monde vivable. Face aux
-          oppressions systémiques, nos luttes doivent devenir systémiques.
-        </p>
-      </header>
+    <>
+      <BlocTitre />
 
-      <Alert variant="info" titre="Site en construction">
-        Chantier 1.2 (auth 4 portes) en cours. La page d'accueil définitive est prévue au chantier
-        2.1.
-      </Alert>
+      <section
+        aria-label="À la une"
+        className="mx-auto grid max-w-4xl gap-6 px-4 pb-16 sm:px-6 lg:px-8"
+      >
+        <UnePetition />
+        <UneArticle />
+        <UneMobilisation />
+        <UneCagnotte />
+      </section>
 
-      <nav aria-label="Navigation interne">
-        <ul className="flex flex-col gap-2">
-          <li>
-            <Link href="/inscription" className="text-brand underline-offset-4 hover:no-underline">
-              Créer un compte
-            </Link>
-          </li>
-          <li>
-            <Link href="/connexion" className="text-brand underline-offset-4 hover:no-underline">
-              Se connecter
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/design-system"
-              className="text-brand underline-offset-4 hover:no-underline"
-            >
-              Système de design (showcase)
-            </Link>
-          </li>
-        </ul>
-      </nav>
-    </Container>
+      <PreFooterCompteurs
+        newsletter={compteurs.newsletter}
+        membres={compteurs.membres}
+        signataires={compteurs.signataires}
+      />
+    </>
   );
 }

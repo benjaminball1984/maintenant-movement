@@ -259,3 +259,35 @@ Pour 1.3 :
 
 - **Génération synchrone dans la Server Action** : timeout Next.js + impossible pour les comptes avec beaucoup de contributions. Rejeté.
 - **Reporter complètement la fonctionnalité au chantier d'infra** : aurait laissé l'onglet Confidentialité sans son bouton « Télécharger mes données », ce qui aurait été un trou visible et anti-pédagogique pour la doctrine RGPD. La présence du stub avec message honnête est meilleure.
+
+---
+
+## ADR-009 — Modale signature pétition via `<dialog>` HTML5 plutôt que Radix (chantier 2.1)
+
+**Date** : 2026-05-20
+**Statut** : actée
+
+### Contexte
+
+La spec (`01_ARCHITECTURE.md §3`) impose une modale de signature de pétition sur la page d'accueil. Trois options :
+1. Implémenter un Dialog accessible à la main (focus trap, gestion Échap, clic backdrop, scroll lock) : long et fragile.
+2. Installer `@radix-ui/react-dialog` : solide, mais ajoute Radix au bundle pour un seul cas.
+3. Utiliser l'élément HTML5 natif `<dialog>` : support large (Chrome 37+, Safari 15.4+, Firefox 98+), accessible par défaut, gère focus trap et Échap nativement.
+
+### Décision
+
+On utilise `<dialog>` HTML5 natif. La méthode `dialog.showModal()` ouvre la modale, `dialog.close()` la ferme, et le backdrop CSS est exposé via `::backdrop`. Le scroll du body est verrouillé par un effet React qui écoute les évènements `show`/`close` du dialog.
+
+Cohérent avec ADR-003 (composants UI maison sans Radix) : on n'ajoute Radix que quand une fonctionnalité dépasse vraiment ce que le HTML natif permet.
+
+### Conséquences
+
+- Bundle plus léger : pas de dépendance Radix Dialog.
+- Code applicatif court (~200 lignes pour la `ModaleSignaturePetition` complète, formulaire compris).
+- Compatibilité : OK pour tous les navigateurs cibles 2026.
+- Pour les futures modales (auth modale, adhésion 3 chemins, etc.), suivre le même pattern. Si une modale a un besoin spécifique non couvert par `<dialog>` (focus trap custom, animation complexe, portail vers un container particulier), envisager Radix à ce moment-là par ADR ultérieure.
+
+### Alternatives considérées
+
+- **Radix Dialog** : à reprendre par ADR si on rencontre un cas où `<dialog>` natif ne suffit pas.
+- **Headless UI (Tailwind Labs)** : alternative légère à Radix, à reconsidérer si on bascule un jour.

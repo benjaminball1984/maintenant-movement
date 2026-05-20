@@ -385,9 +385,9 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 1.3 — Profil utilisateurice (voir `docs/manifests/phase-1-chantier-1.3.md`)
-**Chantier en cours** : 2.1 — Page d'accueil définitive (header + 4 unes empilées + pré-footer compteurs + footer + modale signature)
-**Chantiers bloqués / en attente d'arbitrage** : aucun. Préalables Supabase faits par Lilou/Ben pendant 1.3 : projet Francfort créé, clés dans `.env.local`. Reste à appliquer les migrations 1.1 (`supabase db push`) et configurer Brevo SMTP côté projet pour activer le flux mails d'auth réel.
+**Dernier chantier terminé** : 2.1 — Page d'accueil définitive (voir `docs/manifests/phase-2-chantier-2.1.md`)
+**Chantier en cours** : 2.2 — Section Comprendre + pages utilitaires (remplir les 8 placeholders éditoriaux posés en 2.1)
+**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md` sous « Contenus à arbitrer ». Préalable Supabase technique : `supabase db push` les migrations 1.1 + configurer Brevo SMTP côté projet pour activer les flux end-to-end.
 
 ### Branche principale
 
