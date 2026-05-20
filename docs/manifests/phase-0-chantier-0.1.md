@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-0-chantier-0.1-initialisation-depot`
-**Commit final** : à renseigner après commit
+**Commit final** : `5bef22c`
 **Durée approximative** : 1 session Claude Code
 
 ---
