@@ -49,8 +49,21 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                   Pétitions
                 </Link>
               </li>
-              <li className="px-3 py-2 text-sm text-text-4">
-                Campagnes <span className="text-xs">(3.2)</span>
+              <li>
+                <Link
+                  href="/admin/moderation/campagnes"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Campagnes
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin/moderation/mobilisations"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Mobilisations
+                </Link>
               </li>
               <li className="px-3 py-2 text-sm text-text-4">
                 Cagnottes <span className="text-xs">(3.3)</span>

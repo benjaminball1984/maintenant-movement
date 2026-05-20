@@ -34,6 +34,14 @@ export type NiveauDroitAdmin =
   | 'dpd';
 
 export type StatutPetition = 'en_moderation' | 'publiee' | 'rejetee' | 'archivee';
+export type StatutMobilisation = 'publiee' | 'retiree';
+export type StatutCampagne = 'en_moderation' | 'publiee' | 'rejetee' | 'archivee';
+export type TypeModuleCampagne =
+  | 'petition'
+  | 'mobilisation'
+  | 'cagnotte'
+  | 'sondage'
+  | 'page_editoriale';
 
 // ============================================================
 // Database
@@ -424,6 +432,126 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['signature_petition']['Insert']>;
         Relationships: [];
       };
+
+      mobilisation: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url: string | null;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          date_debut: string;
+          date_fin: string | null;
+          createurice_id: string;
+          statut: StatutMobilisation;
+          retire_par: string | null;
+          retire_le: string | null;
+          raison_retrait: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url?: string | null;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          date_debut: string;
+          date_fin?: string | null;
+          createurice_id: string;
+          statut?: StatutMobilisation;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          raison_retrait?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['mobilisation']['Insert']>;
+        Relationships: [];
+      };
+
+      participation_mobilisation: {
+        Row: {
+          id: string;
+          mobilisation_id: string;
+          personne_id: string | null;
+          code_postal: string | null;
+          accepte_notifications: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          mobilisation_id: string;
+          personne_id?: string | null;
+          code_postal?: string | null;
+          accepte_notifications?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['participation_mobilisation']['Insert']>;
+        Relationships: [];
+      };
+
+      campagne: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          image_url: string | null;
+          createurice_id: string;
+          statut: StatutCampagne;
+          modere_par: string | null;
+          modere_le: string | null;
+          raison_rejet: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          image_url?: string | null;
+          createurice_id: string;
+          statut?: StatutCampagne;
+          modere_par?: string | null;
+          modere_le?: string | null;
+          raison_rejet?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['campagne']['Insert']>;
+        Relationships: [];
+      };
+
+      module_campagne: {
+        Row: {
+          id: string;
+          campagne_id: string;
+          type_module: TypeModuleCampagne;
+          cible_id: string | null;
+          contenu_editorial: string | null;
+          ordre: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          campagne_id: string;
+          type_module: TypeModuleCampagne;
+          cible_id?: string | null;
+          contenu_editorial?: string | null;
+          ordre?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['module_campagne']['Insert']>;
+        Relationships: [];
+      };
     };
 
     Views: {
@@ -469,6 +597,10 @@ export interface Database {
         Args: { petition_a_compter: string };
         Returns: number;
       };
+      nombre_participant_es: {
+        Args: { mobilisation_a_compter: string };
+        Returns: number;
+      };
     };
 
     Enums: {
@@ -496,3 +628,8 @@ export type JournalAdmin = Database['public']['Tables']['journal_admin']['Row'];
 export type Petition = Database['public']['Tables']['petition']['Row'];
 export type SignaturePetition = Database['public']['Tables']['signature_petition']['Row'];
 export type PetitionCompteur = Database['public']['Views']['petition_compteur']['Row'];
+export type Mobilisation = Database['public']['Tables']['mobilisation']['Row'];
+export type ParticipationMobilisation =
+  Database['public']['Tables']['participation_mobilisation']['Row'];
+export type Campagne = Database['public']['Tables']['campagne']['Row'];
+export type ModuleCampagne = Database['public']['Tables']['module_campagne']['Row'];
