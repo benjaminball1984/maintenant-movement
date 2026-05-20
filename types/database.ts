@@ -42,6 +42,10 @@ export type TypeModuleCampagne =
   | 'cagnotte'
   | 'sondage'
   | 'page_editoriale';
+export type TypeCagnotte = 'ouverte' | 'lutte' | 'cotisation';
+export type StatutCagnotte = 'publiee' | 'suspendue' | 'cloturee';
+export type MonnaieDon = 'EUR' | 'T99CP';
+export type StatutDon = 'en_attente' | 'confirme' | 'echoue' | 'rembourse';
 
 // ============================================================
 // Database
@@ -552,6 +556,90 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['module_campagne']['Insert']>;
         Relationships: [];
       };
+
+      cagnotte: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          image_url: string | null;
+          type: TypeCagnotte;
+          objectif_euros: number;
+          createurice_id: string;
+          stripe_account_id: string | null;
+          wallet_t99cp: string | null;
+          statut: StatutCagnotte;
+          suspendue_par: string | null;
+          suspendue_le: string | null;
+          raison_suspension: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          image_url?: string | null;
+          type: TypeCagnotte;
+          objectif_euros?: number;
+          createurice_id: string;
+          stripe_account_id?: string | null;
+          wallet_t99cp?: string | null;
+          statut?: StatutCagnotte;
+          suspendue_par?: string | null;
+          suspendue_le?: string | null;
+          raison_suspension?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['cagnotte']['Insert']>;
+        Relationships: [];
+      };
+
+      don: {
+        Row: {
+          id: string;
+          cagnotte_id: string;
+          personne_id: string | null;
+          prenom: string | null;
+          nom: string | null;
+          email: string | null;
+          code_postal: string | null;
+          monnaie: MonnaieDon;
+          montant_centimes: number;
+          frais_centimes: number;
+          stripe_payment_intent_id: string | null;
+          tx_hash: string | null;
+          statut: StatutDon;
+          accepte_newsletter: boolean;
+          accepte_contact_createurice: boolean;
+          created_at: string;
+          confirme_le: string | null;
+        };
+        Insert: {
+          id?: string;
+          cagnotte_id: string;
+          personne_id?: string | null;
+          prenom?: string | null;
+          nom?: string | null;
+          email?: string | null;
+          code_postal?: string | null;
+          monnaie: MonnaieDon;
+          montant_centimes: number;
+          frais_centimes?: number;
+          stripe_payment_intent_id?: string | null;
+          tx_hash?: string | null;
+          statut?: StatutDon;
+          accepte_newsletter?: boolean;
+          accepte_contact_createurice?: boolean;
+          created_at?: string;
+          confirme_le?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['don']['Insert']>;
+        Relationships: [];
+      };
     };
 
     Views: {
@@ -563,6 +651,17 @@ export interface Database {
           objectif: number;
           statut: StatutPetition;
           nombre_signatures: number;
+        };
+        Relationships: [];
+      };
+      cagnotte_compteur: {
+        Row: {
+          cagnotte_id: string;
+          slug: string;
+          objectif_euros: number;
+          total_euros_centimes: number;
+          total_t99cp_unites: number;
+          nombre_dons: number;
         };
         Relationships: [];
       };
@@ -601,6 +700,14 @@ export interface Database {
         Args: { mobilisation_a_compter: string };
         Returns: number;
       };
+      compteurs_cagnotte: {
+        Args: { cagnotte_a_compter: string };
+        Returns: {
+          total_euros_centimes: number;
+          total_t99cp_unites: number;
+          nombre_dons: number;
+        }[];
+      };
     };
 
     Enums: {
@@ -633,3 +740,6 @@ export type ParticipationMobilisation =
   Database['public']['Tables']['participation_mobilisation']['Row'];
 export type Campagne = Database['public']['Tables']['campagne']['Row'];
 export type ModuleCampagne = Database['public']['Tables']['module_campagne']['Row'];
+export type Cagnotte = Database['public']['Tables']['cagnotte']['Row'];
+export type Don = Database['public']['Tables']['don']['Row'];
+export type CagnotteCompteur = Database['public']['Views']['cagnotte_compteur']['Row'];

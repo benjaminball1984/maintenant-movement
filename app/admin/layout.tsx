@@ -65,8 +65,13 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                   Mobilisations
                 </Link>
               </li>
-              <li className="px-3 py-2 text-sm text-text-4">
-                Cagnottes <span className="text-xs">(3.3)</span>
+              <li>
+                <Link
+                  href="/admin/moderation/cagnottes"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Cagnottes
+                </Link>
               </li>
             </ul>
           </nav>
