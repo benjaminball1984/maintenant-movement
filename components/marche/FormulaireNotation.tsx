@@ -1,0 +1,98 @@
+'use client';
+
+import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import { SelectEtoiles } from '@/components/marche/NotationEtoiles';
+import { Alert, Button, Label, Textarea } from '@/components/ui';
+import { type DonneesNoterVendeureuse, noterVendeureuseSchema } from '@/lib/validations/marche';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+
+interface FormulaireNotationProps {
+  produitId: string;
+  noterVendeureuse: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+}
+
+/**
+ * Formulaire de notation 5 étoiles unilatérale (cf. spec §6F).
+ *
+ * S'affiche seulement après que le produit a été marqué `vendu` par
+ * la vendeureuse (la BDD refuse les notations sur les autres statuts).
+ */
+export function FormulaireNotation({ produitId, noterVendeureuse }: FormulaireNotationProps) {
+  const router = useRouter();
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [envoiEnCours, setEnvoiEnCours] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<DonneesNoterVendeureuse>({
+    resolver: zodResolver(noterVendeureuseSchema),
+    defaultValues: {
+      produit_id: produitId,
+      etoiles: 5,
+      commentaire: '',
+      token_turnstile: '',
+    },
+  });
+
+  async function onSubmit(donnees: DonneesNoterVendeureuse) {
+    setErreur(null);
+    setEnvoiEnCours(true);
+    const resultat = await noterVendeureuse(donnees);
+    setEnvoiEnCours(false);
+    if (!resultat.ok) {
+      setErreur(resultat.message);
+      return;
+    }
+    router.refresh();
+  }
+
+  return (
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <input type="hidden" {...register('produit_id')} />
+      {erreur !== null ? (
+        <Alert variant="danger" titre="Notation impossible">
+          {erreur}
+        </Alert>
+      ) : null}
+
+      <div>
+        <Label htmlFor="notation-etoiles">Combien d'étoiles ?</Label>
+        <Controller
+          name="etoiles"
+          control={control}
+          render={({ field }) => (
+            <SelectEtoiles
+              valeur={field.value}
+              onChange={field.onChange}
+              idPrefixe="notation-etoile"
+            />
+          )}
+        />
+        {errors.etoiles !== undefined ? (
+          <p className="mt-1 text-xs text-danger">{errors.etoiles.message}</p>
+        ) : null}
+      </div>
+
+      <div>
+        <Label htmlFor="notation-commentaire">Commentaire (optionnel)</Label>
+        <Textarea id="notation-commentaire" rows={4} {...register('commentaire')} />
+        {errors.commentaire !== undefined ? (
+          <p className="mt-1 text-xs text-danger">{errors.commentaire.message}</p>
+        ) : null}
+      </div>
+
+      <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+
+      <Button type="submit" disabled={envoiEnCours}>
+        {envoiEnCours ? 'Envoi...' : 'Publier la notation'}
+      </Button>
+    </form>
+  );
+}

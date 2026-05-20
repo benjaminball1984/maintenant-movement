@@ -59,6 +59,19 @@ export type StatutPrestationSel =
   | 'contestee'
   | 'annulee';
 
+// Chantier 4.3 — Marché solidaire (3 onglets : Produit / Boutique / Minimarché).
+export type ModeProduitMarche = 'vente' | 'don';
+export type StatutProduitMarche = 'disponible' | 'reserve' | 'vendu' | 'retire' | 'expire';
+export type SensBoutiqueMarche = 'propose' | 'cherche';
+export type StatutBoutiqueMarche = 'ouverte' | 'fermee' | 'retiree';
+export type StatutMinimarche = 'annonce' | 'en_cours' | 'termine' | 'annule' | 'retire';
+/**
+ * Catalogue des monnaies acceptées en physique (minimarché).
+ * Cf. spec §6F : 4 monnaies acceptées (T99CP, Euros, Ğ1, Monnaies
+ * locales complémentaires). Ğ1 et MNLC réservées au physique.
+ */
+export type MonnaieMarcheMinimarche = 'T99CP' | 'EUR' | 'G1' | 'MNLC';
+
 // ============================================================
 // Database
 // ============================================================
@@ -771,6 +784,180 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['don']['Insert']>;
         Relationships: [];
       };
+
+      // ============================================================
+      // Chantier 4.3 — Marché solidaire
+      // ============================================================
+
+      produit_marche: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          mode: ModeProduitMarche;
+          prix_euros_centimes: number;
+          /** Plus petite unité T99CP, sérialisée en string (bigint-safe). */
+          prix_t99cp_unites: string;
+          categorie_slug: string | null;
+          image_url: string | null;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          remise_main_propre: boolean;
+          envoi_postal: boolean;
+          vendeureuse_id: string;
+          statut: StatutProduitMarche;
+          derniere_activite_le: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          mode: ModeProduitMarche;
+          prix_euros_centimes?: number;
+          prix_t99cp_unites?: string;
+          categorie_slug?: string | null;
+          image_url?: string | null;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          remise_main_propre?: boolean;
+          envoi_postal?: boolean;
+          vendeureuse_id: string;
+          statut?: StatutProduitMarche;
+          derniere_activite_le?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['produit_marche']['Insert']>;
+        Relationships: [];
+      };
+
+      boutique_marche: {
+        Row: {
+          id: string;
+          slug: string;
+          nom: string;
+          description: string;
+          image_url: string | null;
+          sens: SensBoutiqueMarche;
+          ouverte_du: string | null;
+          ouverte_au: string | null;
+          lieu: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          createurice_id: string;
+          statut: StatutBoutiqueMarche;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          nom: string;
+          description: string;
+          image_url?: string | null;
+          sens: SensBoutiqueMarche;
+          ouverte_du?: string | null;
+          ouverte_au?: string | null;
+          lieu?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          createurice_id: string;
+          statut?: StatutBoutiqueMarche;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['boutique_marche']['Insert']>;
+        Relationships: [];
+      };
+
+      produit_boutique: {
+        Row: {
+          id: string;
+          produit_id: string;
+          boutique_id: string;
+          rattache_le: string;
+          rattache_par: string;
+        };
+        Insert: {
+          id?: string;
+          produit_id: string;
+          boutique_id: string;
+          rattache_le?: string;
+          rattache_par: string;
+        };
+        Update: Partial<Database['public']['Tables']['produit_boutique']['Insert']>;
+        Relationships: [];
+      };
+
+      minimarche_solidaire: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url: string | null;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          commence_le: string;
+          termine_le: string;
+          monnaies_acceptees: MonnaieMarcheMinimarche[];
+          createurice_id: string;
+          statut: StatutMinimarche;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url?: string | null;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          commence_le: string;
+          termine_le: string;
+          monnaies_acceptees?: MonnaieMarcheMinimarche[];
+          createurice_id: string;
+          statut?: StatutMinimarche;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['minimarche_solidaire']['Insert']>;
+        Relationships: [];
+      };
+
+      notation_marche: {
+        Row: {
+          id: string;
+          produit_id: string;
+          acheteureuse_id: string;
+          vendeureuse_id: string;
+          etoiles: number;
+          commentaire: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          produit_id: string;
+          acheteureuse_id: string;
+          vendeureuse_id: string;
+          etoiles: number;
+          commentaire?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['notation_marche']['Insert']>;
+        Relationships: [];
+      };
     };
 
     Views: {
@@ -793,6 +980,14 @@ export interface Database {
           total_euros_centimes: number;
           total_t99cp_unites: number;
           nombre_dons: number;
+        };
+        Relationships: [];
+      };
+      notation_marche_stats: {
+        Row: {
+          vendeureuse_id: string;
+          moyenne_etoiles: number;
+          nombre_notations: number;
         };
         Relationships: [];
       };
@@ -881,3 +1076,9 @@ export type CagnotteCompteur = Database['public']['Views']['cagnotte_compteur'][
 export type OffreEntraide = Database['public']['Tables']['offre_entraide']['Row'];
 export type ServiceSel = Database['public']['Tables']['service_sel']['Row'];
 export type PrestationSel = Database['public']['Tables']['prestation_sel']['Row'];
+export type ProduitMarche = Database['public']['Tables']['produit_marche']['Row'];
+export type BoutiqueMarche = Database['public']['Tables']['boutique_marche']['Row'];
+export type ProduitBoutique = Database['public']['Tables']['produit_boutique']['Row'];
+export type MinimarcheSolidaire = Database['public']['Tables']['minimarche_solidaire']['Row'];
+export type NotationMarche = Database['public']['Tables']['notation_marche']['Row'];
+export type NotationMarcheStats = Database['public']['Views']['notation_marche_stats']['Row'];

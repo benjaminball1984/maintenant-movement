@@ -34,11 +34,21 @@ export default function LayoutEntraide({ children }: { children: ReactNode }) {
                   </Link>
                 </li>
               ))}
-              <li className="px-3 py-2 text-sm text-text-4">
-                SEL <span className="text-xs">(4.2)</span>
+              <li>
+                <Link
+                  href="/s-entraider/sel"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  SEL
+                </Link>
               </li>
-              <li className="px-3 py-2 text-sm text-text-4">
-                Marché solidaire <span className="text-xs">(4.3)</span>
+              <li>
+                <Link
+                  href="/s-entraider/marche"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Marché solidaire
+                </Link>
               </li>
             </ul>
           </nav>
