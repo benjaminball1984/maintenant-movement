@@ -38,41 +38,43 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 lg:flex-row lg:px-8">
         <aside className="lg:w-56 lg:shrink-0">
-          <nav aria-label="Sections de modération">
+          <nav aria-label="Console d'administration">
+            <p className="mb-3 text-xs font-bold uppercase tracking-cap text-text-3">
+              Tableau de bord
+            </p>
+            <ul className="mb-4 grid gap-1">
+              <li>
+                <Link
+                  href="/admin"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Vue d'ensemble
+                </Link>
+              </li>
+            </ul>
             <p className="mb-3 text-xs font-bold uppercase tracking-cap text-text-3">Modération</p>
             <ul className="grid gap-1">
-              <li>
-                <Link
-                  href="/admin/moderation/petitions"
-                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                >
-                  Pétitions
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/moderation/campagnes"
-                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                >
-                  Campagnes
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/moderation/mobilisations"
-                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                >
-                  Mobilisations
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/moderation/cagnottes"
-                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                >
-                  Cagnottes
-                </Link>
-              </li>
+              {[
+                { href: '/admin/moderation/petitions', libelle: 'Pétitions' },
+                { href: '/admin/moderation/campagnes', libelle: 'Campagnes' },
+                { href: '/admin/moderation/mobilisations', libelle: 'Mobilisations' },
+                { href: '/admin/moderation/cagnottes', libelle: 'Cagnottes' },
+                { href: '/admin/moderation/media', libelle: 'Médias' },
+                { href: '/admin/moderation/sel', libelle: 'SEL' },
+                { href: '/admin/moderation/marche', libelle: 'Marché solidaire' },
+                { href: '/admin/moderation/moments', libelle: 'Moments' },
+                { href: '/admin/moderation/sondages', libelle: 'Sondages' },
+                { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
+              ].map((onglet) => (
+                <li key={onglet.href}>
+                  <Link
+                    href={onglet.href}
+                    className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                  >
+                    {onglet.libelle}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
         </aside>
