@@ -385,16 +385,20 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 0.1 — Initialisation du dépôt (voir `docs/manifests/phase-0-chantier-0.1.md`)
-**Chantier en cours** : 0.2 — Système de design (à attaquer)
+**Dernier chantier terminé** : 0.2 — Système de design (voir `docs/manifests/phase-0-chantier-0.2.md`)
+**Chantier en cours** : 1.1 — Schéma BDD initial (à attaquer dès Supabase prêt)
 **Chantiers bloqués / en attente d'arbitrage** : aucun
 
-### Préalables externes attendus avant la mise en ligne
+### Branche principale
 
-- Création du repo GitHub distant et `git push -u origin main` (renommer `master` → `main` au préalable).
-- Création du compte Cloudflare Pages pour brancher le déploiement.
-- Création du projet Supabase (région Francfort) avant le chantier 1.1.
-- Clés Brevo, Stripe, LiveKit, Turnstile, T99CP : au chantier qui les branche (le site tourne en local avec mocks d'ici là).
+`main` (renommée depuis `master` pendant le chantier 0.2). Toutes les branches feature partent de `main`.
+
+### Préalables externes attendus
+
+- **Avant chantier 1.1** : création du projet Supabase (région Francfort), récupération des trois clés (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
+- **Au moment voulu** : création du repo GitHub distant et `git push -u origin main` pour activer la CI.
+- **Quand accessible** : compte Cloudflare Pages pour le déploiement (cf. CLAUDE.md §6).
+- **Au chantier qui les branche** : clés Brevo, Stripe, LiveKit, Turnstile, T99CP (le site tourne en local avec mocks d'ici là).
 
 ### Décisions politiques en attente d'arbitrage de Lilou/Ben
 

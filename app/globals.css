@@ -1,28 +1,135 @@
+@import "../styles/tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
- * Variables CSS racine : posées au chantier 0.2 depuis
- * docs/specs/04_DESIGN-TOKENS.md (couleurs, typographie, espacements).
- * Pour ce chantier 0.1, seuls les fondamentaux d'accessibilité sont fixés.
+ * Styles globaux du site Maintenant!.
+ *
+ * Les tokens (couleurs, typographie, espacements) viennent de tokens.css.
+ * Ce fichier pose la hiérarchie typographique et les invariants
+ * d'accessibilité (focus visible, sélection, motion réduit).
  */
-:root {
-  color-scheme: light;
-}
 
+/* ------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------ */
 html {
   scroll-behavior: smooth;
+  text-size-adjust: 100%;
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  background-color: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--size-base);
+  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Focus visible : non négociable pour l'accessibilité clavier. */
+::selection {
+  background-color: var(--selection-bg);
+  color: var(--text-1);
+}
+
+/* ------------------------------------------------------------
+ * Hiérarchie typographique (Sora pour h1-h4, Inter au-delà)
+ * ------------------------------------------------------------ */
+h1 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: var(--size-4xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--size-5xl);
+  }
+}
+
+h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: var(--size-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-1);
+}
+
+h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--size-2xl);
+  line-height: var(--leading-tight);
+  color: var(--text-1);
+}
+
+h4 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: var(--size-xl);
+  line-height: var(--leading-tight);
+  color: var(--text-1);
+}
+
+h5,
+h6 {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: var(--size-lg);
+  color: var(--text-1);
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.95em;
+}
+
+/* ------------------------------------------------------------
+ * Focus visible : signature accessibilité (cf. 04_DESIGN-TOKENS.md §9)
+ * ------------------------------------------------------------ */
+:focus {
+  outline: none;
+}
+
 :focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-xs);
+}
+
+/* ------------------------------------------------------------
+ * Motion réduit : respecte la préférence système
+ * ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Print : utile dès maintenant pour les pages que les gens impriment
+ * (Maintenant Médias arrive au chantier 7.3 avec sa propre CSS)
+ * ------------------------------------------------------------ */
+@media print {
+  :root {
+    --bg: #ffffff;
+  }
+  body {
+    color: #000;
+  }
 }

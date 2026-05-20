@@ -1,6 +1,286 @@
 /*
- * Tokens de design — variables CSS racine.
+ * Tokens de design — variables CSS racine du site Maintenant!.
  *
- * Sera rempli au chantier 0.2 depuis docs/specs/04_DESIGN-TOKENS.md
- * (couleurs, typographie, espacements, rayons, ombres).
+ * Source unique : docs/specs/04_DESIGN-TOKENS.md (validé Lilou/Ben le 20 mai 2026).
+ *
+ * Règle (CLAUDE.md §6 et 04_DESIGN-TOKENS.md §0) : tout passe par CSS
+ * variables et tailwind.config.ts. Modifier une couleur ne doit jamais
+ * nécessiter de refacto applicative.
+ *
+ * Trois sources de vérité pour le thème :
+ * - prefers-color-scheme (suit l'OS) : appliqué par défaut
+ * - html[data-theme="dark"] (forcé) : override prefers-color-scheme
+ * - html[data-theme="light"] (forcé) : override prefers-color-scheme
+ *
+ * Le toggle utilisateur·ice (ThemeToggle) écrit dans localStorage et
+ * pose `data-theme` sur <html>. Un script anti-FOUC dans <head> applique
+ * la valeur stockée avant le premier rendu.
  */
+
+/* ============================================================
+ * Mode clair (valeurs racine)
+ * ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* Fonds */
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f5f4f2;
+
+  /* Bordures */
+  --border: #e8e6e1;
+  --border-dark: #d4d1ca;
+
+  /* Texte (4 niveaux, du plus dense au plus discret) */
+  --text-1: #1a1a18;
+  --text-2: #4a4840;
+  --text-3: #6b6962;
+  --text-4: #9c9a93;
+
+  /* Brand (les 3 couleurs cœur) */
+  --brand: #e11d74;
+  --brand-dark: #b91560;
+  --brand-light: #fde9f2;
+
+  --accent: #7c3aed;
+  --accent-light: #f3ebfe;
+
+  --hue: #dc2654;
+  --hue-light: #fce7ee;
+
+  /* Gradients signature */
+  --grad: linear-gradient(135deg, #7c3aed 0%, #e11d74 50%, #dc2654 100%);
+  --grad-r: linear-gradient(to right, #7c3aed, #e11d74, #dc2654);
+  --grad-soft: linear-gradient(135deg, #f3ebfe 0%, #fde9f2 50%, #fce7ee 100%);
+  --grad-dark: linear-gradient(135deg, #5b21b6 0%, #b91560 100%);
+
+  /* Sémantique */
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --info: #0369a1;
+  --info-light: #eff6ff;
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+  --danger: #dc2626;
+  --danger-light: #fcebeb;
+
+  /* Focus ring : signature visuelle, magenta à 18 % */
+  --focus-ring: 0 0 0 3px rgba(225, 29, 116, 0.18);
+  --selection-bg: rgba(225, 29, 116, 0.2);
+
+  /* Échelle typographique */
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-base: 1rem;
+  --size-lg: 1.125rem;
+  --size-xl: 1.25rem;
+  --size-2xl: 1.5rem;
+  --size-3xl: 1.875rem;
+  --size-4xl: 2.5rem;
+  --size-5xl: 3.5rem;
+  --size-6xl: 5rem;
+
+  --leading-tight: 1.15;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-cap: 0.12em;
+
+  /* Espacements (système 4px) */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Border radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Ombres */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.1);
+  --shadow-focus: var(--focus-ring);
+  --shadow-brand: 0 2px 8px rgba(225, 29, 116, 0.25);
+
+  /* Motion */
+  --dur-fast: 0.12s;
+  --dur: 0.18s;
+  --dur-slow: 0.28s;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+ * Mode sombre — suit l'OS par défaut
+ * ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: #16161a;
+    --surface: #1f1f23;
+    --surface-2: #28282e;
+
+    --border: #2e2d30;
+    --border-dark: #3d3c3f;
+
+    --text-1: #fafaf9;
+    --text-2: #c9c5bb;
+    --text-3: #8e8a82;
+    --text-4: #6d6b65;
+
+    --brand: #f03388;
+    --brand-dark: #d02472;
+    --brand-light: #3a1827;
+
+    --accent: #9059f5;
+    --accent-light: #251a3c;
+
+    --hue: #e84770;
+    --hue-light: #361822;
+
+    --grad: linear-gradient(135deg, #9059f5 0%, #f03388 50%, #e84770 100%);
+    --grad-r: linear-gradient(to right, #9059f5, #f03388, #e84770);
+    --grad-soft: linear-gradient(135deg, #251a3c 0%, #3a1827 50%, #361822 100%);
+    --grad-dark: linear-gradient(135deg, #7c3aed 0%, #e11d74 100%);
+
+    --success: #22c55e;
+    --success-light: #052e16;
+    --info: #3b82f6;
+    --info-light: #0c2a52;
+    --warning: #f59e0b;
+    --warning-light: #2d1d06;
+    --danger: #ef4444;
+    --danger-light: #2c0a0a;
+
+    --focus-ring: 0 0 0 3px rgba(240, 51, 136, 0.3);
+    --selection-bg: rgba(240, 51, 136, 0.25);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.6);
+    --shadow-brand: 0 2px 14px rgba(240, 51, 136, 0.4);
+  }
+}
+
+/* ============================================================
+ * Toggle manuel : data-theme="dark" force le mode sombre
+ * (override prefers-color-scheme dans les deux sens)
+ * ============================================================ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #16161a;
+  --surface: #1f1f23;
+  --surface-2: #28282e;
+
+  --border: #2e2d30;
+  --border-dark: #3d3c3f;
+
+  --text-1: #fafaf9;
+  --text-2: #c9c5bb;
+  --text-3: #8e8a82;
+  --text-4: #6d6b65;
+
+  --brand: #f03388;
+  --brand-dark: #d02472;
+  --brand-light: #3a1827;
+
+  --accent: #9059f5;
+  --accent-light: #251a3c;
+
+  --hue: #e84770;
+  --hue-light: #361822;
+
+  --grad: linear-gradient(135deg, #9059f5 0%, #f03388 50%, #e84770 100%);
+  --grad-r: linear-gradient(to right, #9059f5, #f03388, #e84770);
+  --grad-soft: linear-gradient(135deg, #251a3c 0%, #3a1827 50%, #361822 100%);
+  --grad-dark: linear-gradient(135deg, #7c3aed 0%, #e11d74 100%);
+
+  --success: #22c55e;
+  --success-light: #052e16;
+  --info: #3b82f6;
+  --info-light: #0c2a52;
+  --warning: #f59e0b;
+  --warning-light: #2d1d06;
+  --danger: #ef4444;
+  --danger-light: #2c0a0a;
+
+  --focus-ring: 0 0 0 3px rgba(240, 51, 136, 0.3);
+  --selection-bg: rgba(240, 51, 136, 0.25);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 2px 14px rgba(240, 51, 136, 0.4);
+}
+
+/* ============================================================
+ * Toggle manuel : data-theme="light" force le mode clair
+ * (reprend les valeurs racine, utile quand l'OS est sombre)
+ * ============================================================ */
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f5f4f2;
+
+  --border: #e8e6e1;
+  --border-dark: #d4d1ca;
+
+  --text-1: #1a1a18;
+  --text-2: #4a4840;
+  --text-3: #6b6962;
+  --text-4: #9c9a93;
+
+  --brand: #e11d74;
+  --brand-dark: #b91560;
+  --brand-light: #fde9f2;
+
+  --accent: #7c3aed;
+  --accent-light: #f3ebfe;
+
+  --hue: #dc2654;
+  --hue-light: #fce7ee;
+
+  --grad: linear-gradient(135deg, #7c3aed 0%, #e11d74 50%, #dc2654 100%);
+  --grad-r: linear-gradient(to right, #7c3aed, #e11d74, #dc2654);
+  --grad-soft: linear-gradient(135deg, #f3ebfe 0%, #fde9f2 50%, #fce7ee 100%);
+  --grad-dark: linear-gradient(135deg, #5b21b6 0%, #b91560 100%);
+
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+  --info: #0369a1;
+  --info-light: #eff6ff;
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+  --danger: #dc2626;
+  --danger-light: #fcebeb;
+
+  --focus-ring: 0 0 0 3px rgba(225, 29, 116, 0.18);
+  --selection-bg: rgba(225, 29, 116, 0.2);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.1);
+  --shadow-brand: 0 2px 8px rgba(225, 29, 116, 0.25);
+}
