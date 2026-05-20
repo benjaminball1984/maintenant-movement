@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-4-chantier-4.3-marche-solidaire`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `58decab`
 **Durée approximative** : 1 session Claude Code
 
 ---
