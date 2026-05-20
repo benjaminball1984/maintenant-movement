@@ -105,6 +105,9 @@ export type SousTypeMomentPaP =
   | 'pap_repas'
   | 'pap_volontaires';
 
+// Chantier 5.4 — D'autres moyens d'agir.
+export type StatutOrganisationPartenaire = 'affichee' | 'retiree';
+
 // ============================================================
 // Database
 // ============================================================
@@ -967,6 +970,41 @@ export interface Database {
         Relationships: [];
       };
 
+      organisation_partenaire: {
+        Row: {
+          id: string;
+          nom: string;
+          slug: string;
+          description_courte: string | null;
+          url: string;
+          categorie_slug: string | null;
+          statut: StatutOrganisationPartenaire;
+          raison_retrait: string | null;
+          retire_par: string | null;
+          retire_le: string | null;
+          ajoute_par: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          nom: string;
+          slug: string;
+          description_courte?: string | null;
+          url: string;
+          categorie_slug?: string | null;
+          statut?: StatutOrganisationPartenaire;
+          raison_retrait?: string | null;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          ajoute_par: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['organisation_partenaire']['Insert']>;
+        Relationships: [];
+      };
+
       moment_solidaire: {
         Row: {
           id: string;
@@ -1316,3 +1354,4 @@ export type MandatConfederal = Database['public']['Tables']['mandat_confederal']
 export type MomentSolidaire = Database['public']['Tables']['moment_solidaire']['Row'];
 export type ParticipationMoment = Database['public']['Tables']['participation_moment']['Row'];
 export type Tupperware = Database['public']['Tables']['tupperware']['Row'];
+export type OrganisationPartenaire = Database['public']['Tables']['organisation_partenaire']['Row'];
