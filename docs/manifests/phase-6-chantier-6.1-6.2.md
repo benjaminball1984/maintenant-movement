@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-6-chantier-6.1-carte-agenda`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `eba9f84`
 **Durée approximative** : 1 session Claude Code (chantier court : enrichissement de l'existant + nouvelle page)
 
 ---
