@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-3-chantier-3.2-mobilisations-campagnes`
-**Commit final** : à renseigner après commit
+**Commit final** : `3a30f74`
 **Durée approximative** : 1 session Claude Code
 
 ---
