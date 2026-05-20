@@ -86,6 +86,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['personne']['Insert']>;
+        Relationships: [];
       };
 
       commune: {
@@ -124,6 +125,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['commune']['Insert']>;
+        Relationships: [];
       };
 
       appartenance_commune: {
@@ -146,6 +148,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['appartenance_commune']['Insert']>;
+        Relationships: [];
       };
 
       federation: {
@@ -172,6 +175,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['federation']['Insert']>;
+        Relationships: [];
       };
 
       appartenance_federation: {
@@ -194,6 +198,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['appartenance_federation']['Insert']>;
+        Relationships: [];
       };
 
       confederation: {
@@ -218,6 +223,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['confederation']['Insert']>;
+        Relationships: [];
       };
 
       appartenance_confederation: {
@@ -240,6 +246,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['appartenance_confederation']['Insert']>;
+        Relationships: [];
       };
 
       gt_thematique: {
@@ -266,6 +273,7 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['gt_thematique']['Insert']>;
+        Relationships: [];
       };
 
       appartenance_gt: {
@@ -288,6 +296,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['appartenance_gt']['Insert']>;
+        Relationships: [];
       };
 
       droit_admin: {
@@ -314,6 +323,7 @@ export interface Database {
           retire_le?: string | null;
         };
         Update: Partial<Database['public']['Tables']['droit_admin']['Insert']>;
+        Relationships: [];
       };
 
       journal_admin: {
@@ -342,10 +352,13 @@ export interface Database {
           cree_le?: string;
         };
         Update: Partial<Database['public']['Tables']['journal_admin']['Insert']>;
+        Relationships: [];
       };
     };
 
-    Views: Record<string, never>;
+    Views: {
+      [_ in never]: never;
+    };
 
     Functions: {
       est_admin_national: {
@@ -374,7 +387,13 @@ export interface Database {
       };
     };
 
-    Enums: Record<string, never>;
+    Enums: {
+      [_ in never]: never;
+    };
+
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 }
 

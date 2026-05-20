@@ -8,8 +8,9 @@ import Link from 'next/link';
  * surtitre, titre, sous-titre. La structure complète (header, 4 unes
  * empilées, pré-footer, footer) sera implémentée au chantier 2.1.
  *
- * Aucun lien ne pointe vers une page inexistante (cf. CLAUDE.md §4) :
- * seuls `/design-system` (placeholder 0.2 désormais peuplé) est exposé.
+ * Aucun lien ne pointe vers une page inexistante (cf. CLAUDE.md §4) : seuls
+ * sont exposés les pages déjà construites (system de design, inscription,
+ * connexion).
  */
 export default function PageAccueil() {
   return (
@@ -26,12 +27,22 @@ export default function PageAccueil() {
       </header>
 
       <Alert variant="info" titre="Site en construction">
-        Chantier 0.2 (système de design) en cours. La page d'accueil définitive est prévue au
-        chantier 2.1.
+        Chantier 1.2 (auth 4 portes) en cours. La page d'accueil définitive est prévue au chantier
+        2.1.
       </Alert>
 
       <nav aria-label="Navigation interne">
         <ul className="flex flex-col gap-2">
+          <li>
+            <Link href="/inscription" className="text-brand underline-offset-4 hover:no-underline">
+              Créer un compte
+            </Link>
+          </li>
+          <li>
+            <Link href="/connexion" className="text-brand underline-offset-4 hover:no-underline">
+              Se connecter
+            </Link>
+          </li>
           <li>
             <Link
               href="/design-system"

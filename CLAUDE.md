@@ -385,9 +385,9 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 1.1 — Schéma BDD initial (voir `docs/manifests/phase-1-chantier-1.1.md`)
-**Chantier en cours** : 1.2 — Auth 4 portes (préalable : Supabase live + appliquer les migrations 1.1)
-**Chantiers bloqués / en attente d'arbitrage** : aucun (le code applicatif 1.1 est livré ; les tests d'intégration SQL attendent l'instance Supabase)
+**Dernier chantier terminé** : 1.2 — Auth 4 portes (voir `docs/manifests/phase-1-chantier-1.2.md`)
+**Chantier en cours** : 1.3 — Profil utilisateurice (dashboard + 7 onglets + visibilité par champ + export ZIP + suppression différée 30 j + 2FA)
+**Chantiers bloqués / en attente d'arbitrage** : aucun (le code applicatif 1.1 et 1.2 est livré ; le flux end-to-end d'inscription/connexion attend Supabase live + Brevo SMTP côté projet Supabase)
 
 ### Branche principale
 

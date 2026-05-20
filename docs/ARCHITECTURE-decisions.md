@@ -187,3 +187,41 @@ L'application duplique la vérification au niveau Zod pour donner un retour avan
 
 - **Validation applicative seule** : non fiable (un script admin peut contourner).
 - **Contrainte d'exclusion** : trop subtile pour cette règle ; les triggers sont plus lisibles et plus pédagogiques.
+
+---
+
+## ADR-007 — Supabase Auth pour l'auth transactionnel, Brevo pour la newsletter et le métier (chantier 1.2)
+
+**Date** : 2026-05-20
+**Statut** : actée
+
+### Contexte
+
+Les flux d'authentification (validation email, magic link, reset mot de passe, confirmation OAuth) déclenchent l'envoi d'emails dits « auth-transactionnels ». Deux approches possibles :
+
+1. Laisser Supabase Auth gérer ces envois (il a un système intégré configurable via SMTP).
+2. Capter chaque évènement Supabase Auth (via webhook ou hook) et déclencher nos propres envois via `BrevoEmailService`.
+
+Par ailleurs, on a déjà `BrevoEmailService` pour le métier : newsletter mardi récap + vendredi (chantier 8.1), reçus fiscaux (chantier 3.3), notifications admin.
+
+### Décision
+
+**Partage clair** :
+- **Supabase Auth → SMTP Brevo** (configuré côté projet Supabase, dashboard Auth → SMTP Settings) gère **tous les emails d'authentification** : confirmation d'inscription, magic link, reset mot de passe, changement d'email.
+- **`BrevoEmailService` côté app** (API Brevo) gère **les emails métier non-auth** : récap mardi, newsletter vendredi, reçus, notifications admin, alertes.
+
+Avantages :
+- Pas de duplication de logique : Supabase Auth a déjà des templates et un anti-rebond éprouvés pour les mails d'auth.
+- Pas de webhook fragile à maintenir entre Supabase et notre serveur pour relayer les évènements d'auth.
+- Une seule clé Brevo (SMTP + API) configurée dans deux endroits (Supabase dashboard + `.env.local`).
+
+### Conséquences
+
+- Au moment où le projet Supabase sera créé, il faudra configurer Brevo comme provider SMTP dans Supabase Auth (paramètres : `smtp-relay.brevo.com:587`, login Brevo, mot de passe SMTP).
+- Les templates d'auth sont personnalisables côté Supabase (dashboard → Authentication → Email Templates). On y met les textes en français avec le ton sobre Maintenant!.
+- Si on doit un jour personnaliser un mail d'auth au-delà de ce que Supabase permet (par exemple ajouter une signature dynamique), on bascule ce mail spécifique en webhook → `BrevoEmailService`. Décision à reprendre par ADR ultérieure.
+
+### Alternatives considérées
+
+- **Tout passer par `BrevoEmailService`** : nécessite des webhooks Supabase → app, plus de surface de bugs, anti-rebond à réimplémenter.
+- **Tout passer par Supabase Auth** : ne marche pas pour la newsletter et les reçus, qui ne sont pas des mails d'auth.
