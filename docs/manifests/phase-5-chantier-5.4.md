@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-5-chantier-5.4-autres-moyens`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `38a2021`
 **Durée approximative** : 1 session Claude Code (court chantier)
 
 ---
