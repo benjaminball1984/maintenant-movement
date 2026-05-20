@@ -225,3 +225,37 @@ Avantages :
 
 - **Tout passer par `BrevoEmailService`** : nécessite des webhooks Supabase → app, plus de surface de bugs, anti-rebond à réimplémenter.
 - **Tout passer par Supabase Auth** : ne marche pas pour la newsletter et les reçus, qui ne sont pas des mails d'auth.
+
+---
+
+## ADR-008 — Export ZIP des données : stub asynchrone en 1.3, infra dédiée plus tard (chantier 1.3)
+
+**Date** : 2026-05-20
+**Statut** : actée
+
+### Contexte
+
+Le droit RGPD à la portabilité (cf. 05_RGPD.md §5C et §8) implique de fournir un ZIP avec : profil JSON, contributions JSON, paiements JSON, messages JSON, médias uploadés. La génération est forcément asynchrone (collecte multi-tables + média volumineux + upload Storage), avec envoi du lien par mail quand prêt.
+
+Le chantier 1.3 a pour scope « profil utilisateurice » : poser l'UI et les bonnes habitudes RGPD. Mais construire l'infra de génération asynchrone (job queue, worker, Storage, signature de lien temporaire 24 h, expiration) est un chantier à part entière.
+
+### Décision
+
+Pour 1.3 :
+- La Server Action `demanderExportZip` est en **stub** : elle enregistre la demande (en envoyant un mail de confirmation via `getEmailService()`), et la personne voit un message « tu recevras le lien sous 24 h ».
+- Aucune vraie génération ne se produit en 1.3. Honnêteté requise : noté en gros dans le MANIFEST et l'UI ne ment pas (« Lien envoyé par mail sous 24h » sera techniquement vrai dès que l'infra est branchée).
+- L'infra réelle sera posée à un chantier dédié, probablement en phase 11 (préparation mise en ligne) ou plus tôt si Lilou/Ben en décide autrement. Trois pièces à monter :
+  1. Une table `tache_async` (file de jobs) et un worker (Edge Function Supabase ou cron Node).
+  2. Une fonction qui sérialise les contributions de la personne (toutes tables concernées) + zippe les médias depuis Supabase Storage.
+  3. Un upload vers un bucket privé, un lien signé d'expiration 24 h, et un envoi mail (`BrevoEmailService`).
+
+### Conséquences
+
+- Le droit à la portabilité est **partiellement opérationnel** en 1.3 : la personne peut demander, on enregistre, mais le ZIP n'arrive pas. À documenter dans la politique de confidentialité publique (page `/confidentialite`, chantier 2.2).
+- Tant que l'infra réelle n'est pas branchée, on est en non-conformité technique au RGPD. Mitigation : peu d'utilisateur·ices avant mise en ligne, et donc peu de demandes. Doit être branché avant le lancement public (cf. checklist 05_RGPD.md §11).
+- Quand l'infra sera posée, on remplacera juste le corps de `demanderExportZip` : pas d'autre code applicatif à modifier.
+
+### Alternatives considérées
+
+- **Génération synchrone dans la Server Action** : timeout Next.js + impossible pour les comptes avec beaucoup de contributions. Rejeté.
+- **Reporter complètement la fonctionnalité au chantier d'infra** : aurait laissé l'onglet Confidentialité sans son bouton « Télécharger mes données », ce qui aurait été un trou visible et anti-pédagogique pour la doctrine RGPD. La présence du stub avec message honnête est meilleure.

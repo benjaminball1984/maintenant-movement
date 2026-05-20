@@ -1,0 +1,146 @@
+import { z } from 'zod';
+import { codePostalFrancaisSchema } from './auth';
+
+/**
+ * Schémas de validation des actions de profil.
+ *
+ * Source de vérité côté UI (react-hook-form) ET côté Server Actions.
+ * La BDD reste la dernière ligne de défense via CHECK constraints + RLS.
+ */
+
+// ============================================================
+// Visibilité par champ (cf. 01_ARCHITECTURE.md §9 et 04_DESIGN-TOKENS.md §3)
+// ============================================================
+
+/** Quatre niveaux de visibilité, du plus ouvert au plus fermé. */
+export const NIVEAUX_VISIBILITE = ['publique', 'membres', 'amies', 'privee'] as const;
+export type NiveauVisibilite = (typeof NIVEAUX_VISIBILITE)[number];
+
+/**
+ * Champs du profil dont la visibilité est configurable.
+ * Hors champs identifiants (email, nom légal) qui ne sont jamais publics
+ * sans action explicite, et hors champs techniques.
+ */
+export const CHAMPS_VISIBILITE = [
+  'nom',
+  'prenom',
+  'pronom',
+  'code_postal',
+  'telephone',
+  'photo_url',
+  'bio',
+] as const;
+export type ChampVisibilite = (typeof CHAMPS_VISIBILITE)[number];
+
+export const niveauVisibiliteSchema = z.enum(NIVEAUX_VISIBILITE);
+
+/**
+ * Préférences de visibilité : un niveau par champ. Tous optionnels.
+ * Stocké en jsonb dans `personne.preferences_visibilite`.
+ *
+ * Défaut applicatif quand le champ est absent : `membres` (visible aux
+ * personnes connectées au site, pas en clair sur le web).
+ */
+export const preferencesVisibiliteSchema = z
+  .object({
+    nom: niveauVisibiliteSchema.optional(),
+    prenom: niveauVisibiliteSchema.optional(),
+    pronom: niveauVisibiliteSchema.optional(),
+    code_postal: niveauVisibiliteSchema.optional(),
+    telephone: niveauVisibiliteSchema.optional(),
+    photo_url: niveauVisibiliteSchema.optional(),
+    bio: niveauVisibiliteSchema.optional(),
+  })
+  .strict();
+
+export type PreferencesVisibilite = z.infer<typeof preferencesVisibiliteSchema>;
+
+// ============================================================
+// Préférences de notifications (cf. 01_ARCHITECTURE.md §10)
+// ============================================================
+
+/**
+ * Cinq canaux hiérarchisés (cf. spec §10). Les deux premiers (messagerie
+ * interne, cloche) sont toujours actifs : on respecte l'attention sans
+ * la couper. Les trois suivants sont opt-in/opt-out.
+ */
+export const preferencesNotificationsSchema = z
+  .object({
+    push: z.boolean(),
+    push_son: z.boolean(),
+    push_vibration: z.boolean(),
+    mardi_recap: z.boolean(),
+    vendredi_newsletter: z.boolean(),
+  })
+  .strict();
+
+export type PreferencesNotifications = z.infer<typeof preferencesNotificationsSchema>;
+
+export const PREFERENCES_NOTIFICATIONS_DEFAUT: PreferencesNotifications = {
+  push: false,
+  push_son: false,
+  push_vibration: false,
+  mardi_recap: true,
+  vendredi_newsletter: true,
+};
+
+// ============================================================
+// Mise à jour des informations de profil
+// ============================================================
+
+export const mettreAJourProfilSchema = z
+  .object({
+    nom: z.string().trim().min(1, 'Le nom est requis.').max(100),
+    prenom: z.string().trim().min(1, 'Le prénom est requis.').max(100),
+    pronom: z.string().trim().min(1, 'Le pronom est requis.').max(50),
+    code_postal: codePostalFrancaisSchema,
+    telephone: z
+      .string()
+      .trim()
+      .regex(/^(\+33|0)[1-9](\d{2}){4}$/, 'Format de téléphone français invalide.')
+      .optional()
+      .or(z.literal('')),
+    photo_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
+    bio: z
+      .string()
+      .max(500, 'La bio doit faire 500 caractères maximum.')
+      .optional()
+      .or(z.literal('')),
+    mode_theme: z.enum(['auto', 'light', 'dark']),
+  })
+  .strict();
+
+export type DonneesMiseAJourProfil = z.infer<typeof mettreAJourProfilSchema>;
+
+// ============================================================
+// Demande de suppression de compte (RGPD §5A)
+// ============================================================
+
+/**
+ * Demande de suppression : la personne doit retaper son email pour
+ * confirmer (anti-action accidentelle). Match l'email en BDD côté
+ * Server Action.
+ */
+export const demanderSuppressionSchema = z
+  .object({
+    confirmation_email: z.string().trim().toLowerCase().email(),
+  })
+  .strict();
+
+export type DonneesDemanderSuppression = z.infer<typeof demanderSuppressionSchema>;
+
+// ============================================================
+// 2FA TOTP (RGPD §5F)
+// ============================================================
+
+export const verifierTotpSchema = z
+  .object({
+    factor_id: z.string().min(1),
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'Le code TOTP doit comporter 6 chiffres.'),
+  })
+  .strict();
+
+export type DonneesVerifierTotp = z.infer<typeof verifierTotpSchema>;
