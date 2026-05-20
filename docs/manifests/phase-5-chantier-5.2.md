@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-5-chantier-5.2-communes`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `0c13ac4`
 **Durée approximative** : 1 session Claude Code
 
 ---
