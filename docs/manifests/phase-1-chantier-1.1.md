@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-1-chantier-1.1-schema-bdd-initial`
-**Commit final** : à renseigner après commit
+**Commit final** : `7b37881`
 **Durée approximative** : 1 session Claude Code (enchaînée avec 0.1 et 0.2)
 
 ---
