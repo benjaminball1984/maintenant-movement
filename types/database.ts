@@ -33,6 +33,8 @@ export type NiveauDroitAdmin =
   | 'animation'
   | 'dpd';
 
+export type StatutPetition = 'en_moderation' | 'publiee' | 'rejetee' | 'archivee';
+
 // ============================================================
 // Database
 // ============================================================
@@ -354,10 +356,88 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['journal_admin']['Insert']>;
         Relationships: [];
       };
+
+      petition: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          destinataire: string;
+          image_url: string | null;
+          objectif: number;
+          createurice_id: string;
+          statut: StatutPetition;
+          modere_par: string | null;
+          modere_le: string | null;
+          raison_rejet: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          texte: string;
+          destinataire: string;
+          image_url?: string | null;
+          objectif: number;
+          createurice_id: string;
+          statut?: StatutPetition;
+          modere_par?: string | null;
+          modere_le?: string | null;
+          raison_rejet?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['petition']['Insert']>;
+        Relationships: [];
+      };
+
+      signature_petition: {
+        Row: {
+          id: string;
+          petition_id: string;
+          personne_id: string | null;
+          nom: string;
+          prenom: string;
+          email: string;
+          code_postal: string;
+          telephone: string | null;
+          accepte_newsletter: boolean;
+          accepte_contact_createurice: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          petition_id: string;
+          personne_id?: string | null;
+          nom: string;
+          prenom: string;
+          email: string;
+          code_postal: string;
+          telephone?: string | null;
+          accepte_newsletter?: boolean;
+          accepte_contact_createurice?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['signature_petition']['Insert']>;
+        Relationships: [];
+      };
     };
 
     Views: {
-      [_ in never]: never;
+      petition_compteur: {
+        Row: {
+          petition_id: string;
+          slug: string;
+          titre: string;
+          objectif: number;
+          statut: StatutPetition;
+          nombre_signatures: number;
+        };
+        Relationships: [];
+      };
     };
 
     Functions: {
@@ -385,6 +465,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      nombre_signatures: {
+        Args: { petition_a_compter: string };
+        Returns: number;
+      };
     };
 
     Enums: {
@@ -409,3 +493,6 @@ export type Confederation = Database['public']['Tables']['confederation']['Row']
 export type GtThematique = Database['public']['Tables']['gt_thematique']['Row'];
 export type DroitAdmin = Database['public']['Tables']['droit_admin']['Row'];
 export type JournalAdmin = Database['public']['Tables']['journal_admin']['Row'];
+export type Petition = Database['public']['Tables']['petition']['Row'];
+export type SignaturePetition = Database['public']['Tables']['signature_petition']['Row'];
+export type PetitionCompteur = Database['public']['Views']['petition_compteur']['Row'];
