@@ -80,6 +80,31 @@ export type StatutAdhesion = 'active' | 'expiree' | 'annulee';
 export type EntiteConfederal = 'commune' | 'federation' | 'confederation';
 export type StatutMandat = 'actif' | 'libere';
 
+// Chantier 5.3 — Moments solidaires (8 types).
+export type TypeMomentSolidaire =
+  | 'porte_a_porte'
+  | 'maraude'
+  | 'vide_grenier_solidaire'
+  | 'soutien'
+  | 'manifestation'
+  | 'rencontre'
+  | 'concert_solidaire'
+  | 'repas_solidaire';
+export type StatutMomentSolidaire = 'annonce' | 'en_cours' | 'termine' | 'annule' | 'retire';
+export type StatutTupperware = 'emporte' | 'rendu' | 'perdu';
+/**
+ * Sous-types du porte-à-porte solidaire en 7 moments (cf. spec §7C).
+ * Pour les autres types, `sous_type` est null.
+ */
+export type SousTypeMomentPaP =
+  | 'pap_1er_passage'
+  | 'pap_2e_passage'
+  | 'pap_tri'
+  | 'pap_distribution'
+  | 'pap_maraude_invit'
+  | 'pap_repas'
+  | 'pap_volontaires';
+
 // ============================================================
 // Database
 // ============================================================
@@ -942,6 +967,111 @@ export interface Database {
         Relationships: [];
       };
 
+      moment_solidaire: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          type: TypeMomentSolidaire;
+          sous_type: string | null;
+          parent_id: string | null;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          commence_le: string;
+          termine_le: string | null;
+          commune_id: string | null;
+          cause_locale: string | null;
+          capacite_max: number | null;
+          meta: Json;
+          createurice_id: string;
+          statut: StatutMomentSolidaire;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          type: TypeMomentSolidaire;
+          sous_type?: string | null;
+          parent_id?: string | null;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          commence_le: string;
+          termine_le?: string | null;
+          commune_id?: string | null;
+          cause_locale?: string | null;
+          capacite_max?: number | null;
+          meta?: Json;
+          createurice_id: string;
+          statut?: StatutMomentSolidaire;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['moment_solidaire']['Insert']>;
+        Relationships: [];
+      };
+
+      participation_moment: {
+        Row: {
+          id: string;
+          moment_id: string;
+          personne_id: string | null;
+          prenom: string | null;
+          email: string | null;
+          telephone: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          moment_id: string;
+          personne_id?: string | null;
+          prenom?: string | null;
+          email?: string | null;
+          telephone?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['participation_moment']['Insert']>;
+        Relationships: [];
+      };
+
+      tupperware: {
+        Row: {
+          id: string;
+          moment_id: string;
+          porteureuse_prenom: string;
+          porteureuse_email: string | null;
+          porteureuse_telephone: string | null;
+          contenu: string | null;
+          emporte_le: string;
+          rendu_le: string | null;
+          statut: StatutTupperware;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          moment_id: string;
+          porteureuse_prenom: string;
+          porteureuse_email?: string | null;
+          porteureuse_telephone?: string | null;
+          contenu?: string | null;
+          emporte_le?: string;
+          rendu_le?: string | null;
+          statut?: StatutTupperware;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['tupperware']['Insert']>;
+        Relationships: [];
+      };
+
       mandat_confederal: {
         Row: {
           id: string;
@@ -1183,3 +1313,6 @@ export type NotationMarcheStats = Database['public']['Views']['notation_marche_s
 export type Adhesion = Database['public']['Tables']['adhesion']['Row'];
 export type AdherentActif = Database['public']['Views']['adherent_actif']['Row'];
 export type MandatConfederal = Database['public']['Tables']['mandat_confederal']['Row'];
+export type MomentSolidaire = Database['public']['Tables']['moment_solidaire']['Row'];
+export type ParticipationMoment = Database['public']['Tables']['participation_moment']['Row'];
+export type Tupperware = Database['public']['Tables']['tupperware']['Row'];
