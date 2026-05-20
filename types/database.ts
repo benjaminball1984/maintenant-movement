@@ -126,6 +126,9 @@ export type ModeSondage = 'classique' | 'pondere';
 export type StatutSondage = 'ouvert' | 'ferme' | 'archive' | 'retire';
 export type TrancheAge = 'moins_18' | '18_24' | '25_34' | '35_49' | '50_64' | '65_plus';
 
+// Chantier 8.1 — Notifications (5 canaux hiérarchisés).
+export type CanalNotification = 'cloche' | 'push' | 'mail_mardi' | 'newsletter_vendredi';
+
 // ============================================================
 // Database
 // ============================================================
@@ -988,6 +991,62 @@ export interface Database {
         Relationships: [];
       };
 
+      notification: {
+        Row: {
+          id: string;
+          destinataire_id: string;
+          type: string;
+          cible_table: string | null;
+          cible_id: string | null;
+          titre: string;
+          message: string | null;
+          href: string | null;
+          lue: boolean;
+          lue_le: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          destinataire_id: string;
+          type: string;
+          cible_table?: string | null;
+          cible_id?: string | null;
+          titre: string;
+          message?: string | null;
+          href?: string | null;
+          lue?: boolean;
+          lue_le?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['notification']['Insert']>;
+        Relationships: [];
+      };
+
+      preference_notification: {
+        Row: {
+          personne_id: string;
+          cloche_active: boolean;
+          push_active: boolean;
+          mail_recap_mardi_active: boolean;
+          newsletter_vendredi_active: boolean;
+          preferences_par_type: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          personne_id: string;
+          cloche_active?: boolean;
+          push_active?: boolean;
+          mail_recap_mardi_active?: boolean;
+          newsletter_vendredi_active?: boolean;
+          preferences_par_type?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['preference_notification']['Insert']>;
+        Relationships: [];
+      };
+
       sondage: {
         Row: {
           id: string;
@@ -1496,3 +1555,5 @@ export type Media = Database['public']['Tables']['media']['Row'];
 export type Sondage = Database['public']['Tables']['sondage']['Row'];
 export type ReponseSondage = Database['public']['Tables']['reponse_sondage']['Row'];
 export type SondageResultats = Database['public']['Views']['sondage_resultats']['Row'];
+export type Notification = Database['public']['Tables']['notification']['Row'];
+export type PreferenceNotification = Database['public']['Tables']['preference_notification']['Row'];
