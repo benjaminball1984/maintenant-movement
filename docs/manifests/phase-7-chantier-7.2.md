@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-7-chantier-7.2-radio`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `31e1b1e`
 **Durée approximative** : 1 session Claude Code (chantier court)
 
 ---
