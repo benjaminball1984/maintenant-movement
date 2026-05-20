@@ -23,12 +23,44 @@ const ZOOM_INITIAL = 5;
 const COULEUR_PAR_TYPE: Record<TypePoint, string> = {
   mobilisation: '#e85d75',
   commune: '#9333ea',
+  entraide_hebergement: '#10b981',
+  entraide_transport: '#0ea5e9',
+  entraide_pret_objet: '#f59e0b',
+  entraide_fruits_terre: '#84cc16',
+  sel: '#ec4899',
+  produit_marche: '#6366f1',
+  boutique_marche: '#a855f7',
+  minimarche: '#d946ef',
+  moment_solidaire: '#ef4444',
 };
 
 const LIBELLE_PAR_TYPE: Record<TypePoint, string> = {
   mobilisation: 'Mobilisations',
   commune: 'Communes libres',
+  entraide_hebergement: 'Hébergement solidaire',
+  entraide_transport: 'Transport solidaire',
+  entraide_pret_objet: 'Qui prête tout',
+  entraide_fruits_terre: 'Fruits de la terre',
+  sel: 'SEL',
+  produit_marche: 'Produits du marché',
+  boutique_marche: 'Boutiques éphémères',
+  minimarche: 'Minimarchés',
+  moment_solidaire: 'Moments solidaires',
 };
+
+const TOUS_LES_TYPES: TypePoint[] = [
+  'mobilisation',
+  'commune',
+  'entraide_hebergement',
+  'entraide_transport',
+  'entraide_pret_objet',
+  'entraide_fruits_terre',
+  'sel',
+  'produit_marche',
+  'boutique_marche',
+  'minimarche',
+  'moment_solidaire',
+];
 
 /**
  * Composant carte unifiée (Client Component). Reçoit les points pré-
@@ -43,9 +75,7 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
   const conteneurRef = useRef<HTMLDivElement>(null);
   const carteRef = useRef<maplibregl.Map | null>(null);
   const marqueursRef = useRef<maplibregl.Marker[]>([]);
-  const [typesActifs, setTypesActifs] = useState<Set<TypePoint>>(
-    new Set(['mobilisation', 'commune']),
-  );
+  const [typesActifs, setTypesActifs] = useState<Set<TypePoint>>(new Set(TOUS_LES_TYPES));
 
   // Initialisation MapLibre une seule fois.
   useEffect(() => {
@@ -135,7 +165,7 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
     <div className="grid gap-3">
       <fieldset className="flex flex-wrap items-center gap-3">
         <legend className="sr-only">Filtres de type</legend>
-        {(['mobilisation', 'commune'] as TypePoint[]).map((type) => {
+        {TOUS_LES_TYPES.map((type) => {
           const compte = points.filter((p) => p.type === type).length;
           return (
             <label
