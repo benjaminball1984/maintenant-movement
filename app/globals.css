@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Variables CSS racine : posées au chantier 0.2 depuis
+ * docs/specs/04_DESIGN-TOKENS.md (couleurs, typographie, espacements).
+ * Pour ce chantier 0.1, seuls les fondamentaux d'accessibilité sont fixés.
+ */
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus visible : non négociable pour l'accessibilité clavier. */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

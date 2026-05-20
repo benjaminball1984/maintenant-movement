@@ -1,0 +1,27 @@
+# Hooks Git locaux gérés par Lefthook.
+#
+# Installation automatique via le script `prepare` de `package.json` au
+# `npm install`. Pour réinstaller manuellement : `npx lefthook install`.
+#
+# Politique : aucun commit n'est accepté si le lint ou le typecheck échoue.
+# Pas de bypass (CLAUDE.md §8.6).
+
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: '*.{ts,tsx,js,jsx,json}'
+      run: npx biome check --no-errors-on-unmatched {staged_files}
+    typecheck:
+      glob: '*.{ts,tsx}'
+      run: npx tsc --noEmit
+
+commit-msg:
+  commands:
+    convention:
+      # Format attendu (cf. CLAUDE.md §7) :
+      #   phase N - chantier N.X - description courte
+      #   fix - phase N - chantier N.X - description courte
+      # La validation est en Node pour rester portable (Git Bash sous
+      # Windows ne digérait pas le here-doc multi-ligne).
+      run: node scripts/check-commit-msg.mjs {1}

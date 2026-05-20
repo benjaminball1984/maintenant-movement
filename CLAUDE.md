@@ -384,10 +384,17 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : `<à remplir par Claude Code au premier chantier>`
-**Dernier chantier terminé** : aucun (initialisation à venir)
-**Chantier en cours** : 0.1 — Initialisation du dépôt
+**Dernière mise à jour** : 2026-05-20
+**Dernier chantier terminé** : 0.1 — Initialisation du dépôt (voir `docs/manifests/phase-0-chantier-0.1.md`)
+**Chantier en cours** : 0.2 — Système de design (à attaquer)
 **Chantiers bloqués / en attente d'arbitrage** : aucun
+
+### Préalables externes attendus avant la mise en ligne
+
+- Création du repo GitHub distant et `git push -u origin main` (renommer `master` → `main` au préalable).
+- Création du compte Cloudflare Pages pour brancher le déploiement.
+- Création du projet Supabase (région Francfort) avant le chantier 1.1.
+- Clés Brevo, Stripe, LiveKit, Turnstile, T99CP : au chantier qui les branche (le site tourne en local avec mocks d'ici là).
 
 ### Décisions politiques en attente d'arbitrage de Lilou/Ben
 

@@ -1,0 +1,67 @@
+# Pipeline CI du site Maintenant!.
+#
+# Au chantier 0.1, la CI ne déploie pas : elle vérifie seulement que le
+# code est lintable, typable, et que les tests unitaires + E2E passent.
+# Le déploiement Cloudflare Pages sera branché plus tard (CLAUDE.md §6).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck:
+    name: Lint et typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test-unit:
+    name: Tests unitaires (Vitest)
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  test-e2e:
+    name: Tests E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
