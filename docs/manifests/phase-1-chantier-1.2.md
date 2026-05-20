@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-1-chantier-1.2-auth-4-portes`
-**Commit final** : à renseigner après commit
+**Commit final** : `423c671`
 **Durée approximative** : 1 session Claude Code
 
 ---
