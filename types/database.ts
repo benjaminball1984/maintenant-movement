@@ -46,6 +46,9 @@ export type TypeCagnotte = 'ouverte' | 'lutte' | 'cotisation';
 export type StatutCagnotte = 'publiee' | 'suspendue' | 'cloturee';
 export type MonnaieDon = 'EUR' | 'T99CP';
 export type StatutDon = 'en_attente' | 'confirme' | 'echoue' | 'rembourse';
+export type TypeOffreEntraide = 'hebergement' | 'transport' | 'pret_objet' | 'fruits_terre';
+export type SensOffreEntraide = 'propose' | 'cherche';
+export type StatutOffreEntraide = 'publiee' | 'retiree' | 'cloturee';
 
 // ============================================================
 // Database
@@ -598,6 +601,51 @@ export interface Database {
         Relationships: [];
       };
 
+      offre_entraide: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url: string | null;
+          type: TypeOffreEntraide;
+          sens: SensOffreEntraide;
+          lieu: string;
+          latitude: number | null;
+          longitude: number | null;
+          meta: Json;
+          createurice_id: string;
+          statut: StatutOffreEntraide;
+          retire_par: string | null;
+          retire_le: string | null;
+          raison_retrait: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          description: string;
+          image_url?: string | null;
+          type: TypeOffreEntraide;
+          sens: SensOffreEntraide;
+          lieu: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          meta?: Json;
+          createurice_id: string;
+          statut?: StatutOffreEntraide;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          raison_retrait?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['offre_entraide']['Insert']>;
+        Relationships: [];
+      };
+
       don: {
         Row: {
           id: string;
@@ -743,3 +791,4 @@ export type ModuleCampagne = Database['public']['Tables']['module_campagne']['Ro
 export type Cagnotte = Database['public']['Tables']['cagnotte']['Row'];
 export type Don = Database['public']['Tables']['don']['Row'];
 export type CagnotteCompteur = Database['public']['Views']['cagnotte_compteur']['Row'];
+export type OffreEntraide = Database['public']['Tables']['offre_entraide']['Row'];
