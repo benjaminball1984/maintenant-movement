@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-2-chantier-2.1-page-accueil`
-**Commit final** : à renseigner après commit
+**Commit final** : `fd03f5e`
 **Durée approximative** : 1 session Claude Code
 
 ---
