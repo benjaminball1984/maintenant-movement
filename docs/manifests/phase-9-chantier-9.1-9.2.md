@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-9-chantier-9.1-9.2-admin`
-**Commit final** : `À RENSEIGNER PAR LE COMMIT FIX SUIVANT`
+**Commit final** : `d91839a`
 **Durée approximative** : 1 session Claude Code
 
 ---
