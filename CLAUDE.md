@@ -385,8 +385,8 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 > Tu mets à jour cette section à la fin de chaque chantier.
 
 **Dernière mise à jour** : 2026-05-21
-**Dernier chantier terminé** : 6.1 + 6.2 — Carte unifiée enrichie (11 types géolocalisés) + Agenda agrégé (4 sources datées, filtres jour/département/type) (voir `docs/manifests/phase-6-chantier-6.1-6.2.md`)
-**Chantier en cours** : 7.1 (Maintenant Médias) ou 2.2 (pages éditoriales)
+**Dernier chantier terminé** : 7.1 — Maintenant Médias (table polymorphe 9 types + page liste 10 onglets + fiche détail avec embed audio/vidéo/iframe) (voir `docs/manifests/phase-7-chantier-7.1.md`)
+**Chantier en cours** : 7.2 (Maintenant Radio AzuraCast) ou 2.2 (pages éditoriales)
 **Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-030 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures. Préalable Marché prod : poser un cron qui expire les annonces inactives 3 mois (chantier 11.3). Préalable Adhésion prod : poser un cron quotidien qui appelle `envoyerRelancesAdhesion(14)` (chantier 11.3). Préalable Communes : Lilou/Ben fournit le CSV des 2100-2300 communes puis lancer `npx tsx scripts/import-communes.ts <fichier.csv>`. Préalable Moments prod : poser un cron horaire pour la transition annonce→en_cours→termine (chantier 11.3).
 
 ### Branche principale

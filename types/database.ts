@@ -108,6 +108,19 @@ export type SousTypeMomentPaP =
 // Chantier 5.4 — D'autres moyens d'agir.
 export type StatutOrganisationPartenaire = 'affichee' | 'retiree';
 
+// Chantier 7.1 — Maintenant Médias (9 types couvrant la spec §4A).
+export type TypeMedia =
+  | 'edito'
+  | 'tribune'
+  | 'article'
+  | 'breve'
+  | 'dessin'
+  | 'podcast'
+  | 'video'
+  | 'live'
+  | 'newsletter';
+export type StatutMedia = 'brouillon' | 'publie' | 'retire' | 'archive';
+
 // ============================================================
 // Database
 // ============================================================
@@ -970,6 +983,51 @@ export interface Database {
         Relationships: [];
       };
 
+      media: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          corps: string;
+          type: TypeMedia;
+          auteurice_id: string | null;
+          provenance_externe: string | null;
+          source_url: string | null;
+          media_url: string | null;
+          vignette_url: string | null;
+          tags: string[] | null;
+          statut: StatutMedia;
+          publie_le: string | null;
+          retire_par: string | null;
+          retire_le: string | null;
+          raison_retrait: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          corps: string;
+          type: TypeMedia;
+          auteurice_id?: string | null;
+          provenance_externe?: string | null;
+          source_url?: string | null;
+          media_url?: string | null;
+          vignette_url?: string | null;
+          tags?: string[] | null;
+          statut?: StatutMedia;
+          publie_le?: string | null;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          raison_retrait?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['media']['Insert']>;
+        Relationships: [];
+      };
+
       organisation_partenaire: {
         Row: {
           id: string;
@@ -1355,3 +1413,4 @@ export type MomentSolidaire = Database['public']['Tables']['moment_solidaire']['
 export type ParticipationMoment = Database['public']['Tables']['participation_moment']['Row'];
 export type Tupperware = Database['public']['Tables']['tupperware']['Row'];
 export type OrganisationPartenaire = Database['public']['Tables']['organisation_partenaire']['Row'];
+export type Media = Database['public']['Tables']['media']['Row'];
