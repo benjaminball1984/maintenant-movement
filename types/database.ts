@@ -121,6 +121,11 @@ export type TypeMedia =
   | 'newsletter';
 export type StatutMedia = 'brouillon' | 'publie' | 'retire' | 'archive';
 
+// Chantier 7.4 — Sondages (2 modes).
+export type ModeSondage = 'classique' | 'pondere';
+export type StatutSondage = 'ouvert' | 'ferme' | 'archive' | 'retire';
+export type TrancheAge = 'moins_18' | '18_24' | '25_34' | '35_49' | '50_64' | '65_plus';
+
 // ============================================================
 // Database
 // ============================================================
@@ -983,6 +988,72 @@ export interface Database {
         Relationships: [];
       };
 
+      sondage: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          question: string;
+          options: string[];
+          image_url: string | null;
+          mode: ModeSondage;
+          commune_id: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          createurice_id: string;
+          statut: StatutSondage;
+          ferme_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          question: string;
+          options: string[];
+          image_url?: string | null;
+          mode?: ModeSondage;
+          commune_id?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          createurice_id: string;
+          statut?: StatutSondage;
+          ferme_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['sondage']['Insert']>;
+        Relationships: [];
+      };
+
+      reponse_sondage: {
+        Row: {
+          id: string;
+          sondage_id: string;
+          personne_id: string;
+          option_index: number;
+          code_postal: string | null;
+          tranche_age: TrancheAge | null;
+          pronom: string | null;
+          genre_declare: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          sondage_id: string;
+          personne_id: string;
+          option_index: number;
+          code_postal?: string | null;
+          tranche_age?: TrancheAge | null;
+          pronom?: string | null;
+          genre_declare?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['reponse_sondage']['Insert']>;
+        Relationships: [];
+      };
+
       media: {
         Row: {
           id: string;
@@ -1284,6 +1355,14 @@ export interface Database {
         };
         Relationships: [];
       };
+      sondage_resultats: {
+        Row: {
+          sondage_id: string;
+          option_index: number;
+          nombre_votes: number;
+        };
+        Relationships: [];
+      };
       notation_marche_stats: {
         Row: {
           vendeureuse_id: string;
@@ -1414,3 +1493,6 @@ export type ParticipationMoment = Database['public']['Tables']['participation_mo
 export type Tupperware = Database['public']['Tables']['tupperware']['Row'];
 export type OrganisationPartenaire = Database['public']['Tables']['organisation_partenaire']['Row'];
 export type Media = Database['public']['Tables']['media']['Row'];
+export type Sondage = Database['public']['Tables']['sondage']['Row'];
+export type ReponseSondage = Database['public']['Tables']['reponse_sondage']['Row'];
+export type SondageResultats = Database['public']['Views']['sondage_resultats']['Row'];
