@@ -72,6 +72,10 @@ export type StatutMinimarche = 'annonce' | 'en_cours' | 'termine' | 'annule' | '
  */
 export type MonnaieMarcheMinimarche = 'T99CP' | 'EUR' | 'G1' | 'MNLC';
 
+// Chantier 5.1 — Adhérer (3 chemins).
+export type CheminAdhesion = 'gratuit' | 'euros' | 't99cp';
+export type StatutAdhesion = 'active' | 'expiree' | 'annulee';
+
 // ============================================================
 // Database
 // ============================================================
@@ -934,6 +938,42 @@ export interface Database {
         Relationships: [];
       };
 
+      adhesion: {
+        Row: {
+          id: string;
+          personne_id: string;
+          chemin: CheminAdhesion;
+          montant_euros_centimes: number;
+          /** Plus petite unité T99CP (string bigint-safe). */
+          montant_t99cp_unites: string;
+          debute_le: string;
+          expire_le: string;
+          statut: StatutAdhesion;
+          stripe_session_id: string | null;
+          tx_hash: string | null;
+          relance_envoyee_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          personne_id: string;
+          chemin: CheminAdhesion;
+          montant_euros_centimes?: number;
+          montant_t99cp_unites?: string;
+          debute_le?: string;
+          expire_le?: string;
+          statut?: StatutAdhesion;
+          stripe_session_id?: string | null;
+          tx_hash?: string | null;
+          relance_envoyee_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['adhesion']['Insert']>;
+        Relationships: [];
+      };
+
       notation_marche: {
         Row: {
           id: string;
@@ -991,6 +1031,17 @@ export interface Database {
         };
         Relationships: [];
       };
+      adherent_actif: {
+        Row: {
+          personne_id: string;
+          adhesion_id: string;
+          chemin: CheminAdhesion;
+          debute_le: string;
+          expire_le: string;
+          statut: StatutAdhesion;
+        };
+        Relationships: [];
+      };
     };
 
     Functions: {
@@ -1038,6 +1089,10 @@ export interface Database {
         Args: { seuil_minutes?: number };
         Returns: Array<Database['public']['Tables']['prestation_sel']['Row']>;
       };
+      adhesions_a_relancer: {
+        Args: { seuil_jours?: number };
+        Returns: Array<Database['public']['Tables']['adhesion']['Row']>;
+      };
     };
 
     Enums: {
@@ -1082,3 +1137,5 @@ export type ProduitBoutique = Database['public']['Tables']['produit_boutique']['
 export type MinimarcheSolidaire = Database['public']['Tables']['minimarche_solidaire']['Row'];
 export type NotationMarche = Database['public']['Tables']['notation_marche']['Row'];
 export type NotationMarcheStats = Database['public']['Views']['notation_marche_stats']['Row'];
+export type Adhesion = Database['public']['Tables']['adhesion']['Row'];
+export type AdherentActif = Database['public']['Views']['adherent_actif']['Row'];
