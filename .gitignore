@@ -63,3 +63,6 @@ Thumbs.db
 # TypeScript build info
 *.tsbuildinfo
 backups/
+
+# Patches generes pour review externe (jamais commites)
+docs/review/
