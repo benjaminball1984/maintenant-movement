@@ -104,9 +104,7 @@ async function garantirAccesAdmin(prochaine: string): Promise<void> {
   const { data: estAdminGeneral } = await supabase.rpc('est_admin_general');
   if (estAdminGeneral === true) return;
 
-  const { data: estModerateurice } = await supabase.rpc('est_moderateurice', {
-    onglet_demande: null,
-  });
+  const { data: estModerateurice } = await supabase.rpc('est_moderateurice', {});
   if (estModerateurice === true) return;
 
   redirect('/');

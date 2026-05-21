@@ -39,13 +39,13 @@ export async function listerMediasPublies(type?: TypeMedia, limite = 50): Promis
     .limit(limite);
   if (type !== undefined) q = q.eq('type', type);
   const { data } = await q;
-  return hydrater(supabase, data ?? []);
+  return hydrater(supabase, (data ?? []) as Media[]);
 }
 
 export async function mediaParSlug(slug: string): Promise<MediaEnrichi | null> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('media').select('*').eq('slug', slug).maybeSingle();
   if (data === null) return null;
-  const [h] = await hydrater(supabase, [data]);
+  const [h] = await hydrater(supabase, [data as Media]);
   return h ?? null;
 }

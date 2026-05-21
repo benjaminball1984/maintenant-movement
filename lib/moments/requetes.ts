@@ -37,7 +37,7 @@ async function hydrater(
     compteurParts.set(p.moment_id, (compteurParts.get(p.moment_id) ?? 0) + 1);
   }
   const enfantsParParent = new Map<string, MomentSolidaire[]>();
-  for (const e of enfants.data ?? []) {
+  for (const e of (enfants.data ?? []) as MomentSolidaire[]) {
     if (e.parent_id === null) continue;
     const liste = enfantsParParent.get(e.parent_id) ?? [];
     liste.push(e);
@@ -77,7 +77,7 @@ export async function listerMomentsSolidaires(
   if (filtre.parentsSeulement === true) q = q.is('parent_id', null);
   const { data } = await q;
   if (data === null) return [];
-  return hydrater(supabase, data);
+  return hydrater(supabase, data as MomentSolidaire[]);
 }
 
 export async function momentSolidaireParSlug(slug: string): Promise<MomentSolidaireEnrichi | null> {
@@ -88,7 +88,7 @@ export async function momentSolidaireParSlug(slug: string): Promise<MomentSolida
     .eq('slug', slug)
     .maybeSingle();
   if (data === null) return null;
-  const [h] = await hydrater(supabase, [data]);
+  const [h] = await hydrater(supabase, [data as MomentSolidaire]);
   return h ?? null;
 }
 

@@ -40,11 +40,12 @@ export default async function PageAdherer() {
         </p>
       </header>
 
-      {adhesion !== null ? (
+      {adhesion !== null && adhesion.expire_le !== null && adhesion.chemin !== null ? (
         <Alert variant="success" titre="Tu es déjà adhérent·e">
           Ton adhésion est active jusqu'au{' '}
           <strong>{FORMATEUR_DATE.format(new Date(adhesion.expire_le))}</strong> (chemin{' '}
-          {libelleChemin(adhesion.chemin)}). Renouvelle quand tu veux ci-dessous.
+          {libelleChemin(adhesion.chemin as 'gratuit' | 'euros' | 't99cp')}). Renouvelle quand tu
+          veux ci-dessous.
         </Alert>
       ) : null}
 

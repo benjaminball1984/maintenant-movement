@@ -87,7 +87,7 @@ export async function listerMobilisationsAVenir(limite = 50): Promise<Mobilisati
     return [];
   }
 
-  return hydraterMobilisations(supabase, data);
+  return hydraterMobilisations(supabase, data as Mobilisation[]);
 }
 
 /**
@@ -109,7 +109,7 @@ export async function listerMobilisationsPassees(limite = 20): Promise<Mobilisat
     return [];
   }
 
-  return hydraterMobilisations(supabase, data);
+  return hydraterMobilisations(supabase, data as Mobilisation[]);
 }
 
 /**
@@ -138,7 +138,7 @@ export async function mobilisationParSlug(slug: string): Promise<MobilisationEnr
     return null;
   }
 
-  const [hydratee] = await hydraterMobilisations(supabase, [data]);
+  const [hydratee] = await hydraterMobilisations(supabase, [data as Mobilisation]);
   return hydratee ?? null;
 }
 
@@ -166,7 +166,7 @@ export async function listerMobilisationsGeolocalisees(
     return [];
   }
 
-  return hydraterMobilisations(supabase, data);
+  return hydraterMobilisations(supabase, data as Mobilisation[]);
 }
 
 /**
@@ -189,7 +189,7 @@ export async function listerMobilisationsAVerifier(): Promise<MobilisationEnrich
     return [];
   }
 
-  return hydraterMobilisations(supabase, data);
+  return hydraterMobilisations(supabase, data as Mobilisation[]);
 }
 
 /**

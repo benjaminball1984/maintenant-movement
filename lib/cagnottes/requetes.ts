@@ -98,7 +98,7 @@ export async function listerCagnottesPubliees(
   const { data, error } = await q;
   if (error !== null || data === null) return [];
 
-  return hydraterCagnottes(supabase, data);
+  return hydraterCagnottes(supabase, data as Cagnotte[]);
 }
 
 export async function cagnotteAlaUne(): Promise<CagnotteEnrichie | null> {
@@ -114,7 +114,7 @@ export async function cagnotteAlaUne(): Promise<CagnotteEnrichie | null> {
     .order('created_at', { ascending: false })
     .limit(1);
   if (error !== null || data === null || data.length === 0) return null;
-  const liste = await hydraterCagnottes(supabase, data);
+  const liste = await hydraterCagnottes(supabase, data as Cagnotte[]);
   return liste[0] ?? null;
 }
 
@@ -126,7 +126,7 @@ export async function cagnotteParSlug(slug: string): Promise<CagnotteEnrichie | 
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [hydratee] = await hydraterCagnottes(supabase, [data]);
+  const [hydratee] = await hydraterCagnottes(supabase, [data as Cagnotte]);
   return hydratee ?? null;
 }
 
@@ -141,5 +141,5 @@ export async function listerCagnottesAVerifier(): Promise<CagnotteEnrichie[]> {
     .order('created_at', { ascending: false })
     .limit(50);
   if (error !== null || data === null) return [];
-  return hydraterCagnottes(supabase, data);
+  return hydraterCagnottes(supabase, data as Cagnotte[]);
 }

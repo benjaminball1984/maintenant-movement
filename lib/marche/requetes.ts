@@ -69,10 +69,14 @@ async function chargerNotations(
     .select('*')
     .in('vendeureuse_id', vendeureuseIds);
   return new Map(
-    (data ?? []).map((s) => [
-      s.vendeureuse_id,
-      { moyenne_etoiles: s.moyenne_etoiles, nombre_notations: s.nombre_notations },
-    ]),
+    (data ?? [])
+      .filter(
+        (s): s is NotationMarcheStats & { vendeureuse_id: string } => s.vendeureuse_id !== null,
+      )
+      .map((s) => [
+        s.vendeureuse_id,
+        { moyenne_etoiles: s.moyenne_etoiles, nombre_notations: s.nombre_notations },
+      ]),
   );
 }
 
@@ -180,7 +184,7 @@ export async function listerProduitsMarche(
 
   const { data, error } = await q;
   if (error !== null || data === null) return [];
-  return hydraterProduits(supabase, data);
+  return hydraterProduits(supabase, data as ProduitMarche[]);
 }
 
 export async function produitParSlug(slug: string): Promise<ProduitMarcheEnrichi | null> {
@@ -191,7 +195,7 @@ export async function produitParSlug(slug: string): Promise<ProduitMarcheEnrichi
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [h] = await hydraterProduits(supabase, [data]);
+  const [h] = await hydraterProduits(supabase, [data as ProduitMarche]);
   return h ?? null;
 }
 
@@ -232,7 +236,7 @@ export async function listerBoutiques(limite = 50): Promise<BoutiqueMarcheEnrich
     .order('created_at', { ascending: false })
     .limit(limite);
   if (error !== null || data === null) return [];
-  return hydraterBoutiques(supabase, data);
+  return hydraterBoutiques(supabase, data as BoutiqueMarche[]);
 }
 
 export async function boutiqueParSlug(slug: string): Promise<BoutiqueMarcheEnrichie | null> {
@@ -243,7 +247,7 @@ export async function boutiqueParSlug(slug: string): Promise<BoutiqueMarcheEnric
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [h] = await hydraterBoutiques(supabase, [data]);
+  const [h] = await hydraterBoutiques(supabase, [data as BoutiqueMarche]);
   return h ?? null;
 }
 
@@ -260,7 +264,7 @@ export async function produitsDeLaBoutique(boutiqueId: string): Promise<ProduitM
     .select('*')
     .in('id', ids)
     .order('created_at', { ascending: false });
-  return hydraterProduits(supabase, produits ?? []);
+  return hydraterProduits(supabase, (produits ?? []) as ProduitMarche[]);
 }
 
 // ============================================================
@@ -279,7 +283,7 @@ export async function listerMinimarches(
     .order('commence_le', { ascending: true })
     .limit(limite);
   if (error !== null || data === null) return [];
-  return hydraterMinimarches(supabase, data);
+  return hydraterMinimarches(supabase, data as MinimarcheSolidaire[]);
 }
 
 export async function minimarcheParSlug(slug: string): Promise<MinimarcheSolidaireEnrichi | null> {
@@ -290,6 +294,6 @@ export async function minimarcheParSlug(slug: string): Promise<MinimarcheSolidai
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [h] = await hydraterMinimarches(supabase, [data]);
+  const [h] = await hydraterMinimarches(supabase, [data as MinimarcheSolidaire]);
   return h ?? null;
 }

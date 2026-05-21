@@ -43,7 +43,7 @@ export async function listerServicesSel(
   if (categorie !== undefined) q = q.eq('categorie', categorie);
   const { data, error } = await q;
   if (error !== null || data === null) return [];
-  return hydrater(supabase, data);
+  return hydrater(supabase, data as ServiceSel[]);
 }
 
 export async function serviceSelParSlug(slug: string): Promise<ServiceSelEnrichi | null> {
@@ -54,6 +54,6 @@ export async function serviceSelParSlug(slug: string): Promise<ServiceSelEnrichi
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [h] = await hydrater(supabase, [data]);
+  const [h] = await hydrater(supabase, [data as ServiceSel]);
   return h ?? null;
 }

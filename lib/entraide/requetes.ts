@@ -46,7 +46,7 @@ export async function listerOffresPubliees(
     .order('created_at', { ascending: false })
     .limit(limite);
   if (error !== null || data === null) return [];
-  return hydraterOffres(supabase, data);
+  return hydraterOffres(supabase, data as OffreEntraide[]);
 }
 
 export async function offreParSlug(slug: string): Promise<OffreEnrichie | null> {
@@ -57,6 +57,6 @@ export async function offreParSlug(slug: string): Promise<OffreEnrichie | null> 
     .eq('slug', slug)
     .maybeSingle();
   if (error !== null || data === null) return null;
-  const [h] = await hydraterOffres(supabase, [data]);
+  const [h] = await hydraterOffres(supabase, [data as OffreEntraide]);
   return h ?? null;
 }

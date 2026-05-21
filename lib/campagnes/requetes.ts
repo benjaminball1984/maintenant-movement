@@ -88,8 +88,9 @@ async function hydraterCampagne(
       .order('ordre', { ascending: true }),
   ]);
 
-  const cibles = await resoudreCibles(supabase, modules ?? []);
-  const modulesResolus: ModuleResolu[] = (modules ?? []).map((m) => {
+  const modulesNarrowed = (modules ?? []) as ModuleCampagne[];
+  const cibles = await resoudreCibles(supabase, modulesNarrowed);
+  const modulesResolus: ModuleResolu[] = modulesNarrowed.map((m) => {
     const cible = m.cible_id !== null ? cibles.get(m.cible_id) : null;
     return {
       ...m,
@@ -121,7 +122,7 @@ export async function listerCampagnesPubliees(limite = 50): Promise<CampagneEnri
     return [];
   }
 
-  return Promise.all(data.map((c) => hydraterCampagne(supabase, c)));
+  return Promise.all((data as Campagne[]).map((c) => hydraterCampagne(supabase, c)));
 }
 
 export async function campagneParSlug(slug: string): Promise<CampagneEnrichie | null> {
@@ -137,7 +138,7 @@ export async function campagneParSlug(slug: string): Promise<CampagneEnrichie | 
     return null;
   }
 
-  return hydraterCampagne(supabase, data);
+  return hydraterCampagne(supabase, data as Campagne);
 }
 
 export async function listerCampagnesAModerer(): Promise<CampagneEnrichie[]> {
@@ -153,5 +154,5 @@ export async function listerCampagnesAModerer(): Promise<CampagneEnrichie[]> {
     return [];
   }
 
-  return Promise.all(data.map((c) => hydraterCampagne(supabase, c)));
+  return Promise.all((data as Campagne[]).map((c) => hydraterCampagne(supabase, c)));
 }

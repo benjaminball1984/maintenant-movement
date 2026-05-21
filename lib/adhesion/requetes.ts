@@ -35,5 +35,5 @@ export async function historiqueAdhesions(personneId: string): Promise<Adhesion[
     .eq('personne_id', personneId)
     .order('debute_le', { ascending: false });
   if (error !== null || data === null) return [];
-  return data;
+  return data as Adhesion[];
 }

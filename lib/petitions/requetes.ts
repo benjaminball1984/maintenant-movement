@@ -97,7 +97,7 @@ export async function listerPetitionsPubliees(limite = 50): Promise<PetitionAvec
     return [];
   }
 
-  return hydraterPetitions(supabase, data);
+  return hydraterPetitions(supabase, data as Petition[]);
 }
 
 /**
@@ -126,7 +126,7 @@ export async function petitionParSlug(slug: string): Promise<PetitionAvecCompteu
     return null;
   }
 
-  const [hydratee] = await hydraterPetitions(supabase, [data]);
+  const [hydratee] = await hydraterPetitions(supabase, [data as Petition]);
   return hydratee ?? null;
 }
 
@@ -148,5 +148,5 @@ export async function listerPetitionsAModerer(): Promise<PetitionAvecCompteur[]>
     return [];
   }
 
-  return hydraterPetitions(supabase, data);
+  return hydraterPetitions(supabase, data as Petition[]);
 }

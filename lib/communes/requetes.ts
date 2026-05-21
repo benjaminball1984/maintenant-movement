@@ -41,7 +41,10 @@ export async function listerCommunes(recherche?: string, limite = 100): Promise<
     compteur.set(a.commune_id, (compteur.get(a.commune_id) ?? 0) + 1);
   }
 
-  return communes.map((c) => ({ ...c, nombre_adherents: compteur.get(c.id) ?? 0 }));
+  return communes.map((c) => ({
+    ...c,
+    nombre_adherents: compteur.get(c.id) ?? 0,
+  })) as CommuneEnrichie[];
 }
 
 export async function communeParSlug(slug: string): Promise<CommuneEnrichie | null> {
@@ -53,7 +56,7 @@ export async function communeParSlug(slug: string): Promise<CommuneEnrichie | nu
     .select('id', { count: 'exact', head: true })
     .eq('commune_id', c.id)
     .eq('est_active', true);
-  return { ...c, nombre_adherents: count ?? 0 };
+  return { ...c, nombre_adherents: count ?? 0 } as CommuneEnrichie;
 }
 
 // ============================================================
@@ -81,7 +84,10 @@ export async function listerFederations(): Promise<FederationEnrichie[]> {
     compteur.set(l.federation_id, (compteur.get(l.federation_id) ?? 0) + 1);
   }
 
-  return federations.map((f) => ({ ...f, nombre_communes: compteur.get(f.id) ?? 0 }));
+  return federations.map((f) => ({
+    ...f,
+    nombre_communes: compteur.get(f.id) ?? 0,
+  })) as FederationEnrichie[];
 }
 
 export async function federationParSlug(slug: string): Promise<FederationEnrichie | null> {
@@ -93,7 +99,7 @@ export async function federationParSlug(slug: string): Promise<FederationEnrichi
     .select('id', { count: 'exact', head: true })
     .eq('federation_id', f.id)
     .eq('est_active', true);
-  return { ...f, nombre_communes: count ?? 0 };
+  return { ...f, nombre_communes: count ?? 0 } as FederationEnrichie;
 }
 
 // ============================================================
@@ -103,13 +109,13 @@ export async function federationParSlug(slug: string): Promise<FederationEnrichi
 export async function listerConfederations(): Promise<Confederation[]> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('confederation').select('*').order('nom');
-  return data ?? [];
+  return (data ?? []) as Confederation[];
 }
 
 export async function confederationParSlug(slug: string): Promise<Confederation | null> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('confederation').select('*').eq('slug', slug).maybeSingle();
-  return data;
+  return data as Confederation | null;
 }
 
 // ============================================================
@@ -147,5 +153,5 @@ export async function listerMandatsActifs(
       personne_prenom: p?.prenom ?? null,
       personne_nom: p?.nom ?? null,
     };
-  });
+  }) as MandatAvecPersonne[];
 }

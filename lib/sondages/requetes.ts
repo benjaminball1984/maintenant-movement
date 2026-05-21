@@ -28,7 +28,7 @@ export async function listerSondagesOuverts(limite = 50): Promise<Sondage[]> {
     .in('statut', ['ouvert', 'ferme'])
     .order('created_at', { ascending: false })
     .limit(limite);
-  return data ?? [];
+  return (data ?? []) as Sondage[];
 }
 
 export async function sondageParSlugAvecResultats(
@@ -47,20 +47,24 @@ export async function sondageParSlugAvecResultats(
     .select('*')
     .eq('sondage_id', sondage.id);
 
-  const compteurs = new Array(sondage.options.length).fill(0) as number[];
+  const sondageNarrowed = sondage as Sondage;
+  const compteurs = new Array(sondageNarrowed.options.length).fill(0) as number[];
   let total = 0;
   for (const r of (resultats ?? []) as SondageResultats[]) {
-    if (r.option_index >= 0 && r.option_index < compteurs.length) {
-      compteurs[r.option_index] = r.nombre_votes;
-      total += r.nombre_votes;
+    const idx = r.option_index;
+    const votes = r.nombre_votes;
+    if (idx === null || votes === null) continue;
+    if (idx >= 0 && idx < compteurs.length) {
+      compteurs[idx] = votes;
+      total += votes;
     }
   }
 
   return {
-    ...sondage,
+    ...sondageNarrowed,
     total_votes: total,
     resultats_par_option: compteurs,
-    pondere_disponible: sondage.mode === 'pondere' && total >= 300,
+    pondere_disponible: sondageNarrowed.mode === 'pondere' && total >= 300,
   };
 }
 

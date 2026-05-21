@@ -14,7 +14,7 @@ export async function listerOrganisationsPartenaires(): Promise<OrganisationPart
     .select('*')
     .eq('statut', 'affichee')
     .order('nom');
-  return data ?? [];
+  return (data ?? []) as OrganisationPartenaire[];
 }
 
 /**

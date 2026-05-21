@@ -1,25 +1,2536 @@
-/**
- * Types TypeScript miroir du schéma Supabase posé au chantier 1.1.
- *
- * Format compatible avec `supabase gen types typescript --linked` : une
- * fois le projet Supabase créé et lié au CLI, on régénère ce fichier
- * automatiquement et il remplacera le contenu manuel ci-dessous.
- *
- * Conventions :
- * - Les unions de string literals (statut, niveau, type) viennent des
- *   CHECK constraints SQL.
- * - `Row` = ce qu'on lit (toutes colonnes obligatoires, sauf nullable).
- * - `Insert` = ce qu'on écrit en INSERT (les colonnes à default sont
- *   optionnelles).
- * - `Update` = patch (tout est optionnel).
- */
+﻿export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-/** Type JSON récursif standard Supabase. */
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '14.5';
+  };
+  public: {
+    Tables: {
+      adhesion: {
+        Row: {
+          chemin: string;
+          created_at: string;
+          debute_le: string;
+          expire_le: string;
+          id: string;
+          montant_euros_centimes: number;
+          montant_t99cp_unites: string;
+          personne_id: string;
+          relance_envoyee_le: string | null;
+          statut: string;
+          stripe_session_id: string | null;
+          tx_hash: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          chemin: string;
+          created_at?: string;
+          debute_le?: string;
+          expire_le?: string;
+          id?: string;
+          montant_euros_centimes?: number;
+          montant_t99cp_unites?: string;
+          personne_id: string;
+          relance_envoyee_le?: string | null;
+          statut?: string;
+          stripe_session_id?: string | null;
+          tx_hash?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          chemin?: string;
+          created_at?: string;
+          debute_le?: string;
+          expire_le?: string;
+          id?: string;
+          montant_euros_centimes?: number;
+          montant_t99cp_unites?: string;
+          personne_id?: string;
+          relance_envoyee_le?: string | null;
+          statut?: string;
+          stripe_session_id?: string | null;
+          tx_hash?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'adhesion_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      appartenance_commune: {
+        Row: {
+          commune_id: string;
+          created_at: string;
+          est_active: boolean;
+          id: string;
+          personne_id: string;
+          quittee_le: string | null;
+          rejointe_le: string;
+        };
+        Insert: {
+          commune_id: string;
+          created_at?: string;
+          est_active?: boolean;
+          id?: string;
+          personne_id: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Update: {
+          commune_id?: string;
+          created_at?: string;
+          est_active?: boolean;
+          id?: string;
+          personne_id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_commune_commune_id_fkey';
+            columns: ['commune_id'];
+            isOneToOne: false;
+            referencedRelation: 'commune';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_commune_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      appartenance_confederation: {
+        Row: {
+          confederation_id: string;
+          created_at: string;
+          est_active: boolean;
+          federation_id: string;
+          id: string;
+          quittee_le: string | null;
+          rejointe_le: string;
+        };
+        Insert: {
+          confederation_id: string;
+          created_at?: string;
+          est_active?: boolean;
+          federation_id: string;
+          id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Update: {
+          confederation_id?: string;
+          created_at?: string;
+          est_active?: boolean;
+          federation_id?: string;
+          id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_confederation_confederation_id_fkey';
+            columns: ['confederation_id'];
+            isOneToOne: false;
+            referencedRelation: 'confederation';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_confederation_federation_id_fkey';
+            columns: ['federation_id'];
+            isOneToOne: false;
+            referencedRelation: 'federation';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      appartenance_federation: {
+        Row: {
+          commune_id: string;
+          created_at: string;
+          est_active: boolean;
+          federation_id: string;
+          id: string;
+          quittee_le: string | null;
+          rejointe_le: string;
+        };
+        Insert: {
+          commune_id: string;
+          created_at?: string;
+          est_active?: boolean;
+          federation_id: string;
+          id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Update: {
+          commune_id?: string;
+          created_at?: string;
+          est_active?: boolean;
+          federation_id?: string;
+          id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_federation_commune_id_fkey';
+            columns: ['commune_id'];
+            isOneToOne: false;
+            referencedRelation: 'commune';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_federation_federation_id_fkey';
+            columns: ['federation_id'];
+            isOneToOne: false;
+            referencedRelation: 'federation';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      appartenance_gt: {
+        Row: {
+          created_at: string;
+          est_active: boolean;
+          gt_thematique_id: string;
+          id: string;
+          personne_id: string;
+          quittee_le: string | null;
+          rejointe_le: string;
+        };
+        Insert: {
+          created_at?: string;
+          est_active?: boolean;
+          gt_thematique_id: string;
+          id?: string;
+          personne_id: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Update: {
+          created_at?: string;
+          est_active?: boolean;
+          gt_thematique_id?: string;
+          id?: string;
+          personne_id?: string;
+          quittee_le?: string | null;
+          rejointe_le?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_gt_gt_thematique_id_fkey';
+            columns: ['gt_thematique_id'];
+            isOneToOne: false;
+            referencedRelation: 'gt_thematique';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_gt_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      boutique_marche: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          description: string;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          lieu: string | null;
+          longitude: number | null;
+          nom: string;
+          ouverte_au: string | null;
+          ouverte_du: string | null;
+          sens: string;
+          slug: string;
+          statut: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          description: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string | null;
+          longitude?: number | null;
+          nom: string;
+          ouverte_au?: string | null;
+          ouverte_du?: string | null;
+          sens: string;
+          slug: string;
+          statut?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          description?: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string | null;
+          longitude?: number | null;
+          nom?: string;
+          ouverte_au?: string | null;
+          ouverte_du?: string | null;
+          sens?: string;
+          slug?: string;
+          statut?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'boutique_marche_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      cagnotte: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          id: string;
+          image_url: string | null;
+          objectif_euros: number;
+          raison_suspension: string | null;
+          slug: string;
+          statut: string;
+          stripe_account_id: string | null;
+          suspendue_le: string | null;
+          suspendue_par: string | null;
+          texte: string;
+          titre: string;
+          type: string;
+          updated_at: string;
+          wallet_t99cp: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          id?: string;
+          image_url?: string | null;
+          objectif_euros?: number;
+          raison_suspension?: string | null;
+          slug: string;
+          statut?: string;
+          stripe_account_id?: string | null;
+          suspendue_le?: string | null;
+          suspendue_par?: string | null;
+          texte: string;
+          titre: string;
+          type: string;
+          updated_at?: string;
+          wallet_t99cp?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          id?: string;
+          image_url?: string | null;
+          objectif_euros?: number;
+          raison_suspension?: string | null;
+          slug?: string;
+          statut?: string;
+          stripe_account_id?: string | null;
+          suspendue_le?: string | null;
+          suspendue_par?: string | null;
+          texte?: string;
+          titre?: string;
+          type?: string;
+          updated_at?: string;
+          wallet_t99cp?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'cagnotte_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'cagnotte_suspendue_par_fkey';
+            columns: ['suspendue_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      campagne: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          id: string;
+          image_url: string | null;
+          modere_le: string | null;
+          modere_par: string | null;
+          raison_rejet: string | null;
+          slug: string;
+          statut: string;
+          texte: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          id?: string;
+          image_url?: string | null;
+          modere_le?: string | null;
+          modere_par?: string | null;
+          raison_rejet?: string | null;
+          slug: string;
+          statut?: string;
+          texte: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          id?: string;
+          image_url?: string | null;
+          modere_le?: string | null;
+          modere_par?: string | null;
+          raison_rejet?: string | null;
+          slug?: string;
+          statut?: string;
+          texte?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campagne_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'campagne_modere_par_fkey';
+            columns: ['modere_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      commune: {
+        Row: {
+          code_insee: string | null;
+          code_postal_principal: string | null;
+          created_at: string;
+          createurice_id: string | null;
+          departement: string | null;
+          description_courte: string | null;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          nom: string;
+          region: string | null;
+          slug: string;
+          statut_creation: string;
+          updated_at: string;
+        };
+        Insert: {
+          code_insee?: string | null;
+          code_postal_principal?: string | null;
+          created_at?: string;
+          createurice_id?: string | null;
+          departement?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          nom: string;
+          region?: string | null;
+          slug: string;
+          statut_creation?: string;
+          updated_at?: string;
+        };
+        Update: {
+          code_insee?: string | null;
+          code_postal_principal?: string | null;
+          created_at?: string;
+          createurice_id?: string | null;
+          departement?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          nom?: string;
+          region?: string | null;
+          slug?: string;
+          statut_creation?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'commune_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      confederation: {
+        Row: {
+          created_at: string;
+          createurice_id: string | null;
+          description_courte: string | null;
+          id: string;
+          image_url: string | null;
+          nom: string;
+          slug: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom: string;
+          slug: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom?: string;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'confederation_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      don: {
+        Row: {
+          accepte_contact_createurice: boolean;
+          accepte_newsletter: boolean;
+          cagnotte_id: string;
+          code_postal: string | null;
+          confirme_le: string | null;
+          created_at: string;
+          email: string | null;
+          frais_centimes: number;
+          id: string;
+          monnaie: string;
+          montant_centimes: number;
+          nom: string | null;
+          personne_id: string | null;
+          prenom: string | null;
+          statut: string;
+          stripe_payment_intent_id: string | null;
+          tx_hash: string | null;
+        };
+        Insert: {
+          accepte_contact_createurice?: boolean;
+          accepte_newsletter?: boolean;
+          cagnotte_id: string;
+          code_postal?: string | null;
+          confirme_le?: string | null;
+          created_at?: string;
+          email?: string | null;
+          frais_centimes?: number;
+          id?: string;
+          monnaie: string;
+          montant_centimes: number;
+          nom?: string | null;
+          personne_id?: string | null;
+          prenom?: string | null;
+          statut?: string;
+          stripe_payment_intent_id?: string | null;
+          tx_hash?: string | null;
+        };
+        Update: {
+          accepte_contact_createurice?: boolean;
+          accepte_newsletter?: boolean;
+          cagnotte_id?: string;
+          code_postal?: string | null;
+          confirme_le?: string | null;
+          created_at?: string;
+          email?: string | null;
+          frais_centimes?: number;
+          id?: string;
+          monnaie?: string;
+          montant_centimes?: number;
+          nom?: string | null;
+          personne_id?: string | null;
+          prenom?: string | null;
+          statut?: string;
+          stripe_payment_intent_id?: string | null;
+          tx_hash?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'don_cagnotte_id_fkey';
+            columns: ['cagnotte_id'];
+            isOneToOne: false;
+            referencedRelation: 'cagnotte';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'don_cagnotte_id_fkey';
+            columns: ['cagnotte_id'];
+            isOneToOne: false;
+            referencedRelation: 'cagnotte_compteur';
+            referencedColumns: ['cagnotte_id'];
+          },
+          {
+            foreignKeyName: 'don_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      droit_admin: {
+        Row: {
+          accorde_le: string;
+          accorde_par: string | null;
+          id: string;
+          niveau: string;
+          perimetre_onglet: string[] | null;
+          personne_id: string;
+          retire_le: string | null;
+          retire_par: string | null;
+          scope_commune_id: string | null;
+        };
+        Insert: {
+          accorde_le?: string;
+          accorde_par?: string | null;
+          id?: string;
+          niveau: string;
+          perimetre_onglet?: string[] | null;
+          personne_id: string;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          scope_commune_id?: string | null;
+        };
+        Update: {
+          accorde_le?: string;
+          accorde_par?: string | null;
+          id?: string;
+          niveau?: string;
+          perimetre_onglet?: string[] | null;
+          personne_id?: string;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          scope_commune_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'droit_admin_accorde_par_fkey';
+            columns: ['accorde_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'droit_admin_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'droit_admin_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'droit_admin_scope_commune_id_fkey';
+            columns: ['scope_commune_id'];
+            isOneToOne: false;
+            referencedRelation: 'commune';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      federation: {
+        Row: {
+          created_at: string;
+          createurice_id: string | null;
+          description_courte: string | null;
+          id: string;
+          image_url: string | null;
+          nom: string;
+          slug: string;
+          type: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom: string;
+          slug: string;
+          type?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description_courte?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom?: string;
+          slug?: string;
+          type?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'federation_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      gt_thematique: {
+        Row: {
+          created_at: string;
+          createurice_id: string | null;
+          description: string | null;
+          id: string;
+          image_url: string | null;
+          nom: string;
+          slug: string;
+          sujet: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom: string;
+          slug: string;
+          sujet: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string | null;
+          description?: string | null;
+          id?: string;
+          image_url?: string | null;
+          nom?: string;
+          slug?: string;
+          sujet?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'gt_thematique_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      journal_admin: {
+        Row: {
+          action: string;
+          admin_id: string | null;
+          ancien_etat: Json | null;
+          cible_id: string | null;
+          cible_table: string | null;
+          cree_le: string;
+          id: number;
+          ip: string | null;
+          nouvel_etat: Json | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          action: string;
+          admin_id?: string | null;
+          ancien_etat?: Json | null;
+          cible_id?: string | null;
+          cible_table?: string | null;
+          cree_le?: string;
+          id?: number;
+          ip?: string | null;
+          nouvel_etat?: Json | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          action?: string;
+          admin_id?: string | null;
+          ancien_etat?: Json | null;
+          cible_id?: string | null;
+          cible_table?: string | null;
+          cree_le?: string;
+          id?: number;
+          ip?: string | null;
+          nouvel_etat?: Json | null;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'journal_admin_admin_id_fkey';
+            columns: ['admin_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      mandat_confederal: {
+        Row: {
+          created_at: string;
+          entite_id: string;
+          entite_type: string;
+          id: string;
+          libere_le: string | null;
+          personne_id: string;
+          raison_liberation: string | null;
+          statut: string;
+          tirage_seed: string | null;
+          tire_le: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          entite_id: string;
+          entite_type: string;
+          id?: string;
+          libere_le?: string | null;
+          personne_id: string;
+          raison_liberation?: string | null;
+          statut?: string;
+          tirage_seed?: string | null;
+          tire_le?: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          entite_id?: string;
+          entite_type?: string;
+          id?: string;
+          libere_le?: string | null;
+          personne_id?: string;
+          raison_liberation?: string | null;
+          statut?: string;
+          tirage_seed?: string | null;
+          tire_le?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'mandat_confederal_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      media: {
+        Row: {
+          auteurice_id: string | null;
+          corps: string;
+          created_at: string;
+          id: string;
+          media_url: string | null;
+          provenance_externe: string | null;
+          publie_le: string | null;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          slug: string;
+          source_url: string | null;
+          statut: string;
+          tags: string[] | null;
+          titre: string;
+          type: string;
+          updated_at: string;
+          vignette_url: string | null;
+        };
+        Insert: {
+          auteurice_id?: string | null;
+          corps: string;
+          created_at?: string;
+          id?: string;
+          media_url?: string | null;
+          provenance_externe?: string | null;
+          publie_le?: string | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug: string;
+          source_url?: string | null;
+          statut?: string;
+          tags?: string[] | null;
+          titre: string;
+          type: string;
+          updated_at?: string;
+          vignette_url?: string | null;
+        };
+        Update: {
+          auteurice_id?: string | null;
+          corps?: string;
+          created_at?: string;
+          id?: string;
+          media_url?: string | null;
+          provenance_externe?: string | null;
+          publie_le?: string | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug?: string;
+          source_url?: string | null;
+          statut?: string;
+          tags?: string[] | null;
+          titre?: string;
+          type?: string;
+          updated_at?: string;
+          vignette_url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'media_auteurice_id_fkey';
+            columns: ['auteurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'media_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      minimarche_solidaire: {
+        Row: {
+          commence_le: string;
+          created_at: string;
+          createurice_id: string;
+          description: string;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          monnaies_acceptees: string[];
+          slug: string;
+          statut: string;
+          termine_le: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          commence_le: string;
+          created_at?: string;
+          createurice_id: string;
+          description: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          monnaies_acceptees?: string[];
+          slug: string;
+          statut?: string;
+          termine_le: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          commence_le?: string;
+          created_at?: string;
+          createurice_id?: string;
+          description?: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          monnaies_acceptees?: string[];
+          slug?: string;
+          statut?: string;
+          termine_le?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'minimarche_solidaire_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      mobilisation: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          date_debut: string;
+          date_fin: string | null;
+          description: string;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          slug: string;
+          statut: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          date_debut: string;
+          date_fin?: string | null;
+          description: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug: string;
+          statut?: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          date_debut?: string;
+          date_fin?: string | null;
+          description?: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug?: string;
+          statut?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'mobilisation_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'mobilisation_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      module_campagne: {
+        Row: {
+          campagne_id: string;
+          cible_id: string | null;
+          contenu_editorial: string | null;
+          created_at: string;
+          id: string;
+          ordre: number;
+          type_module: string;
+        };
+        Insert: {
+          campagne_id: string;
+          cible_id?: string | null;
+          contenu_editorial?: string | null;
+          created_at?: string;
+          id?: string;
+          ordre?: number;
+          type_module: string;
+        };
+        Update: {
+          campagne_id?: string;
+          cible_id?: string | null;
+          contenu_editorial?: string | null;
+          created_at?: string;
+          id?: string;
+          ordre?: number;
+          type_module?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'module_campagne_campagne_id_fkey';
+            columns: ['campagne_id'];
+            isOneToOne: false;
+            referencedRelation: 'campagne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      moment_solidaire: {
+        Row: {
+          capacite_max: number | null;
+          cause_locale: string | null;
+          commence_le: string;
+          commune_id: string | null;
+          created_at: string;
+          createurice_id: string;
+          description: string;
+          id: string;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          meta: Json;
+          parent_id: string | null;
+          slug: string;
+          sous_type: string | null;
+          statut: string;
+          termine_le: string | null;
+          titre: string;
+          type: string;
+          updated_at: string;
+        };
+        Insert: {
+          capacite_max?: number | null;
+          cause_locale?: string | null;
+          commence_le: string;
+          commune_id?: string | null;
+          created_at?: string;
+          createurice_id: string;
+          description: string;
+          id?: string;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          meta?: Json;
+          parent_id?: string | null;
+          slug: string;
+          sous_type?: string | null;
+          statut?: string;
+          termine_le?: string | null;
+          titre: string;
+          type: string;
+          updated_at?: string;
+        };
+        Update: {
+          capacite_max?: number | null;
+          cause_locale?: string | null;
+          commence_le?: string;
+          commune_id?: string | null;
+          created_at?: string;
+          createurice_id?: string;
+          description?: string;
+          id?: string;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          meta?: Json;
+          parent_id?: string | null;
+          slug?: string;
+          sous_type?: string | null;
+          statut?: string;
+          termine_le?: string | null;
+          titre?: string;
+          type?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'moment_solidaire_commune_id_fkey';
+            columns: ['commune_id'];
+            isOneToOne: false;
+            referencedRelation: 'commune';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'moment_solidaire_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'moment_solidaire_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'moment_solidaire';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notation_marche: {
+        Row: {
+          acheteureuse_id: string;
+          commentaire: string | null;
+          created_at: string;
+          etoiles: number;
+          id: string;
+          produit_id: string;
+          updated_at: string;
+          vendeureuse_id: string;
+        };
+        Insert: {
+          acheteureuse_id: string;
+          commentaire?: string | null;
+          created_at?: string;
+          etoiles: number;
+          id?: string;
+          produit_id: string;
+          updated_at?: string;
+          vendeureuse_id: string;
+        };
+        Update: {
+          acheteureuse_id?: string;
+          commentaire?: string | null;
+          created_at?: string;
+          etoiles?: number;
+          id?: string;
+          produit_id?: string;
+          updated_at?: string;
+          vendeureuse_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notation_marche_acheteureuse_id_fkey';
+            columns: ['acheteureuse_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notation_marche_produit_id_fkey';
+            columns: ['produit_id'];
+            isOneToOne: false;
+            referencedRelation: 'produit_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notation_marche_vendeureuse_id_fkey';
+            columns: ['vendeureuse_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notification: {
+        Row: {
+          cible_id: string | null;
+          cible_table: string | null;
+          created_at: string;
+          destinataire_id: string;
+          href: string | null;
+          id: string;
+          lue: boolean;
+          lue_le: string | null;
+          message: string | null;
+          titre: string;
+          type: string;
+        };
+        Insert: {
+          cible_id?: string | null;
+          cible_table?: string | null;
+          created_at?: string;
+          destinataire_id: string;
+          href?: string | null;
+          id?: string;
+          lue?: boolean;
+          lue_le?: string | null;
+          message?: string | null;
+          titre: string;
+          type: string;
+        };
+        Update: {
+          cible_id?: string | null;
+          cible_table?: string | null;
+          created_at?: string;
+          destinataire_id?: string;
+          href?: string | null;
+          id?: string;
+          lue?: boolean;
+          lue_le?: string | null;
+          message?: string | null;
+          titre?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notification_destinataire_id_fkey';
+            columns: ['destinataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      offre_entraide: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          description: string;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          meta: Json;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          sens: string;
+          slug: string;
+          statut: string;
+          titre: string;
+          type: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          description: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          meta?: Json;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          sens: string;
+          slug: string;
+          statut?: string;
+          titre: string;
+          type: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          description?: string;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          meta?: Json;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          sens?: string;
+          slug?: string;
+          statut?: string;
+          titre?: string;
+          type?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'offre_entraide_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'offre_entraide_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      organisation_partenaire: {
+        Row: {
+          ajoute_par: string;
+          categorie_slug: string | null;
+          created_at: string;
+          description_courte: string | null;
+          id: string;
+          nom: string;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          slug: string;
+          statut: string;
+          updated_at: string;
+          url: string;
+        };
+        Insert: {
+          ajoute_par: string;
+          categorie_slug?: string | null;
+          created_at?: string;
+          description_courte?: string | null;
+          id?: string;
+          nom: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug: string;
+          statut?: string;
+          updated_at?: string;
+          url: string;
+        };
+        Update: {
+          ajoute_par?: string;
+          categorie_slug?: string | null;
+          created_at?: string;
+          description_courte?: string | null;
+          id?: string;
+          nom?: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          slug?: string;
+          statut?: string;
+          updated_at?: string;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'organisation_partenaire_ajoute_par_fkey';
+            columns: ['ajoute_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organisation_partenaire_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      participation_mobilisation: {
+        Row: {
+          accepte_notifications: boolean;
+          code_postal: string | null;
+          created_at: string;
+          id: string;
+          mobilisation_id: string;
+          personne_id: string | null;
+        };
+        Insert: {
+          accepte_notifications?: boolean;
+          code_postal?: string | null;
+          created_at?: string;
+          id?: string;
+          mobilisation_id: string;
+          personne_id?: string | null;
+        };
+        Update: {
+          accepte_notifications?: boolean;
+          code_postal?: string | null;
+          created_at?: string;
+          id?: string;
+          mobilisation_id?: string;
+          personne_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'participation_mobilisation_mobilisation_id_fkey';
+            columns: ['mobilisation_id'];
+            isOneToOne: false;
+            referencedRelation: 'mobilisation';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'participation_mobilisation_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      participation_moment: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          id: string;
+          moment_id: string;
+          personne_id: string | null;
+          prenom: string | null;
+          telephone: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          moment_id: string;
+          personne_id?: string | null;
+          prenom?: string | null;
+          telephone?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          moment_id?: string;
+          personne_id?: string | null;
+          prenom?: string | null;
+          telephone?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'participation_moment_moment_id_fkey';
+            columns: ['moment_id'];
+            isOneToOne: false;
+            referencedRelation: 'moment_solidaire';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'participation_moment_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      personne: {
+        Row: {
+          anonymise_le: string | null;
+          bio: string | null;
+          code_postal: string | null;
+          created_at: string;
+          date_naissance: string | null;
+          derniere_connexion_le: string | null;
+          email: string | null;
+          email_verifie: boolean;
+          id: string;
+          mode_theme: string | null;
+          nom: string | null;
+          photo_url: string | null;
+          preferences_visibilite: Json;
+          prenom: string | null;
+          pronom: string | null;
+          statut: string;
+          suppression_demandee_le: string | null;
+          telephone: string | null;
+          totp_secret: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          anonymise_le?: string | null;
+          bio?: string | null;
+          code_postal?: string | null;
+          created_at?: string;
+          date_naissance?: string | null;
+          derniere_connexion_le?: string | null;
+          email?: string | null;
+          email_verifie?: boolean;
+          id: string;
+          mode_theme?: string | null;
+          nom?: string | null;
+          photo_url?: string | null;
+          preferences_visibilite?: Json;
+          prenom?: string | null;
+          pronom?: string | null;
+          statut?: string;
+          suppression_demandee_le?: string | null;
+          telephone?: string | null;
+          totp_secret?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          anonymise_le?: string | null;
+          bio?: string | null;
+          code_postal?: string | null;
+          created_at?: string;
+          date_naissance?: string | null;
+          derniere_connexion_le?: string | null;
+          email?: string | null;
+          email_verifie?: boolean;
+          id?: string;
+          mode_theme?: string | null;
+          nom?: string | null;
+          photo_url?: string | null;
+          preferences_visibilite?: Json;
+          prenom?: string | null;
+          pronom?: string | null;
+          statut?: string;
+          suppression_demandee_le?: string | null;
+          telephone?: string | null;
+          totp_secret?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      petition: {
+        Row: {
+          created_at: string;
+          createurice_id: string;
+          destinataire: string;
+          id: string;
+          image_url: string | null;
+          modere_le: string | null;
+          modere_par: string | null;
+          objectif: number;
+          raison_rejet: string | null;
+          slug: string;
+          statut: string;
+          texte: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          createurice_id: string;
+          destinataire: string;
+          id?: string;
+          image_url?: string | null;
+          modere_le?: string | null;
+          modere_par?: string | null;
+          objectif: number;
+          raison_rejet?: string | null;
+          slug: string;
+          statut?: string;
+          texte: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          createurice_id?: string;
+          destinataire?: string;
+          id?: string;
+          image_url?: string | null;
+          modere_le?: string | null;
+          modere_par?: string | null;
+          objectif?: number;
+          raison_rejet?: string | null;
+          slug?: string;
+          statut?: string;
+          texte?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'petition_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'petition_modere_par_fkey';
+            columns: ['modere_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      preference_notification: {
+        Row: {
+          cloche_active: boolean;
+          created_at: string;
+          mail_recap_mardi_active: boolean;
+          newsletter_vendredi_active: boolean;
+          personne_id: string;
+          preferences_par_type: Json;
+          push_active: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          cloche_active?: boolean;
+          created_at?: string;
+          mail_recap_mardi_active?: boolean;
+          newsletter_vendredi_active?: boolean;
+          personne_id: string;
+          preferences_par_type?: Json;
+          push_active?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          cloche_active?: boolean;
+          created_at?: string;
+          mail_recap_mardi_active?: boolean;
+          newsletter_vendredi_active?: boolean;
+          personne_id?: string;
+          preferences_par_type?: Json;
+          push_active?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'preference_notification_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: true;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      prestation_sel: {
+        Row: {
+          annulee_le: string | null;
+          beneficiaire_id: string;
+          contestee_le: string | null;
+          created_at: string;
+          creditee_le: string | null;
+          declaree_realisee_le: string | null;
+          duree_minutes_reelle: number | null;
+          id: string;
+          prestataire_id: string;
+          reservee_le: string;
+          service_id: string;
+          statut: string;
+          tx_hash_credit: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          annulee_le?: string | null;
+          beneficiaire_id: string;
+          contestee_le?: string | null;
+          created_at?: string;
+          creditee_le?: string | null;
+          declaree_realisee_le?: string | null;
+          duree_minutes_reelle?: number | null;
+          id?: string;
+          prestataire_id: string;
+          reservee_le?: string;
+          service_id: string;
+          statut?: string;
+          tx_hash_credit?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          annulee_le?: string | null;
+          beneficiaire_id?: string;
+          contestee_le?: string | null;
+          created_at?: string;
+          creditee_le?: string | null;
+          declaree_realisee_le?: string | null;
+          duree_minutes_reelle?: number | null;
+          id?: string;
+          prestataire_id?: string;
+          reservee_le?: string;
+          service_id?: string;
+          statut?: string;
+          tx_hash_credit?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'prestation_sel_beneficiaire_id_fkey';
+            columns: ['beneficiaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prestation_sel_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'prestation_sel_service_id_fkey';
+            columns: ['service_id'];
+            isOneToOne: false;
+            referencedRelation: 'service_sel';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      produit_boutique: {
+        Row: {
+          boutique_id: string;
+          id: string;
+          produit_id: string;
+          rattache_le: string;
+          rattache_par: string;
+        };
+        Insert: {
+          boutique_id: string;
+          id?: string;
+          produit_id: string;
+          rattache_le?: string;
+          rattache_par: string;
+        };
+        Update: {
+          boutique_id?: string;
+          id?: string;
+          produit_id?: string;
+          rattache_le?: string;
+          rattache_par?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'produit_boutique_boutique_id_fkey';
+            columns: ['boutique_id'];
+            isOneToOne: false;
+            referencedRelation: 'boutique_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'produit_boutique_produit_id_fkey';
+            columns: ['produit_id'];
+            isOneToOne: false;
+            referencedRelation: 'produit_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'produit_boutique_rattache_par_fkey';
+            columns: ['rattache_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      produit_marche: {
+        Row: {
+          categorie_slug: string | null;
+          created_at: string;
+          derniere_activite_le: string;
+          description: string;
+          envoi_postal: boolean;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          mode: string;
+          prix_euros_centimes: number;
+          prix_t99cp_unites: string;
+          remise_main_propre: boolean;
+          slug: string;
+          statut: string;
+          titre: string;
+          updated_at: string;
+          vendeureuse_id: string;
+        };
+        Insert: {
+          categorie_slug?: string | null;
+          created_at?: string;
+          derniere_activite_le?: string;
+          description: string;
+          envoi_postal?: boolean;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          mode: string;
+          prix_euros_centimes?: number;
+          prix_t99cp_unites?: string;
+          remise_main_propre?: boolean;
+          slug: string;
+          statut?: string;
+          titre: string;
+          updated_at?: string;
+          vendeureuse_id: string;
+        };
+        Update: {
+          categorie_slug?: string | null;
+          created_at?: string;
+          derniere_activite_le?: string;
+          description?: string;
+          envoi_postal?: boolean;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          mode?: string;
+          prix_euros_centimes?: number;
+          prix_t99cp_unites?: string;
+          remise_main_propre?: boolean;
+          slug?: string;
+          statut?: string;
+          titre?: string;
+          updated_at?: string;
+          vendeureuse_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'produit_marche_vendeureuse_id_fkey';
+            columns: ['vendeureuse_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      reponse_sondage: {
+        Row: {
+          code_postal: string | null;
+          created_at: string;
+          genre_declare: string | null;
+          id: string;
+          option_index: number;
+          personne_id: string;
+          pronom: string | null;
+          sondage_id: string;
+          tranche_age: string | null;
+        };
+        Insert: {
+          code_postal?: string | null;
+          created_at?: string;
+          genre_declare?: string | null;
+          id?: string;
+          option_index: number;
+          personne_id: string;
+          pronom?: string | null;
+          sondage_id: string;
+          tranche_age?: string | null;
+        };
+        Update: {
+          code_postal?: string | null;
+          created_at?: string;
+          genre_declare?: string | null;
+          id?: string;
+          option_index?: number;
+          personne_id?: string;
+          pronom?: string | null;
+          sondage_id?: string;
+          tranche_age?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reponse_sondage_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reponse_sondage_sondage_id_fkey';
+            columns: ['sondage_id'];
+            isOneToOne: false;
+            referencedRelation: 'sondage';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      service_sel: {
+        Row: {
+          categorie: string;
+          created_at: string;
+          createurice_id: string;
+          description: string;
+          duree_minutes_estimee: number;
+          id: string;
+          latitude: number | null;
+          lieu: string;
+          longitude: number | null;
+          sens: string;
+          slug: string;
+          statut: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          categorie: string;
+          created_at?: string;
+          createurice_id: string;
+          description: string;
+          duree_minutes_estimee: number;
+          id?: string;
+          latitude?: number | null;
+          lieu: string;
+          longitude?: number | null;
+          sens: string;
+          slug: string;
+          statut?: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          categorie?: string;
+          created_at?: string;
+          createurice_id?: string;
+          description?: string;
+          duree_minutes_estimee?: number;
+          id?: string;
+          latitude?: number | null;
+          lieu?: string;
+          longitude?: number | null;
+          sens?: string;
+          slug?: string;
+          statut?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'service_sel_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      signature_petition: {
+        Row: {
+          accepte_contact_createurice: boolean;
+          accepte_newsletter: boolean;
+          code_postal: string;
+          created_at: string;
+          email: string;
+          id: string;
+          nom: string;
+          personne_id: string | null;
+          petition_id: string;
+          prenom: string;
+          telephone: string | null;
+        };
+        Insert: {
+          accepte_contact_createurice?: boolean;
+          accepte_newsletter?: boolean;
+          code_postal: string;
+          created_at?: string;
+          email: string;
+          id?: string;
+          nom: string;
+          personne_id?: string | null;
+          petition_id: string;
+          prenom: string;
+          telephone?: string | null;
+        };
+        Update: {
+          accepte_contact_createurice?: boolean;
+          accepte_newsletter?: boolean;
+          code_postal?: string;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          nom?: string;
+          personne_id?: string | null;
+          petition_id?: string;
+          prenom?: string;
+          telephone?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'signature_petition_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'signature_petition_petition_id_fkey';
+            columns: ['petition_id'];
+            isOneToOne: false;
+            referencedRelation: 'petition';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'signature_petition_petition_id_fkey';
+            columns: ['petition_id'];
+            isOneToOne: false;
+            referencedRelation: 'petition_compteur';
+            referencedColumns: ['petition_id'];
+          },
+        ];
+      };
+      sondage: {
+        Row: {
+          commune_id: string | null;
+          created_at: string;
+          createurice_id: string;
+          ferme_le: string | null;
+          id: string;
+          image_url: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          mode: string;
+          options: string[];
+          question: string;
+          slug: string;
+          statut: string;
+          titre: string;
+          updated_at: string;
+        };
+        Insert: {
+          commune_id?: string | null;
+          created_at?: string;
+          createurice_id: string;
+          ferme_le?: string | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          mode?: string;
+          options: string[];
+          question: string;
+          slug: string;
+          statut?: string;
+          titre: string;
+          updated_at?: string;
+        };
+        Update: {
+          commune_id?: string | null;
+          created_at?: string;
+          createurice_id?: string;
+          ferme_le?: string | null;
+          id?: string;
+          image_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          mode?: string;
+          options?: string[];
+          question?: string;
+          slug?: string;
+          statut?: string;
+          titre?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'sondage_commune_id_fkey';
+            columns: ['commune_id'];
+            isOneToOne: false;
+            referencedRelation: 'commune';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'sondage_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      tupperware: {
+        Row: {
+          contenu: string | null;
+          created_at: string;
+          emporte_le: string;
+          id: string;
+          moment_id: string;
+          notes: string | null;
+          porteureuse_email: string | null;
+          porteureuse_prenom: string;
+          porteureuse_telephone: string | null;
+          rendu_le: string | null;
+          statut: string;
+          updated_at: string;
+        };
+        Insert: {
+          contenu?: string | null;
+          created_at?: string;
+          emporte_le?: string;
+          id?: string;
+          moment_id: string;
+          notes?: string | null;
+          porteureuse_email?: string | null;
+          porteureuse_prenom: string;
+          porteureuse_telephone?: string | null;
+          rendu_le?: string | null;
+          statut?: string;
+          updated_at?: string;
+        };
+        Update: {
+          contenu?: string | null;
+          created_at?: string;
+          emporte_le?: string;
+          id?: string;
+          moment_id?: string;
+          notes?: string | null;
+          porteureuse_email?: string | null;
+          porteureuse_prenom?: string;
+          porteureuse_telephone?: string | null;
+          rendu_le?: string | null;
+          statut?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tupperware_moment_id_fkey';
+            columns: ['moment_id'];
+            isOneToOne: false;
+            referencedRelation: 'moment_solidaire';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+    };
+    Views: {
+      adherent_actif: {
+        Row: {
+          adhesion_id: string | null;
+          chemin: string | null;
+          debute_le: string | null;
+          expire_le: string | null;
+          personne_id: string | null;
+          statut: string | null;
+        };
+        Insert: {
+          adhesion_id?: string | null;
+          chemin?: string | null;
+          debute_le?: string | null;
+          expire_le?: string | null;
+          personne_id?: string | null;
+          statut?: string | null;
+        };
+        Update: {
+          adhesion_id?: string | null;
+          chemin?: string | null;
+          debute_le?: string | null;
+          expire_le?: string | null;
+          personne_id?: string | null;
+          statut?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'adhesion_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      cagnotte_compteur: {
+        Row: {
+          cagnotte_id: string | null;
+          nombre_dons: number | null;
+          objectif_euros: number | null;
+          slug: string | null;
+          total_euros_centimes: number | null;
+          total_t99cp_unites: number | null;
+        };
+        Relationships: [];
+      };
+      notation_marche_stats: {
+        Row: {
+          moyenne_etoiles: number | null;
+          nombre_notations: number | null;
+          vendeureuse_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notation_marche_vendeureuse_id_fkey';
+            columns: ['vendeureuse_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      petition_compteur: {
+        Row: {
+          nombre_signatures: number | null;
+          objectif: number | null;
+          petition_id: string | null;
+          slug: string | null;
+          statut: string | null;
+          titre: string | null;
+        };
+        Relationships: [];
+      };
+      sondage_resultats: {
+        Row: {
+          nombre_votes: number | null;
+          option_index: number | null;
+          sondage_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reponse_sondage_sondage_id_fkey';
+            columns: ['sondage_id'];
+            isOneToOne: false;
+            referencedRelation: 'sondage';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+    };
+    Functions: {
+      adhesions_a_relancer: {
+        Args: { seuil_jours?: number };
+        Returns: {
+          chemin: string;
+          created_at: string;
+          debute_le: string;
+          expire_le: string;
+          id: string;
+          montant_euros_centimes: number;
+          montant_t99cp_unites: string;
+          personne_id: string;
+          relance_envoyee_le: string | null;
+          statut: string;
+          stripe_session_id: string | null;
+          tx_hash: string | null;
+          updated_at: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'adhesion';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      candidates_pour_assemblee: {
+        Args: { entite_id_recherche: string; entite_type_recherche: string };
+        Returns: string[];
+      };
+      compteurs_cagnotte: {
+        Args: { cagnotte_a_compter: string };
+        Returns: {
+          nombre_dons: number;
+          total_euros_centimes: number;
+          total_t99cp_unites: number;
+        }[];
+      };
+      est_admin_general: { Args: never; Returns: boolean };
+      est_admin_national: { Args: never; Returns: boolean };
+      est_animation_commune: {
+        Args: { commune_a_verifier: string };
+        Returns: boolean;
+      };
+      est_dpd: { Args: never; Returns: boolean };
+      est_membre_commune: {
+        Args: { commune_a_verifier: string };
+        Returns: boolean;
+      };
+      est_moderateurice: { Args: { onglet_demande?: string }; Returns: boolean };
+      nombre_communes_actives: {
+        Args: { personne_a_compter: string };
+        Returns: number;
+      };
+      nombre_participant_es: {
+        Args: { mobilisation_a_compter: string };
+        Returns: number;
+      };
+      nombre_signatures: {
+        Args: { petition_a_compter: string };
+        Returns: number;
+      };
+      prestations_a_crediter: {
+        Args: { seuil_minutes?: number };
+        Returns: {
+          annulee_le: string | null;
+          beneficiaire_id: string;
+          contestee_le: string | null;
+          created_at: string;
+          creditee_le: string | null;
+          declaree_realisee_le: string | null;
+          duree_minutes_reelle: number | null;
+          id: string;
+          prestataire_id: string;
+          reservee_le: string;
+          service_id: string;
+          statut: string;
+          tx_hash_credit: string | null;
+          updated_at: string;
+        }[];
+        SetofOptions: {
+          from: '*';
+          to: 'prestation_sel';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+};
+
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema['Enums']
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema['CompositeTypes']
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never;
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const;
 
 // ============================================================
 // Unions de statuts (depuis CHECK constraints SQL)
 // ============================================================
+// `supabase gen types typescript` ne traduit pas les CHECK constraints
+// en unions TypeScript : il renvoie `string` pour ces colonnes. On
+// rÃ©tablit ici les unions exactes, puis on en sert les alias de Row
+// (Personne, Adhesion, etc.) plus bas avec les colonnes narrowÃ©es.
 
 export type StatutPersonne = 'actif' | 'pending_deletion' | 'anonymise';
 export type ModeTheme = 'auto' | 'light' | 'dark';
@@ -59,28 +2570,20 @@ export type StatutPrestationSel =
   | 'contestee'
   | 'annulee';
 
-// Chantier 4.3 — Marché solidaire (3 onglets : Produit / Boutique / Minimarché).
+// Chantier 4.3 - Marche solidaire (3 onglets : Produit / Boutique / Minimarche).
 export type ModeProduitMarche = 'vente' | 'don';
 export type StatutProduitMarche = 'disponible' | 'reserve' | 'vendu' | 'retire' | 'expire';
 export type SensBoutiqueMarche = 'propose' | 'cherche';
 export type StatutBoutiqueMarche = 'ouverte' | 'fermee' | 'retiree';
 export type StatutMinimarche = 'annonce' | 'en_cours' | 'termine' | 'annule' | 'retire';
-/**
- * Catalogue des monnaies acceptées en physique (minimarché).
- * Cf. spec §6F : 4 monnaies acceptées (T99CP, Euros, Ğ1, Monnaies
- * locales complémentaires). Ğ1 et MNLC réservées au physique.
- */
 export type MonnaieMarcheMinimarche = 'T99CP' | 'EUR' | 'G1' | 'MNLC';
 
-// Chantier 5.1 — Adhérer (3 chemins).
 export type CheminAdhesion = 'gratuit' | 'euros' | 't99cp';
 export type StatutAdhesion = 'active' | 'expiree' | 'annulee';
 
-// Chantier 5.2 — Assemblée Confédérale.
 export type EntiteConfederal = 'commune' | 'federation' | 'confederation';
 export type StatutMandat = 'actif' | 'libere';
 
-// Chantier 5.3 — Moments solidaires (8 types).
 export type TypeMomentSolidaire =
   | 'porte_a_porte'
   | 'maraude'
@@ -92,10 +2595,6 @@ export type TypeMomentSolidaire =
   | 'repas_solidaire';
 export type StatutMomentSolidaire = 'annonce' | 'en_cours' | 'termine' | 'annule' | 'retire';
 export type StatutTupperware = 'emporte' | 'rendu' | 'perdu';
-/**
- * Sous-types du porte-à-porte solidaire en 7 moments (cf. spec §7C).
- * Pour les autres types, `sous_type` est null.
- */
 export type SousTypeMomentPaP =
   | 'pap_1er_passage'
   | 'pap_2e_passage'
@@ -105,10 +2604,8 @@ export type SousTypeMomentPaP =
   | 'pap_repas'
   | 'pap_volontaires';
 
-// Chantier 5.4 — D'autres moyens d'agir.
 export type StatutOrganisationPartenaire = 'affichee' | 'retiree';
 
-// Chantier 7.1 — Maintenant Médias (9 types couvrant la spec §4A).
 export type TypeMedia =
   | 'edito'
   | 'tribune'
@@ -121,1439 +2618,127 @@ export type TypeMedia =
   | 'newsletter';
 export type StatutMedia = 'brouillon' | 'publie' | 'retire' | 'archive';
 
-// Chantier 7.4 — Sondages (2 modes).
 export type ModeSondage = 'classique' | 'pondere';
 export type StatutSondage = 'ouvert' | 'ferme' | 'archive' | 'retire';
 export type TrancheAge = 'moins_18' | '18_24' | '25_34' | '35_49' | '50_64' | '65_plus';
 
-// Chantier 8.1 — Notifications (5 canaux hiérarchisés).
 export type CanalNotification = 'cloche' | 'push' | 'mail_mardi' | 'newsletter_vendredi';
 
 // ============================================================
-// Database
+// Alias pratiques (raccourcis exportes pour usage applicatif)
 // ============================================================
+// Chaque alias narrow les colonnes CHECK-contraintes vers leur union.
+// Les requetes Supabase renvoient le `Row` brut (avec `string`) :
+// dans lib/*/requetes.ts on fait un cast `as <Alias>[]` au moment du
+// `return`. Le runtime est garanti par les CHECK SQL.
 
-export interface Database {
-  public: {
-    Tables: {
-      personne: {
-        Row: {
-          id: string;
-          email: string | null;
-          nom: string | null;
-          prenom: string | null;
-          pronom: string | null;
-          date_naissance: string | null;
-          code_postal: string | null;
-          telephone: string | null;
-          photo_url: string | null;
-          bio: string | null;
-          statut: StatutPersonne;
-          email_verifie: boolean;
-          totp_secret: string | null;
-          preferences_visibilite: Json;
-          mode_theme: ModeTheme | null;
-          suppression_demandee_le: string | null;
-          anonymise_le: string | null;
-          derniere_connexion_le: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id: string;
-          email?: string | null;
-          nom?: string | null;
-          prenom?: string | null;
-          pronom?: string | null;
-          date_naissance?: string | null;
-          code_postal?: string | null;
-          telephone?: string | null;
-          photo_url?: string | null;
-          bio?: string | null;
-          statut?: StatutPersonne;
-          email_verifie?: boolean;
-          totp_secret?: string | null;
-          preferences_visibilite?: Json;
-          mode_theme?: ModeTheme | null;
-          suppression_demandee_le?: string | null;
-          anonymise_le?: string | null;
-          derniere_connexion_le?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['personne']['Insert']>;
-        Relationships: [];
-      };
+type RowOf<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+type ViewOf<V extends keyof Database['public']['Views']> = Database['public']['Views'][V]['Row'];
 
-      commune: {
-        Row: {
-          id: string;
-          slug: string;
-          nom: string;
-          code_insee: string | null;
-          code_postal_principal: string | null;
-          departement: string | null;
-          region: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          description_courte: string | null;
-          image_url: string | null;
-          statut_creation: StatutCreationCommune;
-          createurice_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          nom: string;
-          code_insee?: string | null;
-          code_postal_principal?: string | null;
-          departement?: string | null;
-          region?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          description_courte?: string | null;
-          image_url?: string | null;
-          statut_creation?: StatutCreationCommune;
-          createurice_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['commune']['Insert']>;
-        Relationships: [];
-      };
-
-      appartenance_commune: {
-        Row: {
-          id: string;
-          personne_id: string;
-          commune_id: string;
-          rejointe_le: string;
-          quittee_le: string | null;
-          est_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          personne_id: string;
-          commune_id: string;
-          rejointe_le?: string;
-          quittee_le?: string | null;
-          est_active?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['appartenance_commune']['Insert']>;
-        Relationships: [];
-      };
-
-      federation: {
-        Row: {
-          id: string;
-          slug: string;
-          nom: string;
-          type: TypeFederation;
-          description_courte: string | null;
-          image_url: string | null;
-          createurice_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          nom: string;
-          type?: TypeFederation;
-          description_courte?: string | null;
-          image_url?: string | null;
-          createurice_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['federation']['Insert']>;
-        Relationships: [];
-      };
-
-      appartenance_federation: {
-        Row: {
-          id: string;
-          commune_id: string;
-          federation_id: string;
-          rejointe_le: string;
-          quittee_le: string | null;
-          est_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          commune_id: string;
-          federation_id: string;
-          rejointe_le?: string;
-          quittee_le?: string | null;
-          est_active?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['appartenance_federation']['Insert']>;
-        Relationships: [];
-      };
-
-      confederation: {
-        Row: {
-          id: string;
-          slug: string;
-          nom: string;
-          description_courte: string | null;
-          image_url: string | null;
-          createurice_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          nom: string;
-          description_courte?: string | null;
-          image_url?: string | null;
-          createurice_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['confederation']['Insert']>;
-        Relationships: [];
-      };
-
-      appartenance_confederation: {
-        Row: {
-          id: string;
-          federation_id: string;
-          confederation_id: string;
-          rejointe_le: string;
-          quittee_le: string | null;
-          est_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          federation_id: string;
-          confederation_id: string;
-          rejointe_le?: string;
-          quittee_le?: string | null;
-          est_active?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['appartenance_confederation']['Insert']>;
-        Relationships: [];
-      };
-
-      gt_thematique: {
-        Row: {
-          id: string;
-          slug: string;
-          nom: string;
-          sujet: string;
-          description: string | null;
-          image_url: string | null;
-          createurice_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          nom: string;
-          sujet: string;
-          description?: string | null;
-          image_url?: string | null;
-          createurice_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['gt_thematique']['Insert']>;
-        Relationships: [];
-      };
-
-      appartenance_gt: {
-        Row: {
-          id: string;
-          personne_id: string;
-          gt_thematique_id: string;
-          rejointe_le: string;
-          quittee_le: string | null;
-          est_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          personne_id: string;
-          gt_thematique_id: string;
-          rejointe_le?: string;
-          quittee_le?: string | null;
-          est_active?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['appartenance_gt']['Insert']>;
-        Relationships: [];
-      };
-
-      droit_admin: {
-        Row: {
-          id: string;
-          personne_id: string;
-          niveau: NiveauDroitAdmin;
-          scope_commune_id: string | null;
-          perimetre_onglet: string[] | null;
-          accorde_par: string | null;
-          accorde_le: string;
-          retire_par: string | null;
-          retire_le: string | null;
-        };
-        Insert: {
-          id?: string;
-          personne_id: string;
-          niveau: NiveauDroitAdmin;
-          scope_commune_id?: string | null;
-          perimetre_onglet?: string[] | null;
-          accorde_par?: string | null;
-          accorde_le?: string;
-          retire_par?: string | null;
-          retire_le?: string | null;
-        };
-        Update: Partial<Database['public']['Tables']['droit_admin']['Insert']>;
-        Relationships: [];
-      };
-
-      journal_admin: {
-        Row: {
-          id: number;
-          admin_id: string | null;
-          action: string;
-          cible_table: string | null;
-          cible_id: string | null;
-          ancien_etat: Json | null;
-          nouvel_etat: Json | null;
-          ip: string | null;
-          user_agent: string | null;
-          cree_le: string;
-        };
-        Insert: {
-          id?: number;
-          admin_id?: string | null;
-          action: string;
-          cible_table?: string | null;
-          cible_id?: string | null;
-          ancien_etat?: Json | null;
-          nouvel_etat?: Json | null;
-          ip?: string | null;
-          user_agent?: string | null;
-          cree_le?: string;
-        };
-        Update: Partial<Database['public']['Tables']['journal_admin']['Insert']>;
-        Relationships: [];
-      };
-
-      petition: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          destinataire: string;
-          image_url: string | null;
-          objectif: number;
-          createurice_id: string;
-          statut: StatutPetition;
-          modere_par: string | null;
-          modere_le: string | null;
-          raison_rejet: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          destinataire: string;
-          image_url?: string | null;
-          objectif: number;
-          createurice_id: string;
-          statut?: StatutPetition;
-          modere_par?: string | null;
-          modere_le?: string | null;
-          raison_rejet?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['petition']['Insert']>;
-        Relationships: [];
-      };
-
-      signature_petition: {
-        Row: {
-          id: string;
-          petition_id: string;
-          personne_id: string | null;
-          nom: string;
-          prenom: string;
-          email: string;
-          code_postal: string;
-          telephone: string | null;
-          accepte_newsletter: boolean;
-          accepte_contact_createurice: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          petition_id: string;
-          personne_id?: string | null;
-          nom: string;
-          prenom: string;
-          email: string;
-          code_postal: string;
-          telephone?: string | null;
-          accepte_newsletter?: boolean;
-          accepte_contact_createurice?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['signature_petition']['Insert']>;
-        Relationships: [];
-      };
-
-      mobilisation: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url: string | null;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          date_debut: string;
-          date_fin: string | null;
-          createurice_id: string;
-          statut: StatutMobilisation;
-          retire_par: string | null;
-          retire_le: string | null;
-          raison_retrait: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url?: string | null;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          date_debut: string;
-          date_fin?: string | null;
-          createurice_id: string;
-          statut?: StatutMobilisation;
-          retire_par?: string | null;
-          retire_le?: string | null;
-          raison_retrait?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['mobilisation']['Insert']>;
-        Relationships: [];
-      };
-
-      participation_mobilisation: {
-        Row: {
-          id: string;
-          mobilisation_id: string;
-          personne_id: string | null;
-          code_postal: string | null;
-          accepte_notifications: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          mobilisation_id: string;
-          personne_id?: string | null;
-          code_postal?: string | null;
-          accepte_notifications?: boolean;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['participation_mobilisation']['Insert']>;
-        Relationships: [];
-      };
-
-      campagne: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          image_url: string | null;
-          createurice_id: string;
-          statut: StatutCampagne;
-          modere_par: string | null;
-          modere_le: string | null;
-          raison_rejet: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          image_url?: string | null;
-          createurice_id: string;
-          statut?: StatutCampagne;
-          modere_par?: string | null;
-          modere_le?: string | null;
-          raison_rejet?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['campagne']['Insert']>;
-        Relationships: [];
-      };
-
-      module_campagne: {
-        Row: {
-          id: string;
-          campagne_id: string;
-          type_module: TypeModuleCampagne;
-          cible_id: string | null;
-          contenu_editorial: string | null;
-          ordre: number;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          campagne_id: string;
-          type_module: TypeModuleCampagne;
-          cible_id?: string | null;
-          contenu_editorial?: string | null;
-          ordre?: number;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['module_campagne']['Insert']>;
-        Relationships: [];
-      };
-
-      cagnotte: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          image_url: string | null;
-          type: TypeCagnotte;
-          objectif_euros: number;
-          createurice_id: string;
-          stripe_account_id: string | null;
-          wallet_t99cp: string | null;
-          statut: StatutCagnotte;
-          suspendue_par: string | null;
-          suspendue_le: string | null;
-          raison_suspension: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          texte: string;
-          image_url?: string | null;
-          type: TypeCagnotte;
-          objectif_euros?: number;
-          createurice_id: string;
-          stripe_account_id?: string | null;
-          wallet_t99cp?: string | null;
-          statut?: StatutCagnotte;
-          suspendue_par?: string | null;
-          suspendue_le?: string | null;
-          raison_suspension?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['cagnotte']['Insert']>;
-        Relationships: [];
-      };
-
-      offre_entraide: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url: string | null;
-          type: TypeOffreEntraide;
-          sens: SensOffreEntraide;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          meta: Json;
-          createurice_id: string;
-          statut: StatutOffreEntraide;
-          retire_par: string | null;
-          retire_le: string | null;
-          raison_retrait: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url?: string | null;
-          type: TypeOffreEntraide;
-          sens: SensOffreEntraide;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          meta?: Json;
-          createurice_id: string;
-          statut?: StatutOffreEntraide;
-          retire_par?: string | null;
-          retire_le?: string | null;
-          raison_retrait?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['offre_entraide']['Insert']>;
-        Relationships: [];
-      };
-
-      service_sel: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          categorie: CategorieServiceSel;
-          sens: SensServiceSel;
-          duree_minutes_estimee: number;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          createurice_id: string;
-          statut: StatutServiceSel;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          categorie: CategorieServiceSel;
-          sens: SensServiceSel;
-          duree_minutes_estimee: number;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          createurice_id: string;
-          statut?: StatutServiceSel;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['service_sel']['Insert']>;
-        Relationships: [];
-      };
-
-      prestation_sel: {
-        Row: {
-          id: string;
-          service_id: string;
-          prestataire_id: string;
-          beneficiaire_id: string;
-          duree_minutes_reelle: number | null;
-          statut: StatutPrestationSel;
-          reservee_le: string;
-          declaree_realisee_le: string | null;
-          creditee_le: string | null;
-          contestee_le: string | null;
-          annulee_le: string | null;
-          tx_hash_credit: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          service_id: string;
-          prestataire_id: string;
-          beneficiaire_id: string;
-          duree_minutes_reelle?: number | null;
-          statut?: StatutPrestationSel;
-          reservee_le?: string;
-          declaree_realisee_le?: string | null;
-          creditee_le?: string | null;
-          contestee_le?: string | null;
-          annulee_le?: string | null;
-          tx_hash_credit?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['prestation_sel']['Insert']>;
-        Relationships: [];
-      };
-
-      don: {
-        Row: {
-          id: string;
-          cagnotte_id: string;
-          personne_id: string | null;
-          prenom: string | null;
-          nom: string | null;
-          email: string | null;
-          code_postal: string | null;
-          monnaie: MonnaieDon;
-          montant_centimes: number;
-          frais_centimes: number;
-          stripe_payment_intent_id: string | null;
-          tx_hash: string | null;
-          statut: StatutDon;
-          accepte_newsletter: boolean;
-          accepte_contact_createurice: boolean;
-          created_at: string;
-          confirme_le: string | null;
-        };
-        Insert: {
-          id?: string;
-          cagnotte_id: string;
-          personne_id?: string | null;
-          prenom?: string | null;
-          nom?: string | null;
-          email?: string | null;
-          code_postal?: string | null;
-          monnaie: MonnaieDon;
-          montant_centimes: number;
-          frais_centimes?: number;
-          stripe_payment_intent_id?: string | null;
-          tx_hash?: string | null;
-          statut?: StatutDon;
-          accepte_newsletter?: boolean;
-          accepte_contact_createurice?: boolean;
-          created_at?: string;
-          confirme_le?: string | null;
-        };
-        Update: Partial<Database['public']['Tables']['don']['Insert']>;
-        Relationships: [];
-      };
-
-      // ============================================================
-      // Chantier 4.3 — Marché solidaire
-      // ============================================================
-
-      produit_marche: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          mode: ModeProduitMarche;
-          prix_euros_centimes: number;
-          /** Plus petite unité T99CP, sérialisée en string (bigint-safe). */
-          prix_t99cp_unites: string;
-          categorie_slug: string | null;
-          image_url: string | null;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          remise_main_propre: boolean;
-          envoi_postal: boolean;
-          vendeureuse_id: string;
-          statut: StatutProduitMarche;
-          derniere_activite_le: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          mode: ModeProduitMarche;
-          prix_euros_centimes?: number;
-          prix_t99cp_unites?: string;
-          categorie_slug?: string | null;
-          image_url?: string | null;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          remise_main_propre?: boolean;
-          envoi_postal?: boolean;
-          vendeureuse_id: string;
-          statut?: StatutProduitMarche;
-          derniere_activite_le?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['produit_marche']['Insert']>;
-        Relationships: [];
-      };
-
-      boutique_marche: {
-        Row: {
-          id: string;
-          slug: string;
-          nom: string;
-          description: string;
-          image_url: string | null;
-          sens: SensBoutiqueMarche;
-          ouverte_du: string | null;
-          ouverte_au: string | null;
-          lieu: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          createurice_id: string;
-          statut: StatutBoutiqueMarche;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          nom: string;
-          description: string;
-          image_url?: string | null;
-          sens: SensBoutiqueMarche;
-          ouverte_du?: string | null;
-          ouverte_au?: string | null;
-          lieu?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          createurice_id: string;
-          statut?: StatutBoutiqueMarche;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['boutique_marche']['Insert']>;
-        Relationships: [];
-      };
-
-      produit_boutique: {
-        Row: {
-          id: string;
-          produit_id: string;
-          boutique_id: string;
-          rattache_le: string;
-          rattache_par: string;
-        };
-        Insert: {
-          id?: string;
-          produit_id: string;
-          boutique_id: string;
-          rattache_le?: string;
-          rattache_par: string;
-        };
-        Update: Partial<Database['public']['Tables']['produit_boutique']['Insert']>;
-        Relationships: [];
-      };
-
-      minimarche_solidaire: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url: string | null;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          commence_le: string;
-          termine_le: string;
-          monnaies_acceptees: MonnaieMarcheMinimarche[];
-          createurice_id: string;
-          statut: StatutMinimarche;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          image_url?: string | null;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          commence_le: string;
-          termine_le: string;
-          monnaies_acceptees?: MonnaieMarcheMinimarche[];
-          createurice_id: string;
-          statut?: StatutMinimarche;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['minimarche_solidaire']['Insert']>;
-        Relationships: [];
-      };
-
-      notification: {
-        Row: {
-          id: string;
-          destinataire_id: string;
-          type: string;
-          cible_table: string | null;
-          cible_id: string | null;
-          titre: string;
-          message: string | null;
-          href: string | null;
-          lue: boolean;
-          lue_le: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          destinataire_id: string;
-          type: string;
-          cible_table?: string | null;
-          cible_id?: string | null;
-          titre: string;
-          message?: string | null;
-          href?: string | null;
-          lue?: boolean;
-          lue_le?: string | null;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['notification']['Insert']>;
-        Relationships: [];
-      };
-
-      preference_notification: {
-        Row: {
-          personne_id: string;
-          cloche_active: boolean;
-          push_active: boolean;
-          mail_recap_mardi_active: boolean;
-          newsletter_vendredi_active: boolean;
-          preferences_par_type: Json;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          personne_id: string;
-          cloche_active?: boolean;
-          push_active?: boolean;
-          mail_recap_mardi_active?: boolean;
-          newsletter_vendredi_active?: boolean;
-          preferences_par_type?: Json;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['preference_notification']['Insert']>;
-        Relationships: [];
-      };
-
-      sondage: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          question: string;
-          options: string[];
-          image_url: string | null;
-          mode: ModeSondage;
-          commune_id: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          createurice_id: string;
-          statut: StatutSondage;
-          ferme_le: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          question: string;
-          options: string[];
-          image_url?: string | null;
-          mode?: ModeSondage;
-          commune_id?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          createurice_id: string;
-          statut?: StatutSondage;
-          ferme_le?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['sondage']['Insert']>;
-        Relationships: [];
-      };
-
-      reponse_sondage: {
-        Row: {
-          id: string;
-          sondage_id: string;
-          personne_id: string;
-          option_index: number;
-          code_postal: string | null;
-          tranche_age: TrancheAge | null;
-          pronom: string | null;
-          genre_declare: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          sondage_id: string;
-          personne_id: string;
-          option_index: number;
-          code_postal?: string | null;
-          tranche_age?: TrancheAge | null;
-          pronom?: string | null;
-          genre_declare?: string | null;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['reponse_sondage']['Insert']>;
-        Relationships: [];
-      };
-
-      media: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          corps: string;
-          type: TypeMedia;
-          auteurice_id: string | null;
-          provenance_externe: string | null;
-          source_url: string | null;
-          media_url: string | null;
-          vignette_url: string | null;
-          tags: string[] | null;
-          statut: StatutMedia;
-          publie_le: string | null;
-          retire_par: string | null;
-          retire_le: string | null;
-          raison_retrait: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          corps: string;
-          type: TypeMedia;
-          auteurice_id?: string | null;
-          provenance_externe?: string | null;
-          source_url?: string | null;
-          media_url?: string | null;
-          vignette_url?: string | null;
-          tags?: string[] | null;
-          statut?: StatutMedia;
-          publie_le?: string | null;
-          retire_par?: string | null;
-          retire_le?: string | null;
-          raison_retrait?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['media']['Insert']>;
-        Relationships: [];
-      };
-
-      organisation_partenaire: {
-        Row: {
-          id: string;
-          nom: string;
-          slug: string;
-          description_courte: string | null;
-          url: string;
-          categorie_slug: string | null;
-          statut: StatutOrganisationPartenaire;
-          raison_retrait: string | null;
-          retire_par: string | null;
-          retire_le: string | null;
-          ajoute_par: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          nom: string;
-          slug: string;
-          description_courte?: string | null;
-          url: string;
-          categorie_slug?: string | null;
-          statut?: StatutOrganisationPartenaire;
-          raison_retrait?: string | null;
-          retire_par?: string | null;
-          retire_le?: string | null;
-          ajoute_par: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['organisation_partenaire']['Insert']>;
-        Relationships: [];
-      };
-
-      moment_solidaire: {
-        Row: {
-          id: string;
-          slug: string;
-          titre: string;
-          description: string;
-          type: TypeMomentSolidaire;
-          sous_type: string | null;
-          parent_id: string | null;
-          lieu: string;
-          latitude: number | null;
-          longitude: number | null;
-          commence_le: string;
-          termine_le: string | null;
-          commune_id: string | null;
-          cause_locale: string | null;
-          capacite_max: number | null;
-          meta: Json;
-          createurice_id: string;
-          statut: StatutMomentSolidaire;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          slug: string;
-          titre: string;
-          description: string;
-          type: TypeMomentSolidaire;
-          sous_type?: string | null;
-          parent_id?: string | null;
-          lieu: string;
-          latitude?: number | null;
-          longitude?: number | null;
-          commence_le: string;
-          termine_le?: string | null;
-          commune_id?: string | null;
-          cause_locale?: string | null;
-          capacite_max?: number | null;
-          meta?: Json;
-          createurice_id: string;
-          statut?: StatutMomentSolidaire;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['moment_solidaire']['Insert']>;
-        Relationships: [];
-      };
-
-      participation_moment: {
-        Row: {
-          id: string;
-          moment_id: string;
-          personne_id: string | null;
-          prenom: string | null;
-          email: string | null;
-          telephone: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          moment_id: string;
-          personne_id?: string | null;
-          prenom?: string | null;
-          email?: string | null;
-          telephone?: string | null;
-          created_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['participation_moment']['Insert']>;
-        Relationships: [];
-      };
-
-      tupperware: {
-        Row: {
-          id: string;
-          moment_id: string;
-          porteureuse_prenom: string;
-          porteureuse_email: string | null;
-          porteureuse_telephone: string | null;
-          contenu: string | null;
-          emporte_le: string;
-          rendu_le: string | null;
-          statut: StatutTupperware;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          moment_id: string;
-          porteureuse_prenom: string;
-          porteureuse_email?: string | null;
-          porteureuse_telephone?: string | null;
-          contenu?: string | null;
-          emporte_le?: string;
-          rendu_le?: string | null;
-          statut?: StatutTupperware;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['tupperware']['Insert']>;
-        Relationships: [];
-      };
-
-      mandat_confederal: {
-        Row: {
-          id: string;
-          personne_id: string;
-          entite_type: EntiteConfederal;
-          entite_id: string;
-          tire_le: string;
-          tirage_seed: string | null;
-          statut: StatutMandat;
-          libere_le: string | null;
-          raison_liberation: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          personne_id: string;
-          entite_type: EntiteConfederal;
-          entite_id: string;
-          tire_le?: string;
-          tirage_seed?: string | null;
-          statut?: StatutMandat;
-          libere_le?: string | null;
-          raison_liberation?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['mandat_confederal']['Insert']>;
-        Relationships: [];
-      };
-
-      adhesion: {
-        Row: {
-          id: string;
-          personne_id: string;
-          chemin: CheminAdhesion;
-          montant_euros_centimes: number;
-          /** Plus petite unité T99CP (string bigint-safe). */
-          montant_t99cp_unites: string;
-          debute_le: string;
-          expire_le: string;
-          statut: StatutAdhesion;
-          stripe_session_id: string | null;
-          tx_hash: string | null;
-          relance_envoyee_le: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          personne_id: string;
-          chemin: CheminAdhesion;
-          montant_euros_centimes?: number;
-          montant_t99cp_unites?: string;
-          debute_le?: string;
-          expire_le?: string;
-          statut?: StatutAdhesion;
-          stripe_session_id?: string | null;
-          tx_hash?: string | null;
-          relance_envoyee_le?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['adhesion']['Insert']>;
-        Relationships: [];
-      };
-
-      notation_marche: {
-        Row: {
-          id: string;
-          produit_id: string;
-          acheteureuse_id: string;
-          vendeureuse_id: string;
-          etoiles: number;
-          commentaire: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          produit_id: string;
-          acheteureuse_id: string;
-          vendeureuse_id: string;
-          etoiles: number;
-          commentaire?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<Database['public']['Tables']['notation_marche']['Insert']>;
-        Relationships: [];
-      };
-    };
-
-    Views: {
-      petition_compteur: {
-        Row: {
-          petition_id: string;
-          slug: string;
-          titre: string;
-          objectif: number;
-          statut: StatutPetition;
-          nombre_signatures: number;
-        };
-        Relationships: [];
-      };
-      cagnotte_compteur: {
-        Row: {
-          cagnotte_id: string;
-          slug: string;
-          objectif_euros: number;
-          total_euros_centimes: number;
-          total_t99cp_unites: number;
-          nombre_dons: number;
-        };
-        Relationships: [];
-      };
-      sondage_resultats: {
-        Row: {
-          sondage_id: string;
-          option_index: number;
-          nombre_votes: number;
-        };
-        Relationships: [];
-      };
-      notation_marche_stats: {
-        Row: {
-          vendeureuse_id: string;
-          moyenne_etoiles: number;
-          nombre_notations: number;
-        };
-        Relationships: [];
-      };
-      adherent_actif: {
-        Row: {
-          personne_id: string;
-          adhesion_id: string;
-          chemin: CheminAdhesion;
-          debute_le: string;
-          expire_le: string;
-          statut: StatutAdhesion;
-        };
-        Relationships: [];
-      };
-    };
-
-    Functions: {
-      est_admin_national: {
-        Args: Record<string, never>;
-        Returns: boolean;
-      };
-      est_admin_general: {
-        Args: Record<string, never>;
-        Returns: boolean;
-      };
-      est_moderateurice: {
-        Args: { onglet_demande?: string | null };
-        Returns: boolean;
-      };
-      est_animation_commune: {
-        Args: { commune_a_verifier: string };
-        Returns: boolean;
-      };
-      est_membre_commune: {
-        Args: { commune_a_verifier: string };
-        Returns: boolean;
-      };
-      est_dpd: {
-        Args: Record<string, never>;
-        Returns: boolean;
-      };
-      nombre_signatures: {
-        Args: { petition_a_compter: string };
-        Returns: number;
-      };
-      nombre_participant_es: {
-        Args: { mobilisation_a_compter: string };
-        Returns: number;
-      };
-      compteurs_cagnotte: {
-        Args: { cagnotte_a_compter: string };
-        Returns: {
-          total_euros_centimes: number;
-          total_t99cp_unites: number;
-          nombre_dons: number;
-        }[];
-      };
-      prestations_a_crediter: {
-        Args: { seuil_minutes?: number };
-        Returns: Array<Database['public']['Tables']['prestation_sel']['Row']>;
-      };
-      adhesions_a_relancer: {
-        Args: { seuil_jours?: number };
-        Returns: Array<Database['public']['Tables']['adhesion']['Row']>;
-      };
-      nombre_communes_actives: {
-        Args: { personne_a_compter: string };
-        Returns: number;
-      };
-      candidates_pour_assemblee: {
-        Args: { entite_type_recherche: string; entite_id_recherche: string };
-        Returns: string[];
-      };
-    };
-
-    Enums: {
-      [_ in never]: never;
-    };
-
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-}
-
-// ============================================================
-// Alias pratiques (raccourcis exportés pour usage applicatif)
-// ============================================================
-
-export type Personne = Database['public']['Tables']['personne']['Row'];
-export type Commune = Database['public']['Tables']['commune']['Row'];
-export type AppartenanceCommune = Database['public']['Tables']['appartenance_commune']['Row'];
-export type Federation = Database['public']['Tables']['federation']['Row'];
-export type Confederation = Database['public']['Tables']['confederation']['Row'];
-export type GtThematique = Database['public']['Tables']['gt_thematique']['Row'];
-export type DroitAdmin = Database['public']['Tables']['droit_admin']['Row'];
-export type JournalAdmin = Database['public']['Tables']['journal_admin']['Row'];
-export type Petition = Database['public']['Tables']['petition']['Row'];
-export type SignaturePetition = Database['public']['Tables']['signature_petition']['Row'];
-export type PetitionCompteur = Database['public']['Views']['petition_compteur']['Row'];
-export type Mobilisation = Database['public']['Tables']['mobilisation']['Row'];
-export type ParticipationMobilisation =
-  Database['public']['Tables']['participation_mobilisation']['Row'];
-export type Campagne = Database['public']['Tables']['campagne']['Row'];
-export type ModuleCampagne = Database['public']['Tables']['module_campagne']['Row'];
-export type Cagnotte = Database['public']['Tables']['cagnotte']['Row'];
-export type Don = Database['public']['Tables']['don']['Row'];
-export type CagnotteCompteur = Database['public']['Views']['cagnotte_compteur']['Row'];
-export type OffreEntraide = Database['public']['Tables']['offre_entraide']['Row'];
-export type ServiceSel = Database['public']['Tables']['service_sel']['Row'];
-export type PrestationSel = Database['public']['Tables']['prestation_sel']['Row'];
-export type ProduitMarche = Database['public']['Tables']['produit_marche']['Row'];
-export type BoutiqueMarche = Database['public']['Tables']['boutique_marche']['Row'];
-export type ProduitBoutique = Database['public']['Tables']['produit_boutique']['Row'];
-export type MinimarcheSolidaire = Database['public']['Tables']['minimarche_solidaire']['Row'];
-export type NotationMarche = Database['public']['Tables']['notation_marche']['Row'];
-export type NotationMarcheStats = Database['public']['Views']['notation_marche_stats']['Row'];
-export type Adhesion = Database['public']['Tables']['adhesion']['Row'];
-export type AdherentActif = Database['public']['Views']['adherent_actif']['Row'];
-export type MandatConfederal = Database['public']['Tables']['mandat_confederal']['Row'];
-export type MomentSolidaire = Database['public']['Tables']['moment_solidaire']['Row'];
-export type ParticipationMoment = Database['public']['Tables']['participation_moment']['Row'];
-export type Tupperware = Database['public']['Tables']['tupperware']['Row'];
-export type OrganisationPartenaire = Database['public']['Tables']['organisation_partenaire']['Row'];
-export type Media = Database['public']['Tables']['media']['Row'];
-export type Sondage = Database['public']['Tables']['sondage']['Row'];
-export type ReponseSondage = Database['public']['Tables']['reponse_sondage']['Row'];
-export type SondageResultats = Database['public']['Views']['sondage_resultats']['Row'];
-export type Notification = Database['public']['Tables']['notification']['Row'];
-export type PreferenceNotification = Database['public']['Tables']['preference_notification']['Row'];
+export type Personne = Omit<RowOf<'personne'>, 'statut' | 'mode_theme'> & {
+  statut: StatutPersonne;
+  mode_theme: ModeTheme | null;
+};
+export type Commune = Omit<RowOf<'commune'>, 'statut_creation'> & {
+  statut_creation: StatutCreationCommune;
+};
+export type AppartenanceCommune = RowOf<'appartenance_commune'>;
+export type Federation = Omit<RowOf<'federation'>, 'type'> & {
+  type: TypeFederation;
+};
+export type Confederation = RowOf<'confederation'>;
+export type GtThematique = RowOf<'gt_thematique'>;
+export type DroitAdmin = Omit<RowOf<'droit_admin'>, 'niveau'> & {
+  niveau: NiveauDroitAdmin;
+};
+export type JournalAdmin = RowOf<'journal_admin'>;
+export type Petition = Omit<RowOf<'petition'>, 'statut'> & {
+  statut: StatutPetition;
+};
+export type SignaturePetition = RowOf<'signature_petition'>;
+export type PetitionCompteur = ViewOf<'petition_compteur'>;
+export type Mobilisation = Omit<RowOf<'mobilisation'>, 'statut'> & {
+  statut: StatutMobilisation;
+};
+export type ParticipationMobilisation = RowOf<'participation_mobilisation'>;
+export type Campagne = Omit<RowOf<'campagne'>, 'statut'> & {
+  statut: StatutCampagne;
+};
+export type ModuleCampagne = Omit<RowOf<'module_campagne'>, 'type_module'> & {
+  type_module: TypeModuleCampagne;
+};
+export type Cagnotte = Omit<RowOf<'cagnotte'>, 'type' | 'statut'> & {
+  type: TypeCagnotte;
+  statut: StatutCagnotte;
+};
+export type Don = Omit<RowOf<'don'>, 'monnaie' | 'statut'> & {
+  monnaie: MonnaieDon;
+  statut: StatutDon;
+};
+export type CagnotteCompteur = ViewOf<'cagnotte_compteur'>;
+export type OffreEntraide = Omit<RowOf<'offre_entraide'>, 'type' | 'sens' | 'statut'> & {
+  type: TypeOffreEntraide;
+  sens: SensOffreEntraide;
+  statut: StatutOffreEntraide;
+};
+export type ServiceSel = Omit<RowOf<'service_sel'>, 'categorie' | 'sens' | 'statut'> & {
+  categorie: CategorieServiceSel;
+  sens: SensServiceSel;
+  statut: StatutServiceSel;
+};
+export type PrestationSel = Omit<RowOf<'prestation_sel'>, 'statut'> & {
+  statut: StatutPrestationSel;
+};
+export type ProduitMarche = Omit<RowOf<'produit_marche'>, 'mode' | 'statut'> & {
+  mode: ModeProduitMarche;
+  statut: StatutProduitMarche;
+};
+export type BoutiqueMarche = Omit<RowOf<'boutique_marche'>, 'sens' | 'statut'> & {
+  sens: SensBoutiqueMarche;
+  statut: StatutBoutiqueMarche;
+};
+export type ProduitBoutique = RowOf<'produit_boutique'>;
+export type MinimarcheSolidaire = Omit<
+  RowOf<'minimarche_solidaire'>,
+  'statut' | 'monnaies_acceptees'
+> & {
+  statut: StatutMinimarche;
+  monnaies_acceptees: MonnaieMarcheMinimarche[];
+};
+export type NotationMarche = RowOf<'notation_marche'>;
+export type NotationMarcheStats = ViewOf<'notation_marche_stats'>;
+export type Adhesion = Omit<RowOf<'adhesion'>, 'chemin' | 'statut'> & {
+  chemin: CheminAdhesion;
+  statut: StatutAdhesion;
+};
+export type AdherentActif = ViewOf<'adherent_actif'>;
+export type MandatConfederal = Omit<RowOf<'mandat_confederal'>, 'entite_type' | 'statut'> & {
+  entite_type: EntiteConfederal;
+  statut: StatutMandat;
+};
+export type MomentSolidaire = Omit<RowOf<'moment_solidaire'>, 'type' | 'sous_type' | 'statut'> & {
+  type: TypeMomentSolidaire;
+  sous_type: SousTypeMomentPaP | null;
+  statut: StatutMomentSolidaire;
+};
+export type ParticipationMoment = RowOf<'participation_moment'>;
+export type Tupperware = Omit<RowOf<'tupperware'>, 'statut'> & {
+  statut: StatutTupperware;
+};
+export type OrganisationPartenaire = Omit<RowOf<'organisation_partenaire'>, 'statut'> & {
+  statut: StatutOrganisationPartenaire;
+};
+export type Media = Omit<RowOf<'media'>, 'type' | 'statut'> & {
+  type: TypeMedia;
+  statut: StatutMedia;
+};
+export type Sondage = Omit<RowOf<'sondage'>, 'mode' | 'statut'> & {
+  mode: ModeSondage;
+  statut: StatutSondage;
+};
+export type ReponseSondage = Omit<RowOf<'reponse_sondage'>, 'tranche_age'> & {
+  tranche_age: TrancheAge | null;
+};
+export type SondageResultats = ViewOf<'sondage_resultats'>;
+export type Notification = RowOf<'notification'>;
+export type PreferenceNotification = RowOf<'preference_notification'>;

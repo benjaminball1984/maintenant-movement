@@ -43,7 +43,7 @@ export async function getSession(): Promise<ContexteSession | null> {
   return {
     userId: user.id,
     email: user.email ?? '',
-    personne: personne ?? null,
+    personne: (personne ?? null) as Personne | null,
   };
 }
 
