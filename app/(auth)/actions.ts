@@ -1,7 +1,7 @@
 'use server';
 
 import { SITE } from '@/config/site';
-import { getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesConnexionMdp,
@@ -82,7 +82,19 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
   }
 
   // Création de la ligne `personne` correspondante (cf. ADR-005).
-  const { error: insertError } = await supabase.from('personne').insert({
+  //
+  // On utilise ici le client `admin` (service_role) et non le client
+  // serveur cookie-bound. Raison : juste après `signUp`, l'utilisateur·ice
+  // n'a pas encore de session active (la confirmation d'email n'a pas eu
+  // lieu), donc `auth.uid()` vaut `null` côté policies RLS. La policy
+  // `personne_insert_self` (`auth.uid() = id`) refuserait alors l'INSERT
+  // et laisserait un `auth.users` orphelin sans ligne `personne`.
+  //
+  // Usage admin légitime : on n'insère qu'avec l'`id` retourné par
+  // `signUp.user.id` (donc strictement le compte qui vient d'être créé),
+  // pas de risque d'usurpation.
+  const supabaseAdmin = getSupabaseAdmin();
+  const { error: insertError } = await supabaseAdmin.from('personne').insert({
     id: signUp.user.id,
     email: donnees.email,
     nom: donnees.nom,
