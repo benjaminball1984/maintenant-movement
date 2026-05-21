@@ -87,7 +87,25 @@ Tous les formulaires publics passent par `<CaptchaTurnstile>`. Le token est vali
 
 ### 2.3 CSP (Content Security Policy)
 
-Headers dans `next.config.ts` : bloque `<script>` inline non autorisé, autorise uniquement les origines connues (Supabase, Stripe, OpenStreetMap, AzuraCast).
+Headers définis dans `next.config.mjs > headers()` (posés au chantier 12.6, polish post-revue). Directives :
+
+- `default-src 'self'` (tout par défaut limité à l'origine).
+- `script-src` : `'self'`, `'unsafe-inline'` (Next.js injecte des scripts inline pour l'hydratation), `challenges.cloudflare.com` (Turnstile), `js.stripe.com` (Stripe.js).
+- `style-src` : `'self'`, `'unsafe-inline'` (Tailwind injecte des styles critiques inline).
+- `img-src` : `'self'`, `data:`, `blob:`, `*.tile.openstreetmap.org` (MapLibre tuiles), `*.supabase.co` (médias).
+- `connect-src` : `'self'`, `*.supabase.co` + `wss://*.supabase.co`, `*.livekit.cloud` + WSS, `api.stripe.com`, `challenges.cloudflare.com`.
+- `frame-src` : Turnstile + Stripe (paiement et hooks).
+- `font-src` : `'self'`, `data:`.
+- `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'` (anti-clickjacking).
+
+Headers HTTP complémentaires posés en même temps :
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(self), geolocation=(self), payment=(self)`
+
+À tester en preview Cloudflare Pages : si une ressource est bloquée, ajuster la directive concernée (DevTools → Console → erreurs CSP).
 
 ### 2.4 Pas de fuite de clés
 
@@ -143,7 +161,7 @@ Document séparé `docs/plan-incident.md` à rédiger par Lilou/Ben + la trésor
 | Validations Zod systématiques | ✓ | 245 tests verts |
 | Turnstile sur tous les formulaires publics | ✓ | Mock dev, à brancher prod |
 | Auth 4 portes + email vérifié + 2FA admin | ✓ | Chantier 1.2 |
-| CSP stricte | À renforcer | À tester en preview Cloudflare |
+| CSP stricte | Posée (12.6) | À tester en preview Cloudflare |
 | Mocks par défaut | ✓ | - |
 | Backups quotidiens | ✗ | À programmer côté Supabase |
 | Pentest | ✗ | À programmer post-lancement |
