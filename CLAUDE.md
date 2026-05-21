@@ -413,6 +413,8 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 - Coordonnées de l'association (adresse, RNA, email contact, email DPD) pour finaliser la politique de confidentialité.
 - Choix collégial du·de la DPD bénévole.
 
+**Index unique des contenus en attente** : `docs/CONTENUS-A-ARBITRER.md`. C'est la liste à parcourir avec Lilou/Ben pour passer du squelette technique à une publication réelle.
+
 ---
 
 ## 12. Liens vers les specs
