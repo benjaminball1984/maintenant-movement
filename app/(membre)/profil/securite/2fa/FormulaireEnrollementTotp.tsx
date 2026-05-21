@@ -87,7 +87,11 @@ export function FormulaireEnrollementTotp() {
           // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG contrôlé venant du serveur Supabase.
           dangerouslySetInnerHTML={{ __html: etat.qr }}
           aria-label="QR code TOTP"
-          className="bg-white p-2"
+          // Fond blanc volontaire (bg-white) en mode clair comme en mode
+          // sombre : le QR a besoin d'un contraste maximal sur clair pour
+          // rester scannable par les apps d'authentification. La bordure
+          // rounded-sm le détoure du conteneur surface.
+          className="rounded-sm bg-white p-2"
         />
         <details className="w-full">
           <summary className="cursor-pointer text-sm text-text-3">

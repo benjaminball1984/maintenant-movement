@@ -28,7 +28,7 @@ export function CarteWrapper({ points }: CarteWrapperProps) {
 function Squelette() {
   return (
     <div
-      className="grid h-[70vh] w-full place-items-center rounded-lg border border-border bg-surface-2 text-text-3"
+      className="grid h-[60vh] min-h-[400px] w-full place-items-center rounded-lg border border-border bg-surface-2 text-text-3 sm:h-[70vh]"
       aria-busy="true"
     >
       Chargement de la carte...

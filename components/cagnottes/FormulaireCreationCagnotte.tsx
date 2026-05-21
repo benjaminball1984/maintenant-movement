@@ -145,7 +145,7 @@ export function FormulaireCreationCagnotte({
           min={0}
           max={1_000_000}
           step={100}
-          className="max-w-[220px]"
+          className="w-full sm:max-w-[220px]"
           {...register('objectif_euros', { valueAsNumber: true })}
         />
         <p className="mt-1 text-xs text-text-3">

@@ -19,6 +19,13 @@ const ZOOM_INITIAL = 5;
  *
  * On utilise un cercle SVG inline car les marqueurs HTML par défaut
  * MapLibre sont une goutte d'eau bleue figée.
+ *
+ * Hexa en dur volontairement : MapLibre dessine ces cercles à l'exécution
+ * dans des SVG isolés des tokens CSS, donc on ne peut pas y injecter une
+ * variable Tailwind comme `bg-brand`. Si la palette dark mode change, il
+ * faudra penser à dupliquer ce mapping derrière un `prefers-color-scheme`
+ * (non nécessaire pour MVP : ces marqueurs sur fond OSM gardent un
+ * contraste correct dans les deux thèmes).
  */
 const COULEUR_PAR_TYPE: Record<TypePoint, string> = {
   mobilisation: '#e85d75',
@@ -193,7 +200,7 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
 
       <div
         ref={conteneurRef}
-        className="h-[70vh] w-full overflow-hidden rounded-lg border border-border"
+        className="h-[60vh] min-h-[400px] w-full overflow-hidden rounded-lg border border-border sm:h-[70vh]"
         aria-label="Carte interactive des actions Maintenant!"
         role="region"
       />
@@ -204,18 +211,23 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
 /**
  * Rendu HTML simple du contenu de popup. Pas de React ici : MapLibre
  * accepte une chaîne HTML. On échappe ce qui vient de l'utilisateur.
+ *
+ * Les styles inline consomment les CSS variables du site (`--text-1`,
+ * `--text-2`, `--text-3`, `--brand`, `--surface`) pour rester lisibles
+ * en mode clair comme en mode sombre, sans dépendre de Tailwind (le
+ * popup est rendu dans un conteneur MapLibre hors du flux principal).
  */
 function renduPopup(point: PointCarte): string {
   const titre = echapperHtml(point.titre);
   const sousTitre = point.sous_titre !== null ? echapperHtml(point.sous_titre) : '';
   return `
-    <div style="font-family: var(--font-body, system-ui); min-width: 200px;">
-      <p style="margin: 0; font-size: 0.7rem; text-transform: uppercase; color: #888;">
+    <div style="font-family: var(--font-body, system-ui); min-width: 200px; background: var(--surface); color: var(--text-1);">
+      <p style="margin: 0; font-size: 0.7rem; text-transform: uppercase; color: var(--text-3);">
         ${echapperHtml(LIBELLE_PAR_TYPE[point.type])}
       </p>
-      <p style="margin: 0.25rem 0; font-weight: 700; color: #111;">${titre}</p>
-      ${sousTitre !== '' ? `<p style="margin: 0; font-size: 0.85rem; color: #555;">${sousTitre}</p>` : ''}
-      <a href="${point.href}" style="display: inline-block; margin-top: 0.5rem; color: #9333ea; text-decoration: underline;">
+      <p style="margin: 0.25rem 0; font-weight: 700; color: var(--text-1);">${titre}</p>
+      ${sousTitre !== '' ? `<p style="margin: 0; font-size: 0.85rem; color: var(--text-2);">${sousTitre}</p>` : ''}
+      <a href="${point.href}" style="display: inline-block; margin-top: 0.5rem; color: var(--brand); text-decoration: underline;">
         Voir la fiche →
       </a>
     </div>

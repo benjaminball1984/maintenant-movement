@@ -148,7 +148,7 @@ export function FormulaireCreationService({ creerServiceSel }: FormulaireCreatio
           min={15}
           max={480}
           step={15}
-          className="max-w-[180px]"
+          className="w-full sm:max-w-[180px]"
           {...register('duree_minutes_estimee', { valueAsNumber: true })}
         />
         <p className="mt-1 text-xs text-text-3">

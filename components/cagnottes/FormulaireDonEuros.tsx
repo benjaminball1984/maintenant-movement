@@ -118,7 +118,7 @@ export function FormulaireDonEuros({ cagnotteId, faireDonEuros }: FormulaireDonE
             step={1}
             value={montantEuros}
             onChange={gererMontantChange}
-            className="max-w-[140px]"
+            className="w-full sm:max-w-[140px]"
           />
         </div>
         {errors.montant_centimes !== undefined ? (
@@ -162,7 +162,7 @@ export function FormulaireDonEuros({ cagnotteId, faireDonEuros }: FormulaireDonE
           inputMode="numeric"
           maxLength={5}
           autoComplete="postal-code"
-          className="max-w-[140px]"
+          className="w-full sm:max-w-[140px]"
           {...register('code_postal')}
         />
         {errors.code_postal !== undefined ? (
