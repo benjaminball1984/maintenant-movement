@@ -7,7 +7,13 @@
  *     à la règle "pas de coquilles vides". »
  *
  * Usage :
- *   npx tsx scripts/import-communes.ts <fichier.csv>
+ *   npx tsx scripts/import-communes.ts <fichier.csv> --dry-run
+ *   npx tsx scripts/import-communes.ts <fichier.csv> --confirm
+ *
+ * Mode `--dry-run` : parse le CSV, affiche ce qui serait écrit, n'écrit
+ * rien en base. À utiliser systématiquement avant `--confirm`. Sans flag,
+ * le script refuse de démarrer (garde-fou contre les écrasements
+ * accidentels en prod).
  *
  * Format attendu du CSV (en-tête obligatoire) :
  *   slug,nom,code_insee,code_postal_principal,departement,region,latitude,longitude
@@ -92,13 +98,39 @@ function parserCsv(contenu: string): LigneCSV[] {
   });
 }
 
-async function main(): Promise<void> {
-  const arg = process.argv[2];
-  if (arg === undefined || arg === '') {
-    console.error('Usage : npx tsx scripts/import-communes.ts <fichier.csv>');
+/**
+ * Lit `process.argv` et retourne le mode demandé.
+ * Refuse de démarrer si ni `--dry-run` ni `--confirm` n'est fourni :
+ * c'est le garde-fou qui empêche un import accidentel en prod.
+ */
+function lireMode(): { fichier: string; estDryRun: boolean } {
+  const args = process.argv.slice(2);
+  const fichier = args.find((a) => !a.startsWith('--'));
+  const estDryRun = args.includes('--dry-run');
+  const estConfirme = args.includes('--confirm');
+
+  if (fichier === undefined || fichier === '') {
+    console.error(
+      'Usage : npx tsx scripts/import-communes.ts <fichier.csv> [--dry-run | --confirm]',
+    );
     process.exit(1);
   }
-  const chemin = resolve(arg);
+  if (!estDryRun && !estConfirme) {
+    console.error(
+      'Refus de démarrer : précisez --dry-run (test à blanc) ou --confirm (import effectif).',
+    );
+    process.exit(1);
+  }
+  if (estDryRun && estConfirme) {
+    console.error('--dry-run et --confirm sont mutuellement exclusifs.');
+    process.exit(1);
+  }
+  return { fichier, estDryRun };
+}
+
+async function main(): Promise<void> {
+  const { fichier, estDryRun } = lireMode();
+  const chemin = resolve(fichier);
   const contenu = readFileSync(chemin, 'utf-8');
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -111,7 +143,19 @@ async function main(): Promise<void> {
   const supabase = createClient(url, key);
   const lignes = parserCsv(contenu);
   // biome-ignore lint/suspicious/noConsoleLog: trace explicite de l'import CLI.
-  console.log(`${lignes.length} communes à importer.`);
+  console.log(`${lignes.length} communes ${estDryRun ? 'seraient' : 'à'} importer.`);
+
+  if (estDryRun) {
+    // biome-ignore lint/suspicious/noConsoleLog: récap dry-run.
+    console.log('[dry-run] aperçu des 3 premières lignes :');
+    for (const ligne of lignes.slice(0, 3)) {
+      // biome-ignore lint/suspicious/noConsoleLog: récap dry-run.
+      console.log(JSON.stringify(ligne));
+    }
+    // biome-ignore lint/suspicious/noConsoleLog: récap dry-run.
+    console.log('[dry-run] aucune écriture en base. Relancer avec --confirm pour appliquer.');
+    return;
+  }
 
   let succes = 0;
   let echecs = 0;

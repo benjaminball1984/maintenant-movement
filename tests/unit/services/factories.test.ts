@@ -1,6 +1,6 @@
 import { getEmailService, resetEmailService } from '@/lib/email';
 import { getLiveKitService, resetLiveKitService } from '@/lib/livekit';
-import { getPaymentService, resetPaymentService } from '@/lib/stripe';
+import { getPaymentService, resetPaymentService } from '@/lib/payments';
 import { getT99CPService, resetT99CPService } from '@/lib/t99cp';
 import { getTurnstileService, resetTurnstileService } from '@/lib/turnstile';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';

@@ -10,7 +10,13 @@
  *   - 2 articles à reprendre
  *
  * Usage :
- *   npx tsx scripts/migrer-base44.ts <dossier_csv>
+ *   npx tsx scripts/migrer-base44.ts <dossier_csv> --dry-run
+ *   npx tsx scripts/migrer-base44.ts <dossier_csv> --confirm
+ *
+ * Mode `--dry-run` (recommandé en premier) : lit les CSV, parse, affiche
+ * les comptages, n'écrit RIEN en base. Mode `--confirm` : effectue les
+ * upserts de pétitions. Sans flag, le script refuse de démarrer pour
+ * éviter tout écrasement accidentel de la prod.
  *
  * Le dossier doit contenir 4 CSV (extraits depuis l'admin Base44) :
  *   - membres.csv          (id, email, nom, prenom, date_adhesion, ...)
@@ -90,12 +96,36 @@ function slugifier(s: string): string {
     .slice(0, 80);
 }
 
-async function main(): Promise<void> {
-  const dossier = process.argv[2];
+/**
+ * Lit `process.argv` et retourne le mode demandé. Refuse de démarrer si
+ * ni `--dry-run` ni `--confirm` n'est fourni : c'est le garde-fou qui
+ * empêche une migration accidentelle en prod.
+ */
+function lireMode(): { dossier: string; estDryRun: boolean } {
+  const args = process.argv.slice(2);
+  const dossier = args.find((a) => !a.startsWith('--'));
+  const estDryRun = args.includes('--dry-run');
+  const estConfirme = args.includes('--confirm');
+
   if (dossier === undefined || dossier === '') {
-    console.error('Usage : npx tsx scripts/migrer-base44.ts <dossier_csv>');
+    console.error('Usage : npx tsx scripts/migrer-base44.ts <dossier_csv> [--dry-run | --confirm]');
     process.exit(1);
   }
+  if (!estDryRun && !estConfirme) {
+    console.error(
+      'Refus de démarrer : précisez --dry-run (rapport sans écriture) ou --confirm (migration effective).',
+    );
+    process.exit(1);
+  }
+  if (estDryRun && estConfirme) {
+    console.error('--dry-run et --confirm sont mutuellement exclusifs.');
+    process.exit(1);
+  }
+  return { dossier, estDryRun };
+}
+
+async function main(): Promise<void> {
+  const { dossier, estDryRun } = lireMode();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (url === undefined || url === '' || key === undefined || key === '') {
@@ -178,6 +208,12 @@ async function main(): Promise<void> {
   let nbPetitions = 0;
   for (const p of petitions) {
     const slug = slugifier(p.titre);
+    if (estDryRun) {
+      // biome-ignore lint/suspicious/noConsoleLog: aperçu dry-run.
+      console.log(`[dry-run] upsert pétition ${slug} (titre: ${p.titre.slice(0, 60)})`);
+      nbPetitions += 1;
+      continue;
+    }
     const { error } = await supabase.from('petition').upsert(
       {
         slug,
