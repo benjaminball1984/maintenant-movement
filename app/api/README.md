@@ -2,9 +2,10 @@
 
 Route handlers Next.js (webhooks et endpoints serveur).
 
-À venir au fil des chantiers :
-- `stripe/webhook/route.ts` (chantier 3.3, cagnottes)
-- `brevo/webhook/route.ts` (chantier 1.2, validation email)
-- `livekit/token/route.ts` (chantier 7.6, salles Décider)
+Au moment de la livraison du squelette technique, ce dossier ne contient pas encore de route. Les mutations passent par des **Server Actions** (cf. `app/.../actions.ts`). Les webhooks externes seront branchés au moment où les services réels seront connectés :
 
-Note : on privilégie les **Server Actions** pour les mutations simples. Ce dossier reste réservé aux webhooks et aux endpoints publics typés.
+- `stripe/webhook/route.ts` : à câbler au go-live Stripe (sessions Checkout, payouts Connect).
+- `brevo/webhook/route.ts` : événements newsletter (désabonnement, bounce).
+- `livekit/token/route.ts` : génération de jetons pour les salles Décider.
+
+Tant qu'aucun webhook n'est branché, ce dossier reste vide et c'est intentionnel. Voir `docs/LANCEMENT.md` pour la procédure de câblage.

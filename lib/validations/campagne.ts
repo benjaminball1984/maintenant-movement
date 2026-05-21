@@ -14,6 +14,18 @@ import { tokenTurnstileSchema } from './auth';
 // Création d'une campagne (auth requise + modération a priori)
 // ============================================================
 
+/**
+ * Schéma de création d'une campagne (auth requise).
+ *
+ * Champs :
+ * - `titre` : 5-200 caractères, devient base du slug public.
+ * - `texte` : 100-5000 caractères, contenu narratif de la campagne.
+ * - `image_url` : URL absolue optionnelle d'une image de bandeau.
+ * - `token_turnstile` : preuve anti-bot Cloudflare.
+ *
+ * Flux : statut initial `en_attente`, modération a priori, publication
+ * uniquement après décision admin (cf. schéma `modererCampagneSchema`).
+ */
 export const creerCampagneSchema = z
   .object({
     titre: z
@@ -37,6 +49,15 @@ export type DonneesCreerCampagne = z.infer<typeof creerCampagneSchema>;
 // Modération a priori (publier | rejeter)
 // ============================================================
 
+/**
+ * Schéma de modération a priori d'une campagne (réservé admin).
+ *
+ * Champs :
+ * - `campagne_id` : UUID de la campagne à statuer.
+ * - `decision` : `publiee` (visible publiquement) ou `rejetee` (archivée).
+ * - `raison_rejet` : exigée si `decision === 'rejetee'`, minimum 10
+ *   caractères pour journalisation en `journal_admin`.
+ */
 export const modererCampagneSchema = z
   .object({
     campagne_id: z.string().uuid(),
@@ -101,6 +122,11 @@ export type DonneesAttacherModule = z.infer<typeof attacherModuleSchema>;
 // Détachement d'un module
 // ============================================================
 
+/**
+ * Schéma de détachement d'un module d'une campagne. Action réservée à
+ * la créatrice ou à un·e admin (l'autorisation est vérifiée côté Server
+ * Action, pas dans le schéma).
+ */
 export const detacherModuleSchema = z
   .object({
     module_id: z.string().uuid(),

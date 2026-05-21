@@ -8,6 +8,20 @@ import { z } from 'zod';
  * (présomption d'utilité), pas de soumission par les usager·ères.
  */
 
+/**
+ * Schéma de validation pour l'ajout d'une organisation partenaire à la
+ * liste publique « D'autres moyens d'agir ».
+ *
+ * Champs :
+ * - `nom` : nom officiel de l'organisation (3-200 caractères).
+ * - `description_courte` : 0-500 caractères, présentation neutre.
+ * - `url` : URL absolue valide vers le site officiel.
+ * - `categorie_slug` : slug d'une catégorie existante (slug minuscule,
+ *   chiffres et tirets).
+ *
+ * Action réservée admin / modérateurice (présomption d'utilité, pas
+ * d'endossement politique).
+ */
 export const ajouterOrganisationPartenaireSchema = z
   .object({
     nom: z
@@ -36,6 +50,11 @@ export type DonneesAjouterOrganisationPartenaire = z.infer<
   typeof ajouterOrganisationPartenaireSchema
 >;
 
+/**
+ * Schéma de validation pour le retrait d'une organisation partenaire de
+ * la liste publique. Une raison explicite (>= 10 caractères) est exigée
+ * pour pouvoir tracer la décision en `journal_admin`.
+ */
 export const retirerOrganisationSchema = z
   .object({
     organisation_id: z.string().uuid(),
