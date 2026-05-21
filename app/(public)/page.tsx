@@ -4,7 +4,7 @@ import { UneArticle } from '@/components/home/UneArticle';
 import { UneCagnotte } from '@/components/home/UneCagnotte';
 import { UneMobilisation } from '@/components/home/UneMobilisation';
 import { UnePetition } from '@/components/home/UnePetition';
-import { getCompteursHome } from '@/lib/queries/home';
+import { getCompteursHome } from '@/lib/home/requetes';
 
 /**
  * Page d'accueil définitive (chantier 2.1).

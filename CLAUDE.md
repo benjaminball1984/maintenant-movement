@@ -384,10 +384,10 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-20
-**Dernier chantier terminé** : 2.1 — Page d'accueil définitive (voir `docs/manifests/phase-2-chantier-2.1.md`)
-**Chantier en cours** : 2.2 — Section Comprendre + pages utilitaires (remplir les 8 placeholders éditoriaux posés en 2.1)
-**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/manifests/phase-2-chantier-2.1.md` sous « Contenus à arbitrer ». Préalable Supabase technique : `supabase db push` les migrations 1.1 + configurer Brevo SMTP côté projet pour activer les flux end-to-end.
+**Dernière mise à jour** : 2026-05-21
+**Dernier chantier terminé** : 12 — Polish global post-revue (chantiers 12.1 à 12.6) : nettoyage des doublons d'architecture, mise au pas du design system et du dark mode, tests responsive cross-format, centralisation des contenus à arbitrer, JSDoc des schémas Zod, CSP réelle et durcissement headers HTTP (voir `docs/manifests/phase-12-polish-revue-globale.md`).
+**État du projet** : squelette technique complet (33 chantiers livrés, 4.3 à 11.3 puis 12.1-12.6). Chantiers 7.3/7.5/7.6 livrés en stubs fonctionnels honnêtes (à enrichir post-MVP). Chantier 2.2 (8 pages éditoriales) bloqué tant que Lilou/Ben ne fournit pas les textes ; les pages affichent une bannière neutre en prod. Lighthouse mobile et audit WCAG complet à faire après un déploiement de staging Cloudflare Pages. **Prêt pour la review de code et le lancement opérationnel** selon `docs/LANCEMENT.md` et `docs/CONTENUS-A-ARBITRER.md`.
+**Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/CONTENUS-A-ARBITRER.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-033 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures. Préalable Marché prod : poser un cron qui expire les annonces inactives 3 mois (chantier 11.3). Préalable Adhésion prod : poser un cron quotidien qui appelle `envoyerRelancesAdhesion(14)` (chantier 11.3). Préalable Communes : Lilou/Ben fournit le CSV des 2100-2300 communes puis lancer `npx tsx scripts/import-communes.ts <fichier.csv> --dry-run` puis `--confirm`. Préalable Moments prod : poser un cron horaire pour la transition annonce→en_cours→termine (chantier 11.3). Préalable Playwright multi-viewports : `npx playwright install` pour télécharger Firefox + WebKit en local.
 
 ### Branche principale
 
@@ -412,6 +412,8 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 - Contenus éditoriaux pour les pages : Doctrine, Commune libre, Assemblée Confédérale, Monnaie 99-coin, FAQ, Ressources, À propos. À arbitrer au fur et à mesure via les placeholders.
 - Coordonnées de l'association (adresse, RNA, email contact, email DPD) pour finaliser la politique de confidentialité.
 - Choix collégial du·de la DPD bénévole.
+
+**Index unique des contenus en attente** : `docs/CONTENUS-A-ARBITRER.md`. C'est la liste à parcourir avec Lilou/Ben pour passer du squelette technique à une publication réelle.
 
 ---
 
