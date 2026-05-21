@@ -17,9 +17,23 @@
  * Stripe.js qui sont chargés depuis leurs origines officielles.
  */
 
+/**
+ * En developpement, Next.js utilise `eval()` pour le hot-reload
+ * (react-refresh-utils). On relache donc `script-src` avec
+ * `'unsafe-eval'` uniquement en dev. En production, cette directive
+ * reste interdite.
+ *
+ * On ajoute aussi `'unsafe-eval'` en dev pour Webpack HMR.
+ */
+const enDeveloppement = process.env.NODE_ENV !== 'production';
+
+const scriptSrc = enDeveloppement
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' challenges.cloudflare.com js.stripe.com"
+  : "script-src 'self' 'unsafe-inline' challenges.cloudflare.com js.stripe.com";
+
 const directivesCsp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' challenges.cloudflare.com js.stripe.com",
+  scriptSrc,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.supabase.co",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.livekit.cloud wss://*.livekit.cloud https://api.stripe.com https://challenges.cloudflare.com",

@@ -5,12 +5,16 @@ import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesConnexionMdp,
+  type DonneesDemandeReset,
   type DonneesInscription,
   type DonneesMagicLink,
+  type DonneesNouveauMotDePasse,
   type ProviderOAuth,
   connexionMdpSchema,
+  demandeResetSchema,
   inscriptionSchema,
   magicLinkSchema,
+  nouveauMotDePasseSchema,
 } from '@/lib/validations/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -29,7 +33,9 @@ import { redirect } from 'next/navigation';
  * déjà pris, etc.) sont retournées dans `{ ok: false, message }`.
  */
 
-export type ResultatAction = { ok: true; redirectVers?: string } | { ok: false; message: string };
+export type ResultatAction =
+  | { ok: true; redirectVers?: string }
+  | { ok: false; message: string; dejaInscrit?: boolean };
 
 /**
  * Wrapper de vérification Turnstile. Centralisé pour éviter la
@@ -74,12 +80,21 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
   if (signUpError !== null) {
     return { ok: false, message: traduireErreurAuth(signUpError.message) };
   }
-  if (signUp.user === null) {
+
+  // Anti-enumeration Supabase : si l'email est deja en base, signUp
+  // renvoie un user avec `identities: []` (ou `user === null` sur les
+  // anciennes versions du SDK). Pas d'email envoye dans ce cas. On
+  // detecte explicitement pour proposer le flux de reinitialisation
+  // plutot que laisser la personne se demander pourquoi rien n'arrive.
+  if (signUp.user === null || (signUp.user.identities?.length ?? 0) === 0) {
     return {
       ok: false,
-      message: 'Compte créé, vérifie ton mail pour le confirmer.',
+      dejaInscrit: true,
+      message:
+        "Un compte existe déjà avec cet email. Tu peux te connecter, ou réinitialiser ton mot de passe si tu l'as oublié.",
     };
   }
+  const utilisateurAuth = signUp.user;
 
   // Création de la ligne `personne` correspondante (cf. ADR-005).
   //
@@ -95,7 +110,7 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
   // pas de risque d'usurpation.
   const supabaseAdmin = getSupabaseAdmin();
   const { error: insertError } = await supabaseAdmin.from('personne').insert({
-    id: signUp.user.id,
+    id: utilisateurAuth.id,
     email: donnees.email,
     nom: donnees.nom,
     prenom: donnees.prenom,
@@ -212,6 +227,79 @@ export async function ouvrirOAuth(provider: ProviderOAuth): Promise<ResultatActi
   }
 
   return { ok: true, redirectVers: data.url };
+}
+
+// ============================================================
+// Reset du mot de passe (demande + nouveau mot de passe)
+// ============================================================
+
+/**
+ * Etape 1 : envoie un mail avec un lien de reinitialisation.
+ *
+ * Le lien clique amene sur `/auth/callback?next=/reinitialiser-mot-de-passe`,
+ * ce qui ouvre une session temporaire puis renvoie sur le formulaire de
+ * nouveau mot de passe.
+ *
+ * Pour l'anti-enumeration : on retourne `ok: true` quel que soit le
+ * resultat de Supabase (succes ou email inexistant), pour ne pas laisser
+ * deduire si un email est enregistre ou non. C'est aussi le comportement
+ * par defaut de Supabase qui ne distingue pas ces deux cas dans l'API.
+ */
+export async function demanderResetMotDePasse(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = demandeResetSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Donnees invalides.' };
+  }
+  const donnees: DonneesDemandeReset = parse.data;
+
+  const erreurTurnstile = await verifierTurnstile(donnees.token_turnstile);
+  if (erreurTurnstile !== null) {
+    return erreurTurnstile;
+  }
+
+  const supabase = await getSupabaseServer();
+  await supabase.auth.resetPasswordForEmail(donnees.email, {
+    redirectTo: `${SITE.urlProd}/auth/callback?next=/reinitialiser-mot-de-passe`,
+  });
+
+  // On ne propage pas l'erreur eventuelle (anti-enumeration).
+  return { ok: true, redirectVers: '/verifier-email' };
+}
+
+/**
+ * Etape 2 : applique le nouveau mot de passe.
+ *
+ * Pre-requis : la personne arrive ici apres avoir clique sur le lien
+ * email, donc une session temporaire est posee par le callback. Si la
+ * session est absente, on rejette : c'est probablement quelqu'un qui a
+ * navigue directement sur la page.
+ */
+export async function definirNouveauMotDePasse(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = nouveauMotDePasseSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Donnees invalides.' };
+  }
+  const donnees: DonneesNouveauMotDePasse = parse.data;
+
+  const supabase = await getSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user === null) {
+    return {
+      ok: false,
+      message:
+        'Lien expire ou invalide. Refais une demande de reinitialisation depuis la page Mot de passe oublie.',
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: donnees.mot_de_passe });
+  if (error !== null) {
+    return { ok: false, message: traduireErreurAuth(error.message) };
+  }
+
+  revalidatePath('/', 'layout');
+  return { ok: true, redirectVers: '/profil/dashboard' };
 }
 
 // ============================================================

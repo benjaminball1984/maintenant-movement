@@ -46,6 +46,14 @@ export default async function PageConnexion({
           Mot de passe
         </Heading>
         <FormulaireConnexionMdp />
+        <p className="mt-3 text-sm">
+          <Link
+            href="/mot-de-passe-oublie"
+            className="text-brand underline-offset-4 hover:underline"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </p>
       </Card>
 
       <Card variant="ombre">

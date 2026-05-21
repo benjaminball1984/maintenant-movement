@@ -1,11 +1,13 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import { ChampMotDePasse } from '@/components/formulaires/ChampMotDePasse';
 import { Alert, Button, Input, Label } from '@/components/ui';
 import { type DonneesInscription, inscriptionSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { inscrire } from '../actions';
 
@@ -20,7 +22,19 @@ import { inscrire } from '../actions';
 export function FormulaireInscription() {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
+  // Si Supabase signale que l'email est deja en base, on affiche en
+  // plus du message d'erreur deux liens d'action utiles : aller a la
+  // connexion ou demander un reset de mot de passe.
+  const [dejaInscrit, setDejaInscrit] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  // `hydrate` reste a false tant que le useEffect cote client n'a pas
+  // tourne. Tant qu'il vaut false on desactive le bouton de submit, ce
+  // qui empeche un clic premature de tomber en GET natif et d'exposer
+  // le mot de passe dans l'URL (cf. incident chantier 13.1).
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
@@ -37,12 +51,16 @@ export function FormulaireInscription() {
 
   async function onSubmit(donnees: DonneesInscription) {
     setErreurServeur(null);
+    setDejaInscrit(false);
     setEnvoiEnCours(true);
     const resultat = await inscrire(donnees);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {
       setErreurServeur(resultat.message);
+      if (resultat.dejaInscrit === true) {
+        setDejaInscrit(true);
+      }
       return;
     }
     if (resultat.redirectVers !== undefined) {
@@ -58,8 +76,24 @@ export function FormulaireInscription() {
       aria-label="Formulaire d'inscription"
     >
       {erreurServeur !== null ? (
-        <Alert variant="danger" titre="Erreur">
-          {erreurServeur}
+        <Alert
+          variant={dejaInscrit ? 'info' : 'danger'}
+          titre={dejaInscrit ? 'Email déjà inscrit' : 'Erreur'}
+        >
+          <p>{erreurServeur}</p>
+          {dejaInscrit ? (
+            <p className="mt-2 flex flex-wrap gap-3 text-sm">
+              <Link href="/connexion" className="text-brand underline-offset-4 hover:underline">
+                Aller à la connexion
+              </Link>
+              <Link
+                href="/mot-de-passe-oublie"
+                className="text-brand underline-offset-4 hover:underline"
+              >
+                Réinitialiser mon mot de passe
+              </Link>
+            </p>
+          ) : null}
         </Alert>
       ) : null}
 
@@ -185,9 +219,8 @@ export function FormulaireInscription() {
         <Label htmlFor="ins-mdp" obligatoire>
           Mot de passe
         </Label>
-        <Input
+        <ChampMotDePasse
           id="ins-mdp"
-          type="password"
           autoComplete="new-password"
           aria-invalid={errors.mot_de_passe !== undefined}
           aria-describedby="ins-mdp-aide"
@@ -222,8 +255,8 @@ export function FormulaireInscription() {
         <p className="text-xs text-danger">{errors.token_turnstile.message}</p>
       ) : null}
 
-      <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Envoi en cours...' : 'Créer mon compte'}
+      <Button type="submit" disabled={envoiEnCours || !hydrate}>
+        {envoiEnCours ? 'Envoi en cours...' : !hydrate ? 'Chargement…' : 'Créer mon compte'}
       </Button>
     </form>
   );

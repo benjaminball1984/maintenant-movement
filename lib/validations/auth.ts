@@ -124,6 +124,37 @@ export const magicLinkSchema = z
 export type DonneesMagicLink = z.infer<typeof magicLinkSchema>;
 
 // ============================================================
+// Reset du mot de passe (demande + nouveau mot de passe)
+// ============================================================
+
+/**
+ * Demande de reinitialisation : email + Turnstile, identique au magic link.
+ * Le clic sur le lien recu par mail amene sur la page de nouveau mot de
+ * passe avec une session temporaire (cf. /reinitialiser-mot-de-passe).
+ */
+export const demandeResetSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
+    token_turnstile: tokenTurnstileSchema,
+  })
+  .strict();
+
+export type DonneesDemandeReset = z.infer<typeof demandeResetSchema>;
+
+/**
+ * Definition du nouveau mot de passe : meme regle que l'inscription.
+ * Pas de Turnstile : on est deja authentifie par la session temporaire
+ * issue du clic sur le lien email.
+ */
+export const nouveauMotDePasseSchema = z
+  .object({
+    mot_de_passe: motDePasseSchema,
+  })
+  .strict();
+
+export type DonneesNouveauMotDePasse = z.infer<typeof nouveauMotDePasseSchema>;
+
+// ============================================================
 // Providers OAuth (cf. 01_ARCHITECTURE.md §9 « 4 portes »)
 // ============================================================
 

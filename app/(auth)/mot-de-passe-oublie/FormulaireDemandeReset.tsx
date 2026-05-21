@@ -2,18 +2,20 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesMagicLink, magicLinkSchema } from '@/lib/validations/auth';
+import { type DonneesDemandeReset, demandeResetSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { envoyerMagicLink } from '../actions';
+import { demanderResetMotDePasse } from '../actions';
 
 /**
- * Connexion par lien magique : envoi d'un email avec lien à usage unique
- * (porte 2 sur 4). Pas de mot de passe à mémoriser.
+ * Formulaire de demande de reinitialisation du mot de passe.
+ *
+ * Saisie d'un email + Turnstile. Apres soumission, redirection vers
+ * /verifier-email avec un message generique (anti-enumeration).
  */
-export function FormulaireMagicLink() {
+export function FormulaireDemandeReset() {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -27,15 +29,15 @@ export function FormulaireMagicLink() {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<DonneesMagicLink>({
-    resolver: zodResolver(magicLinkSchema),
+  } = useForm<DonneesDemandeReset>({
+    resolver: zodResolver(demandeResetSchema),
     defaultValues: { token_turnstile: '' },
   });
 
-  async function onSubmit(donnees: DonneesMagicLink) {
+  async function onSubmit(donnees: DonneesDemandeReset) {
     setErreurServeur(null);
     setEnvoiEnCours(true);
-    const resultat = await envoyerMagicLink(donnees);
+    const resultat = await demanderResetMotDePasse(donnees);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {
@@ -52,7 +54,7 @@ export function FormulaireMagicLink() {
       noValidate
       onSubmit={handleSubmit(onSubmit)}
       className="grid gap-3"
-      aria-label="Connexion par lien magique"
+      aria-label="Demande de reinitialisation"
     >
       {erreurServeur !== null ? (
         <Alert variant="danger" titre="Envoi impossible">
@@ -61,11 +63,11 @@ export function FormulaireMagicLink() {
       ) : null}
 
       <div>
-        <Label htmlFor="cnx-magic-email" obligatoire>
+        <Label htmlFor="reset-email" obligatoire>
           Email
         </Label>
         <Input
-          id="cnx-magic-email"
+          id="reset-email"
           type="email"
           autoComplete="email"
           aria-invalid={errors.email !== undefined}
@@ -78,12 +80,12 @@ export function FormulaireMagicLink() {
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button variant="ghost" type="submit" disabled={envoiEnCours || !hydrate}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate}>
         {envoiEnCours
           ? 'Envoi en cours...'
           : !hydrate
             ? 'Chargement…'
-            : 'Recevoir un lien par email'}
+            : 'Recevoir un lien de réinitialisation'}
       </Button>
     </form>
   );

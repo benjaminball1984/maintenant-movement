@@ -1,19 +1,21 @@
 'use client';
 
-import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { ChampMotDePasse } from '@/components/formulaires/ChampMotDePasse';
-import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesConnexionMdp, connexionMdpSchema } from '@/lib/validations/auth';
+import { Alert, Button, Label } from '@/components/ui';
+import { type DonneesNouveauMotDePasse, nouveauMotDePasseSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { connecterAvecMotDePasse } from '../actions';
+import { definirNouveauMotDePasse } from '../actions';
 
 /**
- * Connexion par email + mot de passe (porte 1 sur 4).
+ * Formulaire de definition du nouveau mot de passe.
+ *
+ * Pas de Turnstile : on est deja authentifie par la session temporaire
+ * issue du clic sur le lien email.
  */
-export function FormulaireConnexionMdp() {
+export function FormulaireNouveauMotDePasse() {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -25,17 +27,15 @@ export function FormulaireConnexionMdp() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-  } = useForm<DonneesConnexionMdp>({
-    resolver: zodResolver(connexionMdpSchema),
-    defaultValues: { token_turnstile: '' },
+  } = useForm<DonneesNouveauMotDePasse>({
+    resolver: zodResolver(nouveauMotDePasseSchema),
   });
 
-  async function onSubmit(donnees: DonneesConnexionMdp) {
+  async function onSubmit(donnees: DonneesNouveauMotDePasse) {
     setErreurServeur(null);
     setEnvoiEnCours(true);
-    const resultat = await connecterAvecMotDePasse(donnees);
+    const resultat = await definirNouveauMotDePasse(donnees);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {
@@ -52,36 +52,21 @@ export function FormulaireConnexionMdp() {
       noValidate
       onSubmit={handleSubmit(onSubmit)}
       className="grid gap-3"
-      aria-label="Connexion par mot de passe"
+      aria-label="Nouveau mot de passe"
     >
       {erreurServeur !== null ? (
-        <Alert variant="danger" titre="Connexion impossible">
+        <Alert variant="danger" titre="Impossible de définir le mot de passe">
           {erreurServeur}
         </Alert>
       ) : null}
 
       <div>
-        <Label htmlFor="cnx-mdp-email" obligatoire>
-          Email
-        </Label>
-        <Input
-          id="cnx-mdp-email"
-          type="email"
-          autoComplete="email"
-          aria-invalid={errors.email !== undefined}
-          {...register('email')}
-        />
-        {errors.email !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
-        ) : null}
-      </div>
-      <div>
-        <Label htmlFor="cnx-mdp-passe" obligatoire>
-          Mot de passe
+        <Label htmlFor="reset-mdp" obligatoire>
+          Nouveau mot de passe
         </Label>
         <ChampMotDePasse
-          id="cnx-mdp-passe"
-          autoComplete="current-password"
+          id="reset-mdp"
+          autoComplete="new-password"
           aria-invalid={errors.mot_de_passe !== undefined}
           {...register('mot_de_passe')}
         />
@@ -90,10 +75,12 @@ export function FormulaireConnexionMdp() {
         ) : null}
       </div>
 
-      <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
-
       <Button type="submit" disabled={envoiEnCours || !hydrate}>
-        {envoiEnCours ? 'Connexion en cours...' : !hydrate ? 'Chargement…' : 'Se connecter'}
+        {envoiEnCours
+          ? 'Enregistrement...'
+          : !hydrate
+            ? 'Chargement…'
+            : 'Enregistrer le nouveau mot de passe'}
       </Button>
     </form>
   );
