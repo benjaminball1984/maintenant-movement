@@ -3,14 +3,26 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Configuration Playwright pour les tests end-to-end.
  *
- * Au chantier 0.1, un seul navigateur (Chromium) suffit : les tests
- * vérifient l'absence de page blanche et de lien mort sur la home et la
- * page placeholder du système de design.
+ * Stratégie multi-format (chantier 12.3 polish) :
+ *   - 5 viewports Chromium : mobile portrait/paysage, tablette
+ *     portrait/paysage, desktop. Tous les tests tournent sur chaque
+ *     viewport pour vérifier qu'aucune mise en page ne casse.
+ *   - 2 navigateurs supplémentaires (Firefox, WebKit) sur viewport
+ *     desktop : sanity cross-browser.
+ *
+ * Pour ne lancer qu'un seul viewport :
+ *   npm run test:e2e -- --project=mobile-portrait
  *
  * Le `webServer` lance `npm run dev` automatiquement avant les tests.
  */
 const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
+
+const VIEWPORT_MOBILE_PORTRAIT = { width: 375, height: 667 };
+const VIEWPORT_MOBILE_PAYSAGE = { width: 667, height: 375 };
+const VIEWPORT_TABLETTE_PORTRAIT = { width: 768, height: 1024 };
+const VIEWPORT_TABLETTE_PAYSAGE = { width: 1024, height: 768 };
+const VIEWPORT_DESKTOP = { width: 1440, height: 900 };
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -28,8 +40,32 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'mobile-portrait',
+      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PORTRAIT },
+    },
+    {
+      name: 'mobile-paysage',
+      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PAYSAGE },
+    },
+    {
+      name: 'tablette-portrait',
+      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PORTRAIT },
+    },
+    {
+      name: 'tablette-paysage',
+      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PAYSAGE },
+    },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_DESKTOP },
+    },
+    {
+      name: 'desktop-firefox',
+      use: { ...devices['Desktop Firefox'], viewport: VIEWPORT_DESKTOP },
+    },
+    {
+      name: 'desktop-webkit',
+      use: { ...devices['Desktop Safari'], viewport: VIEWPORT_DESKTOP },
     },
   ],
   webServer: {
