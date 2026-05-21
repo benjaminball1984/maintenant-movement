@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-12-polish-revue-globale`
-**Commit final** : `<À METTRE EN PLACE>` (renseigné par le commit de fixage de SHA)
+**Commit final** : `6b686af`
 **Durée approximative** : 1 session Claude Code (revue + polish complet)
 
 ---
