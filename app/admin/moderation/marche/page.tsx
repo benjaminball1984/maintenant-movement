@@ -1,3 +1,5 @@
+import { retirerProduit } from '@/app/(public)/s-entraider/marche/actions';
+import { ControleModeration } from '@/components/admin/moderation/ControleModeration';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
@@ -51,17 +53,34 @@ export default async function PageModerationMarche() {
         <ul className="grid gap-2">
           {(produits ?? []).map((p) => (
             <li key={p.id}>
-              <Card variant="ombre" className="flex items-center justify-between gap-2">
-                <p>
-                  <Badge variant={p.mode === 'don' ? 'success' : 'brand'}>{p.mode}</Badge>{' '}
-                  <Link
-                    href={`/s-entraider/marche/produits/${p.slug}`}
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {p.titre}
-                  </Link>
-                </p>
-                <Badge variant="default">{p.statut}</Badge>
+              <Card variant="ombre" className="grid gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p>
+                    <Badge variant={p.mode === 'don' ? 'success' : 'brand'}>{p.mode}</Badge>{' '}
+                    <Link
+                      href={`/s-entraider/marche/produits/${p.slug}`}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {p.titre}
+                    </Link>
+                  </p>
+                  <Badge variant="default">{p.statut}</Badge>
+                </div>
+                {p.statut === 'disponible' || p.statut === 'reserve' ? (
+                  <ControleModeration
+                    actions={[
+                      {
+                        libelle: 'Retirer',
+                        action: retirerProduit,
+                        champId: 'produit_id',
+                        id: p.id,
+                        champRaison: 'raison',
+                        placeholderRaison: 'Motif du retrait, au moins 10 caractères.',
+                        messageSucces: 'Produit retiré.',
+                      },
+                    ]}
+                  />
+                ) : null}
               </Card>
             </li>
           ))}

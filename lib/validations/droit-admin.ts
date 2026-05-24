@@ -32,7 +32,7 @@ export const ONGLETS_MODERATION = [
   'marche',
   'moments',
   'sondages',
-  'autres-moyens',
+  'autres_moyens',
 ] as const;
 
 export type OngletModeration = (typeof ONGLETS_MODERATION)[number];
@@ -48,7 +48,7 @@ export const LIBELLES_ONGLET: Record<OngletModeration, string> = {
   marche: 'Marché solidaire',
   moments: 'Moments',
   sondages: 'Sondages',
-  'autres-moyens': 'Autres moyens',
+  autres_moyens: 'Autres moyens',
 };
 
 // ============================================================
