@@ -1,6 +1,6 @@
 'use server';
 
-import { SITE } from '@/config/site';
+import { getSiteUrl } from '@/config/site';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -67,48 +67,75 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
     return erreurTurnstile;
   }
 
-  const supabase = await getSupabaseServer();
-
-  const { data: signUp, error: signUpError } = await supabase.auth.signUp({
+  // Création du compte via l'API admin (et non `auth.signUp` anonyme).
+  //
+  // Pourquoi admin (cf. ADR-006) : ce projet Supabase applique une
+  // obfuscation anti-énumération stricte sur `signUp`, qui renvoie
+  // toujours `user: null`, même en cas de succès (vérifié en conditions
+  // réelles, chantier 13.1). Impossible d'en tirer l'`id` nécessaire à la
+  // création de la ligne `personne`, ni de distinguer un compte neuf d'un
+  // compte existant. L'API admin, elle, renvoie l'`id` de façon fiable et
+  // signale un email déjà pris via `code: email_exists`.
+  //
+  // On ne perd pas de garde-fou : l'anti-bot est déjà assuré en amont par
+  // Turnstile, et la robustesse du mot de passe par le schéma Zod.
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data: creation, error: creationError } = await supabaseAdmin.auth.admin.createUser({
     email: donnees.email,
     password: donnees.mot_de_passe,
+    // La personne doit valider son email avant d'être confirmée (RGPD §5E).
+    email_confirm: false,
+  });
+
+  if (creationError !== null) {
+    // Email déjà enregistré : on oriente vers connexion / réinitialisation
+    // plutôt que de laisser un message d'erreur opaque.
+    if (
+      creationError.code === 'email_exists' ||
+      creationError.message.toLowerCase().includes('already been registered')
+    ) {
+      return {
+        ok: false,
+        dejaInscrit: true,
+        message:
+          "Un compte existe déjà avec cet email. Tu peux te connecter, ou réinitialiser ton mot de passe si tu l'as oublié.",
+      };
+    }
+    return { ok: false, message: traduireErreurAuth(creationError.message) };
+  }
+
+  const utilisateurAuth = creation.user;
+
+  // Envoi de l'email de confirmation. `createUser` ne déclenche aucun
+  // email : on le demande explicitement via `resend`. Si l'envoi échoue,
+  // on supprime le compte tout juste créé pour ne pas laisser un compte
+  // orphelin que la personne ne pourrait jamais valider : l'inscription
+  // reste ainsi « tout ou rien ».
+  const supabase = await getSupabaseServer();
+  const { error: emailError } = await supabase.auth.resend({
+    type: 'signup',
+    email: donnees.email,
     options: {
-      emailRedirectTo: `${SITE.urlProd}/auth/callback?next=/profil/dashboard`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
     },
   });
 
-  if (signUpError !== null) {
-    return { ok: false, message: traduireErreurAuth(signUpError.message) };
-  }
-
-  // Anti-enumeration Supabase : si l'email est deja en base, signUp
-  // renvoie un user avec `identities: []` (ou `user === null` sur les
-  // anciennes versions du SDK). Pas d'email envoye dans ce cas. On
-  // detecte explicitement pour proposer le flux de reinitialisation
-  // plutot que laisser la personne se demander pourquoi rien n'arrive.
-  if (signUp.user === null || (signUp.user.identities?.length ?? 0) === 0) {
+  if (emailError !== null) {
+    await supabaseAdmin.auth.admin.deleteUser(utilisateurAuth.id);
     return {
       ok: false,
-      dejaInscrit: true,
-      message:
-        "Un compte existe déjà avec cet email. Tu peux te connecter, ou réinitialiser ton mot de passe si tu l'as oublié.",
+      message: "L'email de confirmation n'a pas pu être envoyé. Réessaie dans un instant.",
     };
   }
-  const utilisateurAuth = signUp.user;
 
-  // Création de la ligne `personne` correspondante (cf. ADR-005).
+  // Création de la ligne `personne` correspondante (cf. ADR-005), via le
+  // client admin (service_role). Raison : juste après la création,
+  // l'utilisateur·ice n'a pas de session (email pas confirmé), donc
+  // `auth.uid()` vaut `null` côté policies RLS et la policy
+  // `personne_insert_self` (`auth.uid() = id`) refuserait l'INSERT.
   //
-  // On utilise ici le client `admin` (service_role) et non le client
-  // serveur cookie-bound. Raison : juste après `signUp`, l'utilisateur·ice
-  // n'a pas encore de session active (la confirmation d'email n'a pas eu
-  // lieu), donc `auth.uid()` vaut `null` côté policies RLS. La policy
-  // `personne_insert_self` (`auth.uid() = id`) refuserait alors l'INSERT
-  // et laisserait un `auth.users` orphelin sans ligne `personne`.
-  //
-  // Usage admin légitime : on n'insère qu'avec l'`id` retourné par
-  // `signUp.user.id` (donc strictement le compte qui vient d'être créé),
-  // pas de risque d'usurpation.
-  const supabaseAdmin = getSupabaseAdmin();
+  // Usage admin légitime : on n'insère qu'avec l'`id` du compte qui vient
+  // d'être créé (`creation.user.id`), pas de risque d'usurpation.
   const { error: insertError } = await supabaseAdmin.from('personne').insert({
     id: utilisateurAuth.id,
     email: donnees.email,
@@ -184,7 +211,7 @@ export async function envoyerMagicLink(donneesBrutes: unknown): Promise<Resultat
   const { error } = await supabase.auth.signInWithOtp({
     email: donnees.email,
     options: {
-      emailRedirectTo: `${SITE.urlProd}/auth/callback?next=/profil/dashboard`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
     },
   });
 
@@ -214,7 +241,7 @@ export async function ouvrirOAuth(provider: ProviderOAuth): Promise<ResultatActi
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${SITE.urlProd}/auth/callback?next=/profil/dashboard`,
+      redirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
     },
   });
 
@@ -259,7 +286,7 @@ export async function demanderResetMotDePasse(donneesBrutes: unknown): Promise<R
 
   const supabase = await getSupabaseServer();
   await supabase.auth.resetPasswordForEmail(donnees.email, {
-    redirectTo: `${SITE.urlProd}/auth/callback?next=/reinitialiser-mot-de-passe`,
+    redirectTo: `${getSiteUrl()}/auth/callback?next=/reinitialiser-mot-de-passe`,
   });
 
   // On ne propage pas l'erreur eventuelle (anti-enumeration).

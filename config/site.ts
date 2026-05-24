@@ -19,3 +19,20 @@ export const SITE = {
   /** Locale par défaut (le contenu éditorial est en français). */
   locale: 'fr',
 } as const;
+
+/**
+ * URL de base pour les liens absolus générés à l'exécution : redirections
+ * d'authentification et liens des emails de confirmation.
+ *
+ * En développement, `NEXT_PUBLIC_SITE_URL` vaut `http://localhost:3000`
+ * (cf. `.env.local`), pour que le lien de validation d'email revienne sur
+ * la machine locale et non sur le site de production. En production, on
+ * définit cette variable sur l'URL réelle, sinon on retombe sur l'URL
+ * canonique `urlProd`.
+ *
+ * À distinguer de `SITE.urlProd`, qui reste l'URL canonique figée utilisée
+ * pour le SEO (metadataBase, Open Graph, sitemap).
+ */
+export function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? SITE.urlProd;
+}

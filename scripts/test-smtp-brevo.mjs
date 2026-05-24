@@ -19,7 +19,7 @@ const destinataire = process.argv[2] ?? 'lifebenjaminaeron.ball@gmail.com';
 console.info('[test-smtp] Connexion SMTP Brevo...');
 console.info('  Host: smtp-relay.brevo.com:587');
 console.info(`  Login: ${env.BREVO_SMTP_USER}`);
-console.info(`  From:  benjamin.ball1984@gmail.com`);
+console.info('  From:  benjamin.ball1984@gmail.com');
 console.info(`  To:    ${destinataire}`);
 
 const transport = nodemailer.createTransport({

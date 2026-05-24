@@ -1,7 +1,7 @@
+import { readFileSync } from 'node:fs';
 // Test direct du signUp Supabase pour isoler le probleme de la chaine SMTP.
 // Tente une inscription email puis loggue le retour brut.
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync } from 'node:fs';
 
 const env = Object.fromEntries(
   readFileSync('.env.local', 'utf8')
