@@ -1,4 +1,5 @@
 import { SITE } from '@/config/site';
+import { estAdminNational } from '@/lib/admin/national/garde';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -19,6 +20,9 @@ import type { ReactNode } from 'react';
  */
 export default async function LayoutAdmin({ children }: { children: ReactNode }) {
   await garantirAccesAdmin('/admin/moderation/petitions');
+
+  // La console nationale n'est proposée qu'aux admins du niveau le plus élevé.
+  const peutNational = await estAdminNational();
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -76,6 +80,29 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 </li>
               ))}
             </ul>
+
+            {peutNational ? (
+              <>
+                <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-cap text-text-3">
+                  Console nationale
+                </p>
+                <ul className="grid gap-1">
+                  {[
+                    { href: '/admin/national', libelle: 'Vue nationale' },
+                    { href: '/admin/national/droits', libelle: 'Gestion des droits' },
+                  ].map((onglet) => (
+                    <li key={onglet.href}>
+                      <Link
+                        href={onglet.href}
+                        className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                      >
+                        {onglet.libelle}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </nav>
         </aside>
         <main className="flex-1">{children}</main>
