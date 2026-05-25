@@ -9,6 +9,15 @@ export const SITE = {
   /** Nom officiel : `Maintenant!` avec capitale et point d'exclamation. */
   nom: 'Maintenant!',
 
+  /**
+   * Entité juridique pour les mentions légales et la confidentialité.
+   * Décision Lilou/Ben (2026-05-25) : Maintenant! est pour l'instant un
+   * collectif, aucune association n'est déposée, donc pas de numéro RNA. On
+   * affiche « collectif Maintenant! ». À remplacer par la dénomination et le
+   * RNA de l'association le jour où elle est déposée.
+   */
+  entiteLegale: 'collectif Maintenant!',
+
   /** URL de production. */
   urlProd: 'https://maintenant-le-mouvement.org',
 

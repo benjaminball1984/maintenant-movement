@@ -96,9 +96,11 @@ contenu rédigé, soit transmettre le texte à un·e dev qui s'en occupe.
 À fournir une fois pour toutes, alimentent les pages ci-dessus, le
 footer et la signature des emails sortants :
 
-- [ ] **Nom légal complet** de l'association.
-- [ ] **Adresse postale** du siège.
-- [ ] **Numéro RNA** (Registre National des Associations).
+- [x] **Nom légal** : **« collectif Maintenant! »** (décision Lilou/Ben,
+  2026-05-25). Maintenant! est pour l'instant un collectif, aucune association
+  n'est encore déposée. Stocké dans `config/site.ts` (`SITE.entiteLegale`).
+- [ ] **Adresse postale** du siège (en attente : pas d'association déposée).
+- [ ] **Numéro RNA** : sans objet tant qu'aucune association n'est déposée.
 - [ ] **Email de contact général** (typiquement `contact@...`).
 - [ ] **Email DPD** (typiquement `dpd@...`) + **nom du·de la DPD bénévole**.
 - [ ] **Email presse** (si dédié).
