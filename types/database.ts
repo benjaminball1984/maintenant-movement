@@ -2323,6 +2323,222 @@ export type Database = {
           },
         ];
       };
+      relation_reseau: {
+        Row: {
+          created_at: string;
+          suiveur_id: string;
+          suivi_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          suiveur_id: string;
+          suivi_id: string;
+        };
+        Update: {
+          created_at?: string;
+          suiveur_id?: string;
+          suivi_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'relation_reseau_suiveur_id_fkey';
+            columns: ['suiveur_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'relation_reseau_suivi_id_fkey';
+            columns: ['suivi_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      post_reseau: {
+        Row: {
+          auteurice_id: string;
+          created_at: string;
+          id: string;
+          image_url: string | null;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          statut: string;
+          texte: string;
+          updated_at: string;
+        };
+        Insert: {
+          auteurice_id: string;
+          created_at?: string;
+          id?: string;
+          image_url?: string | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte: string;
+          updated_at?: string;
+        };
+        Update: {
+          auteurice_id?: string;
+          created_at?: string;
+          id?: string;
+          image_url?: string | null;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'post_reseau_auteurice_id_fkey';
+            columns: ['auteurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'post_reseau_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      commentaire_reseau: {
+        Row: {
+          auteurice_id: string;
+          created_at: string;
+          id: string;
+          post_id: string;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          statut: string;
+          texte: string;
+        };
+        Insert: {
+          auteurice_id: string;
+          created_at?: string;
+          id?: string;
+          post_id: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte: string;
+        };
+        Update: {
+          auteurice_id?: string;
+          created_at?: string;
+          id?: string;
+          post_id?: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'commentaire_reseau_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'post_reseau';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'commentaire_reseau_auteurice_id_fkey';
+            columns: ['auteurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      reaction_reseau: {
+        Row: {
+          created_at: string;
+          personne_id: string;
+          post_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          personne_id: string;
+          post_id: string;
+        };
+        Update: {
+          created_at?: string;
+          personne_id?: string;
+          post_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reaction_reseau_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'post_reseau';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reaction_reseau_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      message_reseau: {
+        Row: {
+          created_at: string;
+          destinataire_id: string;
+          expediteur_id: string;
+          id: string;
+          lu: boolean;
+          lu_le: string | null;
+          texte: string;
+        };
+        Insert: {
+          created_at?: string;
+          destinataire_id: string;
+          expediteur_id: string;
+          id?: string;
+          lu?: boolean;
+          lu_le?: string | null;
+          texte: string;
+        };
+        Update: {
+          created_at?: string;
+          destinataire_id?: string;
+          expediteur_id?: string;
+          id?: string;
+          lu?: boolean;
+          lu_le?: string | null;
+          texte?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'message_reseau_expediteur_id_fkey';
+            columns: ['expediteur_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'message_reseau_destinataire_id_fkey';
+            columns: ['destinataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
@@ -2491,6 +2707,41 @@ export type Database = {
       trouver_ou_creer_profil_unifie: {
         Args: { email_cible: string };
         Returns: string;
+      };
+      champ_reseau_visible: {
+        Args: { niveau: string; est_soi: boolean; est_ami: boolean; est_connecte: boolean };
+        Returns: boolean;
+      };
+      personne_affichage: {
+        Args: { cible: string };
+        Returns: {
+          id: string;
+          numero_unique: string | null;
+          prenom: string | null;
+          nom: string | null;
+          pronom: string | null;
+          photo_url: string | null;
+          bio: string | null;
+        }[];
+      };
+      est_ami_reseau: {
+        Args: { cible: string };
+        Returns: boolean;
+      };
+      personne_id_par_numero: {
+        Args: { numero_cible: string };
+        Returns: string;
+      };
+      membres_commune: {
+        Args: { commune_cible: string };
+        Returns: {
+          personne_id: string;
+          numero_unique: string | null;
+          prenom: string | null;
+          nom: string | null;
+          photo_url: string | null;
+          rejoint_le: string;
+        }[];
       };
       prestations_a_crediter: {
         Args: { seuil_minutes?: number };
@@ -2781,6 +3032,11 @@ export type Petition = Omit<RowOf<'petition'>, 'statut'> & {
 };
 export type SignaturePetition = RowOf<'signature_petition'>;
 export type ProfilUnifie = RowOf<'profil_unifie'>;
+export type RelationReseau = RowOf<'relation_reseau'>;
+export type PostReseau = RowOf<'post_reseau'>;
+export type CommentaireReseau = RowOf<'commentaire_reseau'>;
+export type ReactionReseau = RowOf<'reaction_reseau'>;
+export type MessageReseau = RowOf<'message_reseau'>;
 export type PetitionCompteur = ViewOf<'petition_compteur'>;
 export type Mobilisation = Omit<RowOf<'mobilisation'>, 'statut'> & {
   statut: StatutMobilisation;
