@@ -73,10 +73,17 @@ export async function getCompteursCommune(codeInsee: string): Promise<CompteursC
 
 /**
  * Cherche la commune LIBRE (table `commune`) correspondant à un code INSEE du
- * référentiel, si elle a été activée (pré-créée ou créée par une personne qui
- * l'a rejointe). `null` si aucune commune libre n'existe encore pour ce code :
- * conforme à la doctrine « pas de coquilles vides » (§7B), la commune libre
- * n'apparaît que lorsqu'elle a une existence réelle.
+ * référentiel.
+ *
+ * Décision Lilou/Ben (2026-05-25, révise la doctrine §7B) : on pré-crée une
+ * coquille (`statut_creation = 'pre_creee'`) pour CHAQUE commune et
+ * arrondissement du référentiel, via `scripts/precreer-communes.ts`. La
+ * correspondance existe donc normalement toujours une fois ce script exécuté,
+ * et chaque commune est « rejoignable » immédiatement.
+ *
+ * On renvoie tout de même `null` si la coquille n'a pas encore été
+ * matérialisée (script pas lancé sur cette base), pour une dégradation propre
+ * de l'UI plutôt qu'un crash.
  */
 export async function getCommuneLibreParInsee(
   codeInsee: string,

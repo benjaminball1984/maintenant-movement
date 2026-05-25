@@ -51,10 +51,13 @@ Suite de la plateforme de données. Adapté au schéma RÉCONCILIÉ (pas de tabl
   des réglages de visibilité). L'affichage nominatif inline sur la fiche publique demande une
   décision RGPD : quel niveau de divulgation (prénom + nom complet ? prénom + initiale ?) et
   faut-il respecter les réglages de visibilité individuels ? À trancher.
-- [ ] **« Rejoindre » depuis une fiche référentiel sans commune libre** : aujourd'hui, on invite
-  à activer la commune. Auto-matérialiser une commune libre (`commune`, statut `auto_creee`)
-  au moment du « rejoindre » touche la doctrine §7B (« pas de coquilles vides ») : à valider
-  avant de l'implémenter.
+- [x] **RÉSOLU (Lilou/Ben, 2026-05-25) : « Rejoindre » depuis une fiche référentiel** : la
+  doctrine §7B est révisée (« coquilles vides » désormais autorisées). On pré-crée une coquille
+  `pre_creee` pour TOUTES les communes et arrondissements du référentiel (`scripts/precreer-communes.ts`).
+  Plus besoin d'auto-matérialiser au moment du « rejoindre » : la coquille existe déjà, le flux
+  `rejoindreCommune` la trouve par `code_insee`. La création libre reste possible avec le nom
+  souhaité, refusée seulement si ce nom exact est déjà pris (garde dans `creerCommuneLibre`).
+  Préalable d'activation : lancer `scripts/precreer-communes.ts --confirm` sur la base distante.
 - [ ] **Rattachement des signatures importées au profil par email** : les signatures faites
   avant d'avoir un compte (importées, `personne_id` null) n'apparaissent pas encore dans
   « Mes contributions » (la RLS filtre par `personne_id`). Le rattachement par email est une

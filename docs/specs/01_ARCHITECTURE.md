@@ -369,7 +369,9 @@ Argumentaire fonction + mise à l'échelle + organisation systémique + le 99,99
 
 > « On part du réel et on ne part pas de coquille vide. »
 
-**Cartographie pré-créée** : entre 2 100 et 2 300 communes pré-créées par Lilou/Ben (CSV à fournir avant le chantier). Seule exception à la règle « pas de coquilles vides ». Création libre de communes supplémentaires possible (ex : « Commune libre d'Orgemont »).
+**Révision Lilou/Ben (2026-05-25)** : la règle « pas de coquilles vides » est levée. On pré-crée désormais une coquille (`statut_creation = 'pre_creee'`) pour chaque commune et arrondissement du référentiel officiel (~35 000 communes + 45 arrondissements, table `commune_reference`), via le script `scripts/precreer-communes.ts`, pour que chaque commune soit consultable et « rejoignable » immédiatement.
+
+**Cartographie** : tout le référentiel est matérialisé en coquilles dans la table `commune` (statut `pre_creee`). La création libre d'une commune supplémentaire (quartier, ZAD, territoire libre, ex : « Commune libre d'Orgemont ») reste possible avec le nom souhaité, et n'est refusée que si ce nom exact est déjà pris (coquille pré-créée ou commune déjà créée par la communauté).
 
 #### Trois niveaux supra-locaux
 
