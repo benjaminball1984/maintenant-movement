@@ -4,8 +4,10 @@ import {
   rejoindreCommune,
 } from '@/app/(public)/agir/communes/actions';
 import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCommune';
+import { ListeMembres } from '@/components/communes/ListeMembres';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { type MembreCommune, listerMembresCommune } from '@/lib/communes/membres';
 import { communeParSlug } from '@/lib/communes/requetes';
 import { getSupabaseServer } from '@/lib/supabase';
 import { MapPin, Users } from 'lucide-react';
@@ -48,6 +50,12 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
 
     const palierResultat = await palierRejoindreCommune();
     if (palierResultat.ok) palier = palierResultat.palier;
+  }
+
+  // Décision A : la liste nominative des membres n'existe qu'entre membres.
+  let membres: MembreCommune[] = [];
+  if (session !== null && dejaMembre) {
+    membres = await listerMembresCommune(commune.id);
   }
 
   const estLibre = commune.statut_creation === 'auto_creee';
@@ -111,6 +119,19 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             quitterCommune={quitterCommune}
           />
         )}
+
+        {session !== null && dejaMembre && membres.length > 0 ? (
+          <section className="grid gap-3">
+            <Heading niveau={2} className="text-lg">
+              Membres ({membres.length})
+            </Heading>
+            <p className="text-sm text-text-3">
+              Visible uniquement par les membres de cette commune. Clique sur un nom pour voir le
+              profil, ou envoie un message.
+            </p>
+            <ListeMembres membres={membres} moiId={session.userId} />
+          </section>
+        ) : null}
       </article>
     </Container>
   );

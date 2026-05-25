@@ -68,6 +68,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 { href: '/admin/moderation/marche', libelle: 'Marché solidaire' },
                 { href: '/admin/moderation/moments', libelle: 'Moments' },
                 { href: '/admin/moderation/sondages', libelle: 'Sondages' },
+                { href: '/admin/moderation/reseau', libelle: 'Réseau social' },
                 { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
               ].map((onglet) => (
                 <li key={onglet.href}>
