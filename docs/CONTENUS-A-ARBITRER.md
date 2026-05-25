@@ -152,17 +152,23 @@ changement applicatif requis) :
 
 ---
 
-## 5. Arbitrages politiques en attente (Q5, Q13, Q14)
+## 5. Arbitrages politiques (tranchés le 2026-05-25)
 
-Ces décisions ne sont pas urgentes pour le squelette technique mais
-bloquent l'expérience utilisateur·ice de certains espaces :
-
-- [ ] **Q5** : quels services proposés selon statut (adhérent·e,
-  sympathisant·e, donateur·ice).
-- [ ] **Q13** : boucle d'engagement, mécaniques transverses pour
-  ré-engager les personnes inscrites.
-- [ ] **Q14** : indicateurs publics du mouvement (compteurs, KPI publics
-  affichés sur la home et `/a-propos`).
+- [x] **Q5** : **ouvert à tou·tes les inscrit·es**. Aucune fonctionnalité n'est
+  verrouillée par statut ; le statut sert à la reconnaissance et au droit de
+  DÉCISION (voter dans Décider réservé aux adhérent·es). Donateur·ice = mêmes
+  accès qu'adhérent·e.
+- [x] **Q13** : **s'appuyer sur les notifications existantes, sans gamification**
+  (récap mardi, newsletter vendredi, cloche, push). Pas de points/badges/
+  classements. Rien de neuf à construire.
+- [x] **Q14** : **3 compteurs publics** : nombre de membres (adhérent·es),
+  nombre d'abonné·es (newsletter), nombre de signatures. Pas de chiffres
+  financiers en public. Affichés sur la home et `/a-propos`.
+- [x] **Affichage des membres d'une commune** : **visible entre membres**. Les
+  membres connecté·es d'une même commune voient leurs co-membres (prénom +
+  initiale), dans le respect des réglages de visibilité ; rien de nominatif en
+  public (les pages publiques restent au compteur). RGPD : appartenance =
+  donnée sensible.
 
 ---
 
