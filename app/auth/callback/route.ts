@@ -27,6 +27,28 @@ import { type NextRequest, NextResponse } from 'next/server';
  * Documentation Supabase :
  * https://supabase.com/docs/guides/auth/server-side/nextjs
  */
+/**
+ * Rattache le compte tout juste authentifié à son profil unifié (numéro M+7,
+ * chantier 13.3-E) et rend ses anciennes signatures lisibles dans « Mes
+ * contributions ». L'email vient d'être vérifié (verifyOtp / OAuth), donc le
+ * rattachement par email est légitime.
+ *
+ * Idempotente et best-effort : un échec (migration 038 pas encore appliquée)
+ * ne doit jamais empêcher la connexion d'aboutir.
+ */
+async function rattacherProfilUnifieSilencieux(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('rattacher_profil_unifie');
+    if (error !== null) {
+      console.warn('[auth/callback] rattachement profil unifié ignoré :', error.message);
+    }
+  } catch (erreur) {
+    console.warn('[auth/callback] rattachement profil unifié ignoré :', erreur);
+  }
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
@@ -44,6 +66,7 @@ export async function GET(request: NextRequest) {
         new URL(`/connexion?erreur=${encodeURIComponent(error.message)}`, url.origin),
       );
     }
+    await rattacherProfilUnifieSilencieux(supabase);
     return NextResponse.redirect(new URL(next, url.origin));
   }
 
@@ -55,6 +78,7 @@ export async function GET(request: NextRequest) {
         new URL(`/connexion?erreur=${encodeURIComponent(error.message)}`, url.origin),
       );
     }
+    await rattacherProfilUnifieSilencieux(supabase);
     return NextResponse.redirect(new URL(next, url.origin));
   }
 

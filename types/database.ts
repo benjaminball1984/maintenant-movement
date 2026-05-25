@@ -2047,6 +2047,7 @@ export type Database = {
           personne_id: string | null;
           petition_id: string;
           prenom: string;
+          profil_unifie_id: string | null;
           telephone: string | null;
         };
         Insert: {
@@ -2060,6 +2061,7 @@ export type Database = {
           personne_id?: string | null;
           petition_id: string;
           prenom: string;
+          profil_unifie_id?: string | null;
           telephone?: string | null;
         };
         Update: {
@@ -2073,6 +2075,7 @@ export type Database = {
           personne_id?: string | null;
           petition_id?: string;
           prenom?: string;
+          profil_unifie_id?: string | null;
           telephone?: string | null;
         };
         Relationships: [
@@ -2081,6 +2084,13 @@ export type Database = {
             columns: ['personne_id'];
             isOneToOne: false;
             referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'signature_petition_profil_unifie_id_fkey';
+            columns: ['profil_unifie_id'];
+            isOneToOne: false;
+            referencedRelation: 'profil_unifie';
             referencedColumns: ['id'];
           },
           {
@@ -2278,6 +2288,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      profil_unifie: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          id: string;
+          numero_unique: string;
+          personne_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          numero_unique?: string;
+          personne_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          numero_unique?: string;
+          personne_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profil_unifie_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: true;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
@@ -2438,6 +2483,14 @@ export type Database = {
       nombre_signatures: {
         Args: { petition_a_compter: string };
         Returns: number;
+      };
+      rattacher_profil_unifie: {
+        Args: never;
+        Returns: string;
+      };
+      trouver_ou_creer_profil_unifie: {
+        Args: { email_cible: string };
+        Returns: string;
       };
       prestations_a_crediter: {
         Args: { seuil_minutes?: number };
@@ -2727,6 +2780,7 @@ export type Petition = Omit<RowOf<'petition'>, 'statut'> & {
   statut: StatutPetition;
 };
 export type SignaturePetition = RowOf<'signature_petition'>;
+export type ProfilUnifie = RowOf<'profil_unifie'>;
 export type PetitionCompteur = ViewOf<'petition_compteur'>;
 export type Mobilisation = Omit<RowOf<'mobilisation'>, 'statut'> & {
   statut: StatutMobilisation;

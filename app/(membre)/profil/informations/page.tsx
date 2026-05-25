@@ -1,5 +1,6 @@
-import { Heading } from '@/components/ui';
+import { Card, Heading } from '@/components/ui';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
+import { getNumeroUnifie } from '@/lib/profil/unifie';
 import type { DonneesMiseAJourProfil } from '@/lib/validations/profil';
 import type { Metadata } from 'next';
 import { FormulaireInformations } from './FormulaireInformations';
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 
 export default async function PageInformations() {
   const { personne } = await getPersonneOuRediriger('/profil/informations');
+  const numeroUnifie = await getNumeroUnifie(personne.id);
 
   const valeursInitiales: DonneesMiseAJourProfil = {
     nom: personne.nom ?? '',
@@ -31,6 +33,21 @@ export default async function PageInformations() {
           Confidentialité.
         </p>
       </header>
+
+      <Card variant="ombre" className="grid gap-1">
+        <p className="text-xs font-bold uppercase tracking-cap text-text-3">
+          Ton numéro Maintenant!
+        </p>
+        {numeroUnifie !== null ? (
+          <p className="font-mono text-lg text-text-1">{numeroUnifie}</p>
+        ) : (
+          <p className="text-text-2">En cours d’activation.</p>
+        )}
+        <p className="text-sm text-text-3">
+          Cet identifiant t’appartient à vie. Il te relie à tes contributions (pétitions signées,
+          etc.) même si tu changes d’adresse email.
+        </p>
+      </Card>
 
       <FormulaireInformations valeursInitiales={valeursInitiales} />
     </article>

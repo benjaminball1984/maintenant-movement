@@ -2,7 +2,7 @@
 
 import { getSession } from '@/lib/auth/session';
 import { getEmailService } from '@/lib/email';
-import { getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesCreerPetition,
@@ -115,9 +115,16 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
     return { ok: false, message: 'Cette pétition n’est pas (ou plus) ouverte aux signatures.' };
   }
 
+  // Identité durable du signataire : on rattache la signature à un profil
+  // unifié (numéro M+7 stable, cf. chantier 13.3-E), même sans compte. Quand
+  // la personne créera son compte avec ce même email, ses signatures
+  // remonteront dans « Mes contributions ».
+  const profilUnifieId = await rattacherProfilUnifie(donnees.email);
+
   const { error: erreurInsert } = await supabase.from('signature_petition').insert({
     petition_id: petition.id,
     personne_id: session?.userId ?? null,
+    profil_unifie_id: profilUnifieId,
     nom: donnees.nom,
     prenom: donnees.prenom,
     email: donnees.email,
@@ -251,6 +258,33 @@ export async function editerPetition(donneesBrutes: unknown): Promise<ResultatAc
 // ============================================================
 // Helpers internes
 // ============================================================
+
+/**
+ * Trouve (ou crée) le profil unifié d'un email et renvoie son id, pour
+ * rattacher la signature à une identité durable (numéro M+7, chantier 13.3-E).
+ *
+ * Passe par la fonction SQL `trouver_ou_creer_profil_unifie`, réservée au
+ * client service_role (les écritures sur `profil_unifie` ne sont pas ouvertes
+ * au public). Best-effort : si la migration 038 n'est pas encore appliquée, on
+ * renvoie `null` et la signature est tout de même enregistrée (dégradation
+ * propre, même logique que l'inscription newsletter).
+ */
+async function rattacherProfilUnifie(email: string): Promise<string | null> {
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin.rpc('trouver_ou_creer_profil_unifie', {
+      email_cible: email.trim(),
+    });
+    if (error !== null) {
+      console.warn('[signerPetition] profil unifié indisponible :', error.message);
+      return null;
+    }
+    return data ?? null;
+  } catch (erreur) {
+    console.warn('[signerPetition] profil unifié indisponible :', erreur);
+    return null;
+  }
+}
 
 /**
  * True si la personne connectée peut modérer/éditer les pétitions :

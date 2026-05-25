@@ -1,12 +1,15 @@
 /**
  * Script d'import des 5 pétitions et de leurs signatures (chantier 13.3).
  *
- * Réconciliation avec le schéma existant (décision 13.3) : on N'AJOUTE PAS
- * de tables `personnes`/`actions` parallèles. Les signatures importées vont
- * dans la table existante `signature_petition`, qui accepte déjà les
- * signataires SANS compte (`personne_id` nullable). Le « profil qui
- * s'enrichit » repose sur l'email : quand une personne créera un compte,
- * l'app reliera ses signatures par email.
+ * Réconciliation avec le schéma existant (décision 13.3) : les signatures
+ * importées vont dans la table existante `signature_petition`, qui accepte déjà
+ * les signataires SANS compte (`personne_id` nullable).
+ *
+ * Identité durable (chantier 13.3-E) : chaque signataire est rattaché à un
+ * `profil_unifie` (numéro M+7 stable, indépendant de l'email), trouvé-ou-créé
+ * par email via la fonction `trouver_ou_creer_profil_unifie`. Quand la personne
+ * créera son compte avec ce même email, ses signatures remonteront dans
+ * « Mes contributions » (rattachement à la vérification de l'email).
  *
  * Sources (dossier data-migration/) :
  *   - profils_unifies.csv   : email → prenom, nom, telephone, code_postal,
@@ -361,25 +364,47 @@ async function main(): Promise<void> {
     }
   }
 
-  // 4. Insertion par lots des signatures manquantes.
-  const aInserer = rapport.signatures
+  // 4. Signatures manquantes à insérer (les déjà présentes sont ignorées).
+  const candidats = rapport.signatures
     .map((s) => {
       const petitionId = slugVersId.get(s.petitionSlug);
       if (petitionId === undefined) return null;
       if (dejaPresent.has(`${petitionId}::${s.emailLower}`)) return null;
-      return {
-        petition_id: petitionId,
-        personne_id: null,
-        nom: s.nom,
-        prenom: s.prenom,
-        email: s.email,
-        code_postal: s.code_postal,
-        telephone: s.telephone,
-        accepte_newsletter: s.accepte_newsletter,
-        accepte_contact_createurice: s.accepte_contact_createurice,
-      };
+      return { s, petitionId };
     })
-    .filter((r): r is NonNullable<typeof r> => r !== null);
+    .filter((r): r is { s: SignatureImport; petitionId: string } => r !== null);
+
+  // 5. Identité durable : un profil unifié par email (chantier 13.3-E). On ne
+  //    résout que les emails réellement à insérer (efficace en ré-exécution),
+  //    dédupliqués (un appel RPC par email unique, pas par signature).
+  const emailsUniques = new Map<string, string>(); // emailLower -> email original
+  for (const { s } of candidats) {
+    if (!emailsUniques.has(s.emailLower)) emailsUniques.set(s.emailLower, s.email);
+  }
+  const profilParEmail = new Map<string, string>();
+  for (const [emailLower, email] of emailsUniques) {
+    const { data, error } = await avecReessais(() =>
+      supabase.rpc('trouver_ou_creer_profil_unifie', { email_cible: email }),
+    );
+    if (error !== null || data === null) {
+      console.error(`Profil unifié non résolu pour ${emailLower} : ${error?.message ?? 'null'}`);
+      continue;
+    }
+    profilParEmail.set(emailLower, data as string);
+  }
+
+  const aInserer = candidats.map(({ s, petitionId }) => ({
+    petition_id: petitionId,
+    personne_id: null,
+    profil_unifie_id: profilParEmail.get(s.emailLower) ?? null,
+    nom: s.nom,
+    prenom: s.prenom,
+    email: s.email,
+    code_postal: s.code_postal,
+    telephone: s.telephone,
+    accepte_newsletter: s.accepte_newsletter,
+    accepte_contact_createurice: s.accepte_contact_createurice,
+  }));
 
   let succes = 0;
   let echecs = 0;
