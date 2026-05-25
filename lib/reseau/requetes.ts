@@ -71,14 +71,9 @@ export interface MessageAffiche {
   lu: boolean;
 }
 
-/**
- * Nom affiché à partir de prénom/nom (chacun pouvant être masqué). On préfère
- * « Prénom Nom », sinon le morceau visible, sinon « Membre » (jamais de blanc).
- */
-export function nomAffiche(prenom: string | null, nom: string | null): string {
-  const morceaux = [prenom, nom].filter((m): m is string => m !== null && m.trim() !== '');
-  return morceaux.length > 0 ? morceaux.join(' ') : 'Membre';
-}
+// `nomAffiche` vit dans un module pur (client-safe) ; on le ré-exporte ici pour
+// les appels côté serveur qui passent déjà par cette couche de requêtes.
+export { nomAffiche } from './affichage';
 
 /** Hydrate les identités affichables d'un lot de personnes (dédupliqué). */
 async function chargerIdentites(

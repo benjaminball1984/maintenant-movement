@@ -61,12 +61,11 @@ posteriori, encart financement.
 
 ## Déploiement sur le distant
 
-- [ ] **Migration 039 à appliquer** sur la base distante (DDL + RLS + helpers,
-  sans PII) :
-  `npx tsx --env-file=.env.local scripts/appliquer-sql-distant.ts supabase/migrations/20260525140000_reseau_social.sql`.
-  Sans elle, les pages réseau échouent à l'exécution (tables absentes) ; le code
-  ne mocke pas ce cas (fonctionnalité nouvelle). À lancer après feu vert de
-  Lilou/Ben.
+- [x] **Migration 039 appliquée** le 2026-05-25 (autorisée par Lilou/Ben), via
+  `scripts/appliquer-sql-distant.ts`. Vérifié : les 5 tables réseau et les
+  helpers de visibilité (`personne_affichage`, `membres_commune`,
+  `personne_id_par_numero`) sont présents. Le réseau social est actif sur le
+  distant.
 
 ## Choix techniques
 

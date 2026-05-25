@@ -8,8 +8,8 @@ import {
 } from '@/app/(public)/s-informer/reseau/actions';
 import { AvatarReseau } from '@/components/reseau/AvatarReseau';
 import { Button, Textarea } from '@/components/ui';
+import { nomAffiche } from '@/lib/reseau/affichage';
 import type { CommentaireAffiche, PostAffiche } from '@/lib/reseau/requetes';
-import { nomAffiche } from '@/lib/reseau/requetes';
 import { Heart, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
