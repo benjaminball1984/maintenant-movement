@@ -59,17 +59,23 @@ réconciliation et le lien éventuel vers le compte.
 3. **Changement d'email** : l'identité (numéro) ne dépend pas de l'email ; les
    signatures déjà rattachées le restent.
 
-## Non livré / à faire faire par Lilou/Ben
+## Déployé sur le distant (2026-05-25, autorisé par Lilou/Ben)
 
-- [ ] **Appliquer la migration 038 sur la base distante** (`supabase db push` ou
-  `npx tsx --env-file=.env.local scripts/appliquer-sql-distant.ts supabase/migrations/20260525130000_profil_unifie.sql`).
-  DDL + remplissage, sans nouvelle PII (n'utilise que les données déjà en base).
-  Tant qu'elle n'est pas appliquée : numéros non affichés (« en cours
-  d'activation »), signatures importées non visibles dans Mes contributions
-  (dégradation propre, aucun crash).
-- [ ] **Régénérer `types/database.ts`** après application (les types de
-  `profil_unifie`, `signature_petition.profil_unifie_id`, et les 2 fonctions ont
-  été ajoutés à la main cette session).
+- [x] **Migration 038 appliquée** sur la base distante via
+  `scripts/appliquer-sql-distant.ts`. Vérifié : **15 737 profils unifiés**
+  créés (numéros tous uniques et au format `^M[A-Z]{7}$`), **17 746 / 17 746
+  signatures reliées** à leur profil, compte existant relié.
+- [x] **Pré-création des communes** (`precreer-communes.ts --confirm`) :
+  **35 011 coquilles** `pre_creee` (révision §7B). Chaque commune est
+  consultable et rejoignable.
+- [x] **Import des signataires** : déjà complet (17 746 en base), 0 à insérer.
+- Note types : `types/database.ts` a été mis à jour à la main (profil_unifie,
+  `signature_petition.profil_unifie_id`, fonctions). Une régénération via la CLI
+  Supabase reste possible plus tard mais n'est pas nécessaire (les types posés
+  correspondent au schéma appliqué).
+
+## Non livré (et pourquoi)
+
 - [ ] **Réclamation d'un email antérieur** (cas où la personne a signé avec un
   email A puis crée un compte avec un email B) : nécessiterait une action
   « rattacher une autre adresse vérifiée ». Hors v1, à décider plus tard.
