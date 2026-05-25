@@ -29,7 +29,6 @@ const ZOOM_INITIAL = 5;
  */
 const COULEUR_PAR_TYPE: Record<TypePoint, string> = {
   mobilisation: '#e85d75',
-  commune: '#9333ea',
   entraide_hebergement: '#10b981',
   entraide_transport: '#0ea5e9',
   entraide_pret_objet: '#f59e0b',
@@ -43,7 +42,6 @@ const COULEUR_PAR_TYPE: Record<TypePoint, string> = {
 
 const LIBELLE_PAR_TYPE: Record<TypePoint, string> = {
   mobilisation: 'Mobilisations',
-  commune: 'Communes libres',
   entraide_hebergement: 'Hébergement solidaire',
   entraide_transport: 'Transport solidaire',
   entraide_pret_objet: 'Qui prête tout',
@@ -57,7 +55,6 @@ const LIBELLE_PAR_TYPE: Record<TypePoint, string> = {
 
 const TOUS_LES_TYPES: TypePoint[] = [
   'mobilisation',
-  'commune',
   'entraide_hebergement',
   'entraide_transport',
   'entraide_pret_objet',

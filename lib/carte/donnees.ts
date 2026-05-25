@@ -9,7 +9,6 @@ import { getSupabaseServer } from '@/lib/supabase';
  *
  * Sources couvertes par 6.1 :
  *   - mobilisations          (3.2)
- *   - communes libres        (5.2)
  *   - offres d'entraide      (4.1) — 4 sous-types via le type discriminant
  *   - SEL                    (4.2)
  *   - marché produits        (4.3)
@@ -24,7 +23,6 @@ import { getSupabaseServer } from '@/lib/supabase';
 
 export type TypePoint =
   | 'mobilisation'
-  | 'commune'
   | 'entraide_hebergement'
   | 'entraide_transport'
   | 'entraide_pret_objet'
@@ -65,7 +63,6 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
 
   const [
     { data: mobilisations },
-    { data: communes },
     { data: offres },
     { data: services },
     { data: produits },
@@ -81,12 +78,6 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
       .not('longitude', 'is', null)
       .order('date_debut', { ascending: true })
       .limit(500),
-    supabase
-      .from('commune')
-      .select('id, nom, slug, latitude, longitude, departement')
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
-      .limit(3000),
     supabase
       .from('offre_entraide')
       .select('id, titre, slug, latitude, longitude, lieu, type')
@@ -148,19 +139,9 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
     });
   }
 
-  for (const c of communes ?? []) {
-    if (c.latitude === null || c.longitude === null) continue;
-    points.push({
-      id: c.id,
-      type: 'commune',
-      titre: c.nom,
-      slug: c.slug,
-      latitude: c.latitude,
-      longitude: c.longitude,
-      sous_titre: c.departement,
-      href: `/agir/communes/${c.slug}`,
-    });
-  }
+  // Les communes ne sont plus tracées sur la carte unifiée : elles ont leur
+  // carte dédiée et clusterisée (/communes), capable d'afficher tout le
+  // référentiel (~35 000 communes) sans noyer la vue d'activité ici.
 
   for (const o of offres ?? []) {
     if (o.latitude === null || o.longitude === null) continue;

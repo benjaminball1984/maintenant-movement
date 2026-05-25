@@ -201,6 +201,24 @@ export async function creerCommuneLibre(
   }
 
   const supabase = await getSupabaseServer();
+
+  // Pas de doublon par nom exact (insensible à la casse) : si une commune
+  // porte déjà ce nom (coquille pré-créée du référentiel ou commune créée par
+  // la communauté), on refuse pour éviter les doublons (décision Lilou/Ben).
+  // `ilike` sans joker fait une comparaison exacte insensible à la casse.
+  const { data: homonymes } = await supabase
+    .from('commune')
+    .select('id')
+    .ilike('nom', donnees.nom.trim())
+    .limit(1);
+  if (homonymes !== null && homonymes.length > 0) {
+    return {
+      ok: false,
+      message:
+        'Une commune porte déjà exactement ce nom. Choisis un nom distinct (précise le quartier, la ville, etc.).',
+    };
+  }
+
   const slug = await genererSlugUniqueCommune(donnees.nom, supabase);
 
   const { error } = await supabase.from('commune').insert({
