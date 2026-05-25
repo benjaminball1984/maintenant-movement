@@ -171,3 +171,68 @@ export async function listerToutesPetitionsAdmin(): Promise<PetitionAvecCompteur
 
   return hydraterPetitions(supabase, data as Petition[]);
 }
+
+/**
+ * Une signature de la personne connectée, accompagnée des infos de la
+ * pétition concernée. Sert à l'espace « Mes contributions ».
+ */
+export interface MaSignature {
+  /** Identifiant de la signature (cible du réglage de recontact). */
+  id: string;
+  /** Slug de la pétition signée (lien vers la page publique). */
+  petition_slug: string;
+  /** Titre de la pétition signée. */
+  petition_titre: string;
+  /** Statut de la pétition (publiee, en_moderation, ...). */
+  petition_statut: string;
+  /** La personne autorise-t-elle la créatrice à la recontacter ? */
+  accepte_contact_createurice: boolean;
+  /** Date de signature (ISO). */
+  signee_le: string;
+}
+
+/**
+ * Liste les pétitions signées par la personne connectée, avec pour chacune
+ * le réglage de recontact (modifiable depuis /profil/contributions).
+ *
+ * Ne remonte QUE les signatures rattachées au compte (`personne_id`), via la
+ * RLS `signature_petition_select`. Les signatures faites AVANT la création du
+ * compte (importées, `personne_id` null, rattachables seulement par email) ne
+ * sont pas encore reliées : le rattachement par email est une décision
+ * d'architecture/RGPD en attente (cf. manifest 13.3-D). On joint les titres
+ * via une IN-clause (même pattern que `hydraterPetitions`) ; une pétition non
+ * lisible (RLS) est silencieusement omise.
+ */
+export async function listerMesSignatures(): Promise<MaSignature[]> {
+  const supabase = await getSupabaseServer();
+
+  const { data: signatures, error } = await supabase
+    .from('signature_petition')
+    .select('id, petition_id, accepte_contact_createurice, created_at')
+    .order('created_at', { ascending: false });
+  if (error !== null || signatures === null || signatures.length === 0) {
+    return [];
+  }
+
+  const petitionIds = [...new Set(signatures.map((s) => s.petition_id))];
+  const { data: petitions } = await supabase
+    .from('petition')
+    .select('id, slug, titre, statut')
+    .in('id', petitionIds);
+  const parId = new Map((petitions ?? []).map((p) => [p.id, p]));
+
+  return signatures.flatMap((signature) => {
+    const petition = parId.get(signature.petition_id);
+    if (petition === undefined) return [];
+    return [
+      {
+        id: signature.id,
+        petition_slug: petition.slug,
+        petition_titre: petition.titre,
+        petition_statut: petition.statut,
+        accepte_contact_createurice: signature.accepte_contact_createurice,
+        signee_le: signature.created_at,
+      },
+    ];
+  });
+}

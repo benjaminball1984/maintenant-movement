@@ -144,3 +144,23 @@ export const verifierTotpSchema = z
   .strict();
 
 export type DonneesVerifierTotp = z.infer<typeof verifierTotpSchema>;
+
+// ============================================================
+// Réglage de recontact par pétition signée (RGPD : consentement
+// granulaire, modifiable a posteriori depuis /profil/contributions)
+// ============================================================
+
+/**
+ * Réglage du consentement « la créatrice peut me recontacter » pour UNE
+ * signature donnée. Ce consentement est par pétition (il ne remonte jamais
+ * au profil) : une personne peut l'autoriser pour une pétition et pas une
+ * autre. Cf. `signature_petition.accepte_contact_createurice`.
+ */
+export const definirRecontactSignatureSchema = z
+  .object({
+    signature_id: z.string().uuid('Signature invalide.'),
+    autorise: z.boolean(),
+  })
+  .strict();
+
+export type DonneesDefinirRecontactSignature = z.infer<typeof definirRecontactSignatureSchema>;

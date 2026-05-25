@@ -2,6 +2,7 @@ import {
   CHAMPS_VISIBILITE,
   NIVEAUX_VISIBILITE,
   PREFERENCES_NOTIFICATIONS_DEFAUT,
+  definirRecontactSignatureSchema,
   demanderSuppressionSchema,
   mettreAJourProfilSchema,
   preferencesNotificationsSchema,
@@ -142,5 +143,40 @@ describe('verifierTotpSchema', () => {
 
   it('refuse un factor_id vide', () => {
     expect(verifierTotpSchema.safeParse({ factor_id: '', code: '123456' }).success).toBe(false);
+  });
+});
+
+describe('definirRecontactSignatureSchema', () => {
+  const UUID = '550e8400-e29b-41d4-a716-446655440000';
+
+  it('accepte autoriser le recontact', () => {
+    expect(
+      definirRecontactSignatureSchema.safeParse({ signature_id: UUID, autorise: true }).success,
+    ).toBe(true);
+  });
+
+  it('accepte retirer le recontact', () => {
+    expect(
+      definirRecontactSignatureSchema.safeParse({ signature_id: UUID, autorise: false }).success,
+    ).toBe(true);
+  });
+
+  it('refuse un signature_id non UUID', () => {
+    expect(
+      definirRecontactSignatureSchema.safeParse({ signature_id: 'abc', autorise: true }).success,
+    ).toBe(false);
+  });
+
+  it('refuse une valeur autorise non booléenne', () => {
+    expect(
+      definirRecontactSignatureSchema.safeParse({ signature_id: UUID, autorise: 'oui' }).success,
+    ).toBe(false);
+  });
+
+  it('refuse un champ supplémentaire (strict)', () => {
+    expect(
+      definirRecontactSignatureSchema.safeParse({ signature_id: UUID, autorise: true, x: 1 })
+        .success,
+    ).toBe(false);
   });
 });
