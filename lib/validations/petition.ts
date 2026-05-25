@@ -51,34 +51,87 @@ export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
  *   - destinataire 5-200 chars (institution, élu·e, entreprise...)
  *   - objectif 100 à 1 000 000 signataires (pas de pétition d'1 signature ou trop pharaonique)
  */
+/**
+ * Champs de contenu communs à la création et à l'édition d'une pétition.
+ * Extraits ici pour rester DRY : un seul endroit définit les règles de
+ * titre / texte / destinataire / image / objectif.
+ */
+const champsContenuPetition = {
+  titre: z
+    .string()
+    .trim()
+    .min(5, 'Le titre doit comporter au moins 5 caractères.')
+    .max(200, 'Le titre doit faire 200 caractères maximum.'),
+  texte: z
+    .string()
+    .trim()
+    .min(100, 'Le texte doit comporter au moins 100 caractères (argumenter clairement).')
+    .max(5000, 'Le texte doit faire 5000 caractères maximum.'),
+  destinataire: z
+    .string()
+    .trim()
+    .min(5, 'Le destinataire est requis (institution, élu·e, entreprise...).')
+    .max(200, 'Le destinataire doit faire 200 caractères maximum.'),
+  image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
+  objectif: z
+    .number()
+    .int('L’objectif doit être un nombre entier.')
+    .min(100, 'L’objectif minimum est 100 signataires.')
+    .max(1_000_000, 'L’objectif maximum est 1 000 000 signataires.'),
+} as const;
+
 export const creerPetitionSchema = z
   .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, 'Le titre doit faire 200 caractères maximum.'),
-    texte: z
-      .string()
-      .trim()
-      .min(100, 'Le texte doit comporter au moins 100 caractères (argumenter clairement).')
-      .max(5000, 'Le texte doit faire 5000 caractères maximum.'),
-    destinataire: z
-      .string()
-      .trim()
-      .min(5, 'Le destinataire est requis (institution, élu·e, entreprise...).')
-      .max(200, 'Le destinataire doit faire 200 caractères maximum.'),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    objectif: z
-      .number()
-      .int('L’objectif doit être un nombre entier.')
-      .min(100, 'L’objectif minimum est 100 signataires.')
-      .max(1_000_000, 'L’objectif maximum est 1 000 000 signataires.'),
+    ...champsContenuPetition,
     token_turnstile: tokenTurnstileSchema,
   })
   .strict();
 
 export type DonneesCreerPetition = z.infer<typeof creerPetitionSchema>;
+
+// ============================================================
+// Édition d'une pétition par l'équipe (admin / modération)
+// ============================================================
+
+/**
+ * Date optionnelle au format `AAAA-MM-JJ` (input HTML `type="date"`), ou
+ * chaîne vide pour « pas de date ». La Server Action convertit la chaîne
+ * vide en `null` avant l'écriture en base.
+ */
+const dateOptionnelleSchema = z
+  .string()
+  .date('Date invalide (format attendu : AAAA-MM-JJ).')
+  .or(z.literal(''))
+  .optional();
+
+/**
+ * Édition complète d'une pétition par l'équipe : tout le contenu, plus les
+ * deux dates métier (lancement et échéance, cf. migration 035).
+ *
+ * Pas de Turnstile ici : l'action est réservée aux personnes déjà
+ * authentifiées ET porteuses d'un droit admin/modération (vérifié côté
+ * Server Action + RLS). La cohérence des dates (échéance >= lancement)
+ * reflète la contrainte SQL `petition_dates_coherentes`, pour offrir un
+ * message clair avant même de toucher la base.
+ */
+export const editerPetitionSchema = z
+  .object({
+    petition_id: z.string().uuid(),
+    ...champsContenuPetition,
+    date_lancement: dateOptionnelleSchema,
+    date_echeance: dateOptionnelleSchema,
+  })
+  .strict()
+  .refine(
+    (data) =>
+      !data.date_lancement || !data.date_echeance || data.date_echeance >= data.date_lancement,
+    {
+      message: "L'échéance ne peut pas précéder la date de lancement.",
+      path: ['date_echeance'],
+    },
+  );
+
+export type DonneesEditerPetition = z.infer<typeof editerPetitionSchema>;
 
 // ============================================================
 // Modération a priori
