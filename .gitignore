@@ -66,3 +66,7 @@ backups/
 
 # Patches generes pour review externe (jamais commites)
 docs/review/
+
+# Donnees de migration : CSV avec donnees personnelles reelles (RGPD,
+# jamais commitees). Les scripts d'import sont versionnes, pas les CSV.
+data-migration/
