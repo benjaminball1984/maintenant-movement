@@ -1,0 +1,15 @@
+# Exclus du contexte de build Docker.
+node_modules
+.next
+.git
+.github
+.env
+.env.local
+.env.*.local
+tests/screenshots
+playwright-report
+test-results
+*.log
+.DS_Store
+data-migration
+tsconfig.tsbuildinfo
