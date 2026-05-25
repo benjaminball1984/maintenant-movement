@@ -282,26 +282,32 @@ begin
   end loop;
 end $$;
 
--- 2. Un profil unifié pour chaque email de signature, + rattachement.
+-- 2. Un profil unifié pour chaque email de signature.
+--    Les insertions passent par une boucle (un INSERT = un statement, donc le
+--    trigger voit les numéros déjà posés et garantit leur unicité, ce qu'une
+--    insertion ensembliste unique ne permettrait pas). Le rattachement, lui, se
+--    fait ensuite en une seule passe ensembliste (jointure sur lower(email)),
+--    bien plus rapide qu'un UPDATE par email sur ~16 000 emails.
 do $$
 declare
   r record;
-  pid uuid;
 begin
   for r in
     select lower(email) as email_norm, min(email) as email_orig
     from public.signature_petition
     group by lower(email)
   loop
-    select id into pid from public.profil_unifie where lower(email) = r.email_norm limit 1;
-    if pid is null then
-      insert into public.profil_unifie (email) values (r.email_orig) returning id into pid;
+    if not exists (select 1 from public.profil_unifie where lower(email) = r.email_norm) then
+      insert into public.profil_unifie (email) values (r.email_orig);
     end if;
-    update public.signature_petition
-    set profil_unifie_id = pid
-    where lower(email) = r.email_norm and profil_unifie_id is null;
   end loop;
 end $$;
+
+update public.signature_petition s
+set profil_unifie_id = pu.id
+from public.profil_unifie pu
+where lower(pu.email) = lower(s.email)
+  and s.profil_unifie_id is null;
 
 -- 3. `personne_id` sur les signatures dont l'email correspond à un compte.
 update public.signature_petition s
