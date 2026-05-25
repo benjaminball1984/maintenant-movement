@@ -214,9 +214,9 @@ la variable + fournir les clés.
   réelles présentes : 35 011 communes pré-créées, 17 746 signatures importées,
   15 737 profils unifiés. Migrations 038/039 appliquées (historique à
   régulariser, voir `supabase/README.md`).
-- **GitHub** : branche `feature/phase-13-integration`, **~30 commits d'avance
-  sur `main`** (main = phase 12). Décision Lilou/Ben : phase 13 non fusionnée
-  dans `main` brut tant que non validée.
+- **GitHub** : **tout fusionné dans `main`** le 2026-05-25 (fast-forward depuis
+  `feature/phase-13-integration`, tip `a778861`). `main` contient désormais
+  l'ensemble (phases 0 à 13 + réseau social). Historique linéaire.
 
 ---
 
