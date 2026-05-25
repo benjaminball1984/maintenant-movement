@@ -1,10 +1,12 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getT99CPService } from '@/lib/t99cp';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
+import { retirerServiceSelSchema } from '@/lib/validations/moderation';
 import {
   type DonneesAnnulerPrestation,
   type DonneesContesterPrestation,
@@ -381,6 +383,65 @@ export async function crediterPrestationsEnAttente(): Promise<
   }
 
   return { ok: true, traitees };
+}
+
+// ============================================================
+// Retrait d'un service SEL (modération a posteriori, admin)
+// ============================================================
+export async function retirerServiceSel(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = retirerServiceSelSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees = parse.data;
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+
+  // Droit de modération sur l'onglet SEL (ou admin général).
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    const { data: estMod } = await supabase.rpc('est_moderateurice', { onglet_demande: 'sel' });
+    if (estMod !== true) {
+      return { ok: false, message: 'Droit de modération requis.' };
+    }
+  }
+
+  const { data: avant } = await supabase
+    .from('service_sel')
+    .select('id, statut')
+    .eq('id', donnees.service_id)
+    .maybeSingle();
+  if (avant === null) {
+    return { ok: false, message: 'Service introuvable.' };
+  }
+  if (avant.statut === 'retire') {
+    return { ok: false, message: 'Ce service est déjà retiré.' };
+  }
+
+  const { error } = await supabase
+    .from('service_sel')
+    .update({ statut: 'retire' })
+    .eq('id', donnees.service_id);
+  if (error !== null) {
+    return { ok: false, message: `Retrait impossible : ${error.message}` };
+  }
+
+  // `service_sel` n'a pas de colonne de retrait : on trace dans le journal d'audit.
+  await journaliser({
+    action: 'service_sel.retire',
+    cibleTable: 'service_sel',
+    cibleId: donnees.service_id,
+    ancienEtat: { statut: avant.statut },
+    nouvelEtat: { statut: 'retire', raison: donnees.raison },
+  });
+
+  revalidatePath('/s-entraider/sel');
+  revalidatePath('/admin/moderation/sel');
+  return { ok: true };
 }
 
 // ============================================================

@@ -1,5 +1,6 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import {
@@ -9,6 +10,10 @@ import {
   retirerOrganisationSchema,
 } from '@/lib/validations/autres-moyens';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
+import {
+  type DonneesReafficherOrganisation,
+  reafficherOrganisationSchema,
+} from '@/lib/validations/moderation';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -107,6 +112,53 @@ export async function retirerOrganisation(donneesBrutes: unknown): Promise<Resul
   }
 
   revalidatePath('/agir/autres-moyens');
+  return { ok: true };
+}
+
+/**
+ * Réaffiche une organisation précédemment retirée : repasse au statut
+ * `affichee` et efface les métadonnées de retrait (raison, auteurice, date),
+ * comme l'exige la contrainte `orga_statut_valide`. Tracé dans le journal.
+ */
+export async function reafficherOrganisation(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = reafficherOrganisationSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesReafficherOrganisation = parse.data;
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+  const aDroits = await aDroitGestionAutresMoyens(supabase);
+  if (!aDroits) {
+    return { ok: false, message: 'Droit de modération requis.' };
+  }
+
+  const { error } = await supabase
+    .from('organisation_partenaire')
+    .update({
+      statut: 'affichee',
+      raison_retrait: null,
+      retire_par: null,
+      retire_le: null,
+    })
+    .eq('id', donnees.organisation_id);
+  if (error !== null) {
+    return { ok: false, message: `Réaffichage impossible : ${error.message}` };
+  }
+
+  await journaliser({
+    action: 'organisation.reaffichee',
+    cibleTable: 'organisation_partenaire',
+    cibleId: donnees.organisation_id,
+    nouvelEtat: { statut: 'affichee' },
+  });
+
+  revalidatePath('/agir/autres-moyens');
+  revalidatePath('/admin/moderation/autres-moyens');
   return { ok: true };
 }
 

@@ -66,3 +66,8 @@ backups/
 
 # Patches generes pour review externe (jamais commites)
 docs/review/
+
+# Donnees de migration Base44 (PII brute : signataires, membres, newsletter,
+# correspondances communes). Jamais commitees (RGPD). Les fichiers restent en
+# local pour alimenter les scripts d'import, mais ne doivent pas entrer dans git.
+data-migration/
