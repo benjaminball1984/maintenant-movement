@@ -1,10 +1,12 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { SEPT_RDV } from '@/lib/moments/config';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
+import { retirerMomentSchema } from '@/lib/validations/moderation';
 import {
   type DonneesAjouterTupperware,
   type DonneesCreerMomentSolidaire,
@@ -225,6 +227,65 @@ export async function marquerTupperwareRendu(donneesBrutes: unknown): Promise<Re
     return { ok: false, message: `Mise à jour impossible : ${error.message}` };
   }
   revalidatePath('/agir/moments-solidaires');
+  return { ok: true };
+}
+
+// ============================================================
+// Retrait d'un moment (modération a posteriori, admin)
+// ============================================================
+export async function retirerMoment(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = retirerMomentSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees = parse.data;
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+
+  // Droit de modération sur l'onglet Moments (ou admin général).
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    const { data: estMod } = await supabase.rpc('est_moderateurice', { onglet_demande: 'moments' });
+    if (estMod !== true) {
+      return { ok: false, message: 'Droit de modération requis.' };
+    }
+  }
+
+  const { data: avant } = await supabase
+    .from('moment_solidaire')
+    .select('id, statut')
+    .eq('id', donnees.moment_id)
+    .maybeSingle();
+  if (avant === null) {
+    return { ok: false, message: 'Moment introuvable.' };
+  }
+  if (avant.statut === 'retire') {
+    return { ok: false, message: 'Ce moment est déjà retiré.' };
+  }
+
+  const { error } = await supabase
+    .from('moment_solidaire')
+    .update({ statut: 'retire' })
+    .eq('id', donnees.moment_id);
+  if (error !== null) {
+    return { ok: false, message: `Retrait impossible : ${error.message}` };
+  }
+
+  // La table n'a pas de colonne de retrait : on trace dans le journal d'audit.
+  await journaliser({
+    action: 'moment.retire',
+    cibleTable: 'moment_solidaire',
+    cibleId: donnees.moment_id,
+    ancienEtat: { statut: avant.statut },
+    nouvelEtat: { statut: 'retire', raison: donnees.raison },
+  });
+
+  revalidatePath('/agir/moments-solidaires');
+  revalidatePath('/admin/moderation/moments');
   return { ok: true };
 }
 

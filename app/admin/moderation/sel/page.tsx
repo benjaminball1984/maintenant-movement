@@ -1,3 +1,5 @@
+import { retirerServiceSel } from '@/app/(public)/s-entraider/sel/actions';
+import { ControleModeration } from '@/components/admin/moderation/ControleModeration';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
@@ -50,21 +52,38 @@ export default async function PageModerationSel() {
         <ul className="grid gap-2">
           {(services ?? []).map((s) => (
             <li key={s.id}>
-              <Card variant="ombre" className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <Badge variant={s.categorie === 'service' ? 'brand' : 'accent'}>
-                    {s.categorie}
-                  </Badge>
-                  <p className="mt-1 font-bold text-text-1">
-                    <Link
-                      href={`/s-entraider/sel/${s.slug}`}
-                      className="underline-offset-4 hover:underline"
-                    >
-                      {s.titre}
-                    </Link>
-                  </p>
+              <Card variant="ombre" className="grid gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <Badge variant={s.categorie === 'service' ? 'brand' : 'accent'}>
+                      {s.categorie}
+                    </Badge>
+                    <p className="mt-1 font-bold text-text-1">
+                      <Link
+                        href={`/s-entraider/sel/${s.slug}`}
+                        className="underline-offset-4 hover:underline"
+                      >
+                        {s.titre}
+                      </Link>
+                    </p>
+                  </div>
+                  <Badge variant="default">{s.statut}</Badge>
                 </div>
-                <Badge variant="default">{s.statut}</Badge>
+                {s.statut === 'publie' ? (
+                  <ControleModeration
+                    actions={[
+                      {
+                        libelle: 'Retirer',
+                        action: retirerServiceSel,
+                        champId: 'service_id',
+                        id: s.id,
+                        champRaison: 'raison',
+                        placeholderRaison: 'Motif du retrait, au moins 10 caractères.',
+                        messageSucces: 'Service retiré.',
+                      },
+                    ]}
+                  />
+                ) : null}
               </Card>
             </li>
           ))}

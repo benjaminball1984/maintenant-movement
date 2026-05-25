@@ -1,9 +1,11 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
+import { retirerSondageSchema } from '@/lib/validations/moderation';
 import {
   type DonneesCreerSondage,
   type DonneesVoterSondage,
@@ -124,6 +126,66 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
   }
 
   revalidatePath('/s-informer/sondages');
+  return { ok: true };
+}
+
+// ============================================================
+// Retrait d'un sondage (modération a posteriori, admin)
+// ============================================================
+export async function retirerSondage(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = retirerSondageSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees = parse.data;
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+
+  // Droit de modération sur l'onglet Sondages (ou admin général).
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    const { data: estMod } = await supabase.rpc('est_moderateurice', {
+      onglet_demande: 'sondages',
+    });
+    if (estMod !== true) {
+      return { ok: false, message: 'Droit de modération requis.' };
+    }
+  }
+
+  const { data: avant } = await supabase
+    .from('sondage')
+    .select('id, statut')
+    .eq('id', donnees.sondage_id)
+    .maybeSingle();
+  if (avant === null) {
+    return { ok: false, message: 'Sondage introuvable.' };
+  }
+  if (avant.statut === 'retire') {
+    return { ok: false, message: 'Ce sondage est déjà retiré.' };
+  }
+
+  const { error } = await supabase
+    .from('sondage')
+    .update({ statut: 'retire' })
+    .eq('id', donnees.sondage_id);
+  if (error !== null) {
+    return { ok: false, message: `Retrait impossible : ${error.message}` };
+  }
+
+  await journaliser({
+    action: 'sondage.retire',
+    cibleTable: 'sondage',
+    cibleId: donnees.sondage_id,
+    ancienEtat: { statut: avant.statut },
+    nouvelEtat: { statut: 'retire', raison: donnees.raison },
+  });
+
+  revalidatePath('/s-informer/sondages');
+  revalidatePath('/admin/moderation/sondages');
   return { ok: true };
 }
 

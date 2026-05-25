@@ -67,6 +67,7 @@ backups/
 # Patches generes pour review externe (jamais commites)
 docs/review/
 
-# Donnees de migration : CSV avec donnees personnelles reelles (RGPD,
-# jamais commitees). Les scripts d'import sont versionnes, pas les CSV.
+# Donnees de migration Base44 (PII brute : signataires, membres, newsletter,
+# correspondances communes). Jamais commitees (RGPD). Les fichiers restent en
+# local pour alimenter les scripts d'import ; seuls les scripts sont versionnes.
 data-migration/
