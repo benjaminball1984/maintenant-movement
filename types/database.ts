@@ -2221,6 +2221,63 @@ export type Database = {
           },
         ];
       };
+      commune_reference: {
+        Row: {
+          code_departement: string | null;
+          code_insee: string;
+          created_at: string;
+          latitude: number | null;
+          longitude: number | null;
+          nom: string;
+          population: number | null;
+          region: string | null;
+          type: string;
+        };
+        Insert: {
+          code_departement?: string | null;
+          code_insee: string;
+          created_at?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          nom: string;
+          population?: number | null;
+          region?: string | null;
+          type?: string;
+        };
+        Update: {
+          code_departement?: string | null;
+          code_insee?: string;
+          created_at?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          nom?: string;
+          population?: number | null;
+          region?: string | null;
+          type?: string;
+        };
+        Relationships: [];
+      };
+      correspondance_cp_insee: {
+        Row: {
+          code_insee: string;
+          code_postal: string;
+          created_at: string;
+          nom_commune: string | null;
+        };
+        Insert: {
+          code_insee: string;
+          code_postal: string;
+          created_at?: string;
+          nom_commune?: string | null;
+        };
+        Update: {
+          code_insee?: string;
+          code_postal?: string;
+          created_at?: string;
+          nom_commune?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       adherent_actif: {
@@ -2369,6 +2426,14 @@ export type Database = {
       nombre_participant_es: {
         Args: { mobilisation_a_compter: string };
         Returns: number;
+      };
+      compteurs_commune: {
+        Args: { cible_insee: string };
+        Returns: {
+          inscrits: number;
+          signataires: number;
+          abonnes: number;
+        }[];
       };
       nombre_signatures: {
         Args: { petition_a_compter: string };
