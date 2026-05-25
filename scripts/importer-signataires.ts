@@ -20,10 +20,11 @@
  *   npx tsx scripts/importer-signataires.ts data-migration --confirm
  *
  * `--dry-run` : parse, joint, contrôle la qualité, n'écrit RIEN et ne
- * requiert aucune variable d'env. `--confirm` : crée la personne système,
- * upsert les 5 pétitions (statut `archivee`, contenu en placeholder), puis
- * insère les signatures manquantes par lots. Idempotent : ré-exécuter
- * n'insère pas de doublon (unicité `(petition_id, lower(email))`).
+ * requiert aucune variable d'env. `--confirm` : attribue les 5 pétitions au
+ * compte de Benjamin Ball (FK créateurice), les upsert (statut
+ * `en_moderation`, contenu en placeholder), puis insère les signatures
+ * manquantes par lots. Idempotent : ré-exécuter n'insère pas de doublon
+ * (unicité `(petition_id, lower(email))`).
  *
  * Préalable `--confirm` : `NEXT_PUBLIC_SUPABASE_URL` et
  * `SUPABASE_SERVICE_ROLE_KEY` dans l'environnement.
@@ -37,8 +38,13 @@ import { createClient } from '@supabase/supabase-js';
 // Constantes métier
 // ============================================================
 
-/** Personne « système » porteuse des pétitions importées (pas de compte auth). */
-const SYSTEME_ID = '00000000-0000-0000-0000-000000000001';
+/**
+ * Créateurice des pétitions importées. `petition.createurice_id` est une FK
+ * NOT NULL vers `personne(id)`, lui-même lié à `auth.users` : il faut donc un
+ * vrai compte. On attribue provisoirement les 5 pétitions au compte de
+ * Benjamin Ball, qui les réattribuera ensuite via ses droits d'édition.
+ */
+const CREATEUR_EMAIL = 'lifebenjaminaeron.ball@gmail.com';
 
 /** Correspondance nom de pétition (CSV) → slug cible. */
 const PETITIONS: ReadonlyArray<{ nomCsv: string; slug: string }> = [
@@ -215,6 +221,25 @@ function objectifProvisoire(nbSignatures: number): number {
 const LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. [TEXTE À FAIRE : reprendre ou réécrire le texte réel de la pétition avant publication.]';
 
+/**
+ * Réessaie une opération Supabase tant qu'elle renvoie une erreur réseau
+ * transitoire (« fetch failed »), avec un backoff léger. Le réseau vers
+ * Supabase peut être instable depuis cet environnement d'exécution.
+ */
+async function avecReessais<R extends { error: unknown }>(
+  // Les requêtes Supabase renvoient un `PostgrestBuilder`, qui est un thenable
+  // (PromiseLike) et non une vraie `Promise` : on accepte donc PromiseLike.
+  operation: () => PromiseLike<R>,
+  essais = 5,
+): Promise<R> {
+  let resultat = await operation();
+  for (let i = 1; i < essais && resultat.error !== null; i += 1) {
+    await new Promise((r) => setTimeout(r, 800 * i));
+    resultat = await operation();
+  }
+  return resultat;
+}
+
 function lireMode(): { dossier: string; estDryRun: boolean } {
   const args = process.argv.slice(2);
   const dossier = args.find((a) => !a.startsWith('--'));
@@ -275,38 +300,41 @@ async function main(): Promise<void> {
   }
   const supabase = createClient(url, key);
 
-  // 1. Personne système (porteuse des pétitions importées).
-  const { error: errSysteme } = await supabase
-    .from('personne')
-    .upsert(
-      { id: SYSTEME_ID, prenom: 'Système', nom: 'Import', statut: 'actif' },
-      { onConflict: 'id' },
+  // 1. Créateurice des pétitions = compte existant de Benjamin Ball.
+  const { data: createur, error: errCreateur } = await avecReessais(() =>
+    supabase.from('personne').select('id').eq('email', CREATEUR_EMAIL).maybeSingle(),
+  );
+  if (errCreateur !== null || createur === null) {
+    console.error(
+      `Compte créateurice introuvable pour ${CREATEUR_EMAIL}. Vérifier que ce compte existe en base.`,
     );
-  if (errSysteme !== null) {
-    console.error(`Personne système : ${errSysteme.message}`);
     process.exit(1);
   }
+  const createurId = createur.id as string;
 
-  // 2. Les 5 pétitions (placeholders, statut archivee tant que non réécrites).
+  // 2. Les 5 pétitions (placeholders, statut en_moderation : la créateurice
+  //    pourra les éditer/réattribuer via ses droits avant publication).
   const slugVersId = new Map<string, string>();
   for (const { nomCsv, slug } of PETITIONS) {
     const objectif = objectifProvisoire(rapport.parPetition[slug] ?? 0);
-    const { data, error } = await supabase
-      .from('petition')
-      .upsert(
-        {
-          slug,
-          titre: `[TITRE À METTRE — provisoire : ${nomCsv}]`,
-          texte: LOREM,
-          destinataire: '[DESTINATAIRE À METTRE]',
-          objectif,
-          createurice_id: SYSTEME_ID,
-          statut: 'archivee',
-        },
-        { onConflict: 'slug' },
-      )
-      .select('id')
-      .single();
+    const { data, error } = await avecReessais(() =>
+      supabase
+        .from('petition')
+        .upsert(
+          {
+            slug,
+            titre: `[TITRE À METTRE — provisoire : ${nomCsv}]`,
+            texte: LOREM,
+            destinataire: '[DESTINATAIRE À METTRE]',
+            objectif,
+            createurice_id: createurId,
+            statut: 'en_moderation',
+          },
+          { onConflict: 'slug' },
+        )
+        .select('id')
+        .single(),
+    );
     if (error !== null || data === null) {
       console.error(`Pétition ${slug} : ${error?.message ?? 'erreur'}`);
       process.exit(1);
@@ -319,11 +347,13 @@ async function main(): Promise<void> {
   for (const id of slugVersId.values()) {
     let from = 0;
     for (;;) {
-      const { data, error } = await supabase
-        .from('signature_petition')
-        .select('email')
-        .eq('petition_id', id)
-        .range(from, from + 999);
+      const { data, error } = await avecReessais(() =>
+        supabase
+          .from('signature_petition')
+          .select('email')
+          .eq('petition_id', id)
+          .range(from, from + 999),
+      );
       if (error !== null || data === null || data.length === 0) break;
       for (const row of data) dejaPresent.add(`${id}::${normaliserEmail(row.email)}`);
       if (data.length < 1000) break;
@@ -355,7 +385,7 @@ async function main(): Promise<void> {
   let echecs = 0;
   for (let i = 0; i < aInserer.length; i += TAILLE_LOT) {
     const lot = aInserer.slice(i, i + TAILLE_LOT);
-    const { error } = await supabase.from('signature_petition').insert(lot);
+    const { error } = await avecReessais(() => supabase.from('signature_petition').insert(lot));
     if (error !== null) {
       console.error(`Échec lot ${i / TAILLE_LOT + 1} : ${error.message}`);
       echecs += lot.length;
