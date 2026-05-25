@@ -150,3 +150,24 @@ export async function listerPetitionsAModerer(): Promise<PetitionAvecCompteur[]>
 
   return hydraterPetitions(supabase, data as Petition[]);
 }
+
+/**
+ * Liste TOUTES les pétitions, tous statuts confondus, pour la gestion par
+ * l'équipe (édition). La RLS autorise la lecture complète aux admins et
+ * modérateurices ; pour le reste du public, seules les pétitions publiées
+ * remonteraient (et cette fonction n'est appelée que sous `/admin`).
+ */
+export async function listerToutesPetitionsAdmin(): Promise<PetitionAvecCompteur[]> {
+  const supabase = await getSupabaseServer();
+
+  const { data, error } = await supabase
+    .from('petition')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error !== null || data === null) {
+    return [];
+  }
+
+  return hydraterPetitions(supabase, data as Petition[]);
+}

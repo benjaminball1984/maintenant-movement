@@ -1,4 +1,4 @@
-import { signerPetitionSchema } from '@/lib/validations/petition';
+import { editerPetitionSchema, signerPetitionSchema } from '@/lib/validations/petition';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -59,5 +59,61 @@ describe('signerPetitionSchema', () => {
 
   it('refuse un token Turnstile vide', () => {
     expect(signerPetitionSchema.safeParse({ ...valide, token_turnstile: '' }).success).toBe(false);
+  });
+});
+
+/**
+ * Tests du schéma d'édition d'une pétition par l'équipe (chantier 13.2).
+ *
+ * Couvre surtout la règle croisée sur les dates (échéance >= lancement), qui
+ * reflète la contrainte SQL `petition_dates_coherentes`, et la tolérance des
+ * dates optionnelles (chaîne vide ou absente).
+ */
+describe('editerPetitionSchema', () => {
+  const valide = {
+    petition_id: '11111111-1111-4111-8111-111111111111',
+    titre: 'Pour une cantine bio dans toutes les écoles',
+    texte: 'a'.repeat(120),
+    destinataire: 'Le conseil municipal',
+    image_url: '',
+    objectif: 5000,
+    date_lancement: '',
+    date_echeance: '',
+  } as const;
+
+  it('accepte une édition sans dates', () => {
+    expect(editerPetitionSchema.safeParse(valide).success).toBe(true);
+  });
+
+  it('accepte une échéance postérieure au lancement', () => {
+    const r = editerPetitionSchema.safeParse({
+      ...valide,
+      date_lancement: '2026-01-01',
+      date_echeance: '2026-06-01',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('refuse une échéance antérieure au lancement', () => {
+    const r = editerPetitionSchema.safeParse({
+      ...valide,
+      date_lancement: '2026-06-01',
+      date_echeance: '2026-01-01',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('accepte une seule des deux dates', () => {
+    expect(editerPetitionSchema.safeParse({ ...valide, date_echeance: '2026-06-01' }).success).toBe(
+      true,
+    );
+  });
+
+  it('refuse un objectif sous le minimum', () => {
+    expect(editerPetitionSchema.safeParse({ ...valide, objectif: 10 }).success).toBe(false);
+  });
+
+  it('refuse un texte trop court', () => {
+    expect(editerPetitionSchema.safeParse({ ...valide, texte: 'trop court' }).success).toBe(false);
   });
 });

@@ -1623,6 +1623,8 @@ export type Database = {
         Row: {
           created_at: string;
           createurice_id: string;
+          date_echeance: string | null;
+          date_lancement: string | null;
           destinataire: string;
           id: string;
           image_url: string | null;
@@ -1639,6 +1641,8 @@ export type Database = {
         Insert: {
           created_at?: string;
           createurice_id: string;
+          date_echeance?: string | null;
+          date_lancement?: string | null;
           destinataire: string;
           id?: string;
           image_url?: string | null;
@@ -1655,6 +1659,8 @@ export type Database = {
         Update: {
           created_at?: string;
           createurice_id?: string;
+          date_echeance?: string | null;
+          date_lancement?: string | null;
           destinataire?: string;
           id?: string;
           image_url?: string | null;

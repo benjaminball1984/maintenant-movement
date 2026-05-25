@@ -76,6 +76,19 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 </li>
               ))}
             </ul>
+            <p className="mt-4 mb-3 text-xs font-bold uppercase tracking-cap text-text-3">
+              Gestion
+            </p>
+            <ul className="grid gap-1">
+              <li>
+                <Link
+                  href="/admin/petitions"
+                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                >
+                  Pétitions (édition)
+                </Link>
+              </li>
+            </ul>
           </nav>
         </aside>
         <main className="flex-1">{children}</main>

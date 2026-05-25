@@ -6,9 +6,11 @@ import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesCreerPetition,
+  type DonneesEditerPetition,
   type DonneesModererPetition,
   type DonneesSignerPetition,
   creerPetitionSchema,
+  editerPetitionSchema,
   modererPetitionSchema,
   signerPetitionSchema,
   slugifierTitre,
@@ -171,16 +173,10 @@ export async function modererPetition(donneesBrutes: unknown): Promise<ResultatA
 
   const supabase = await getSupabaseServer();
 
-  // Vérification du droit de modération côté Server Action (en plus de
-  // la RLS qui filtrera de toute façon). Permet un message clair.
-  const { data: aDroitMod } = await supabase.rpc('est_moderateurice', {
-    onglet_demande: 'petitions',
-  });
-  if (aDroitMod !== true) {
-    const { data: aDroitGeneral } = await supabase.rpc('est_admin_general');
-    if (aDroitGeneral !== true) {
-      return { ok: false, message: 'Droit de modération requis.' };
-    }
+  // Vérification du droit côté Server Action (en plus de la RLS qui
+  // filtrera de toute façon). Permet un message clair.
+  if (!(await aDroitModerationPetitions(supabase))) {
+    return { ok: false, message: 'Droit de modération requis.' };
   }
 
   const { error } = await supabase
@@ -203,8 +199,76 @@ export async function modererPetition(donneesBrutes: unknown): Promise<ResultatA
 }
 
 // ============================================================
+// Édition d'une pétition par l'équipe (admin / modération)
+// ============================================================
+export async function editerPetition(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = editerPetitionSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesEditerPetition = parse.data;
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+
+  const supabase = await getSupabaseServer();
+
+  if (!(await aDroitModerationPetitions(supabase))) {
+    return { ok: false, message: 'Droit de modération requis.' };
+  }
+
+  // Chaîne vide -> null (pas de date). Sinon on garde la date `AAAA-MM-JJ`
+  // que Postgres interprète sans ambiguïté en `timestamptz`.
+  const { data: maj, error } = await supabase
+    .from('petition')
+    .update({
+      titre: donnees.titre,
+      texte: donnees.texte,
+      destinataire: donnees.destinataire,
+      image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
+      objectif: donnees.objectif,
+      date_lancement: donnees.date_lancement ? donnees.date_lancement : null,
+      date_echeance: donnees.date_echeance ? donnees.date_echeance : null,
+    })
+    .eq('id', donnees.petition_id)
+    .select('slug')
+    .maybeSingle();
+
+  if (error !== null) {
+    return { ok: false, message: `Édition impossible : ${error.message}` };
+  }
+
+  revalidatePath('/admin/petitions');
+  revalidatePath('/mobiliser/petitions');
+  if (maj?.slug) {
+    revalidatePath(`/mobiliser/petitions/${maj.slug}`);
+  }
+  return { ok: true };
+}
+
+// ============================================================
 // Helpers internes
 // ============================================================
+
+/**
+ * True si la personne connectée peut modérer/éditer les pétitions :
+ * droit de modération sur l'onglet `petitions`, ou admin général (national
+ * ou admin). Centralisé pour `modererPetition` et `editerPetition`.
+ *
+ * La RLS reste la barrière réelle ; ce check sert un message clair côté UI.
+ */
+async function aDroitModerationPetitions(supabase: ClientSupabase): Promise<boolean> {
+  const { data: aDroitMod } = await supabase.rpc('est_moderateurice', {
+    onglet_demande: 'petitions',
+  });
+  if (aDroitMod === true) {
+    return true;
+  }
+  const { data: aDroitGeneral } = await supabase.rpc('est_admin_general');
+  return aDroitGeneral === true;
+}
 
 /**
  * Génère un slug unique à partir du titre. Si le slug initial existe
