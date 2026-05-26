@@ -3,6 +3,7 @@ import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,7 +27,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   if (cagnotte === null) {
     return { title: 'Cagnotte introuvable' };
   }
-  return { title: cagnotte.titre, description: cagnotte.texte.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: cagnotte.titre,
+      description: cagnotte.texte,
+      image_url: cagnotte.image_url,
+      type_objet: 'cagnotte',
+    },
+    cheminPage: `/mobiliser/cagnottes/${slug}`,
+  });
 }
 
 export default async function PageCagnotteDetail({ params, searchParams }: PageDetailProps) {

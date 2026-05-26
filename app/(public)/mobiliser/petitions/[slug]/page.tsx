@@ -1,6 +1,7 @@
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { petitionParSlug } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -33,10 +34,15 @@ export async function generateMetadata({ params }: PagePetitionProps): Promise<M
   if (petition === null) {
     return { title: 'Pétition introuvable' };
   }
-  return {
-    title: petition.titre,
-    description: petition.texte.slice(0, 160),
-  };
+  return metadataPourPartage({
+    objet: {
+      titre: petition.titre,
+      description: petition.texte,
+      image_url: petition.image_url,
+      type_objet: 'petition',
+    },
+    cheminPage: `/mobiliser/petitions/${slug}`,
+  });
 }
 
 export default async function PagePetition({ params }: PagePetitionProps) {

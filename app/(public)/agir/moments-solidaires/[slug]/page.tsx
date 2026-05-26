@@ -4,6 +4,7 @@ import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { TYPES_MOMENTS, gabaritFlyerPortAPorte } from '@/lib/moments/config';
 import { listerTupperwaresDuMoment, momentSolidaireParSlug } from '@/lib/moments/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { CalendarRange, MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -31,7 +32,17 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const moment = await momentSolidaireParSlug(slug);
   if (moment === null) return { title: 'Moment introuvable' };
-  return { title: moment.titre, description: moment.description.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: moment.titre,
+      description: moment.description,
+      // Pas de champ image en V1 sur moment_solidaire : on tombe sur l'image
+      // par défaut « moment_solidaire » de la bibliothèque ET1.
+      image_url: null,
+      type_objet: 'moment_solidaire',
+    },
+    cheminPage: `/agir/moments-solidaires/${slug}`,
+  });
 }
 
 export default async function PageDetailMoment({ params }: PageDetailProps) {

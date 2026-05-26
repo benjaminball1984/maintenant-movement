@@ -2,6 +2,7 @@ import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { Calendar, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -19,10 +20,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   if (mobilisation === null) {
     return { title: 'Mobilisation introuvable' };
   }
-  return {
-    title: mobilisation.titre,
-    description: mobilisation.description.slice(0, 160),
-  };
+  return metadataPourPartage({
+    objet: {
+      titre: mobilisation.titre,
+      description: mobilisation.description,
+      image_url: mobilisation.image_url,
+      type_objet: 'mobilisation',
+    },
+    cheminPage: `/mobiliser/mobilisations/${slug}`,
+  });
 }
 
 /**
