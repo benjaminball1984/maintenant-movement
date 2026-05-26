@@ -1,7 +1,12 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
-import { type OffreTypeReservation, creerReservation } from '@/lib/reservation';
+import {
+  type OffreTypeReservation,
+  changerStatutReservation,
+  creerReservation,
+  transitionAutorisee,
+} from '@/lib/reservation';
 import { genererMessageAmorce } from '@/lib/reservation-amorce';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -154,4 +159,81 @@ async function chargerContexteOffre(
     default:
       return { titreOffre: null, createurId: null };
   }
+}
+
+// ============================================================
+// Annulation d'une réservation par le demandeur (V2.3.11)
+// ============================================================
+
+export type ResultatAnnulation = { ok: true } | { ok: false; message: string };
+
+/**
+ * Annule une réservation dont la personne connectée est demandeuse.
+ *
+ * Règles :
+ * - Seul le demandeur peut annuler sa propre réservation depuis cette
+ *   Server Action (les admins passent par leurs propres outils).
+ * - Transition autorisée selon la machine à états D8 (cf.
+ *   `transitionAutorisee`) : `proposee → annulee` et `acceptee → annulee`
+ *   sont les deux cas. Les autres états (refusée, déjà annulée, réalisée,
+ *   confirmée, litige) ne peuvent pas être annulés ici.
+ * - `motif` facultatif mais recommandé (transparence pour le propriétaire
+ *   de l'offre).
+ *
+ * La RLS `reservation_update_demandeur` (V2.2.2) autorise déjà
+ * l'écriture par le demandeur ; on duplique le check côté applicatif
+ * pour un retour d'erreur lisible.
+ */
+export async function annulerReservationAction(options: {
+  reservationId: string;
+  motif?: string;
+  cheminRevalidation?: string;
+}): Promise<ResultatAnnulation> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: existant, error: erreurLecture } = await supabase
+    .from('reservation')
+    .select('id, demandeur_personne_id, statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+
+  if (erreurLecture !== null || existant === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  if (existant.demandeur_personne_id !== session.userId) {
+    return { ok: false, message: 'Tu n’as pas l’autorisation d’annuler cette réservation.' };
+  }
+  const statutActuel = existant.statut as
+    | 'proposee'
+    | 'acceptee'
+    | 'refusee'
+    | 'realisee'
+    | 'confirmee'
+    | 'annulee'
+    | 'litige';
+  if (!transitionAutorisee(statutActuel, 'annulee')) {
+    return {
+      ok: false,
+      message: `Une réservation au statut « ${statutActuel} » ne peut plus être annulée.`,
+    };
+  }
+
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: 'annulee',
+    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+  });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message };
+  }
+
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
 }
