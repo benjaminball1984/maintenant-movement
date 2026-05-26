@@ -2965,6 +2965,137 @@ export type Database = {
           },
         ];
       };
+      groupe_entraide_local: {
+        Row: {
+          id: string;
+          slug: string;
+          nom: string;
+          description_courte: string;
+          description: string;
+          zone_geographique: string;
+          latitude: number | null;
+          longitude: number | null;
+          image_url: string | null;
+          statut: string;
+          createurice_id: string;
+          outil_pret_active: boolean;
+          outil_marche_active: boolean;
+          outil_sel_active: boolean;
+          outil_fruits_active: boolean;
+          outil_hebergement_active: boolean;
+          outil_transport_active: boolean;
+          outil_moments_active: boolean;
+          outil_mobilisations_active: boolean;
+          outil_petitions_active: boolean;
+          outil_decider_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          nom: string;
+          description_courte: string;
+          description: string;
+          zone_geographique: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          image_url?: string | null;
+          statut?: string;
+          createurice_id: string;
+          outil_pret_active?: boolean;
+          outil_marche_active?: boolean;
+          outil_sel_active?: boolean;
+          outil_fruits_active?: boolean;
+          outil_hebergement_active?: boolean;
+          outil_transport_active?: boolean;
+          outil_moments_active?: boolean;
+          outil_mobilisations_active?: boolean;
+          outil_petitions_active?: boolean;
+          outil_decider_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          nom?: string;
+          description_courte?: string;
+          description?: string;
+          zone_geographique?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          image_url?: string | null;
+          statut?: string;
+          createurice_id?: string;
+          outil_pret_active?: boolean;
+          outil_marche_active?: boolean;
+          outil_sel_active?: boolean;
+          outil_fruits_active?: boolean;
+          outil_hebergement_active?: boolean;
+          outil_transport_active?: boolean;
+          outil_moments_active?: boolean;
+          outil_mobilisations_active?: boolean;
+          outil_petitions_active?: boolean;
+          outil_decider_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'groupe_entraide_local_createurice_id_fkey';
+            columns: ['createurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      appartenance_groupe_entraide_local: {
+        Row: {
+          id: string;
+          groupe_id: string;
+          personne_id: string;
+          role_groupe: string;
+          rejoint_le: string;
+          quitte_le: string | null;
+          est_active: boolean;
+        };
+        Insert: {
+          id?: string;
+          groupe_id: string;
+          personne_id: string;
+          role_groupe?: string;
+          rejoint_le?: string;
+          quitte_le?: string | null;
+          est_active?: boolean;
+        };
+        Update: {
+          id?: string;
+          groupe_id?: string;
+          personne_id?: string;
+          role_groupe?: string;
+          rejoint_le?: string;
+          quitte_le?: string | null;
+          est_active?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_groupe_entraide_local_groupe_id_fkey';
+            columns: ['groupe_id'];
+            isOneToOne: false;
+            referencedRelation: 'groupe_entraide_local';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_groupe_entraide_local_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
