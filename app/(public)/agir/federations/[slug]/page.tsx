@@ -1,4 +1,6 @@
+import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { getSession } from '@/lib/auth/session';
 import { federationParSlug } from '@/lib/communes/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
@@ -35,6 +37,16 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
   const federation = await federationParSlug(slug);
   if (federation === null) notFound();
 
+  // Note V2.3.8 : la table `appartenance_federation` lie une COMMUNE à une
+  // fédération, pas une personne. Une personne est « membre » d'une
+  // fédération si elle est membre d'au moins une commune rattachée. Le
+  // helper SQL `est_membre_espace('federation', ...)` posé en V2.2.1
+  // lisait directement `appartenance_federation.personne_id` — qui
+  // n'existe pas. À corriger dans un chantier dédié avec migration. En
+  // attendant, on affiche le fil aux comptes authentifiés (la RLS sera
+  // toujours plus restrictive que l'UI une fois le helper corrigé).
+  const session = await getSession();
+
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
@@ -56,6 +68,18 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
           {federation.nombre_communes > 1 ? 's' : ''}.
         </p>
       </Card>
+
+      {/* Fil de discussion de la fédération (cycle V2 §18, V2.2.1 + V2.3.8).
+          Visible aux comptes authentifiés en attendant le helper SQL corrigé. */}
+      {session !== null ? (
+        <section className="mt-8">
+          <FilDeGroupe
+            espaceType="federation"
+            espaceId={federation.id}
+            cheminRevalidation={`/agir/federations/${slug}`}
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }
