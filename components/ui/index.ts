@@ -15,5 +15,6 @@ export { Heading, type HeadingProps, type NiveauHeading } from './Heading';
 export { IconButton, type IconButtonProps } from './IconButton';
 export { Input, type InputProps } from './Input';
 export { Label, type LabelProps } from './Label';
+export { TeleverseurImage, type TeleverseurImageProps } from './TeleverseurImage';
 export { Textarea, type TextareaProps } from './Textarea';
 export { ScriptInitTheme, ThemeToggle, type ModeTheme } from './ThemeToggle';

@@ -3,23 +3,36 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 /**
- * Variantes de boutons (cf. docs/specs/04_DESIGN-TOKENS.md §10).
+ * Variantes de boutons (cf. docs/specs/04_DESIGN-TOKENS.md §10 et exigence
+ * ET4 du cycle V2, `docs/cdc-v2/01b-EXIGENCES-TRANSVERSALES-UI.md`).
  *
- * - `gradient` : CTA principal, fond gradient violet/magenta/framboise.
- *   Réservé aux actions positives majeures (signer, soutenir, adhérer).
+ * - `primary` : CTA principal, porte le dégradé signature
+ *   (token `--grad` violet → magenta → framboise) + l'ombre `--shadow-brand`,
+ *   dans les deux modes clair/sombre. Réservé aux actions positives majeures
+ *   (signer, soutenir, adhérer, créer un compte, envoyer). Règle d'or
+ *   anti-saturation : le dégradé est le point fort, pas le fond sonore. Si
+ *   tout est en `primary`, l'identité disparaît. Les actions secondaires
+ *   restent neutres (`ghost`, `outline`).
  * - `ghost` : action secondaire, fond surface avec bordure discrète.
  * - `outline` : action neutre, bordure brand, fond transparent.
  * - `link` : variante texte, sans fond ni bordure (pour CTA tertiaires).
+ *
+ * Alias historique : `gradient` reste accepté comme synonyme de `primary`
+ * pour ne pas casser le code et la doc V1 qui le nomment ainsi. Les deux
+ * pointent vers la même classe.
  */
-export type VariantBouton = 'gradient' | 'ghost' | 'outline' | 'link';
+export type VariantBouton = 'primary' | 'gradient' | 'ghost' | 'outline' | 'link';
 
 /**
  * Tailles (hauteur tactile minimale 44 px pour `md` et `lg`, cf. spec §5).
  */
 export type TailleBouton = 'sm' | 'md' | 'lg';
 
+const STYLE_PRIMARY = 'bg-grad text-white shadow-brand hover:brightness-110';
+
 const STYLES_VARIANT: Record<VariantBouton, string> = {
-  gradient: 'bg-grad text-white shadow-brand hover:brightness-110',
+  primary: STYLE_PRIMARY,
+  gradient: STYLE_PRIMARY,
   ghost: 'bg-surface text-text-1 border border-border hover:bg-surface-2',
   outline: 'bg-transparent text-brand border border-brand hover:bg-brand-light',
   link: 'bg-transparent text-brand underline-offset-4 hover:underline px-0',
@@ -41,7 +54,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * soumissions involontaires de formulaire).
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'gradient', taille = 'md', className, type = 'button', ...props },
+  { variant = 'primary', taille = 'md', className, type = 'button', ...props },
   ref,
 ) {
   return (

@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ESPACES } from '@/config/espaces';
 import { SITE } from '@/config/site';
 import { getSession } from '@/lib/auth/session';
@@ -49,6 +50,7 @@ export async function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           {session !== null ? (
             <HeaderProfilMenu email={session.email} prenom={session.personne?.prenom ?? null} />
           ) : (

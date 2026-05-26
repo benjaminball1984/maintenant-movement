@@ -1,5 +1,6 @@
 'use client';
 
+import { mettreAJourMaPreferenceTheme } from '@/app/actions/theme';
 import { cn } from '@/lib/utils';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -10,10 +11,15 @@ import { useCallback, useEffect, useState } from 'react';
  * - `light` : force le mode clair.
  * - `dark` : force le mode sombre.
  *
- * La préférence est persistée dans `localStorage` sous la clé `theme`.
- * Tant que l'auth n'est pas en place (chantier 1.2), c'est le seul lieu
- * de stockage. À partir du chantier 1.3, la préférence connectée sera
- * miroitée dans `personne.preferences_ui` (cf. 04_DESIGN-TOKENS.md §3).
+ * La préférence est persistée :
+ * - dans `localStorage` sous la clé `theme` (source de vérité côté client,
+ *   utilisée par le script anti-FOUC avant le premier rendu) ;
+ * - **et en plus** dans `personne.mode_theme` côté BDD si la personne est
+ *   connectée (exigence transversale ET3 du cycle V2, cf.
+ *   `docs/cdc-v2/01b-EXIGENCES-TRANSVERSALES-UI.md`). La synchro BDD passe
+ *   par la Server Action `mettreAJourMaPreferenceTheme` appelée en
+ *   fire-and-forget : si elle échoue (offline, pas de session, etc.) on
+ *   garde l'expérience locale fonctionnelle.
  */
 export type ModeTheme = 'auto' | 'light' | 'dark';
 
@@ -66,6 +72,12 @@ export function ThemeToggle({ className }: { className?: string }) {
         window.localStorage.setItem(CLE_STOCKAGE, suivant);
       }
       appliquerTheme(suivant);
+      // Synchronisation BDD en fire-and-forget pour les personnes connectées
+      // (ET3). On ne `await` pas : l'expérience locale ne doit jamais être
+      // bloquée par un aller-retour réseau.
+      void mettreAJourMaPreferenceTheme(suivant).catch(() => {
+        // Silencieux : pas de session, offline, etc.
+      });
       return suivant;
     });
   }, []);

@@ -140,12 +140,13 @@ export default function PageDesignSystem() {
 
       <Section id="boutons" titre="Boutons">
         <p className="mb-6 text-text-2">
-          Trois variantes (gradient, ghost, outline) et trois tailles (sm, md, lg). Cible tactile
-          minimale 44 px sur md et lg.
+          Quatre variantes (primary, ghost, outline, link) et trois tailles (sm, md, lg). Cible
+          tactile minimale 44 px sur md et lg. Le variant <code>primary</code> porte le dégradé
+          signature (cycle V2, ET4) ; <code>gradient</code> reste accepté comme alias historique.
         </p>
 
         <div className="space-y-6">
-          <ExempleLigne titre="Gradient (CTA principal)">
+          <ExempleLigne titre="Primary — CTA principal (dégradé signature)">
             <Button taille="sm">Signer (sm)</Button>
             <Button>Signer la pétition</Button>
             <Button taille="lg">Adhérer maintenant</Button>
