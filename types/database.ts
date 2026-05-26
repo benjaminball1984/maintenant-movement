@@ -3096,6 +3096,137 @@ export type Database = {
           },
         ];
       };
+      location_mutualisee: {
+        Row: {
+          id: string;
+          slug: string;
+          organisateur_personne_id: string;
+          type_location: string;
+          titre: string;
+          description: string;
+          prestataire: string;
+          lieu: string;
+          date_evenement: string;
+          date_limite_engagement: string;
+          montant_total_centimes: number;
+          nb_parts_max: number;
+          prix_par_part_centimes: number;
+          canal: string;
+          statut: string;
+          image_url: string | null;
+          avertissement_juridique_accepte: boolean;
+          avertissement_accepte_le: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          organisateur_personne_id: string;
+          type_location: string;
+          titre: string;
+          description: string;
+          prestataire: string;
+          lieu: string;
+          date_evenement: string;
+          date_limite_engagement: string;
+          montant_total_centimes: number;
+          nb_parts_max: number;
+          prix_par_part_centimes: number;
+          canal?: string;
+          statut?: string;
+          image_url?: string | null;
+          avertissement_juridique_accepte: boolean;
+          avertissement_accepte_le?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          organisateur_personne_id?: string;
+          type_location?: string;
+          titre?: string;
+          description?: string;
+          prestataire?: string;
+          lieu?: string;
+          date_evenement?: string;
+          date_limite_engagement?: string;
+          montant_total_centimes?: number;
+          nb_parts_max?: number;
+          prix_par_part_centimes?: number;
+          canal?: string;
+          statut?: string;
+          image_url?: string | null;
+          avertissement_juridique_accepte?: boolean;
+          avertissement_accepte_le?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'location_mutualisee_organisateur_personne_id_fkey';
+            columns: ['organisateur_personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      engagement_location_mutualisee: {
+        Row: {
+          id: string;
+          location_id: string;
+          participant_personne_id: string;
+          nb_parts: number;
+          montant_engage_centimes: number;
+          statut: string;
+          stripe_payment_intent_id: string | null;
+          engage_le: string;
+          paye_le: string | null;
+          annule_le: string | null;
+        };
+        Insert: {
+          id?: string;
+          location_id: string;
+          participant_personne_id: string;
+          nb_parts: number;
+          montant_engage_centimes: number;
+          statut?: string;
+          stripe_payment_intent_id?: string | null;
+          engage_le?: string;
+          paye_le?: string | null;
+          annule_le?: string | null;
+        };
+        Update: {
+          id?: string;
+          location_id?: string;
+          participant_personne_id?: string;
+          nb_parts?: number;
+          montant_engage_centimes?: number;
+          statut?: string;
+          stripe_payment_intent_id?: string | null;
+          engage_le?: string;
+          paye_le?: string | null;
+          annule_le?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'engagement_location_mutualisee_location_id_fkey';
+            columns: ['location_id'];
+            isOneToOne: false;
+            referencedRelation: 'location_mutualisee';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_location_mutualisee_participant_personne_id_fkey';
+            columns: ['participant_personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
