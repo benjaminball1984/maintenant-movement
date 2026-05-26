@@ -2613,6 +2613,67 @@ export type Database = {
           },
         ];
       };
+      droit: {
+        Row: {
+          id: string;
+          personne_id: string;
+          cible_type: string | null;
+          cible_id: string | null;
+          type_droit: string;
+          accorde_par: string | null;
+          accorde_le: string;
+          retire_par: string | null;
+          retire_le: string | null;
+          metadata: Json;
+        };
+        Insert: {
+          id?: string;
+          personne_id: string;
+          cible_type?: string | null;
+          cible_id?: string | null;
+          type_droit: string;
+          accorde_par?: string | null;
+          accorde_le?: string;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          metadata?: Json;
+        };
+        Update: {
+          id?: string;
+          personne_id?: string;
+          cible_type?: string | null;
+          cible_id?: string | null;
+          type_droit?: string;
+          accorde_par?: string | null;
+          accorde_le?: string;
+          retire_par?: string | null;
+          retire_le?: string | null;
+          metadata?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'droit_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'droit_accorde_par_fkey';
+            columns: ['accorde_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'droit_retire_par_fkey';
+            columns: ['retire_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
