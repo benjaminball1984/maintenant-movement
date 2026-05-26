@@ -542,7 +542,10 @@ Les contributions restent (pétitions signées, articles, votes), l'identité di
 - `/profil/communes` : communes auxquelles j'appartiens (1 à 3)
 - `/profil/contributions` : pétitions signées, mobilisations, articles, cagnottes, votes Décider, services SEL
 - `/profil/notifications` : préférences (cloche, push, mails)
-- `/profil/wallet` : statut T99CP + lien externe
+<!-- `/profil/wallet` retiré au chantier V2.1.1 (cycle V2, §19 : aucun wallet
+intégré côté plateforme). Le solde T99CP en lecture seule sera réintroduit
+dans un onglet dédié quand l'adapter `lib/t99cp/` lira Polygon ; le paiement
+T99CP se fait toujours par redirection vers `https://the99coinproject.org/`. -->
 - `/profil/confidentialite` : export ZIP, suppression différée 30 j, paramètres visibilité
 
 ---

@@ -20,7 +20,7 @@ const PAGES_PROTEGEES = [
   '/profil/communes',
   '/profil/contributions',
   '/profil/notifications',
-  '/profil/wallet',
+  // '/profil/wallet' retiré au chantier V2.1.1 (§19 V2 : aucun wallet intégré).
   '/profil/confidentialite',
   '/profil/securite/2fa',
 ] as const;

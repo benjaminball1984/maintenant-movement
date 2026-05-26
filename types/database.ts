@@ -2539,6 +2539,33 @@ export type Database = {
           },
         ];
       };
+      t99cp_hash_consomme: {
+        Row: {
+          tx_hash: string;
+          consomme_par_type: string;
+          consomme_par_id: string | null;
+          consomme_par_profil_id: string | null;
+          consomme_le: string;
+          metadata: Json;
+        };
+        Insert: {
+          tx_hash: string;
+          consomme_par_type: string;
+          consomme_par_id?: string | null;
+          consomme_par_profil_id?: string | null;
+          consomme_le?: string;
+          metadata?: Json;
+        };
+        Update: {
+          tx_hash?: string;
+          consomme_par_type?: string;
+          consomme_par_id?: string | null;
+          consomme_par_profil_id?: string | null;
+          consomme_le?: string;
+          metadata?: Json;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       adherent_actif: {

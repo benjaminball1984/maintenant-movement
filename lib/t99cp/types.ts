@@ -11,6 +11,14 @@
  * - RBU 30 99-coin / mois via wallet certifié (chantier 4.2)
  *
  * Switch via `T99CP_NETWORK` : `mock` (défaut) | `mumbai` | `polygon_mainnet`.
+ *
+ * ⚠️ Cycle V2 chantier V2.1.1 : la plateforme ne signe AUCUNE transaction
+ * (§19 des principes-transversaux-V2.md). La méthode `envoyerTransaction`
+ * est conservée pour la compatibilité avec les flux V1 (adhésion T99CP,
+ * crédit SEL, marché solidaire) mais est **DEPRECATED** : tout nouveau
+ * code doit utiliser la redirection vers `https://the99coinproject.org/`
+ * + vérification de hash via `verifierTransaction` + enregistrement du
+ * hash consommé via `lib/t99cp/hashes-consommes.ts`.
  */
 export interface ResultatBalance {
   /** Balance en plus petite unité du token (wei-équivalent). */
@@ -31,17 +39,34 @@ export interface StatutTransaction {
 }
 
 export interface T99CPService {
-  /** Récupère la balance 99-coin d'un wallet. */
-  obtenirBalance(adresseWallet: string): Promise<ResultatBalance>;
   /**
-   * Émet une transaction (utilisé pour RBU et adhésions T99CP).
-   * Le wallet source dépend du contexte (trésorerie mouvement ou wallet personne).
+   * Récupère la balance 99-coin d'un wallet en LECTURE SEULE sur Polygon.
+   * Méthode conforme au §19 V2 (aucun wallet intégré côté plateforme).
+   */
+  obtenirBalance(adresseWallet: string): Promise<ResultatBalance>;
+
+  /**
+   * @deprecated Cycle V2 V2.1.1 — la plateforme ne signe AUCUNE transaction
+   * (§19). Utiliser à la place : redirection vers la home
+   * `https://the99coinproject.org/` (jamais d'URL profonde), puis
+   * `verifierTransaction(txHash)` au retour, puis `enregistrerHashConsomme`
+   * de `lib/t99cp/hashes-consommes.ts` pour garantir l'unicité.
+   *
+   * Cette méthode reste implémentée pour ne pas casser les flux V1 en
+   * attendant leur refacto V2 (adhésion T99CP, crédit SEL, marché). Les
+   * callers connus sont listés dans le MANIFEST V2.1.1. Ne PAS l'utiliser
+   * dans du code neuf.
    */
   envoyerTransaction(
     adresseSource: string,
     adresseDestination: string,
     montantUnites: bigint,
   ): Promise<ResultatTransaction>;
-  /** Vérifie qu'une transaction est confirmée on-chain. */
+
+  /**
+   * Vérifie qu'une transaction est confirmée on-chain. Source de vérité
+   * du paiement T99CP côté plateforme (en complément du garde-fou
+   * d'unicité `t99cp_hash_consomme`, V2.1.1).
+   */
   verifierTransaction(txHash: string): Promise<StatutTransaction>;
 }

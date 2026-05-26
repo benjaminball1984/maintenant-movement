@@ -11,13 +11,20 @@ import { usePathname } from 'next/navigation';
  * Client Component parce qu'on lit `usePathname()` pour marquer l'onglet
  * actif visuellement et via `aria-current`.
  */
+/**
+ * Onglet « Wallet T99CP » retiré au chantier V2.1.1 : §19 du cycle V2
+ * proscrit tout wallet intégré côté plateforme. Le 99-coin se gère
+ * entièrement à l'extérieur (redirection vers la home `the99coinproject.org`).
+ * Le solde T99CP de la personne sera réintroduit dans un chantier V2 dédié
+ * en lecture seule, via l'adapter `lib/t99cp/`, dans l'onglet
+ * « Contributions » ou un nouvel onglet « 99-coin ».
+ */
 const ONGLETS = [
   { slug: 'dashboard', libelle: 'Vue d’ensemble' },
   { slug: 'informations', libelle: 'Informations' },
   { slug: 'communes', libelle: 'Communes' },
   { slug: 'contributions', libelle: 'Contributions' },
   { slug: 'notifications', libelle: 'Notifications' },
-  { slug: 'wallet', libelle: 'Wallet T99CP' },
   { slug: 'confidentialite', libelle: 'Confidentialité' },
 ] as const;
 
