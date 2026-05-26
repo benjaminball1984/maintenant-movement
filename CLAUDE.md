@@ -1,6 +1,54 @@
 # CLAUDE.md — Mémoire persistante du projet Maintenant!
 
-> **Tu lis ce fichier intégralement à chaque démarrage de session, avant tout autre fichier.** C'est ta mémoire principale entre les sessions Claude Code. Si une décision n'y figure pas, consulte `docs/specs/`. Si la réponse n'y est pas non plus, tu poses la question à Lilou/Ben. Tu n'inventes pas.
+> **Tu lis ce fichier intégralement à chaque démarrage de session, avant tout autre fichier.** C'est ta mémoire principale entre les sessions Claude Code. Si une décision n'y figure pas, consulte `docs/cdc-v2/` (cible V2) puis `docs/specs/` (V1). Si la réponse n'y est pas non plus, tu poses la question à Lilou/Ben. Tu n'inventes pas.
+
+---
+
+## 0. Bloc de préséance V2 (à lire AVANT la section 1)
+
+> Ce bloc prime sur le reste du CLAUDE.md. Il désamorce les contradictions entre le V1 (le code actuel, phases 0-13 livrées) et le V2 (cible doctrinale formalisée dans `docs/cdc-v2/CDC-Maintenant-V2/`).
+
+### 0.1 Pourquoi ce bloc existe
+
+Le projet a sédimenté en trois couches successives, chacune pensée avec les principes de son époque :
+
+- **V0** : première plateforme sur Base44 (abandonnée le 17/05/2026).
+- **V1** : reconstruction sur Claude Code (le code actuel du repo : ~46 tables, ~90 pages, phases 0 à 13 livrées, réseau social inclus). C'est ce qui tourne aujourd'hui en distant Francfort.
+- **V2** : nouvelle doctrine d'architecture, formalisée dans le pack `docs/cdc-v2/CDC-Maintenant-V2/` (principes transversaux, schéma de données D1-D13, matrice de droits MD0-MD6, fiches de sous-espaces).
+
+Il est NORMAL qu'il y ait des écarts entre la V1 (le code) et la V2 (la cible). Ce ne sont pas des bugs : ce sont des décisions prises plus tard. Ce bloc dit comment l'agent doit se comporter face à ces écarts, pour qu'il n'y ait jamais de contradiction vécue du type « on me dit que c'est un principe, puis on me dit le contraire ».
+
+### 0.2 Règle de préséance des sources (NOUVELLE, prime sur tout)
+
+Quand l'agent cherche la vérité sur un point, il consulte les sources dans cet ordre. **La première qui répond gagne.**
+
+1. **Doctrine de greffe** (§0.3 ci-dessous) : règle de comportement la plus haute. Elle ne décrit pas QUOI construire, elle décrit COMMENT toucher l'existant.
+2. **Pack CDC V2** (`docs/cdc-v2/CDC-Maintenant-V2/`) pour tout ce qui touche **l'architecture cible** : modèle de données, liste des espaces/sous-espaces autorisés, droits de plateforme, principes transversaux. **Le CDC V2 prime sur `docs/specs/01_ARCHITECTURE.md` partout où ils divergent sur l'architecture.**
+3. **`docs/specs/`** (specs V1) pour tout ce que le CDC V2 ne traite pas encore : design tokens (`04_DESIGN-TOKENS.md`), RGPD (`05_RGPD.md`), stack (`02_STACK.md`), et surtout **vocabulaire** (`03_VOCABULAIRE.md`).
+4. **Le reste du CLAUDE.md** (persona, exhaustivité, conventions, MANIFEST) : INCHANGÉ, toujours valable, jamais contredit par le V2.
+
+**Cas particulier du VOCABULAIRE** : le vocabulaire fixé (`03_VOCABULAIRE.md` + CLAUDE.md §9) **n'est PAS de l'architecture**. Il prime sur le CDC V2 même là où le CDC V2 emploie une autre forme. Exemple : « **Maintenant Médias** » (avec S) est la forme correcte, jamais « Maintenant Média ». L'agent applique le vocabulaire V1, et signale toute coquille du V2 dans le MANIFEST.
+
+### 0.3 Doctrine de greffe (règle de comportement la plus haute)
+
+La V2 se construit **par greffe** sur la V1, jamais par refonte. Trois interdits absolus, sans exception :
+
+1. **On additionne, on ne soustrait jamais.** On crée de nouvelles tables, colonnes, entités à côté de l'existant. On ne `DROP` aucune table ni colonne portant des données réelles. Une colonne devenue « historique » est conservée comme source de vérité du passé, jamais supprimée.
+2. **On backfill, on ne réinitialise jamais.** Quand une nouvelle structure doit reprendre des données anciennes, on la remplit (backfill) en LISANT l'ancienne. On ne remet aucun compteur à zéro. Les 17 746 signatures restent 17 746. Les 15 737 profils restent 15 737. Les 35 011 communes restent 35 011.
+3. **Le grand modèle V2 (tronc `Objet`, `Espace` générique) est une CIBLE, pas un chantier immédiat.** On n'entreprend AUCUNE migration lourde du modèle de données sans décision explicite et nominative de Lilou/Ben pour ce chantier précis. Tant que cette décision n'est pas donnée, on ne touche pas aux tables métier existantes (`petition`, `cagnotte`, `commune`, etc.) pour les fondre dans un tronc commun.
+
+**Corollaire** : la majorité des chantiers V2 sont *additifs* (nouveaux espaces, nouveaux outils, retrait du wallet intégré, nouvelles entités à côté). Ce sont eux qu'on fait en premier. La convergence vers le modèle tronc+filles se fait plus tard, table par table, sur décision.
+
+### 0.4 Comportement face à un écart V1 ↔ V2 (arbitrage acté par Lilou/Ben)
+
+Quand l'agent constate qu'une décision du CDC V2 contredit une spec V1 ou le code existant sur un point d'architecture :
+
+- **Le V2 gagne** (l'agent applique la décision V2, il ne se fige pas, il ne demande pas la permission à chaque fois).
+- **MAIS l'agent le SIGNALE systématiquement** dans le MANIFEST du chantier, sous une rubrique dédiée **« Écarts V1→V2 appliqués »**, avec pour chaque écart : ce que disait la V1, ce que dit le V2, ce qui a été fait concrètement, et la garantie qu'aucune donnée n'a été perdue.
+
+C'est le même contrat que les « Contenus à arbitrer » : l'agent avance avec une trace visible, plutôt que de s'arrêter ou d'arbitrer en douce. Lilou/Ben lit le MANIFEST en fin de chantier et corrige a posteriori si un écart le surprend.
+
+**Exception (l'agent s'arrête et demande)** : si l'écart implique de toucher des données réelles d'une manière qui pourrait en perdre, ou de lancer une migration lourde du modèle. Dans ce cas, la doctrine de greffe prime : l'agent met `// CHANTIER-EN-ATTENTE-DE-DÉCISION-LL/B` et remonte la question.
 
 ---
 
@@ -10,7 +58,7 @@
 
 **Pilote** : Lilou/Ben (LIFE BENJAMIN BALL, cosec gé). Non-binaire, prénoms fluides (les deux sont utilisés ensemble : « Lilou/Ben »). Tu lui parles avec respect, sobriété, et tu ne fais pas de surcouche émotionnelle.
 
-**Phase actuelle** : développement initial. L'architecture est verrouillée à ~95 % dans `docs/specs/`. Voir `docs/specs/08_PLAN_CHANTIERS.md` pour le plan numéroté.
+**Phase actuelle** : cycle V2 (greffe additive) ouvert le 26/05/2026. L'architecture V1 est dans `docs/specs/`. L'architecture CIBLE est dans le pack CDC V2 (`docs/cdc-v2/CDC-Maintenant-V2/`), qui prime (voir §0). Plan V1 : `docs/specs/08_PLAN_CHANTIERS.md`. Plan V2 par vagues : `docs/cdc-v2/03-PLAN-IMPLEMENTATION.md`.
 
 ---
 
@@ -53,7 +101,7 @@ Trois publics liront ton code :
 - **Slogans, surtitres, sous-titres, taglines** du site ou des pages.
 - **Textes des pages éditoriales** : Doctrine, Commune libre, Assemblée Confédérale, Monnaie 99-coin, FAQ, Ressources, À propos, Mentions légales.
 - **Argumentaires** politiques sur quoi que ce soit.
-- **Fonctionnalités, pages, sections, espaces, sous-espaces** non listés dans `docs/specs/01_ARCHITECTURE.md`. Si tu penses qu'il manque quelque chose, tu le signales dans le MANIFEST sous « propositions », tu n'ajoutes pas.
+- **Fonctionnalités, pages, sections, espaces, sous-espaces** non listés **dans le CDC V2 (`docs/cdc-v2/CDC-Maintenant-V2/`) OU dans `docs/specs/01_ARCHITECTURE.md`**. Si tu penses qu'il manque quelque chose, tu le signales dans le MANIFEST sous « propositions », tu n'ajoutes pas.
 - **Termes du vocabulaire fixé** dans `docs/specs/03_VOCABULAIRE.md`. Tu ne renommes pas « adhérent·e » en « membre », tu ne traduis pas « Décider » en « Voter », etc.
 - **Organisations partenaires, premiers signataires, citations** sauf fournis explicitement.
 - **Palette, typographie, iconographie, identité visuelle** au-delà de ce que pose `docs/specs/04_DESIGN-TOKENS.md`.
@@ -388,7 +436,7 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 **Dernier chantier terminé** : 7.5 (réseau social) — sur `feature/phase-13-integration`. Le réseau social n'est plus un stub : migration 039 (`relation_reseau`, `post_reseau`, `commentaire_reseau`, `reaction_reseau`, `message_reseau` + RLS + helpers de visibilité), flux hiérarchisé transparent + publications/commentaires/soutiens (`/s-informer/reseau`), profil par numéro M+7 (`/s-informer/reseau/[numero]`), messagerie interne (`/s-informer/reseau/messages` + modal réutilisable), modération a posteriori (`/admin/moderation/reseau`). **Décision A** intégrée : sur la page commune, liste des co-membres (nom + prénom complets, respect visibilité) visible uniquement entre membres, nom cliquable vers le profil réseau + bouton message. 300 tests verts (voir `docs/manifests/phase-13-chantier-7.5-reseau-social.md`). Migration 039 appliquée sur le distant le 2026-05-25 (réseau social actif). **Tout fusionné dans `main` le 2026-05-25** (fast-forward depuis `feature/phase-13-integration`, tip `a778861`) : `main` contient désormais l'ensemble phases 0 à 13 + réseau social. Voir aussi `docs/ETAT-DES-LIEUX.md` (synthèse exhaustive pour le cahier des charges V2).
 **Dernier chantier terminé (antérieur)** : 13.3-E (profil unifié) — sur `feature/phase-13-integration`. Chaque signataire (y compris les importés sans compte) a une identité durable : table `profil_unifie` + numéro public « M » + 7 lettres (ex. `MABCDEFG`), stable au-delà de l'email (migration 038). Génération côté base (trigger + format `^M[A-Z]{7}$` + anti-collision + anti gros mots). Rattachement compte ↔ signatures à la vérification de l'email (`rattacher_profil_unifie`, callback auth) ; flux de signature et import branchés (`trouver_ou_creer_profil_unifie`, service_role) ; numéro affiché sur `/profil/informations`. Révise la réconciliation du 2026-05-24. 290 tests verts, lint + typecheck verts (voir `docs/manifests/phase-13-chantier-13.3-e-profil-unifie.md`). Avant (mêmes branche) : 13.3-C/D (carte clusterisée `/communes`, fiche `/communes/[code_insee]`, « Mes contributions »), + révision doctrine §7B (coquilles vides pour tout le référentiel : script `precreer-communes`, garde anti-doublon de nom). Intégration 13.1/13.2/13.3 : voir `docs/manifests/phase-13-integration.md`.
 **Dernier chantier terminé (antérieur)** : 12 — Polish global post-revue (chantiers 12.1 à 12.6), voir `docs/manifests/phase-12-polish-revue-globale.md`.
-**État du projet** : squelette technique complet (33 chantiers livrés, 4.3 à 11.3 puis 12.1-12.6). Chantier 7.5 (réseau social) désormais construit (flux transparent, profils, messagerie, modération a posteriori). Chantiers 7.3/7.6 encore en stubs fonctionnels honnêtes (à enrichir post-MVP). Chantier 2.2 (8 pages éditoriales) bloqué tant que Lilou/Ben ne fournit pas les textes ; les pages affichent une bannière neutre en prod. Lighthouse mobile et audit WCAG complet à faire après un déploiement de staging Cloudflare Pages. **Prêt pour la review de code et le lancement opérationnel** selon `docs/LANCEMENT.md` et `docs/CONTENUS-A-ARBITRER.md`.
+**État du projet** : V1 livrée et fonctionnelle (phases 0-13 : squelette technique complet, 33 chantiers livrés, 4.3 à 11.3 puis 12.1-12.6 + 7.5 réseau social + 13.x intégration plateforme de données). Chantiers 7.3/7.6 en stubs fonctionnels honnêtes (à enrichir post-MVP). Chantier 2.2 (8 pages éditoriales) bloqué tant que Lilou/Ben ne fournit pas les textes ; les pages affichent une bannière neutre en prod. Lighthouse mobile et audit WCAG complet à faire après un déploiement de staging Cloudflare Pages. **Cycle V2 ouvert le 26/05/2026** : greffe additive en cours selon le CDC V2 (`docs/cdc-v2/`). VAGUE 0 (socle de cohérence, zéro risque données) en cours.
 **Chantiers bloqués / en attente d'arbitrage** : 2.2 demande à Lilou/Ben de rédiger les 8 textes éditoriaux listés dans `docs/CONTENUS-A-ARBITRER.md`. Préalables Supabase : `supabase db push` les migrations 1.1 + 012-033 + Brevo SMTP. Préalable Stripe : `npm install stripe` + clés `sk_test_...`. Préalable SEL prod : poser un cron Cloudflare Worker pour `crediterPrestationsEnAttente` toutes les heures. Préalable Marché prod : poser un cron qui expire les annonces inactives 3 mois (chantier 11.3). Préalable Adhésion prod : poser un cron quotidien qui appelle `envoyerRelancesAdhesion(14)` (chantier 11.3). Préalable Communes : Lilou/Ben fournit le CSV des 2100-2300 communes puis lancer `npx tsx scripts/import-communes.ts <fichier.csv> --dry-run` puis `--confirm`. Préalable Moments prod : poser un cron horaire pour la transition annonce→en_cours→termine (chantier 11.3). Préalable Playwright multi-viewports : `npx playwright install` pour télécharger Firefox + WebKit en local. Préalable phase 13 (sur `feature/phase-13-integration`) : pour tester l'édition des dates de pétition et la plateforme de données contre la base distante, appliquer les migrations 13.x (dates pétition 035, `commune_reference`, CP/INSEE) via `supabase db push` ou `scripts/appliquer-sql-distant.ts` (DDL pur, sans PII) ; les scripts d'import signataires/communes restent à lancer en `--confirm` après feu vert. Distant 13.3-C/D/E APPLIQUÉ le 2026-05-25 (autorisé par Lilou/Ben) : migrations 037 (`compteurs_commune`) et 038 (`profil_unifie`) appliquées ; `precreer-communes --confirm` lancé (35 011 coquilles `pre_creee`) ; remplissage profils unifiés vérifié (15 737 profils, 17 746/17 746 signatures reliées) ; import signataires déjà complet (17 746). `types/database.ts` maintenu à la main (régénération CLI optionnelle, non nécessaire). Reste éventuel : réclamation d'un email antérieur (hors v1).
 
 ### Branche principale
