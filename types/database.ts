@@ -2674,6 +2674,63 @@ export type Database = {
           },
         ];
       };
+      fil_groupe_message: {
+        Row: {
+          id: string;
+          espace_type: string;
+          espace_id: string;
+          auteur_id: string;
+          contenu: string;
+          parent_id: string | null;
+          supprime_le: string | null;
+          supprime_par: string | null;
+          motif_suppression: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          espace_type: string;
+          espace_id: string;
+          auteur_id: string;
+          contenu: string;
+          parent_id?: string | null;
+          supprime_le?: string | null;
+          supprime_par?: string | null;
+          motif_suppression?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          espace_type?: string;
+          espace_id?: string;
+          auteur_id?: string;
+          contenu?: string;
+          parent_id?: string | null;
+          supprime_le?: string | null;
+          supprime_par?: string | null;
+          motif_suppression?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'fil_groupe_message_auteur_id_fkey';
+            columns: ['auteur_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'fil_groupe_message_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'fil_groupe_message';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
