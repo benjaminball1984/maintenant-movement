@@ -2787,6 +2787,184 @@ export type Database = {
           },
         ];
       };
+      caisse: {
+        Row: {
+          id: string;
+          type_caisse: string;
+          libelle: string;
+          objet_type: string | null;
+          objet_id: string | null;
+          statut: string;
+          metadata: Json;
+          ouverte_le: string;
+          fermee_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          type_caisse: string;
+          libelle: string;
+          objet_type?: string | null;
+          objet_id?: string | null;
+          statut?: string;
+          metadata?: Json;
+          ouverte_le?: string;
+          fermee_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          type_caisse?: string;
+          libelle?: string;
+          objet_type?: string | null;
+          objet_id?: string | null;
+          statut?: string;
+          metadata?: Json;
+          ouverte_le?: string;
+          fermee_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      receptacle_caisse: {
+        Row: {
+          id: string;
+          caisse_id: string;
+          canal: string;
+          identifiant_receptacle: string;
+          metadata: Json;
+          valide_du: string;
+          valide_au: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          caisse_id: string;
+          canal: string;
+          identifiant_receptacle: string;
+          metadata?: Json;
+          valide_du?: string;
+          valide_au?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          caisse_id?: string;
+          canal?: string;
+          identifiant_receptacle?: string;
+          metadata?: Json;
+          valide_du?: string;
+          valide_au?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'receptacle_caisse_caisse_id_fkey';
+            columns: ['caisse_id'];
+            isOneToOne: false;
+            referencedRelation: 'caisse';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      transaction_sortante: {
+        Row: {
+          id: string;
+          caisse_id: string;
+          receptacle_id: string;
+          beneficiaire_personne_id: string | null;
+          beneficiaire_externe_nom: string | null;
+          beneficiaire_externe_iban_ou_wallet: string | null;
+          montant: number;
+          canal: string;
+          statut: string;
+          motif: string;
+          justificatif_storage_path: string;
+          justificatif_nom_original: string;
+          justificatif_mime_type: string;
+          initie_par_personne_id: string;
+          initie_le: string;
+          confirme_par_personne_id: string | null;
+          confirme_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          caisse_id: string;
+          receptacle_id: string;
+          beneficiaire_personne_id?: string | null;
+          beneficiaire_externe_nom?: string | null;
+          beneficiaire_externe_iban_ou_wallet?: string | null;
+          montant: number;
+          canal: string;
+          statut?: string;
+          motif: string;
+          justificatif_storage_path: string;
+          justificatif_nom_original: string;
+          justificatif_mime_type: string;
+          initie_par_personne_id: string;
+          initie_le?: string;
+          confirme_par_personne_id?: string | null;
+          confirme_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          caisse_id?: string;
+          receptacle_id?: string;
+          beneficiaire_personne_id?: string | null;
+          beneficiaire_externe_nom?: string | null;
+          beneficiaire_externe_iban_ou_wallet?: string | null;
+          montant?: number;
+          canal?: string;
+          statut?: string;
+          motif?: string;
+          justificatif_storage_path?: string;
+          justificatif_nom_original?: string;
+          justificatif_mime_type?: string;
+          initie_par_personne_id?: string;
+          initie_le?: string;
+          confirme_par_personne_id?: string | null;
+          confirme_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_sortante_caisse_id_fkey';
+            columns: ['caisse_id'];
+            isOneToOne: false;
+            referencedRelation: 'caisse';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_sortante_receptacle_id_fkey';
+            columns: ['receptacle_id'];
+            isOneToOne: false;
+            referencedRelation: 'receptacle_caisse';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_sortante_beneficiaire_personne_id_fkey';
+            columns: ['beneficiaire_personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_sortante_initie_par_personne_id_fkey';
+            columns: ['initie_par_personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
