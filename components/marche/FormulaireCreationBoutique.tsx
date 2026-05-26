@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { type DonneesCreerBoutique, creerBoutiqueSchema } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -131,15 +131,11 @@ export function FormulaireCreationBoutique({ creerBoutique }: FormulaireCreation
         <Input id="boutique-lieu" placeholder="Ville ou adresse" {...register('lieu')} />
       </div>
 
-      <div>
-        <Label htmlFor="boutique-image">URL d'image (optionnel)</Label>
-        <Input
-          id="boutique-image"
-          type="url"
-          placeholder="https://..."
-          {...register('image_url')}
-        />
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

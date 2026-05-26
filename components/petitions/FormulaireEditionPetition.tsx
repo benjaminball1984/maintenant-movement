@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { type DonneesEditerPetition, editerPetitionSchema } from '@/lib/validations/petition';
 import type { Petition } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,6 +49,7 @@ export function FormulaireEditionPetition({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<DonneesEditerPetition>({
     resolver: zodResolver(editerPetitionSchema),
@@ -116,13 +117,15 @@ export function FormulaireEditionPetition({
         ) : null}
       </div>
 
-      <div>
-        <Label htmlFor="edit-image">Image (URL, optionnel)</Label>
-        <Input id="edit-image" type="url" placeholder="https://..." {...register('image_url')} />
-        {errors.image_url !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.image_url.message}</p>
-        ) : null}
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        valeurInitiale={petition.image_url}
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
+      {errors.image_url !== undefined ? (
+        <p className="-mt-2 text-xs text-danger">{errors.image_url.message}</p>
+      ) : null}
 
       <div>
         <Label htmlFor="edit-texte" obligatoire>

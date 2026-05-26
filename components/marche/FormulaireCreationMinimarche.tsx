@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { MONNAIES, MONNAIES_PHYSIQUES } from '@/lib/marche/config';
 import { type DonneesCreerMinimarche, creerMinimarcheSchema } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -183,15 +183,11 @@ export function FormulaireCreationMinimarche({
         ) : null}
       </fieldset>
 
-      <div>
-        <Label htmlFor="minimarche-image">URL d'image (optionnel)</Label>
-        <Input
-          id="minimarche-image"
-          type="url"
-          placeholder="https://..."
-          {...register('image_url')}
-        />
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

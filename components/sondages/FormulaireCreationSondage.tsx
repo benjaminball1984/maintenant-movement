@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { type DonneesCreerSondage, creerSondageSchema } from '@/lib/validations/sondages';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -130,10 +130,11 @@ export function FormulaireCreationSondage({ creerSondage }: FormulaireCreationSo
           </label>
         </div>
       </fieldset>
-      <div>
-        <Label htmlFor="sondage-image">URL d'image (optionnel)</Label>
-        <Input id="sondage-image" type="url" placeholder="https://..." {...register('image_url')} />
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
       <Button type="submit" disabled={envoiEnCours}>
         {envoiEnCours ? 'Publication...' : 'Publier le sondage'}
