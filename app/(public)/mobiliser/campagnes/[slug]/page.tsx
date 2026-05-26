@@ -1,4 +1,6 @@
+import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { getSession } from '@/lib/auth/session';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
@@ -59,6 +61,7 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
   }
 
   const estPubliee = campagne.statut === 'publiee';
+  const session = await getSession();
 
   return (
     <Container taille="md" className="py-12">
@@ -148,6 +151,19 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
             </p>
           ) : null}
         </footer>
+
+        {/* Fil de discussion de la campagne (cycle V2 §18, V2.2.1 + V2.3.6).
+            En V2.2.1, est_membre_espace('campagne', id) renvoie true pour
+            tout authentifié faute de table d'appartenance dédiée à la
+            campagne — donc le fil est ouvert à tous les comptes. À
+            durcir quand une table d'appartenance campagne sera créée. */}
+        {estPubliee && session !== null ? (
+          <FilDeGroupe
+            espaceType="campagne"
+            espaceId={campagne.id}
+            cheminRevalidation={`/mobiliser/campagnes/${slug}`}
+          />
+        ) : null}
       </article>
     </Container>
   );

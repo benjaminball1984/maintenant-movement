@@ -5,6 +5,7 @@ import {
 } from '@/app/(public)/agir/communes/actions';
 import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCommune';
 import { ListeMembres } from '@/components/communes/ListeMembres';
+import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { type MembreCommune, listerMembresCommune } from '@/lib/communes/membres';
@@ -139,6 +140,17 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             </p>
             <ListeMembres membres={membres} moiId={session.userId} />
           </section>
+        ) : null}
+
+        {/* Fil de discussion du groupe (cycle V2 §18, V2.2.1 + V2.3.6).
+            Visible aux seuls membres : la RLS de fil_groupe_message filtre
+            via est_membre_espace('commune', commune.id). */}
+        {session !== null && dejaMembre ? (
+          <FilDeGroupe
+            espaceType="commune"
+            espaceId={commune.id}
+            cheminRevalidation={`/agir/communes/${commune.slug}`}
+          />
         ) : null}
       </article>
     </Container>
