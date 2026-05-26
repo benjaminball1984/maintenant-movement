@@ -2566,6 +2566,53 @@ export type Database = {
         };
         Relationships: [];
       };
+      consentement: {
+        Row: {
+          id: string;
+          profil_unifie_id: string;
+          type_consentement: string;
+          objet_type: string | null;
+          objet_id: string | null;
+          valeur: boolean;
+          date_consentement: string;
+          source: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          profil_unifie_id: string;
+          type_consentement: string;
+          objet_type?: string | null;
+          objet_id?: string | null;
+          valeur: boolean;
+          date_consentement?: string;
+          source: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          profil_unifie_id?: string;
+          type_consentement?: string;
+          objet_type?: string | null;
+          objet_id?: string | null;
+          valeur?: boolean;
+          date_consentement?: string;
+          source?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'consentement_profil_unifie_id_fkey';
+            columns: ['profil_unifie_id'];
+            isOneToOne: false;
+            referencedRelation: 'profil_unifie';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
