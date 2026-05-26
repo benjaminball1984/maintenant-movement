@@ -2731,6 +2731,62 @@ export type Database = {
           },
         ];
       };
+      reservation: {
+        Row: {
+          id: string;
+          offre_type: string;
+          offre_id: string;
+          demandeur_personne_id: string;
+          creneau_debut: string;
+          creneau_fin: string | null;
+          quantite: number;
+          message_amorce: string;
+          statut: string;
+          motif_decision: string | null;
+          transaction_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          offre_type: string;
+          offre_id: string;
+          demandeur_personne_id: string;
+          creneau_debut: string;
+          creneau_fin?: string | null;
+          quantite?: number;
+          message_amorce: string;
+          statut?: string;
+          motif_decision?: string | null;
+          transaction_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          offre_type?: string;
+          offre_id?: string;
+          demandeur_personne_id?: string;
+          creneau_debut?: string;
+          creneau_fin?: string | null;
+          quantite?: number;
+          message_amorce?: string;
+          statut?: string;
+          motif_decision?: string | null;
+          transaction_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reservation_demandeur_personne_id_fkey';
+            columns: ['demandeur_personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       adherent_actif: {
