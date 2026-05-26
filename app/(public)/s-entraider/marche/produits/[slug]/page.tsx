@@ -6,6 +6,7 @@ import { NotationEtoiles } from '@/components/marche/NotationEtoiles';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { listerNotationsProduit, produitParSlug } from '@/lib/marche/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { MapPin, Package, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,7 +20,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const produit = await produitParSlug(slug);
   if (produit === null) return { title: 'Produit introuvable' };
-  return { title: produit.titre, description: produit.description.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: produit.titre,
+      description: produit.description,
+      image_url: produit.image_url,
+      type_objet: 'produit_marche',
+    },
+    cheminPage: `/s-entraider/marche/produits/${slug}`,
+  });
 }
 
 /**

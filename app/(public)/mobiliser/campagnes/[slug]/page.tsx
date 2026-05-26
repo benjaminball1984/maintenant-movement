@@ -1,5 +1,6 @@
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,10 +31,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   if (campagne === null) {
     return { title: 'Campagne introuvable' };
   }
-  return {
-    title: campagne.titre,
-    description: campagne.texte.slice(0, 160),
-  };
+  return metadataPourPartage({
+    objet: {
+      titre: campagne.titre,
+      description: campagne.texte,
+      image_url: campagne.image_url,
+      type_objet: 'campagne',
+    },
+    cheminPage: `/mobiliser/campagnes/${slug}`,
+  });
 }
 
 /**

@@ -1,5 +1,6 @@
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { federationParSlug } from '@/lib/communes/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -18,7 +19,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const federation = await federationParSlug(slug);
   if (federation === null) return { title: 'Fédération introuvable' };
-  return { title: federation.nom };
+  return metadataPourPartage({
+    objet: {
+      titre: federation.nom,
+      description: `Fédération ${federation.nom} du mouvement Maintenant!`,
+      image_url: null,
+      type_objet: 'federation',
+    },
+    cheminPage: `/agir/federations/${slug}`,
+  });
 }
 
 export default async function PageDetailFederation({ params }: PageDetailProps) {

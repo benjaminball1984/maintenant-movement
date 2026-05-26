@@ -1,6 +1,7 @@
 import { CarteProduit } from '@/components/marche/CarteProduit';
 import { Alert, Badge, Heading } from '@/components/ui';
 import { boutiqueParSlug, produitsDeLaBoutique } from '@/lib/marche/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { CalendarRange, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -20,7 +21,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const boutique = await boutiqueParSlug(slug);
   if (boutique === null) return { title: 'Boutique introuvable' };
-  return { title: boutique.nom, description: boutique.description.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: boutique.nom,
+      description: boutique.description,
+      image_url: boutique.image_url,
+      type_objet: 'boutique_marche',
+    },
+    cheminPage: `/s-entraider/marche/boutiques/${slug}`,
+  });
 }
 
 export default async function PageDetailBoutique({ params }: PageDetailProps) {

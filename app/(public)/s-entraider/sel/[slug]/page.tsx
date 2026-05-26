@@ -1,4 +1,5 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { serviceSelParSlug } from '@/lib/sel/requetes';
 import { Clock, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -13,7 +14,16 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const service = await serviceSelParSlug(slug);
   if (service === null) return { title: 'Service introuvable' };
-  return { title: service.titre, description: service.description.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: service.titre,
+      description: service.description,
+      // Pas d'image_url en V1 sur service_sel : on tombe sur l'image par défaut.
+      image_url: null,
+      type_objet: 'service_sel',
+    },
+    cheminPage: `/s-entraider/sel/${slug}`,
+  });
 }
 
 /**

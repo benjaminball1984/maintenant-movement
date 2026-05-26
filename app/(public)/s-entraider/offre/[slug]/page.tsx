@@ -1,6 +1,7 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import { offreParSlug } from '@/lib/entraide/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,7 +15,26 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const offre = await offreParSlug(slug);
   if (offre === null) return { title: 'Offre introuvable' };
-  return { title: offre.titre, description: offre.description.slice(0, 160) };
+  // Mapping fin offre.type → TypeObjet pour la matrice d'images par défaut.
+  // En V2 la bibliothèque mutualise les sous-types (transport/hébergement/prêt)
+  // sur la même image générique `offre-entraide.svg` (cf. images-defaut.ts).
+  const typeObjet =
+    offre.type === 'transport'
+      ? 'offre_transport'
+      : offre.type === 'hebergement'
+        ? 'offre_hebergement'
+        : offre.type === 'pret_objet'
+          ? 'offre_pret'
+          : 'offre_entraide';
+  return metadataPourPartage({
+    objet: {
+      titre: offre.titre,
+      description: offre.description,
+      image_url: offre.image_url,
+      type_objet: typeObjet,
+    },
+    cheminPage: `/s-entraider/offre/${slug}`,
+  });
 }
 
 export default async function PageOffreDetail({ params }: PageDetailProps) {

@@ -1,5 +1,6 @@
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { mediaParSlug } from '@/lib/media/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { TypeMedia } from '@/types/database';
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -32,7 +33,17 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const media = await mediaParSlug(slug);
   if (media === null) return { title: 'Média introuvable' };
-  return { title: media.titre, description: media.corps.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: media.titre,
+      description: media.corps,
+      // `vignette_url` est le champ image dédié à l'aperçu / OG (V1 chantier média).
+      image_url: media.vignette_url,
+      type_objet: 'article',
+    },
+    cheminPage: `/s-informer/media/${slug}`,
+    ogType: 'article',
+  });
 }
 
 export default async function PageDetailMedia({ params }: PageDetailProps) {

@@ -2,6 +2,7 @@ import { voterSondage } from '@/app/(public)/s-informer/sondages/actions';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { aVotePersonne, sondageParSlugAvecResultats } from '@/lib/sondages/requetes';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -15,7 +16,16 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const sondage = await sondageParSlugAvecResultats(slug);
   if (sondage === null) return { title: 'Sondage introuvable' };
-  return { title: sondage.titre, description: sondage.question };
+  return metadataPourPartage({
+    objet: {
+      titre: sondage.titre,
+      description: sondage.question,
+      // Pas d'image_url en V1 sur sondage : on tombe sur l'image par défaut.
+      image_url: null,
+      type_objet: 'sondage',
+    },
+    cheminPage: `/s-informer/sondages/${slug}`,
+  });
 }
 
 export default async function PageDetailSondage({ params }: PageDetailProps) {

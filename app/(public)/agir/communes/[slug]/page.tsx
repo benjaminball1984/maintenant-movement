@@ -9,6 +9,7 @@ import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { type MembreCommune, listerMembresCommune } from '@/lib/communes/membres';
 import { communeParSlug } from '@/lib/communes/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -23,10 +24,17 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const commune = await communeParSlug(slug);
   if (commune === null) return { title: 'Commune introuvable' };
-  return {
-    title: commune.nom,
-    description: commune.description_courte ?? `Commune ${commune.nom}`,
-  };
+  return metadataPourPartage({
+    objet: {
+      titre: commune.nom,
+      description: commune.description_courte ?? `Commune libre de ${commune.nom}`,
+      // Pas de champ image_url en V1 sur `commune` (cf. types/database) :
+      // on tombe sur l'image par défaut `commune.svg` de la bibliothèque ET1.
+      image_url: null,
+      type_objet: 'commune_libre',
+    },
+    cheminPage: `/agir/communes/${slug}`,
+  });
 }
 
 export default async function PageDetailCommune({ params }: PageDetailProps) {

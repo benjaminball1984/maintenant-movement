@@ -1,6 +1,7 @@
 import { BadgesMonnaies } from '@/components/marche/BadgesMonnaies';
 import { Badge, Card, Heading } from '@/components/ui';
 import { minimarcheParSlug } from '@/lib/marche/requetes';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { CalendarRange, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -23,7 +24,15 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   const { slug } = await params;
   const minimarche = await minimarcheParSlug(slug);
   if (minimarche === null) return { title: 'Minimarché introuvable' };
-  return { title: minimarche.titre, description: minimarche.description.slice(0, 160) };
+  return metadataPourPartage({
+    objet: {
+      titre: minimarche.titre,
+      description: minimarche.description,
+      image_url: minimarche.image_url,
+      type_objet: 'minimarche_solidaire',
+    },
+    cheminPage: `/s-entraider/marche/minimarches/${slug}`,
+  });
 }
 
 export default async function PageDetailMinimarche({ params }: PageDetailProps) {
