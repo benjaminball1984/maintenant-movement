@@ -1,4 +1,6 @@
+import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { getSession } from '@/lib/auth/session';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { serviceSelParSlug } from '@/lib/sel/requetes';
 import { Clock, MapPin } from 'lucide-react';
@@ -40,6 +42,7 @@ export default async function PageDetailService({ params }: PageDetailProps) {
   if (service === null) notFound();
 
   const estPublie = service.statut === 'publie';
+  const session = await getSession();
 
   return (
     <>
@@ -105,7 +108,8 @@ export default async function PageDetailService({ params }: PageDetailProps) {
             Comment ça marche
           </Heading>
           <ul className="ml-4 list-disc space-y-1 text-sm text-text-2">
-            <li>Tu réserves ce service depuis ton profil (chantier polish à venir).</li>
+            <li>Tu réserves ce service en proposant un créneau et la quantité voulue.</li>
+            <li>Un message d’amorce est pré-rempli et envoyé à la personne prestataire.</li>
             <li>La personne prestataire déclare la durée réelle après réalisation.</li>
             <li>
               2 h plus tard sans contestation : crédit automatique en 99-coin (1 min = 1 unité).
@@ -113,6 +117,25 @@ export default async function PageDetailService({ params }: PageDetailProps) {
             <li>Tu peux contester pendant ces 2 h si la prestation pose problème.</li>
           </ul>
         </Card>
+
+        {estPublie ? (
+          <Card variant="ombre">
+            <Heading niveau={2} apparenceComme={4}>
+              Demander une réservation
+            </Heading>
+            <p className="mt-2 mb-4 text-sm text-text-2">
+              Propose un créneau. Le message d’amorce est généré pour toi à partir du service et de
+              la durée estimée.
+            </p>
+            <BoutonReserverOffre
+              offreType="service_sel"
+              offreId={service.id}
+              estConnecte={session !== null}
+              estCreateur={session?.userId === service.createurice_id}
+              cheminRevalidation={`/s-entraider/sel/${slug}`}
+            />
+          </Card>
+        ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {service.createurice_prenom !== null || service.createurice_nom !== null ? (

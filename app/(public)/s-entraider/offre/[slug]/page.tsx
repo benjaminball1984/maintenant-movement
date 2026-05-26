@@ -1,7 +1,10 @@
+import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { getSession } from '@/lib/auth/session';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import { offreParSlug } from '@/lib/entraide/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import type { OffreTypeReservation } from '@/lib/reservation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -44,6 +47,19 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
 
   const config = SOUS_ESPACES[offre.type];
   const estPubliee = offre.statut === 'publiee';
+
+  // Réservation V2.3.5 : disponible si l'offre est publiée + offre type
+  // mapping vers OffreTypeReservation. On vérifie la session pour adapter
+  // l'UI (bouton de connexion vs bouton de demande).
+  const session = await getSession();
+  const offreTypeReservation: OffreTypeReservation =
+    offre.type === 'transport'
+      ? 'transport_covoiturage'
+      : offre.type === 'hebergement'
+        ? 'hebergement'
+        : offre.type === 'pret_objet'
+          ? 'pret'
+          : 'autre';
 
   return (
     <>
@@ -111,23 +127,24 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
           </div>
         </section>
 
-        <Card variant="ombre">
-          <Heading niveau={2} apparenceComme={4}>
-            Prendre contact
-          </Heading>
-          <p className="mt-2 text-sm text-text-2">
-            Contact direct par email avec la personne qui a publié l'offre. La messagerie interne
-            est en cours de construction (chantier 7.5) ; en attendant, écris à l'adresse fournie
-            ci-dessous.
-          </p>
-          {/* On n'affiche pas l'email en clair pour le moment : la table `personne`
-              ne l'expose pas via une RLS lisible publiquement. Une route serveur
-              dédiée (POST → envoi via Brevo) viendra avec la messagerie interne. */}
-          <p className="mt-3 text-xs text-text-3">
-            Crée un compte pour pouvoir contacter directement les auteur·ices (la mise en relation
-            sera activée avec la messagerie interne).
-          </p>
-        </Card>
+        {estPubliee && offreTypeReservation !== 'autre' ? (
+          <Card variant="ombre">
+            <Heading niveau={2} apparenceComme={4}>
+              Demander une réservation
+            </Heading>
+            <p className="mt-2 mb-4 text-sm text-text-2">
+              Propose un créneau et la quantité souhaitée. Un message d’amorce sera pré-rempli et
+              envoyé à l’auteur·ice via la messagerie interne (chantier réseau social).
+            </p>
+            <BoutonReserverOffre
+              offreType={offreTypeReservation}
+              offreId={offre.id}
+              estConnecte={session !== null}
+              estCreateur={session?.userId === offre.createurice_id}
+              cheminRevalidation={`/s-entraider/offre/${slug}`}
+            />
+          </Card>
+        ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {offre.createurice_prenom !== null || offre.createurice_nom !== null ? (
