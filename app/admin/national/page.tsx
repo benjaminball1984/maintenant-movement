@@ -68,6 +68,12 @@ const MODULES: ReadonlyArray<{ titre: string; description: string; href: string 
     href: '/admin/national/droits',
   },
   {
+    titre: 'Trésorerie',
+    description:
+      'Lecture des caisses (régime B), réceptacles datés et reversements avec justificatif obligatoire.',
+    href: '/admin/national/tresorerie',
+  },
+  {
     titre: 'Gestion des personnes',
     description: 'Rechercher une personne, consulter sa fiche, gérer ses données (RGPD).',
     href: null,

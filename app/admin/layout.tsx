@@ -104,6 +104,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                   {[
                     { href: '/admin/national', libelle: 'Vue nationale' },
                     { href: '/admin/national/droits', libelle: 'Gestion des droits' },
+                    { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
                   ].map((onglet) => (
                     <li key={onglet.href}>
                       <Link
