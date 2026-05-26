@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { type DonneesCreerCagnotte, creerCagnotteSchema } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -156,13 +156,14 @@ export function FormulaireCreationCagnotte({
         ) : null}
       </div>
 
-      <div>
-        <Label htmlFor="cag-image">Image (URL, optionnel)</Label>
-        <Input id="cag-image" type="url" placeholder="https://..." {...register('image_url')} />
-        {errors.image_url !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.image_url.message}</p>
-        ) : null}
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
+      {errors.image_url !== undefined ? (
+        <p className="-mt-2 text-xs text-danger">{errors.image_url.message}</p>
+      ) : null}
 
       <div>
         <Label htmlFor="cag-wallet">Adresse wallet T99CP (optionnel)</Label>

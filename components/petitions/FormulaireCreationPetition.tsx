@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { type DonneesCreerPetition, creerPetitionSchema } from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -109,21 +109,14 @@ export function FormulaireCreationPetition({ creerPetition }: FormulaireCreation
         ) : null}
       </div>
 
-      <div>
-        <Label htmlFor="petition-image">Image (URL, optionnel)</Label>
-        <Input
-          id="petition-image"
-          type="url"
-          placeholder="https://..."
-          {...register('image_url')}
-        />
-        <p className="mt-1 text-xs text-text-3">
-          Une image illustrative (paysage, bannière). L'upload direct arrivera plus tard.
-        </p>
-        {errors.image_url !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.image_url.message}</p>
-        ) : null}
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
+      {errors.image_url !== undefined ? (
+        <p className="-mt-2 text-xs text-danger">{errors.image_url.message}</p>
+      ) : null}
 
       <div>
         <Label htmlFor="petition-texte" obligatoire>

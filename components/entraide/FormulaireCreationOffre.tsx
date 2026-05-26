@@ -1,7 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import {
   type DonneesCreerOffreEntraide,
@@ -203,10 +203,11 @@ export function FormulaireCreationOffre({
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="off-image">Image (URL, optionnel)</Label>
-        <Input id="off-image" type="url" placeholder="https://..." {...register('image_url')} />
-      </div>
+      <ChampImageObjet
+        name="image_url"
+        libelle="Image illustrative (optionnelle)"
+        onChange={(url) => setValue('image_url', url ?? '')}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
