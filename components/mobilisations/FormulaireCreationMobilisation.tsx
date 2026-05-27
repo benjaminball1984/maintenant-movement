@@ -15,10 +15,58 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.149). */
+export interface LibellesCreationMobilisation {
+  alertErreurTitre: string;
+  labelTitre: string;
+  placeholderTitre: string;
+  labelDescription: string;
+  placeholderDescription: string;
+  labelLieu: string;
+  placeholderLieu: string;
+  labelLatitude: string;
+  placeholderLatitude: string;
+  labelLongitude: string;
+  placeholderLongitude: string;
+  hintGeo: string;
+  labelDateDebut: string;
+  labelDateFin: string;
+  labelImage: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  notePublication: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationMobilisation = {
+  alertErreurTitre: 'Création impossible',
+  labelTitre: 'Titre',
+  placeholderTitre: 'Exemple : Manif climat samedi 23 mai',
+  labelDescription: 'Description',
+  placeholderDescription:
+    "Décris l'événement, le déroulé, ce qu'il faut savoir. 50 à 3000 caractères.",
+  labelLieu: 'Lieu',
+  placeholderLieu: 'Exemple : Place de la République, Paris 11e',
+  labelLatitude: 'Latitude (optionnel)',
+  placeholderLatitude: '48.8676',
+  labelLongitude: 'Longitude (optionnel)',
+  placeholderLongitude: '2.3631',
+  hintGeo:
+    'Coordonnées GPS pour la carte. Les deux ou aucune. Tu peux les copier depuis OpenStreetMap.',
+  labelDateDebut: 'Date et heure de début',
+  labelDateFin: 'Date et heure de fin (optionnel)',
+  labelImage: 'Image illustrative (optionnelle)',
+  ctaSubmit: 'Publier la mobilisation',
+  ctaEnCours: 'Publication...',
+  notePublication:
+    "Publication immédiate (modération a posteriori). L'équipe Maintenant! peut retirer la mobilisation en cas de problème.",
+};
+
 interface FormulaireCreationMobilisationProps {
   creerMobilisation: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  /** Libelles UI surchargeables admin via CMS. */
+  libelles?: LibellesCreationMobilisation;
   /** Messages de validation Zod surchargeables admin via CMS. */
   messages?: MessagesValidationMobilisation;
 }
@@ -35,6 +83,7 @@ interface FormulaireCreationMobilisationProps {
  */
 export function FormulaireCreationMobilisation({
   creerMobilisation,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
 }: FormulaireCreationMobilisationProps) {
   const router = useRouter();
@@ -110,20 +159,16 @@ export function FormulaireCreationMobilisation({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Création impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="mob-titre" obligatoire>
-          Titre
+          {libelles.labelTitre}
         </Label>
-        <Input
-          id="mob-titre"
-          placeholder="Exemple : Manif climat samedi 23 mai"
-          {...register('titre')}
-        />
+        <Input id="mob-titre" placeholder={libelles.placeholderTitre} {...register('titre')} />
         {errors.titre !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.titre.message}</p>
         ) : null}
@@ -131,12 +176,12 @@ export function FormulaireCreationMobilisation({
 
       <div>
         <Label htmlFor="mob-description" obligatoire>
-          Description
+          {libelles.labelDescription}
         </Label>
         <Textarea
           id="mob-description"
           rows={8}
-          placeholder="Décris l'événement, le déroulé, ce qu'il faut savoir. 50 à 3000 caractères."
+          placeholder={libelles.placeholderDescription}
           {...register('description')}
         />
         {errors.description !== undefined ? (
@@ -146,13 +191,9 @@ export function FormulaireCreationMobilisation({
 
       <div>
         <Label htmlFor="mob-lieu" obligatoire>
-          Lieu
+          {libelles.labelLieu}
         </Label>
-        <Input
-          id="mob-lieu"
-          placeholder="Exemple : Place de la République, Paris 11e"
-          {...register('lieu')}
-        />
+        <Input id="mob-lieu" placeholder={libelles.placeholderLieu} {...register('lieu')} />
         {errors.lieu !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.lieu.message}</p>
         ) : null}
@@ -160,14 +201,14 @@ export function FormulaireCreationMobilisation({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="mob-lat">Latitude (optionnel)</Label>
+          <Label htmlFor="mob-lat">{libelles.labelLatitude}</Label>
           <Input
             id="mob-lat"
             type="number"
             step="0.000001"
             min={-90}
             max={90}
-            placeholder="48.8676"
+            placeholder={libelles.placeholderLatitude}
             onChange={gererGeoChange('latitude')}
           />
           {errors.latitude !== undefined ? (
@@ -175,14 +216,14 @@ export function FormulaireCreationMobilisation({
           ) : null}
         </div>
         <div>
-          <Label htmlFor="mob-lng">Longitude (optionnel)</Label>
+          <Label htmlFor="mob-lng">{libelles.labelLongitude}</Label>
           <Input
             id="mob-lng"
             type="number"
             step="0.000001"
             min={-180}
             max={180}
-            placeholder="2.3631"
+            placeholder={libelles.placeholderLongitude}
             onChange={gererGeoChange('longitude')}
           />
           {errors.longitude !== undefined ? (
@@ -190,14 +231,12 @@ export function FormulaireCreationMobilisation({
           ) : null}
         </div>
       </div>
-      <p className="-mt-3 text-xs text-text-3">
-        Coordonnées GPS pour la carte. Les deux ou aucune. Tu peux les copier depuis OpenStreetMap.
-      </p>
+      <p className="-mt-3 text-xs text-text-3">{libelles.hintGeo}</p>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="mob-debut" obligatoire>
-            Date et heure de début
+            {libelles.labelDateDebut}
           </Label>
           <Input id="mob-debut" type="datetime-local" onChange={gererDateChange('date_debut')} />
           {errors.date_debut !== undefined ? (
@@ -205,7 +244,7 @@ export function FormulaireCreationMobilisation({
           ) : null}
         </div>
         <div>
-          <Label htmlFor="mob-fin">Date et heure de fin (optionnel)</Label>
+          <Label htmlFor="mob-fin">{libelles.labelDateFin}</Label>
           <Input id="mob-fin" type="datetime-local" onChange={gererDateChange('date_fin')} />
           {errors.date_fin !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.date_fin.message}</p>
@@ -215,7 +254,7 @@ export function FormulaireCreationMobilisation({
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.labelImage}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
       {errors.image_url !== undefined ? (
@@ -226,13 +265,10 @@ export function FormulaireCreationMobilisation({
 
       <div className="flex gap-3">
         <Button type="submit" disabled={envoiEnCours}>
-          {envoiEnCours ? 'Publication...' : 'Publier la mobilisation'}
+          {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>
-      <p className="-mt-2 text-xs text-text-3">
-        Publication immédiate (modération a posteriori). L'équipe Maintenant! peut retirer la
-        mobilisation en cas de problème.
-      </p>
+      <p className="-mt-2 text-xs text-text-3">{libelles.notePublication}</p>
     </form>
   );
 }

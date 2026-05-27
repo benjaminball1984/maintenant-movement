@@ -16,15 +16,53 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.149). */
+export interface LibellesCreationMoment {
+  alertErreurTitre: string;
+  legendeType: string;
+  alertPorteAPorteTitre: string;
+  alertPorteAPorteMessage: string;
+  labelTitre: string;
+  labelDescription: string;
+  labelLieu: string;
+  labelDateDebut: string;
+  labelDateFin: string;
+  labelCauseLocale: string;
+  placeholderCauseLocale: string;
+  labelCapacite: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationMoment = {
+  alertErreurTitre: 'Création impossible',
+  legendeType: 'Type',
+  alertPorteAPorteTitre: '7 RDV générés automatiquement',
+  alertPorteAPorteMessage:
+    'Tu crées le porte-à-porte parent ; les 7 moments enfants seront créés automatiquement avec leurs dates (1er passage, 2e passage, tri, distribution, maraude, repas, volontaires).',
+  labelTitre: 'Titre',
+  labelDescription: 'Description',
+  labelLieu: 'Lieu',
+  labelDateDebut: 'Date et heure de début',
+  labelDateFin: 'Date de fin (optionnel)',
+  labelCauseLocale: 'Cause locale (optionnel)',
+  placeholderCauseLocale: 'Asso de quartier, classe verte, etc.',
+  labelCapacite: 'Capacité maximale (optionnel)',
+  ctaSubmit: 'Publier le moment',
+  ctaEnCours: 'Publication...',
+};
+
 interface FormulaireProps {
   creerMomentSolidaire: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  libelles?: LibellesCreationMoment;
   messages?: MessagesValidationMoments;
 }
 
 export function FormulaireCreationMoment({
   creerMomentSolidaire,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MOMENTS_DEFAUT,
 }: FormulaireProps) {
   const router = useRouter();
@@ -80,13 +118,15 @@ export function FormulaireCreationMoment({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Création impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">Type</legend>
+        <legend className="mb-2 font-body text-sm font-medium text-text-2">
+          {libelles.legendeType}
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {LISTE_TYPES_MOMENTS.map((t) => (
             <label
@@ -109,15 +149,14 @@ export function FormulaireCreationMoment({
       </fieldset>
 
       {type === 'porte_a_porte' ? (
-        <Alert variant="info" titre="7 RDV générés automatiquement">
-          Tu crées le porte-à-porte parent ; les 7 moments enfants seront créés automatiquement avec
-          leurs dates (1er passage, 2e passage, tri, distribution, maraude, repas, volontaires).
+        <Alert variant="info" titre={libelles.alertPorteAPorteTitre}>
+          {libelles.alertPorteAPorteMessage}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="moment-titre" obligatoire>
-          Titre
+          {libelles.labelTitre}
         </Label>
         <Input id="moment-titre" {...register('titre')} />
         {errors.titre !== undefined ? (
@@ -127,7 +166,7 @@ export function FormulaireCreationMoment({
 
       <div>
         <Label htmlFor="moment-description" obligatoire>
-          Description
+          {libelles.labelDescription}
         </Label>
         <Textarea id="moment-description" rows={5} {...register('description')} />
         {errors.description !== undefined ? (
@@ -137,7 +176,7 @@ export function FormulaireCreationMoment({
 
       <div>
         <Label htmlFor="moment-lieu" obligatoire>
-          Lieu
+          {libelles.labelLieu}
         </Label>
         <Input id="moment-lieu" {...register('lieu')} />
         {errors.lieu !== undefined ? (
@@ -148,7 +187,7 @@ export function FormulaireCreationMoment({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="moment-debut" obligatoire>
-            Date et heure de début
+            {libelles.labelDateDebut}
           </Label>
           <Input id="moment-debut" type="datetime-local" {...register('commence_le')} />
           {errors.commence_le !== undefined ? (
@@ -156,22 +195,22 @@ export function FormulaireCreationMoment({
           ) : null}
         </div>
         <div>
-          <Label htmlFor="moment-fin">Date de fin (optionnel)</Label>
+          <Label htmlFor="moment-fin">{libelles.labelDateFin}</Label>
           <Input id="moment-fin" type="datetime-local" {...register('termine_le')} />
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <Label htmlFor="moment-cause">Cause locale (optionnel)</Label>
+          <Label htmlFor="moment-cause">{libelles.labelCauseLocale}</Label>
           <Input
             id="moment-cause"
-            placeholder="Asso de quartier, classe verte, etc."
+            placeholder={libelles.placeholderCauseLocale}
             {...register('cause_locale')}
           />
         </div>
         <div>
-          <Label htmlFor="moment-capa">Capacité maximale (optionnel)</Label>
+          <Label htmlFor="moment-capa">{libelles.labelCapacite}</Label>
           <Input
             id="moment-capa"
             type="number"
@@ -185,7 +224,7 @@ export function FormulaireCreationMoment({
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Publication...' : 'Publier le moment'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

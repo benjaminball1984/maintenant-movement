@@ -12,6 +12,39 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.149). */
+export interface LibellesCreationPetition {
+  alertErreurTitre: string;
+  labelTitre: string;
+  placeholderTitre: string;
+  labelDestinataire: string;
+  placeholderDestinataire: string;
+  hintDestinataire: string;
+  labelImage: string;
+  labelTexte: string;
+  placeholderTexte: string;
+  labelObjectif: string;
+  hintObjectif: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationPetition = {
+  alertErreurTitre: 'Création impossible',
+  labelTitre: 'Titre',
+  placeholderTitre: 'Exemple : Pour le retour des trains de nuit en Auvergne',
+  labelDestinataire: 'Destinataire',
+  placeholderDestinataire: 'Exemple : Ministre des Transports',
+  hintDestinataire: "À qui s'adresse cette pétition (institution, élu·e, entreprise).",
+  labelImage: 'Image illustrative (optionnelle)',
+  labelTexte: 'Texte de la pétition',
+  placeholderTexte: 'Décris le problème et la demande. Argumente. 100 à 5000 caractères.',
+  labelObjectif: 'Objectif chiffré (nombre de signataires)',
+  hintObjectif: "Entre 100 et 1 000 000. Au franchissement de 90 %, l'objectif sera étiré ×1,5.",
+  ctaSubmit: 'Soumettre pour modération',
+  ctaEnCours: 'Envoi en cours...',
+};
+
 interface FormulaireCreationPetitionProps {
   /**
    * Server Action de création. Reçue par prop pour conserver une
@@ -21,6 +54,7 @@ interface FormulaireCreationPetitionProps {
   creerPetition: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  libelles?: LibellesCreationPetition;
   messages?: MessagesValidationPetition;
 }
 
@@ -40,6 +74,7 @@ interface FormulaireCreationPetitionProps {
  */
 export function FormulaireCreationPetition({
   creerPetition,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: FormulaireCreationPetitionProps) {
   const router = useRouter();
@@ -81,20 +116,16 @@ export function FormulaireCreationPetition({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Création impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="petition-titre" obligatoire>
-          Titre
+          {libelles.labelTitre}
         </Label>
-        <Input
-          id="petition-titre"
-          placeholder="Exemple : Pour le retour des trains de nuit en Auvergne"
-          {...register('titre')}
-        />
+        <Input id="petition-titre" placeholder={libelles.placeholderTitre} {...register('titre')} />
         {errors.titre !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.titre.message}</p>
         ) : null}
@@ -102,16 +133,14 @@ export function FormulaireCreationPetition({
 
       <div>
         <Label htmlFor="petition-destinataire" obligatoire>
-          Destinataire
+          {libelles.labelDestinataire}
         </Label>
         <Input
           id="petition-destinataire"
-          placeholder="Exemple : Ministre des Transports"
+          placeholder={libelles.placeholderDestinataire}
           {...register('destinataire')}
         />
-        <p className="mt-1 text-xs text-text-3">
-          À qui s'adresse cette pétition (institution, élu·e, entreprise).
-        </p>
+        <p className="mt-1 text-xs text-text-3">{libelles.hintDestinataire}</p>
         {errors.destinataire !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.destinataire.message}</p>
         ) : null}
@@ -119,7 +148,7 @@ export function FormulaireCreationPetition({
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.labelImage}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
       {errors.image_url !== undefined ? (
@@ -128,12 +157,12 @@ export function FormulaireCreationPetition({
 
       <div>
         <Label htmlFor="petition-texte" obligatoire>
-          Texte de la pétition
+          {libelles.labelTexte}
         </Label>
         <Textarea
           id="petition-texte"
           rows={10}
-          placeholder="Décris le problème et la demande. Argumente. 100 à 5000 caractères."
+          placeholder={libelles.placeholderTexte}
           {...register('texte')}
         />
         {errors.texte !== undefined ? (
@@ -143,7 +172,7 @@ export function FormulaireCreationPetition({
 
       <div>
         <Label htmlFor="petition-objectif" obligatoire>
-          Objectif chiffré (nombre de signataires)
+          {libelles.labelObjectif}
         </Label>
         <Input
           id="petition-objectif"
@@ -156,9 +185,7 @@ export function FormulaireCreationPetition({
           // refuse au lieu de coercer.
           {...register('objectif', { valueAsNumber: true })}
         />
-        <p className="mt-1 text-xs text-text-3">
-          Entre 100 et 1 000 000. Au franchissement de 90 %, l'objectif sera étiré ×1,5.
-        </p>
+        <p className="mt-1 text-xs text-text-3">{libelles.hintObjectif}</p>
         {errors.objectif !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.objectif.message}</p>
         ) : null}
@@ -168,7 +195,7 @@ export function FormulaireCreationPetition({
 
       <div className="flex gap-3">
         <Button type="submit" disabled={envoiEnCours}>
-          {envoiEnCours ? 'Envoi en cours...' : 'Soumettre pour modération'}
+          {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>
     </form>

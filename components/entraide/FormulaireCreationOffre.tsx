@@ -17,6 +17,48 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.149). */
+export interface LibellesCreationOffre {
+  alertErreurTitre: string;
+  legendeType: string;
+  legendeSens: string;
+  sensPropose: string;
+  sensCherche: string;
+  labelTitre: string;
+  placeholderTitre: string;
+  labelDescription: string;
+  placeholderDescription: string;
+  labelLieu: string;
+  placeholderLieu: string;
+  labelLatitude: string;
+  labelLongitude: string;
+  labelImage: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  notePublication: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationOffre = {
+  alertErreurTitre: 'Publication impossible',
+  legendeType: "Type d'offre",
+  legendeSens: 'Sens',
+  sensPropose: "Je propose / j'offre",
+  sensCherche: 'Je cherche / je demande',
+  labelTitre: 'Titre',
+  placeholderTitre: 'Exemple : Chambre à Marseille pour militante de passage',
+  labelDescription: 'Description',
+  placeholderDescription: "Précise le contexte, les conditions, ce qu'il faut savoir.",
+  labelLieu: 'Lieu',
+  placeholderLieu: 'Ville, quartier, ou adresse approximative',
+  labelLatitude: 'Latitude (optionnel)',
+  labelLongitude: 'Longitude (optionnel)',
+  labelImage: 'Image illustrative (optionnelle)',
+  ctaSubmit: "Publier l'offre",
+  ctaEnCours: 'Publication...',
+  notePublication:
+    'Publication immédiate (modération a posteriori). Le contact passe par la messagerie interne du réseau social.',
+};
+
 interface FormulaireCreationOffreProps {
   /** Type pré-rempli depuis la page de création. La personne peut le changer si besoin. */
   typeParDefaut: TypeOffreEntraide;
@@ -25,6 +67,7 @@ interface FormulaireCreationOffreProps {
   ) => Promise<
     { ok: true; slug: string; type: TypeOffreEntraide } | { ok: false; message: string }
   >;
+  libelles?: LibellesCreationOffre;
   messages?: MessagesValidationEntraide;
 }
 
@@ -38,6 +81,7 @@ const ROUTES: Record<TypeOffreEntraide, string> = {
 export function FormulaireCreationOffre({
   typeParDefaut,
   creerOffreEntraide,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_ENTRAIDE_DEFAUT,
 }: FormulaireCreationOffreProps) {
   const router = useRouter();
@@ -92,13 +136,15 @@ export function FormulaireCreationOffre({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Publication impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">Type d'offre</legend>
+        <legend className="mb-2 font-body text-sm font-medium text-text-2">
+          {libelles.legendeType}
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {Object.values(SOUS_ESPACES).map((config) => (
             <label
@@ -118,7 +164,9 @@ export function FormulaireCreationOffre({
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">Sens</legend>
+        <legend className="mb-2 font-body text-sm font-medium text-text-2">
+          {libelles.legendeSens}
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
             <input
@@ -127,7 +175,7 @@ export function FormulaireCreationOffre({
               {...register('sens')}
               className="mt-0.5 accent-brand"
             />
-            <span>Je propose / j'offre</span>
+            <span>{libelles.sensPropose}</span>
           </label>
           <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
             <input
@@ -136,20 +184,16 @@ export function FormulaireCreationOffre({
               {...register('sens')}
               className="mt-0.5 accent-brand"
             />
-            <span>Je cherche / je demande</span>
+            <span>{libelles.sensCherche}</span>
           </label>
         </div>
       </fieldset>
 
       <div>
         <Label htmlFor="off-titre" obligatoire>
-          Titre
+          {libelles.labelTitre}
         </Label>
-        <Input
-          id="off-titre"
-          placeholder="Exemple : Chambre à Marseille pour militante de passage"
-          {...register('titre')}
-        />
+        <Input id="off-titre" placeholder={libelles.placeholderTitre} {...register('titre')} />
         {errors.titre !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.titre.message}</p>
         ) : null}
@@ -157,12 +201,12 @@ export function FormulaireCreationOffre({
 
       <div>
         <Label htmlFor="off-description" obligatoire>
-          Description
+          {libelles.labelDescription}
         </Label>
         <Textarea
           id="off-description"
           rows={6}
-          placeholder="Précise le contexte, les conditions, ce qu'il faut savoir."
+          placeholder={libelles.placeholderDescription}
           {...register('description')}
         />
         {errors.description !== undefined ? (
@@ -172,13 +216,9 @@ export function FormulaireCreationOffre({
 
       <div>
         <Label htmlFor="off-lieu" obligatoire>
-          Lieu
+          {libelles.labelLieu}
         </Label>
-        <Input
-          id="off-lieu"
-          placeholder="Ville, quartier, ou adresse approximative"
-          {...register('lieu')}
-        />
+        <Input id="off-lieu" placeholder={libelles.placeholderLieu} {...register('lieu')} />
         {errors.lieu !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.lieu.message}</p>
         ) : null}
@@ -186,7 +226,7 @@ export function FormulaireCreationOffre({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="off-lat">Latitude (optionnel)</Label>
+          <Label htmlFor="off-lat">{libelles.labelLatitude}</Label>
           <Input
             id="off-lat"
             type="number"
@@ -197,7 +237,7 @@ export function FormulaireCreationOffre({
           />
         </div>
         <div>
-          <Label htmlFor="off-lng">Longitude (optionnel)</Label>
+          <Label htmlFor="off-lng">{libelles.labelLongitude}</Label>
           <Input
             id="off-lng"
             type="number"
@@ -211,19 +251,16 @@ export function FormulaireCreationOffre({
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.labelImage}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Publication...' : "Publier l'offre"}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
-      <p className="-mt-2 text-xs text-text-3">
-        Publication immédiate (modération a posteriori). Le contact passe par la messagerie interne
-        du réseau social.
-      </p>
+      <p className="-mt-2 text-xs text-text-3">{libelles.notePublication}</p>
     </form>
   );
 }
