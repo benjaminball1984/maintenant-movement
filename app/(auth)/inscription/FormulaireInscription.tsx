@@ -3,7 +3,11 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { ChampMotDePasse } from '@/components/formulaires/ChampMotDePasse';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesInscription, inscriptionSchema } from '@/lib/validations/auth';
+import {
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+  type MessagesValidationAuth,
+} from '@/lib/messages-validation';
+import { type DonneesInscription, creerInscriptionSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -77,7 +81,8 @@ const LIBELLES_DEFAUT: LibellesInscription = {
  */
 export function FormulaireInscription({
   libelles = LIBELLES_DEFAUT,
-}: { libelles?: LibellesInscription } = {}) {
+  messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
+}: { libelles?: LibellesInscription; messages?: MessagesValidationAuth } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   // Si Supabase signale que l'email est deja en base, on affiche en
@@ -100,7 +105,7 @@ export function FormulaireInscription({
     setValue,
     formState: { errors },
   } = useForm<DonneesInscription>({
-    resolver: zodResolver(inscriptionSchema),
+    resolver: zodResolver(creerInscriptionSchema(messages)),
     defaultValues: {
       token_turnstile: '',
       cgu_acceptees: false,

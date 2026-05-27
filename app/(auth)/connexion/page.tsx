@@ -2,6 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { lireMessagesValidationAuth } from '@/lib/messages-validation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BoutonsOAuth } from './BoutonsOAuth';
@@ -67,6 +68,7 @@ export default async function PageConnexion({
     magicCtaChargement,
     magicLabelEmail,
     magicAlertErreurTitre,
+    messagesValidation,
   ] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('connexion.titre', { valeurMd: FALLBACKS.titre }),
@@ -101,6 +103,7 @@ export default async function PageConnexion({
     lireContenuEditorial('connexion.magic.alert_erreur_titre', {
       valeurMd: 'Envoi impossible',
     }),
+    lireMessagesValidationAuth(),
   ]);
 
   return (
@@ -181,6 +184,7 @@ export default async function PageConnexion({
             labelMotDePasse: mdpLabelMotDePasse.valeurMd,
             alertErreurTitre: mdpAlertErreurTitre.valeurMd,
           }}
+          messages={messagesValidation}
         />
         <p className="mt-3 text-sm">
           <TexteEditableAdmin
@@ -234,6 +238,7 @@ export default async function PageConnexion({
             labelEmail: magicLabelEmail.valeurMd,
             alertErreurTitre: magicAlertErreurTitre.valeurMd,
           }}
+          messages={messagesValidation}
         />
       </Card>
 

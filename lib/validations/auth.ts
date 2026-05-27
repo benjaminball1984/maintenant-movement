@@ -1,3 +1,7 @@
+import {
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+  type MessagesValidationAuth,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
 
 /**
@@ -9,6 +13,10 @@ import { z } from 'zod';
  * (retour immédiat sans aller-retour serveur).
  *
  * Messages d'erreur en français, orientés solution (cf. 03_VOCABULAIRE.md §9).
+ *
+ * V2.4.139 : factories `creerXxxSchema(messages?)` ajoutees pour permettre
+ * la surcharge admin via CMS. Les exports historiques (sans `creer`) restent
+ * disponibles et utilisent les defauts.
  */
 
 // ============================================================
@@ -16,47 +24,61 @@ import { z } from 'zod';
 // ============================================================
 
 /** Code postal français : 5 chiffres exactement. */
-export const codePostalFrancaisSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{5}$/, 'Le code postal doit comporter 5 chiffres.');
+export function creerCodePostalFrancaisSchema(messages: MessagesValidationAuth) {
+  return z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, messages.codePostalFormat);
+}
+export const codePostalFrancaisSchema = creerCodePostalFrancaisSchema(
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+);
 
 /**
  * Mot de passe : 12 caractères minimum, au moins 1 minuscule, 1 majuscule,
  * 1 chiffre. Pas d'exigence de caractère spécial (recommandation ANSSI :
  * longueur plutôt que complexité forcée).
  */
-export const motDePasseSchema = z
-  .string()
-  .min(12, 'Le mot de passe doit comporter au moins 12 caractères.')
-  .refine((v) => /[a-z]/.test(v), 'Le mot de passe doit contenir une minuscule.')
-  .refine((v) => /[A-Z]/.test(v), 'Le mot de passe doit contenir une majuscule.')
-  .refine((v) => /[0-9]/.test(v), 'Le mot de passe doit contenir un chiffre.');
+export function creerMotDePasseSchema(messages: MessagesValidationAuth) {
+  return z
+    .string()
+    .min(12, messages.motDePasseLongueur)
+    .refine((v) => /[a-z]/.test(v), messages.motDePasseMinuscule)
+    .refine((v) => /[A-Z]/.test(v), messages.motDePasseMajuscule)
+    .refine((v) => /[0-9]/.test(v), messages.motDePasseChiffre);
+}
+export const motDePasseSchema = creerMotDePasseSchema(MESSAGES_VALIDATION_AUTH_DEFAUT);
 
 /**
  * Date de naissance : 15 ans révolus minimum (RGPD §5G).
  * Accepte une chaîne ISO 8601 (`YYYY-MM-DD`) telle qu'envoyée par un
  * input type="date" HTML.
  */
-export const dateNaissanceSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide.')
-  .refine((iso) => {
-    const naissance = new Date(iso);
-    if (Number.isNaN(naissance.getTime())) {
-      return false;
-    }
-    const aujourdHui = new Date();
-    const ageMin = new Date(
-      aujourdHui.getFullYear() - 15,
-      aujourdHui.getMonth(),
-      aujourdHui.getDate(),
-    );
-    return naissance <= ageMin;
-  }, 'Tu dois avoir 15 ans révolus pour créer un compte.');
+export function creerDateNaissanceSchema(messages: MessagesValidationAuth) {
+  return z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, messages.dateFormat)
+    .refine((iso) => {
+      const naissance = new Date(iso);
+      if (Number.isNaN(naissance.getTime())) {
+        return false;
+      }
+      const aujourdHui = new Date();
+      const ageMin = new Date(
+        aujourdHui.getFullYear() - 15,
+        aujourdHui.getMonth(),
+        aujourdHui.getDate(),
+      );
+      return naissance <= ageMin;
+    }, messages.ageMin);
+}
+export const dateNaissanceSchema = creerDateNaissanceSchema(MESSAGES_VALIDATION_AUTH_DEFAUT);
 
 /** Token Turnstile : chaîne non vide. La vérification réelle se fait côté serveur. */
-export const tokenTurnstileSchema = z.string().min(1, 'Vérification anti-bot requise.');
+export function creerTokenTurnstileSchema(messages: MessagesValidationAuth) {
+  return z.string().min(1, messages.turnstileRequis);
+}
+export const tokenTurnstileSchema = creerTokenTurnstileSchema(MESSAGES_VALIDATION_AUTH_DEFAUT);
 
 // ============================================================
 // Inscription
@@ -69,30 +91,30 @@ export const tokenTurnstileSchema = z.string().min(1, 'Vérification anti-bot re
  *
  * Le pronom est obligatoire (signal politique, cf. spec §9).
  */
-export const inscriptionSchema = z
-  .object({
-    nom: z.string().trim().min(1, 'Le nom est requis.').max(100),
-    prenom: z.string().trim().min(1, 'Le prénom est requis.').max(100),
-    pronom: z.string().trim().min(1, 'Le pronom est requis (signal politique).').max(50),
-    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
-    code_postal: codePostalFrancaisSchema,
-    telephone: z
-      .string()
-      .trim()
-      .regex(/^(\+33|0)[1-9](\d{2}){4}$/, 'Format de téléphone français invalide.')
-      .optional()
-      .or(z.literal('')),
-    date_naissance: dateNaissanceSchema,
-    mot_de_passe: motDePasseSchema,
-    cgu_acceptees: z
-      .boolean()
-      .refine(
-        (v) => v === true,
-        "Tu dois accepter la politique de confidentialité pour t'inscrire.",
-      ),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerInscriptionSchema(
+  messages: MessagesValidationAuth = MESSAGES_VALIDATION_AUTH_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(1, messages.nomRequis).max(100),
+      prenom: z.string().trim().min(1, messages.prenomRequis).max(100),
+      pronom: z.string().trim().min(1, messages.pronomRequis).max(50),
+      email: z.string().trim().toLowerCase().email(messages.emailFormat),
+      code_postal: creerCodePostalFrancaisSchema(messages),
+      telephone: z
+        .string()
+        .trim()
+        .regex(/^(\+33|0)[1-9](\d{2}){4}$/, messages.telephoneFormat)
+        .optional()
+        .or(z.literal('')),
+      date_naissance: creerDateNaissanceSchema(messages),
+      mot_de_passe: creerMotDePasseSchema(messages),
+      cgu_acceptees: z.boolean().refine((v) => v === true, messages.cguAcceptees),
+      token_turnstile: creerTokenTurnstileSchema(messages),
+    })
+    .strict();
+}
+export const inscriptionSchema = creerInscriptionSchema();
 
 export type DonneesInscription = z.infer<typeof inscriptionSchema>;
 
@@ -100,13 +122,18 @@ export type DonneesInscription = z.infer<typeof inscriptionSchema>;
 // Connexion email + mot de passe
 // ============================================================
 
-export const connexionMdpSchema = z
-  .object({
-    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
-    mot_de_passe: z.string().min(1, 'Le mot de passe est requis.'),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerConnexionMdpSchema(
+  messages: MessagesValidationAuth = MESSAGES_VALIDATION_AUTH_DEFAUT,
+) {
+  return z
+    .object({
+      email: z.string().trim().toLowerCase().email(messages.emailFormat),
+      mot_de_passe: z.string().min(1, messages.motDePasseRequis),
+      token_turnstile: creerTokenTurnstileSchema(messages),
+    })
+    .strict();
+}
+export const connexionMdpSchema = creerConnexionMdpSchema();
 
 export type DonneesConnexionMdp = z.infer<typeof connexionMdpSchema>;
 
@@ -114,12 +141,17 @@ export type DonneesConnexionMdp = z.infer<typeof connexionMdpSchema>;
 // Magic link
 // ============================================================
 
-export const magicLinkSchema = z
-  .object({
-    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerMagicLinkSchema(
+  messages: MessagesValidationAuth = MESSAGES_VALIDATION_AUTH_DEFAUT,
+) {
+  return z
+    .object({
+      email: z.string().trim().toLowerCase().email(messages.emailFormat),
+      token_turnstile: creerTokenTurnstileSchema(messages),
+    })
+    .strict();
+}
+export const magicLinkSchema = creerMagicLinkSchema();
 
 export type DonneesMagicLink = z.infer<typeof magicLinkSchema>;
 
@@ -132,12 +164,17 @@ export type DonneesMagicLink = z.infer<typeof magicLinkSchema>;
  * Le clic sur le lien recu par mail amene sur la page de nouveau mot de
  * passe avec une session temporaire (cf. /reinitialiser-mot-de-passe).
  */
-export const demandeResetSchema = z
-  .object({
-    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerDemandeResetSchema(
+  messages: MessagesValidationAuth = MESSAGES_VALIDATION_AUTH_DEFAUT,
+) {
+  return z
+    .object({
+      email: z.string().trim().toLowerCase().email(messages.emailFormat),
+      token_turnstile: creerTokenTurnstileSchema(messages),
+    })
+    .strict();
+}
+export const demandeResetSchema = creerDemandeResetSchema();
 
 export type DonneesDemandeReset = z.infer<typeof demandeResetSchema>;
 
@@ -146,11 +183,16 @@ export type DonneesDemandeReset = z.infer<typeof demandeResetSchema>;
  * Pas de Turnstile : on est deja authentifie par la session temporaire
  * issue du clic sur le lien email.
  */
-export const nouveauMotDePasseSchema = z
-  .object({
-    mot_de_passe: motDePasseSchema,
-  })
-  .strict();
+export function creerNouveauMotDePasseSchema(
+  messages: MessagesValidationAuth = MESSAGES_VALIDATION_AUTH_DEFAUT,
+) {
+  return z
+    .object({
+      mot_de_passe: creerMotDePasseSchema(messages),
+    })
+    .strict();
+}
+export const nouveauMotDePasseSchema = creerNouveauMotDePasseSchema();
 
 export type DonneesNouveauMotDePasse = z.infer<typeof nouveauMotDePasseSchema>;
 

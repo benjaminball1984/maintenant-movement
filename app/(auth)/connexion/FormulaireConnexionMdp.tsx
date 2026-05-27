@@ -3,7 +3,11 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { ChampMotDePasse } from '@/components/formulaires/ChampMotDePasse';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesConnexionMdp, connexionMdpSchema } from '@/lib/validations/auth';
+import {
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+  type MessagesValidationAuth,
+} from '@/lib/messages-validation';
+import { type DonneesConnexionMdp, creerConnexionMdpSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -34,7 +38,8 @@ const LIBELLES_DEFAUT: LibellesConnexionMdp = {
  */
 export function FormulaireConnexionMdp({
   libelles = LIBELLES_DEFAUT,
-}: { libelles?: LibellesConnexionMdp } = {}) {
+  messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
+}: { libelles?: LibellesConnexionMdp; messages?: MessagesValidationAuth } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -49,7 +54,7 @@ export function FormulaireConnexionMdp({
     setValue,
     formState: { errors },
   } = useForm<DonneesConnexionMdp>({
-    resolver: zodResolver(connexionMdpSchema),
+    resolver: zodResolver(creerConnexionMdpSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
 

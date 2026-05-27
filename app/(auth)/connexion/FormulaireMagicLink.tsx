@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesMagicLink, magicLinkSchema } from '@/lib/validations/auth';
+import {
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+  type MessagesValidationAuth,
+} from '@/lib/messages-validation';
+import { type DonneesMagicLink, creerMagicLinkSchema } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -32,7 +36,8 @@ const LIBELLES_DEFAUT: LibellesMagicLink = {
  */
 export function FormulaireMagicLink({
   libelles = LIBELLES_DEFAUT,
-}: { libelles?: LibellesMagicLink } = {}) {
+  messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
+}: { libelles?: LibellesMagicLink; messages?: MessagesValidationAuth } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -47,7 +52,7 @@ export function FormulaireMagicLink({
     setValue,
     formState: { errors },
   } = useForm<DonneesMagicLink>({
-    resolver: zodResolver(magicLinkSchema),
+    resolver: zodResolver(creerMagicLinkSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
 

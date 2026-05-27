@@ -2,6 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { lireMessagesValidationAuth } from '@/lib/messages-validation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FormulaireInscription } from './FormulaireInscription';
@@ -68,6 +69,7 @@ export default async function PageInscription() {
     ctaEnCours,
     ctaChargement,
     libellesFormulaire,
+    messagesValidation,
   ] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('inscription.titre', { valeurMd: FALLBACKS.titre }),
@@ -78,6 +80,7 @@ export default async function PageInscription() {
     lireContenuEditorial('inscription.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
     lireContenuEditorial('inscription.cta_chargement', { valeurMd: 'Chargement…' }),
     lireLibellesFormulaire(),
+    lireMessagesValidationAuth(),
   ]);
 
   return (
@@ -111,6 +114,7 @@ export default async function PageInscription() {
           ctaChargement: ctaChargement.valeurMd,
           ...libellesFormulaire,
         }}
+        messages={messagesValidation}
       />
 
       <p className="text-sm text-text-3">
