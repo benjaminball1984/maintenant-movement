@@ -60,7 +60,14 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
       </Heading>
       <p className="mt-2 text-sm text-text-3">
         Référentiel des communes. Filtres : mot-clé, statut (libres vs coquilles pré-créées),
-        département.
+        département.{' '}
+        <a
+          href="/admin/national/communes/export.csv"
+          className="text-brand hover:underline"
+          download
+        >
+          Export CSV (50 000 max) ↓
+        </a>
       </p>
 
       <section className="mt-4 grid gap-2 sm:grid-cols-3">

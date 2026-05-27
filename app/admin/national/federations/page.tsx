@@ -48,7 +48,14 @@ export default async function PageAdminFederations({ searchParams }: Props) {
       </Heading>
       <p className="mt-2 text-sm text-text-3">
         Référentiel des fédérations (regroupements de communes ou groupes thématiques). Filtres :
-        mot-clé, type. Lecture seule, limite 100 lignes.
+        mot-clé, type. Lecture seule, limite 100 lignes.{' '}
+        <a
+          href="/admin/national/federations/export.csv"
+          className="text-brand hover:underline"
+          download
+        >
+          Export CSV ↓
+        </a>
       </p>
 
       <form
