@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 outillage admin : fédérations + exports CSV)
-**Dernier chantier terminé** : V2.4.38 (export CSV pétitions) — sur `main` (tip `11a6bbf`). 8 colonnes avec `nombre_signatures` via jointure sur `petition_compteur`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 outillage admin : exports CSV complets + SEO + helpers purs)
+**Dernier chantier terminé** : V2.4.41 (`lib/pluriel.ts` + 12 tests) — sur `main` (tip `654dc4e`). 498 tests verts. Helpers `accorder` et `compter` pour remplacer `${n > 1 ? 's' : ''}` répété partout.
+**Dernier chantier terminé (antérieur)** : V2.4.40 (sitemap.xml dynamique + robots.txt) — sur `main` (tip `c3e17b7`). 35 pages statiques + URLs publiées agrégées en parallèle, lastmod = updated_at, cache CDN 1h ; robots.txt cache 24h.
+**Dernier chantier terminé (antérieur)** : V2.4.39 (exports CSV cagnottes + mobilisations) — sur `main` (tip `ac95df1`). Cagnottes avec montants agrégés via `cagnotte_compteur`.
+**Dernier chantier terminé (antérieur)** : V2.4.38 (export CSV pétitions) — sur `main` (tip `11a6bbf`). 8 colonnes avec `nombre_signatures` via jointure sur `petition_compteur`.
 **Dernier chantier terminé (antérieur)** : V2.4.37 (exports CSV communes + fédérations) — sur `main` (tip `fd84beb`). 2 routes GET admin, BOM UTF-8 pour Excel, filename horodaté.
 **Dernier chantier terminé (antérieur)** : V2.4.36 (`lib/export-csv.ts` RFC 4180 + 13 tests + endpoint export personnes) — sur `main` (tip `cf6ac54`). 486 tests verts.
 **Dernier chantier terminé (antérieur)** : V2.4.35 (page admin `/admin/national/federations` filtrable) — sur `main` (tip `afb1bb3`). Compteur communes par fédération via 1 requête agrégée (anti N+1), filtres mot-clé + type.
