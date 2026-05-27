@@ -1,6 +1,9 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import { offreParSlug } from '@/lib/entraide/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -9,6 +12,28 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retourPrefix: '←',
+  badgeOffre: 'Offre',
+  badgeDemande: 'Demande',
+  badgeCloturee: 'Clôturée',
+  badgeRetiree: 'Retirée',
+  alertRetireeTitre: 'Offre retirée',
+  alertClotureeTitre: 'Offre clôturée',
+  alertRetireeAmorce: 'Raison :',
+  alertRetireeNonPrecisee: 'non précisée',
+  alertClotureeCorps: "L'auteur·ice a clôturé cette offre.",
+  labelLieu: 'Lieu',
+  coordonneesPrefix: 'Coordonnées :',
+  voirCarte: 'voir sur la carte',
+  sectionDescription: 'Description',
+  sectionReserver: 'Demander une réservation',
+  reserverHint:
+    'Propose un créneau et la quantité souhaitée. Un message d’amorce sera pré-rempli et envoyé à l’auteur·ice via la messagerie interne (chantier réseau social).',
+  footerAmorce: 'Publiée par',
+  footerMilieu: 'le',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -42,16 +67,71 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 
 export default async function PageOffreDetail({ params }: PageDetailProps) {
   const { slug } = await params;
-  const offre = await offreParSlug(slug);
+  const [
+    offre,
+    estAdmin,
+    session,
+    retourPrefix,
+    badgeOffre,
+    badgeDemande,
+    badgeCloturee,
+    badgeRetiree,
+    alertRetireeTitre,
+    alertClotureeTitre,
+    alertRetireeAmorce,
+    alertRetireeNonPrecisee,
+    alertClotureeCorps,
+    labelLieu,
+    coordonneesPrefix,
+    voirCarte,
+    sectionDescription,
+    sectionReserver,
+    reserverHint,
+    footerAmorce,
+    footerMilieu,
+  ] = await Promise.all([
+    offreParSlug(slug),
+    estAdminCourant(),
+    getSession(),
+    lireContenuEditorial('offre.fiche.retour_prefix', { valeurMd: FALLBACKS.retourPrefix }),
+    lireContenuEditorial('offre.fiche.badge_offre', { valeurMd: FALLBACKS.badgeOffre }),
+    lireContenuEditorial('offre.fiche.badge_demande', { valeurMd: FALLBACKS.badgeDemande }),
+    lireContenuEditorial('offre.fiche.badge_cloturee', { valeurMd: FALLBACKS.badgeCloturee }),
+    lireContenuEditorial('offre.fiche.badge_retiree', { valeurMd: FALLBACKS.badgeRetiree }),
+    lireContenuEditorial('offre.fiche.alert_retiree_titre', {
+      valeurMd: FALLBACKS.alertRetireeTitre,
+    }),
+    lireContenuEditorial('offre.fiche.alert_cloturee_titre', {
+      valeurMd: FALLBACKS.alertClotureeTitre,
+    }),
+    lireContenuEditorial('offre.fiche.alert_retiree_amorce', {
+      valeurMd: FALLBACKS.alertRetireeAmorce,
+    }),
+    lireContenuEditorial('offre.fiche.alert_retiree_non_precisee', {
+      valeurMd: FALLBACKS.alertRetireeNonPrecisee,
+    }),
+    lireContenuEditorial('offre.fiche.alert_cloturee_corps', {
+      valeurMd: FALLBACKS.alertClotureeCorps,
+    }),
+    lireContenuEditorial('offre.fiche.label_lieu', { valeurMd: FALLBACKS.labelLieu }),
+    lireContenuEditorial('offre.fiche.coordonnees_prefix', {
+      valeurMd: FALLBACKS.coordonneesPrefix,
+    }),
+    lireContenuEditorial('offre.fiche.voir_carte', { valeurMd: FALLBACKS.voirCarte }),
+    lireContenuEditorial('offre.fiche.section_description', {
+      valeurMd: FALLBACKS.sectionDescription,
+    }),
+    lireContenuEditorial('offre.fiche.section_reserver', {
+      valeurMd: FALLBACKS.sectionReserver,
+    }),
+    lireContenuEditorial('offre.fiche.reserver_hint', { valeurMd: FALLBACKS.reserverHint }),
+    lireContenuEditorial('offre.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
+    lireContenuEditorial('offre.fiche.footer_milieu', { valeurMd: FALLBACKS.footerMilieu }),
+  ]);
   if (offre === null) notFound();
 
   const config = SOUS_ESPACES[offre.type];
   const estPubliee = offre.statut === 'publiee';
-
-  // Réservation V2.3.5 : disponible si l'offre est publiée + offre type
-  // mapping vers OffreTypeReservation. On vérifie la session pour adapter
-  // l'UI (bouton de connexion vs bouton de demande).
-  const session = await getSession();
   const offreTypeReservation: OffreTypeReservation =
     offre.type === 'transport'
       ? 'transport_covoiturage'
@@ -65,18 +145,65 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href={`/s-entraider/${config.slug}`} className="hover:text-brand">
-          ← {config.titre}
+          <TexteEditableAdmin
+            cle="offre.fiche.retour_prefix"
+            valeurInitiale={retourPrefix.valeurMd}
+            estAdmin={estAdmin}
+            libelle="prefixe retour (defaut : ←). Le titre du sous-espace s'ajoute apres."
+            longueurMax={10}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>{' '}
+          {config.titre}
         </Link>
       </p>
 
       <article className="grid gap-6">
         <header className="grid gap-3">
           <div className="flex items-center gap-2">
-            <Badge variant={offre.sens === 'propose' ? 'success' : 'info'}>
-              {offre.sens === 'propose' ? 'Offre' : 'Demande'}
-            </Badge>
-            {offre.statut === 'cloturee' ? <Badge variant="default">Clôturée</Badge> : null}
-            {offre.statut === 'retiree' ? <Badge variant="warning">Retirée</Badge> : null}
+            {offre.sens === 'propose' ? (
+              <TexteEditableAdmin
+                cle="offre.fiche.badge_offre"
+                valeurInitiale={badgeOffre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Offre"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="success">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : (
+              <TexteEditableAdmin
+                cle="offre.fiche.badge_demande"
+                valeurInitiale={badgeDemande.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Demande"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="info">{t}</Badge>}
+              </TexteEditableAdmin>
+            )}
+            {offre.statut === 'cloturee' ? (
+              <TexteEditableAdmin
+                cle="offre.fiche.badge_cloturee"
+                valeurInitiale={badgeCloturee.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Cloturee"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="default">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : null}
+            {offre.statut === 'retiree' ? (
+              <TexteEditableAdmin
+                cle="offre.fiche.badge_retiree"
+                valeurInitiale={badgeRetiree.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Retiree"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="warning">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : null}
           </div>
           <Heading niveau={1}>{offre.titre}</Heading>
 
@@ -97,31 +224,122 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
         {!estPubliee ? (
           <Alert
             variant={offre.statut === 'retiree' ? 'danger' : 'info'}
-            titre={offre.statut === 'retiree' ? 'Offre retirée' : 'Offre clôturée'}
+            titre={
+              offre.statut === 'retiree' ? (
+                <TexteEditableAdmin
+                  cle="offre.fiche.alert_retiree_titre"
+                  valeurInitiale={alertRetireeTitre.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="titre alerte offre retiree"
+                  longueurMax={40}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              ) : (
+                <TexteEditableAdmin
+                  cle="offre.fiche.alert_cloturee_titre"
+                  valeurInitiale={alertClotureeTitre.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="titre alerte offre cloturee"
+                  longueurMax={40}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              )
+            }
           >
-            {offre.statut === 'retiree'
-              ? `Raison : ${offre.raison_retrait ?? 'non précisée'}.`
-              : "L'auteur·ice a clôturé cette offre."}
+            {offre.statut === 'retiree' ? (
+              <>
+                <TexteEditableAdmin
+                  cle="offre.fiche.alert_retiree_amorce"
+                  valeurInitiale={alertRetireeAmorce.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="amorce alerte retiree (Raison :)"
+                  longueurMax={30}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>{' '}
+                {offre.raison_retrait ?? (
+                  <TexteEditableAdmin
+                    cle="offre.fiche.alert_retiree_non_precisee"
+                    valeurInitiale={alertRetireeNonPrecisee.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="fallback si pas de raison"
+                    longueurMax={30}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                )}
+                .
+              </>
+            ) : (
+              <TexteEditableAdmin
+                cle="offre.fiche.alert_cloturee_corps"
+                valeurInitiale={alertClotureeCorps.valeurMd}
+                estAdmin={estAdmin}
+                libelle="corps alerte offre cloturee"
+                longueurMax={200}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            )}
           </Alert>
         ) : null}
 
         <Card variant="ombre" className="grid gap-2">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Lieu</p>
+          <TexteEditableAdmin
+            cle="offre.fiche.label_lieu"
+            valeurInitiale={labelLieu.valeurMd}
+            estAdmin={estAdmin}
+            libelle="label Lieu"
+            longueurMax={20}
+          >
+            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+          </TexteEditableAdmin>
           <p className="text-text-1">{offre.lieu}</p>
           {offre.latitude !== null && offre.longitude !== null ? (
             <p className="text-xs text-text-3">
-              Coordonnées : {offre.latitude.toFixed(4)}, {offre.longitude.toFixed(4)} ·{' '}
-              <Link href="/carte" className="text-brand hover:underline">
-                voir sur la carte
-              </Link>
+              <TexteEditableAdmin
+                cle="offre.fiche.coordonnees_prefix"
+                valeurInitiale={coordonneesPrefix.valeurMd}
+                estAdmin={estAdmin}
+                libelle="prefixe coordonnees"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
+              {offre.latitude.toFixed(4)}, {offre.longitude.toFixed(4)} ·{' '}
+              <TexteEditableAdmin
+                cle="offre.fiche.voir_carte"
+                valeurInitiale={voirCarte.valeurMd}
+                estAdmin={estAdmin}
+                libelle="libelle lien voir sur la carte"
+                longueurMax={40}
+              >
+                {(t) => (
+                  <Link href="/carte" className="text-brand hover:underline">
+                    {t}
+                  </Link>
+                )}
+              </TexteEditableAdmin>
             </p>
           ) : null}
         </Card>
 
         <section className="grid gap-3">
-          <Heading niveau={2} apparenceComme={3}>
-            Description
-          </Heading>
+          <TexteEditableAdmin
+            cle="offre.fiche.section_description"
+            valeurInitiale={sectionDescription.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section description"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {offre.description}
           </div>
@@ -129,13 +347,29 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
 
         {estPubliee && offreTypeReservation !== 'autre' ? (
           <Card variant="ombre">
-            <Heading niveau={2} apparenceComme={4}>
-              Demander une réservation
-            </Heading>
-            <p className="mt-2 mb-4 text-sm text-text-2">
-              Propose un créneau et la quantité souhaitée. Un message d’amorce sera pré-rempli et
-              envoyé à l’auteur·ice via la messagerie interne (chantier réseau social).
-            </p>
+            <TexteEditableAdmin
+              cle="offre.fiche.section_reserver"
+              valeurInitiale={sectionReserver.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section Demander une reservation"
+              longueurMax={60}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={4}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
+            <TexteEditableAdmin
+              cle="offre.fiche.reserver_hint"
+              valeurInitiale={reserverHint.valeurMd}
+              estAdmin={estAdmin}
+              libelle="hint section reservation"
+              multilignes
+              longueurMax={400}
+            >
+              {(t) => <p className="mt-2 mb-4 text-sm text-text-2">{t}</p>}
+            </TexteEditableAdmin>
             <BoutonReserverOffre
               offreType={offreTypeReservation}
               offreId={offre.id}
@@ -149,13 +383,29 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {offre.createurice_prenom !== null || offre.createurice_nom !== null ? (
             <p>
-              Publiée par{' '}
+              <TexteEditableAdmin
+                cle="offre.fiche.footer_amorce"
+                valeurInitiale={footerAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce footer (Publiee par)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <strong className="text-text-2">
                 {[offre.createurice_prenom, offre.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
               </strong>{' '}
-              le{' '}
+              <TexteEditableAdmin
+                cle="offre.fiche.footer_milieu"
+                valeurInitiale={footerMilieu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="conjonction (le)"
+                longueurMax={10}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <time dateTime={offre.created_at}>
                 {new Date(offre.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',

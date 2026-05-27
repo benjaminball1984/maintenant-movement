@@ -1,7 +1,10 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   estMembreDuGroupe,
   groupeEntraideParSlug,
@@ -15,6 +18,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BoutonsAdhesion } from './BoutonsAdhesion';
+
+const FALLBACKS = {
+  retour: '← Tous les groupes',
+  badgeEnModeration: 'En modération',
+  sectionLeGroupe: 'Le groupe',
+  sectionOutilsActives: 'Outils activés',
+  outilsNote:
+    'Outils politiques (pétitions, Décider) désactivés par défaut. Le groupe peut les activer plus tard s’il en exprime le besoin.',
+  cardMembres: 'Membres',
+  membresLabel: 'membre',
+  actifLabel: 'actif',
+  membresEmpty: 'Rejoins le groupe pour voir les co-membres.',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -48,23 +64,73 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
  */
 export default async function PageDetailGroupeEntraide({ params }: PageDetailProps) {
   const { slug } = await params;
-  const groupe = await groupeEntraideParSlug(slug);
+  const [
+    groupe,
+    estAdmin,
+    session,
+    retour,
+    badgeEnModeration,
+    sectionLeGroupe,
+    sectionOutilsActives,
+    outilsNote,
+    cardMembres,
+    membresLabel,
+    actifLabel,
+    membresEmpty,
+  ] = await Promise.all([
+    groupeEntraideParSlug(slug),
+    estAdminCourant(),
+    getSession(),
+    lireContenuEditorial('groupes_locaux.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('groupes_locaux.fiche.badge_en_moderation', {
+      valeurMd: FALLBACKS.badgeEnModeration,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.section_le_groupe', {
+      valeurMd: FALLBACKS.sectionLeGroupe,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.section_outils_actives', {
+      valeurMd: FALLBACKS.sectionOutilsActives,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.outils_note', {
+      valeurMd: FALLBACKS.outilsNote,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.card_membres', {
+      valeurMd: FALLBACKS.cardMembres,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.membres_label', {
+      valeurMd: FALLBACKS.membresLabel,
+    }),
+    lireContenuEditorial('groupes_locaux.fiche.actif_label', { valeurMd: FALLBACKS.actifLabel }),
+    lireContenuEditorial('groupes_locaux.fiche.membres_empty', {
+      valeurMd: FALLBACKS.membresEmpty,
+    }),
+  ]);
   if (groupe === null) notFound();
 
-  const session = await getSession();
   const estMembre = session !== null ? await estMembreDuGroupe(groupe.id, session.userId) : false;
   const membres = estMembre ? await listerMembresGroupe(groupe.id) : [];
 
   const image = getImageObjet({ image_url: groupe.imageUrl, type_objet: 'generique' });
+  const pluriel = membres.length > 1 ? 's' : '';
 
   return (
     <Container taille="lg" className="py-12">
-      <Link
-        href="/s-entraider/groupes-locaux"
-        className="mb-4 inline-flex text-sm text-text-3 hover:text-brand"
+      <TexteEditableAdmin
+        cle="groupes_locaux.fiche.retour"
+        valeurInitiale={retour.valeurMd}
+        estAdmin={estAdmin}
+        libelle="lien retour groupes locaux"
+        longueurMax={40}
       >
-        ← Tous les groupes
-      </Link>
+        {(t) => (
+          <Link
+            href="/s-entraider/groupes-locaux"
+            className="mb-4 inline-flex text-sm text-text-3 hover:text-brand"
+          >
+            {t}
+          </Link>
+        )}
+      </TexteEditableAdmin>
 
       <header className="grid gap-6 md:grid-cols-[2fr_1fr]">
         <div className="relative aspect-video overflow-hidden rounded-md bg-surface-2">
@@ -80,7 +146,17 @@ export default async function PageDetailGroupeEntraide({ params }: PageDetailPro
 
         <div className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-2">
-            {groupe.statut === 'en_moderation' && <Badge variant="warning">En modération</Badge>}
+            {groupe.statut === 'en_moderation' && (
+              <TexteEditableAdmin
+                cle="groupes_locaux.fiche.badge_en_moderation"
+                valeurInitiale={badgeEnModeration.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge En moderation"
+                longueurMax={30}
+              >
+                {(t) => <Badge variant="warning">{t}</Badge>}
+              </TexteEditableAdmin>
+            )}
             <BoutonAdminEditer href={`/admin/moderation/groupes-locaux?id=${groupe.id}`}>
               Admin
             </BoutonAdminEditer>
@@ -100,12 +176,30 @@ export default async function PageDetailGroupeEntraide({ params }: PageDetailPro
 
       <section className="mt-8 grid gap-8 md:grid-cols-[2fr_1fr]">
         <div>
-          <Heading niveau={2}>Le groupe</Heading>
+          <TexteEditableAdmin
+            cle="groupes_locaux.fiche.section_le_groupe"
+            valeurInitiale={sectionLeGroupe.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Le groupe"
+            longueurMax={40}
+          >
+            {(t) => <Heading niveau={2}>{t}</Heading>}
+          </TexteEditableAdmin>
           <p className="mt-2 whitespace-pre-wrap text-text-2">{groupe.description}</p>
 
-          <Heading niveau={2} className="mt-8">
-            Outils activés
-          </Heading>
+          <TexteEditableAdmin
+            cle="groupes_locaux.fiche.section_outils_actives"
+            valeurInitiale={sectionOutilsActives.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Outils actives"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} className="mt-8">
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="mt-3 flex flex-wrap gap-2">
             {groupe.outilPretActive && <Badge variant="default">Prêt d’objets</Badge>}
             {groupe.outilMarcheActive && <Badge variant="default">Marché solidaire</Badge>}
@@ -116,27 +210,75 @@ export default async function PageDetailGroupeEntraide({ params }: PageDetailPro
             {groupe.outilMomentsActive && <Badge variant="default">Moments solidaires</Badge>}
             {groupe.outilMobilisationsActive && <Badge variant="default">Mobilisations</Badge>}
           </div>
-          <p className="mt-2 text-text-3 text-xs">
-            Outils politiques (pétitions, Décider) désactivés par défaut. Le groupe peut les activer
-            plus tard s’il en exprime le besoin.
-          </p>
+          <TexteEditableAdmin
+            cle="groupes_locaux.fiche.outils_note"
+            valeurInitiale={outilsNote.valeurMd}
+            estAdmin={estAdmin}
+            libelle="note outils politiques desactives par defaut"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <p className="mt-2 text-text-3 text-xs">{t}</p>}
+          </TexteEditableAdmin>
         </div>
 
         <aside className="flex flex-col gap-4">
           <Card variant="ombre">
             <h3 className="flex items-center gap-2 font-bold text-text-1">
               <Users size={16} aria-hidden="true" />
-              Membres
+              <TexteEditableAdmin
+                cle="groupes_locaux.fiche.card_membres"
+                valeurInitiale={cardMembres.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre card Membres"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
             </h3>
             {estMembre ? (
               <p className="mt-2 text-sm text-text-2">
-                {membres.length} membre{membres.length > 1 ? 's' : ''} actif
-                {membres.length > 1 ? 's' : ''}.
+                {membres.length}{' '}
+                <TexteEditableAdmin
+                  cle="groupes_locaux.fiche.membres_label"
+                  valeurInitiale={membresLabel.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="label membre (singulier, 's' auto)"
+                  longueurMax={20}
+                >
+                  {(t) => (
+                    <>
+                      {t}
+                      {pluriel}
+                    </>
+                  )}
+                </TexteEditableAdmin>{' '}
+                <TexteEditableAdmin
+                  cle="groupes_locaux.fiche.actif_label"
+                  valeurInitiale={actifLabel.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="label actif (singulier, 's' auto)"
+                  longueurMax={20}
+                >
+                  {(t) => (
+                    <>
+                      {t}
+                      {pluriel}
+                    </>
+                  )}
+                </TexteEditableAdmin>
+                .
               </p>
             ) : (
-              <p className="mt-2 text-sm text-text-3">
-                Rejoins le groupe pour voir les co-membres.
-              </p>
+              <TexteEditableAdmin
+                cle="groupes_locaux.fiche.membres_empty"
+                valeurInitiale={membresEmpty.valeurMd}
+                estAdmin={estAdmin}
+                libelle="message non-membre"
+                longueurMax={200}
+              >
+                {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+              </TexteEditableAdmin>
             )}
           </Card>
         </aside>

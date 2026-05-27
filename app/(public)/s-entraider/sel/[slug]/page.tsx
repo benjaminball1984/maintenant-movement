@@ -1,12 +1,38 @@
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { serviceSelParSlug } from '@/lib/sel/requetes';
 import { Clock, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← SEL',
+  badgeService: 'Service',
+  badgeVolontariat: 'Volontariat',
+  badgeOffre: 'Offre',
+  badgeDemande: 'Demande',
+  alertInactifTitre: "Ce service n'est plus actif",
+  alertInactifCorps: 'Tu peux consulter la fiche mais la réservation est désactivée.',
+  labelDuree: 'Durée',
+  labelLieu: 'Lieu',
+  minutesLabel: 'minutes',
+  coinAttendus: '99-coin attendus',
+  sectionDescription: 'Description',
+  sectionCommentCaMarche: 'Comment ça marche',
+  commentCaMarcheListe:
+    '- Tu réserves ce service en proposant un créneau et la quantité voulue.\n- Un message d’amorce est pré-rempli et envoyé à la personne prestataire.\n- La personne prestataire déclare la durée réelle après réalisation.\n- 2 h plus tard sans contestation : crédit automatique en 99-coin (1 min = 1 unité).\n- Tu peux contester pendant ces 2 h si la prestation pose problème.',
+  sectionReserver: 'Demander une réservation',
+  reserverHint:
+    'Propose un créneau. Le message d’amorce est généré pour toi à partir du service et de la durée estimée.',
+  footerAmorce: 'Publié par',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -38,37 +64,155 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
  */
 export default async function PageDetailService({ params }: PageDetailProps) {
   const { slug } = await params;
-  const service = await serviceSelParSlug(slug);
+  const [
+    service,
+    estAdmin,
+    session,
+    retour,
+    badgeService,
+    badgeVolontariat,
+    badgeOffre,
+    badgeDemande,
+    alertInactifTitre,
+    alertInactifCorps,
+    labelDuree,
+    labelLieu,
+    minutesLabel,
+    coinAttendus,
+    sectionDescription,
+    sectionCommentCaMarche,
+    commentCaMarcheListe,
+    sectionReserver,
+    reserverHint,
+    footerAmorce,
+  ] = await Promise.all([
+    serviceSelParSlug(slug),
+    estAdminCourant(),
+    getSession(),
+    lireContenuEditorial('sel.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('sel.fiche.badge_service', { valeurMd: FALLBACKS.badgeService }),
+    lireContenuEditorial('sel.fiche.badge_volontariat', { valeurMd: FALLBACKS.badgeVolontariat }),
+    lireContenuEditorial('sel.fiche.badge_offre', { valeurMd: FALLBACKS.badgeOffre }),
+    lireContenuEditorial('sel.fiche.badge_demande', { valeurMd: FALLBACKS.badgeDemande }),
+    lireContenuEditorial('sel.fiche.alert_inactif_titre', {
+      valeurMd: FALLBACKS.alertInactifTitre,
+    }),
+    lireContenuEditorial('sel.fiche.alert_inactif_corps', {
+      valeurMd: FALLBACKS.alertInactifCorps,
+    }),
+    lireContenuEditorial('sel.fiche.label_duree', { valeurMd: FALLBACKS.labelDuree }),
+    lireContenuEditorial('sel.fiche.label_lieu', { valeurMd: FALLBACKS.labelLieu }),
+    lireContenuEditorial('sel.fiche.minutes_label', { valeurMd: FALLBACKS.minutesLabel }),
+    lireContenuEditorial('sel.fiche.coin_attendus', { valeurMd: FALLBACKS.coinAttendus }),
+    lireContenuEditorial('sel.fiche.section_description', {
+      valeurMd: FALLBACKS.sectionDescription,
+    }),
+    lireContenuEditorial('sel.fiche.section_comment_ca_marche', {
+      valeurMd: FALLBACKS.sectionCommentCaMarche,
+    }),
+    lireContenuEditorial('sel.fiche.comment_ca_marche_liste', {
+      valeurMd: FALLBACKS.commentCaMarcheListe,
+    }),
+    lireContenuEditorial('sel.fiche.section_reserver', { valeurMd: FALLBACKS.sectionReserver }),
+    lireContenuEditorial('sel.fiche.reserver_hint', { valeurMd: FALLBACKS.reserverHint }),
+    lireContenuEditorial('sel.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
+  ]);
   if (service === null) notFound();
 
   const estPublie = service.statut === 'publie';
-  const session = await getSession();
 
   return (
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/s-entraider/sel" className="hover:text-brand">
-          ← SEL
-        </Link>
+        <TexteEditableAdmin
+          cle="sel.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour SEL"
+          longueurMax={30}
+        >
+          {(t) => (
+            <Link href="/s-entraider/sel" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-6">
         <header className="grid gap-3">
           <div className="flex items-center gap-2">
-            <Badge variant={service.categorie === 'service' ? 'brand' : 'accent'}>
-              {service.categorie === 'service' ? 'Service' : 'Volontariat'}
-            </Badge>
-            <Badge variant={service.sens === 'propose' ? 'success' : 'info'}>
-              {service.sens === 'propose' ? 'Offre' : 'Demande'}
-            </Badge>
+            {service.categorie === 'service' ? (
+              <TexteEditableAdmin
+                cle="sel.fiche.badge_service"
+                valeurInitiale={badgeService.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Service"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="brand">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : (
+              <TexteEditableAdmin
+                cle="sel.fiche.badge_volontariat"
+                valeurInitiale={badgeVolontariat.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Volontariat"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="accent">{t}</Badge>}
+              </TexteEditableAdmin>
+            )}
+            {service.sens === 'propose' ? (
+              <TexteEditableAdmin
+                cle="sel.fiche.badge_offre"
+                valeurInitiale={badgeOffre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Offre"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="success">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : (
+              <TexteEditableAdmin
+                cle="sel.fiche.badge_demande"
+                valeurInitiale={badgeDemande.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Demande"
+                longueurMax={20}
+              >
+                {(t) => <Badge variant="info">{t}</Badge>}
+              </TexteEditableAdmin>
+            )}
             {!estPublie ? <Badge variant="default">{service.statut}</Badge> : null}
           </div>
           <Heading niveau={1}>{service.titre}</Heading>
         </header>
 
         {!estPublie ? (
-          <Alert variant="info" titre="Ce service n'est plus actif">
-            Tu peux consulter la fiche mais la réservation est désactivée.
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="sel.fiche.alert_inactif_titre"
+                valeurInitiale={alertInactifTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte service inactif"
+                longueurMax={50}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="sel.fiche.alert_inactif_corps"
+              valeurInitiale={alertInactifCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte service inactif"
+              longueurMax={200}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
@@ -76,11 +220,38 @@ export default async function PageDetailService({ params }: PageDetailProps) {
           <div className="flex items-start gap-3">
             <Clock size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Durée</p>
+              <TexteEditableAdmin
+                cle="sel.fiche.label_duree"
+                valeurInitiale={labelDuree.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Duree"
+                longueurMax={20}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">
-                {service.duree_minutes_estimee} minutes ·{' '}
+                {service.duree_minutes_estimee}{' '}
+                <TexteEditableAdmin
+                  cle="sel.fiche.minutes_label"
+                  valeurInitiale={minutesLabel.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="label 'minutes'"
+                  longueurMax={20}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>{' '}
+                ·{' '}
                 <span className="text-text-3">
-                  {service.duree_minutes_estimee} 99-coin attendus
+                  {service.duree_minutes_estimee}{' '}
+                  <TexteEditableAdmin
+                    cle="sel.fiche.coin_attendus"
+                    valeurInitiale={coinAttendus.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="suffixe '99-coin attendus'"
+                    longueurMax={40}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
                 </span>
               </p>
             </div>
@@ -88,45 +259,94 @@ export default async function PageDetailService({ params }: PageDetailProps) {
           <div className="flex items-start gap-3">
             <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Lieu</p>
+              <TexteEditableAdmin
+                cle="sel.fiche.label_lieu"
+                valeurInitiale={labelLieu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Lieu"
+                longueurMax={20}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">{service.lieu}</p>
             </div>
           </div>
         </Card>
 
         <section className="grid gap-3">
-          <Heading niveau={2} apparenceComme={3}>
-            Description
-          </Heading>
+          <TexteEditableAdmin
+            cle="sel.fiche.section_description"
+            valeurInitiale={sectionDescription.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Description"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {service.description}
           </div>
         </section>
 
         <Card variant="ombre" className="grid gap-2">
-          <Heading niveau={2} apparenceComme={4}>
-            Comment ça marche
-          </Heading>
-          <ul className="ml-4 list-disc space-y-1 text-sm text-text-2">
-            <li>Tu réserves ce service en proposant un créneau et la quantité voulue.</li>
-            <li>Un message d’amorce est pré-rempli et envoyé à la personne prestataire.</li>
-            <li>La personne prestataire déclare la durée réelle après réalisation.</li>
-            <li>
-              2 h plus tard sans contestation : crédit automatique en 99-coin (1 min = 1 unité).
-            </li>
-            <li>Tu peux contester pendant ces 2 h si la prestation pose problème.</li>
-          </ul>
+          <TexteEditableAdmin
+            cle="sel.fiche.section_comment_ca_marche"
+            valeurInitiale={sectionCommentCaMarche.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Comment ca marche"
+            longueurMax={50}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
+          <TexteEditableAdmin
+            cle="sel.fiche.comment_ca_marche_liste"
+            valeurInitiale={commentCaMarcheListe.valeurMd}
+            estAdmin={estAdmin}
+            libelle="liste 'Comment ca marche' (Markdown : -  pour les items)"
+            multilignes
+            longueurMax={1500}
+          >
+            {(t) => (
+              <div className="text-sm text-text-2">
+                <MarkdownLeger texte={t} />
+              </div>
+            )}
+          </TexteEditableAdmin>
         </Card>
 
         {estPublie ? (
           <Card variant="ombre">
-            <Heading niveau={2} apparenceComme={4}>
-              Demander une réservation
-            </Heading>
-            <p className="mt-2 mb-4 text-sm text-text-2">
-              Propose un créneau. Le message d’amorce est généré pour toi à partir du service et de
-              la durée estimée.
-            </p>
+            <TexteEditableAdmin
+              cle="sel.fiche.section_reserver"
+              valeurInitiale={sectionReserver.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section Demander une reservation"
+              longueurMax={60}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={4}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
+            <TexteEditableAdmin
+              cle="sel.fiche.reserver_hint"
+              valeurInitiale={reserverHint.valeurMd}
+              estAdmin={estAdmin}
+              libelle="hint section reserver"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <p className="mt-2 mb-4 text-sm text-text-2">{t}</p>}
+            </TexteEditableAdmin>
             <BoutonReserverOffre
               offreType="service_sel"
               offreId={service.id}
@@ -140,7 +360,15 @@ export default async function PageDetailService({ params }: PageDetailProps) {
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {service.createurice_prenom !== null || service.createurice_nom !== null ? (
             <p>
-              Publié par{' '}
+              <TexteEditableAdmin
+                cle="sel.fiche.footer_amorce"
+                valeurInitiale={footerAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce footer (Publie par)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <strong className="text-text-2">
                 {[service.createurice_prenom, service.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
