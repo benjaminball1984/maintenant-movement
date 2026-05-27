@@ -105,6 +105,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 <ul className="grid gap-1">
                   {[
                     { href: '/admin/national', libelle: 'Vue nationale' },
+                    { href: '/admin/national/personnes', libelle: 'Personnes' },
                     { href: '/admin/national/droits', libelle: 'Gestion des droits' },
                     { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
                     { href: '/admin/national/audit', libelle: 'Audit journal D8' },
