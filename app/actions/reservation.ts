@@ -104,10 +104,48 @@ export async function creerReservationAction(
     return { ok: false, message: resultat.message };
   }
 
+  // V2.3.12 : envoyer aussi le message d'amorce dans la messagerie
+  // interne (DM `message_reseau`). Tient la promesse UX faite à
+  // l'utilisateur dans BoutonReserverOffre (« le message sera envoyé via
+  // la messagerie interne »). En cas d'échec, on n'annule pas la
+  // réservation (le message peut être renvoyé manuellement plus tard).
+  if (createurId !== null) {
+    await envoyerMessageAmorceInterne({
+      expediteurId: session.userId,
+      destinataireId: createurId,
+      messageAmorce,
+    });
+  }
+
   if (options.cheminRevalidation !== undefined) {
     revalidatePath(options.cheminRevalidation);
   }
   return { ok: true, reservationId: resultat.reservation.id };
+}
+
+/**
+ * Envoie un DM `message_reseau` (V1 chantier 7.5) avec le contenu du
+ * message d'amorce. Fire-and-forget pour ne pas faire échouer la
+ * réservation si l'envoi du message tombe (par exemple en mode dev sans
+ * réseau social actif).
+ */
+async function envoyerMessageAmorceInterne(options: {
+  expediteurId: string;
+  destinataireId: string;
+  messageAmorce: string;
+}): Promise<void> {
+  try {
+    const supabase = await getSupabaseServer();
+    await supabase.from('message_reseau').insert({
+      expediteur_id: options.expediteurId,
+      destinataire_id: options.destinataireId,
+      texte: options.messageAmorce,
+    });
+  } catch (erreur) {
+    // Silencieux : la réservation est créée, le message peut être
+    // renvoyé manuellement par le demandeur depuis la messagerie.
+    console.warn('[creerReservationAction] envoi message_reseau échoué :', erreur);
+  }
 }
 
 /**
