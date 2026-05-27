@@ -7,7 +7,7 @@
  * vue admin nationale.
  */
 
-import type { Caisse } from '@/lib/caisse';
+import type { Caisse, CanalCaisse, StatutTransactionSortante } from '@/lib/caisse';
 import { getSupabaseServer } from '@/lib/supabase';
 
 export interface CaisseEnrichie {
@@ -67,21 +67,133 @@ export async function listerCaissesPourDashboard(): Promise<CaisseEnrichie[]> {
   }
 
   return caisses.map((c) => ({
-    caisse: {
-      id: c.id,
-      typeCaisse: c.type_caisse as Caisse['typeCaisse'],
-      libelle: c.libelle,
-      objetType: (c.objet_type as Caisse['objetType']) ?? null,
-      objetId: c.objet_id ?? null,
-      statut: c.statut as Caisse['statut'],
-      metadata: c.metadata,
-      ouverteLe: c.ouverte_le,
-      fermeeLe: c.fermee_le,
-      createdAt: c.created_at,
-      updatedAt: c.updated_at,
-    },
+    caisse: ligneEnCaisse(c),
     nbReceptaclesActifs: nbReceptaclesParCaisse.get(c.id) ?? 0,
     nbTransactionsSortantes: nbTransactionsParCaisse.get(c.id) ?? 0,
     derniereTransactionLe: derniereTransactionParCaisse.get(c.id) ?? null,
   }));
+}
+
+// ============================================================
+// Détail d'une caisse (cycle V2 V2.3.18)
+// ============================================================
+
+export interface Receptacle {
+  id: string;
+  caisseId: string;
+  canal: CanalCaisse;
+  identifiantReceptacle: string;
+  metadata: unknown;
+  valideDu: string;
+  valideAu: string | null;
+  createdAt: string;
+}
+
+export interface TransactionSortante {
+  id: string;
+  caisseId: string;
+  receptacleId: string;
+  beneficiairePersonneId: string | null;
+  beneficiaireExterneNom: string | null;
+  beneficiaireExterneIbanOuWallet: string | null;
+  montant: number;
+  canal: CanalCaisse;
+  statut: StatutTransactionSortante;
+  motif: string;
+  justificatifStoragePath: string;
+  justificatifNomOriginal: string;
+  justificatifMimeType: string;
+  initiePersonneId: string;
+  initieLe: string;
+  confirmeLe: string | null;
+}
+
+export interface CaisseDetail {
+  caisse: Caisse;
+  receptacles: Receptacle[];
+  transactions: TransactionSortante[];
+}
+
+/**
+ * Charge le détail complet d'une caisse pour la page admin (V2.3.18).
+ * 3 requêtes parallèles : caisse + ses réceptacles + ses transactions
+ * sortantes. Retourne `null` si la caisse n'existe pas (404 côté page).
+ */
+export async function chargerCaissePourDetail(caisseId: string): Promise<CaisseDetail | null> {
+  const supabase = await getSupabaseServer();
+  const [caisseRes, receptaclesRes, transactionsRes] = await Promise.all([
+    supabase.from('caisse').select(CAISSE_CHAMPS).eq('id', caisseId).maybeSingle(),
+    supabase
+      .from('receptacle_caisse')
+      .select('*')
+      .eq('caisse_id', caisseId)
+      .order('valide_du', { ascending: false }),
+    supabase
+      .from('transaction_sortante')
+      .select('*')
+      .eq('caisse_id', caisseId)
+      .order('initie_le', { ascending: false }),
+  ]);
+
+  if (caisseRes.data === null) return null;
+
+  return {
+    caisse: ligneEnCaisse(caisseRes.data),
+    receptacles: (receptaclesRes.data ?? []).map((r) => ({
+      id: r.id,
+      caisseId: r.caisse_id,
+      canal: r.canal as CanalCaisse,
+      identifiantReceptacle: r.identifiant_receptacle,
+      metadata: r.metadata,
+      valideDu: r.valide_du,
+      valideAu: r.valide_au,
+      createdAt: r.created_at,
+    })),
+    transactions: (transactionsRes.data ?? []).map((t) => ({
+      id: t.id,
+      caisseId: t.caisse_id,
+      receptacleId: t.receptacle_id,
+      beneficiairePersonneId: t.beneficiaire_personne_id,
+      beneficiaireExterneNom: t.beneficiaire_externe_nom,
+      beneficiaireExterneIbanOuWallet: t.beneficiaire_externe_iban_ou_wallet,
+      montant: t.montant,
+      canal: t.canal as CanalCaisse,
+      statut: t.statut as StatutTransactionSortante,
+      motif: t.motif,
+      justificatifStoragePath: t.justificatif_storage_path,
+      justificatifNomOriginal: t.justificatif_nom_original,
+      justificatifMimeType: t.justificatif_mime_type,
+      initiePersonneId: t.initie_par_personne_id,
+      initieLe: t.initie_le,
+      confirmeLe: t.confirme_le,
+    })),
+  };
+}
+
+function ligneEnCaisse(c: {
+  id: string;
+  type_caisse: string;
+  libelle: string;
+  objet_type: string | null;
+  objet_id: string | null;
+  statut: string;
+  metadata: unknown;
+  ouverte_le: string;
+  fermee_le: string | null;
+  created_at: string;
+  updated_at: string;
+}): Caisse {
+  return {
+    id: c.id,
+    typeCaisse: c.type_caisse as Caisse['typeCaisse'],
+    libelle: c.libelle,
+    objetType: (c.objet_type as Caisse['objetType']) ?? null,
+    objetId: c.objet_id ?? null,
+    statut: c.statut as Caisse['statut'],
+    metadata: c.metadata as Caisse['metadata'],
+    ouverteLe: c.ouverte_le,
+    fermeeLe: c.fermee_le,
+    createdAt: c.created_at,
+    updatedAt: c.updated_at,
+  };
 }

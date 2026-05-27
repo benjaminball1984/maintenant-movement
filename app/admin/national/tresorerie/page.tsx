@@ -2,6 +2,7 @@ import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { listerCaissesPourDashboard } from '@/lib/admin/tresorerie';
 import { Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Trésorerie',
@@ -99,7 +100,11 @@ function CarteCaisse({
         </span>
       </div>
 
-      <h2 className="font-display font-bold text-lg text-text-1">{caisse.libelle}</h2>
+      <h2 className="font-display font-bold text-lg text-text-1">
+        <Link href={`/admin/national/tresorerie/${caisse.id}`} className="hover:text-brand">
+          {caisse.libelle}
+        </Link>
+      </h2>
 
       {caisse.objetType !== null ? (
         <p className="text-sm text-text-3">
