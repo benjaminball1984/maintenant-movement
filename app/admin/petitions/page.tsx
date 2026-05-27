@@ -28,7 +28,10 @@ export default async function PageGestionPetitions() {
         </Heading>
         <p className="mt-2 text-text-2">
           Toutes les pétitions, tous statuts confondus. Édite le contenu, l'objectif et les dates de
-          lancement et d'échéance.
+          lancement et d'échéance.{' '}
+          <a href="/admin/petitions/export.csv" className="text-brand hover:underline" download>
+            Export CSV ↓
+          </a>
         </p>
       </header>
 
