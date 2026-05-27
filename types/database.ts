@@ -64,6 +64,60 @@ export type Database = {
           },
         ];
       };
+      journal_affiche: {
+        Row: {
+          id: string;
+          slug: string;
+          titre: string;
+          sous_titre: string | null;
+          numero: number;
+          format: string;
+          contenu_md: string;
+          image_couverture_url: string | null;
+          statut: string;
+          perimetre_type: string;
+          perimetre_id: string | null;
+          createurice_id: string | null;
+          publie_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          titre: string;
+          sous_titre?: string | null;
+          numero?: number;
+          format?: string;
+          contenu_md?: string;
+          image_couverture_url?: string | null;
+          statut?: string;
+          perimetre_type?: string;
+          perimetre_id?: string | null;
+          createurice_id?: string | null;
+          publie_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          titre?: string;
+          sous_titre?: string | null;
+          numero?: number;
+          format?: string;
+          contenu_md?: string;
+          image_couverture_url?: string | null;
+          statut?: string;
+          perimetre_type?: string;
+          perimetre_id?: string | null;
+          createurice_id?: string | null;
+          publie_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       salle_decider: {
         Row: {
           id: string;
