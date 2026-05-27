@@ -518,10 +518,76 @@ Entre deux soirées, **dis-moi où tu en es** et je débloque/finalise ce qui pe
 
 ---
 
+## Catégorie 14 — Migration Base44 (chantier 10.1)
+
+État partiel selon CLAUDE.md :
+
+- ✅ **Signatures importées** : 17 746 signatures liées via `signature_petition` + `profil_unifie` (chantier 13.3-E).
+- ✅ **Profils unifiés** : 15 737 profils générés (numéro M+7).
+- ❓ **946 membres Base44** : pas confirmé qu'ils ont été basculés en `adhesion` avec date_adhesion préservée.
+- ❓ **~9 000 abonnés newsletter** : pas confirmé exportés vers Brevo.
+- ❓ **Pétitions Base44** : importées en statut `archivee` via `scripts/migrer-base44.ts`. À réécrire avant repub.
+- ❓ **2 articles Base44** : à reprendre manuellement.
+
+### 14.1 Vérifier l'état actuel
+
+```bash
+# 1. Combien d'adhésions actives existent ?
+psql "$DATABASE_URL" -c "select count(*) from adherent_actif;"
+
+# 2. Combien de pétitions « archivees » ?
+psql "$DATABASE_URL" -c "select slug, titre from petition where statut='archivee';"
+
+# 3. Combien de signatures avec profil_unifie ?
+psql "$DATABASE_URL" -c "select count(*) from signature_petition where profil_unifie_id is not null;"
+```
+
+### 14.2 Si les 946 membres ne sont pas importés
+
+Lancer `scripts/migrer-base44.ts <dossier_csv> --dry-run` pour rapport, puis `--confirm`. Vérifier que `membres.csv` existe dans le dossier fourni (export depuis Base44 admin).
+
+Le script actuel rapporte mais n'insère pas les adhésions effectivement (cf. commentaires dans `scripts/migrer-base44.ts`). Pour finir le travail :
+
+- Récupérer les emails des 946 membres.
+- Pour chacun, créer un compte `auth.users` via **Supabase Admin API** (`supabase.auth.admin.createUser`) avec le mail Base44, mot de passe initial aléatoire.
+- Envoyer à chacun un mail « Reset your password » via Brevo (Supabase Auth peut le faire en webhook).
+- Une fois `auth.users` créés, insérer dans `adhesion` :
+  - `personne_id` = `auth.users.id` du membre
+  - `chemin` = `'gratuit'` (ou `'euros'` selon Base44)
+  - `debute_le` = `date_adhesion` originale
+  - `expire_le` = `date_adhesion + 365 jours`
+
+### 14.3 Si les ~9k newsletter ne sont pas dans Brevo
+
+Le script `migrer-base44.ts` affiche le nombre mais ne pousse pas vers Brevo. Pour finir :
+
+1. Récupérer le CSV `newsletter.csv` (email, code_postal, inscrit_le).
+2. Via Brevo Dashboard → Contacts → Import. Mapper les colonnes.
+3. Ajouter un **tag « base44-newsletter »** pour distinguer les imports historiques.
+4. Vérifier le quota gratuit (300 emails/jour) avant tout envoi.
+
+### 14.4 Réécriture des pétitions Base44
+
+Les 2-3 pétitions Base44 ont été importées en `statut='archivee'` avec le texte d'origine. Pour les republier :
+
+1. Aller sur `/admin/petitions` (édition).
+2. Pour chacune, éditer titre + texte (Lilou/Ben a un nouveau ton politique).
+3. Passer le statut à `publiee`.
+
+### 14.5 Reprise des 2 articles Base44
+
+Articles à transférer manuellement depuis Base44 vers la table `media` côté Maintenant! :
+
+1. `/admin/media` (mod section).
+2. Création manuelle des 2 articles avec le texte original.
+3. Statut `publie`.
+
+---
+
 ## Récapitulatif chiffré
 
-- **Code livré** : 37 chantiers V2.3.x (V2.3.1 à V2.3.37) + fix Ultraplan CI + VAGUE 0/1/2 entières.
-- **Tests** : 413 verts.
+- **Code livré** : 46 chantiers V2.3.x (V2.3.1 à V2.3.46) + fix Ultraplan CI + VAGUE 0/1/2 entières.
+- **Tests** : **427 verts**.
 - **Migrations en attente distant** : 12.
 - **Backfills à lancer** : 3 (consentement, droits, caisses).
 - **PR à merger** : 1 (fix CI Playwright).
@@ -529,6 +595,7 @@ Entre deux soirées, **dis-moi où tu en es** et je débloque/finalise ce qui pe
 - **Services externes** : 6 (Supabase, Brevo, Stripe, Cloudflare, LiveKit, Sentry).
 - **Crons à poser** : 4.
 - **Contenus éditoriaux à fournir** : 8 pages.
+- **Migration Base44** : 946 membres + 9k newsletter à finaliser (cf. catégorie 14).
 
 ---
 
