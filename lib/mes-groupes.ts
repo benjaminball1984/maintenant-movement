@@ -98,9 +98,8 @@ export async function listerMesAppartenances(personneId: string): Promise<MesApp
       id: l.gt_thematique.id,
       nom: l.gt_thematique.nom,
       slug: l.gt_thematique.slug,
-      // GT thématiques : aucune page publique livrée à ce jour (V2.3.22).
-      // On laisse `href` vide → la page ne rend pas de lien cliquable.
-      href: '',
+      // V2.3.38 : page GT individuelle livrée.
+      href: `/co-construire/${l.gt_thematique.slug}`,
       depuisLe: l.rejointe_le,
       typeLibelle: 'GT thématique',
     }));
