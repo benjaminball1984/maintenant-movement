@@ -91,3 +91,92 @@ export async function initierTransactionSortanteAction(
   revalidatePath('/admin/national/tresorerie');
   return { ok: true, transactionId: r.transactionId };
 }
+
+/**
+ * Confirme une transaction sortante (V2.3.36). Transition `initiee → confirmee`.
+ * Vérifie l'admin national. Le `confirme_par_personne_id` est celui qui
+ * appelle l'action ; il DEVRAIT idéalement être différent de
+ * `initie_par_personne_id` pour respecter une double-signature, mais
+ * cette règle est portée par l'usage humain (pas de contrainte SQL).
+ */
+export async function confirmerTransactionSortanteAction(options: {
+  transactionId: string;
+  caisseId: string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    return { ok: false, message: 'Action réservée aux admins nationaux.' };
+  }
+
+  const { error } = await supabase
+    .from('transaction_sortante')
+    .update({
+      statut: 'confirmee',
+      confirme_par_personne_id: session.userId,
+      confirme_le: new Date().toISOString(),
+    })
+    .eq('id', options.transactionId)
+    .eq('statut', 'initiee');
+
+  if (error !== null) return { ok: false, message: error.message };
+
+  revalidatePath(`/admin/national/tresorerie/${options.caisseId}`);
+  revalidatePath('/admin/national/tresorerie');
+  return { ok: true };
+}
+
+/**
+ * Annule une transaction sortante initiée (V2.3.36).
+ * Transition `initiee → annulee`. Permet de retirer une transaction
+ * posée par erreur avant confirmation comptable.
+ */
+export async function annulerTransactionSortanteAction(options: {
+  transactionId: string;
+  caisseId: string;
+  motif: string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const motifNettoye = options.motif.trim();
+  if (motifNettoye.length < 5) {
+    return { ok: false, message: 'Un motif d’annulation d’au moins 5 caractères est requis.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    return { ok: false, message: 'Action réservée aux admins nationaux.' };
+  }
+
+  // On garde le motif original ET on ajoute l'annulation au motif existant.
+  const { data: tx } = await supabase
+    .from('transaction_sortante')
+    .select('motif')
+    .eq('id', options.transactionId)
+    .maybeSingle();
+  const motifFinal = tx !== null ? `${tx.motif}\n\n[Annulée] ${motifNettoye}` : motifNettoye;
+
+  const { error } = await supabase
+    .from('transaction_sortante')
+    .update({
+      statut: 'annulee',
+      motif: motifFinal,
+    })
+    .eq('id', options.transactionId)
+    .eq('statut', 'initiee');
+
+  if (error !== null) return { ok: false, message: error.message };
+
+  revalidatePath(`/admin/national/tresorerie/${options.caisseId}`);
+  revalidatePath('/admin/national/tresorerie');
+  return { ok: true };
+}

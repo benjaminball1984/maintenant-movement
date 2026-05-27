@@ -1,3 +1,4 @@
+import { BoutonsTransactionSortante } from '@/components/admin/tresorerie/BoutonsTransactionSortante';
 import { FormulaireInitierReversement } from '@/components/admin/tresorerie/FormulaireInitierReversement';
 import { LienJustificatif } from '@/components/admin/tresorerie/LienJustificatif';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
@@ -282,6 +283,9 @@ export default async function PageDetailCaisse({
                       ? ` · confirmée le ${FORMATEUR_DATE.format(new Date(t.confirmeLe))}`
                       : ''}
                   </p>
+                  {t.statut === 'initiee' ? (
+                    <BoutonsTransactionSortante transactionId={t.id} caisseId={caisse.id} />
+                  ) : null}
                 </Card>
               </li>
             ))}
