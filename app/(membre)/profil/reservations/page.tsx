@@ -1,8 +1,14 @@
 import { BoutonAnnulerReservation } from '@/components/reservation/BoutonAnnulerReservation';
 import { BoutonConfirmerReservation } from '@/components/reservation/BoutonConfirmerReservation';
+import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
-import { listerReservationsDuDemandeur, transitionAutorisee } from '@/lib/reservation';
+import {
+  type EntreeJournalReservation,
+  listerJournauxReservations,
+  listerReservationsDuDemandeur,
+  transitionAutorisee,
+} from '@/lib/reservation';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -32,7 +38,10 @@ export const metadata: Metadata = {
 export default async function PageMesReservations() {
   const session = await getSessionOuRediriger('/profil/reservations');
   const reservations = await listerReservationsDuDemandeur(session.userId);
-  const titresParId = await chargerTitresOffres(reservations);
+  const [titresParId, journauxParId] = await Promise.all([
+    chargerTitresOffres(reservations),
+    listerJournauxReservations(reservations.map((r) => r.id)),
+  ]);
 
   return (
     <Container taille="md" className="py-12">
@@ -57,6 +66,7 @@ export default async function PageMesReservations() {
               <CarteReservation
                 reservation={reservation}
                 titreOffre={titresParId.get(reservation.offreId) ?? null}
+                journal={journauxParId.get(reservation.id) ?? []}
               />
             </li>
           ))}
@@ -107,9 +117,11 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
 function CarteReservation({
   reservation,
   titreOffre,
+  journal,
 }: {
   reservation: import('@/lib/reservation').Reservation;
   titreOffre: { titre: string; cheminPage: string | null } | null;
+  journal: EntreeJournalReservation[];
 }) {
   const variantStatut = VARIANT_STATUT[reservation.statut];
   const titreAffiche = titreOffre?.titre ?? '(offre non trouvée)';
@@ -160,6 +172,8 @@ function CarteReservation({
         </summary>
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>
+
+      <HistoriqueTransitions entrees={journal} />
 
       {transitionAutorisee(reservation.statut, 'confirmee') ? (
         <BoutonConfirmerReservation

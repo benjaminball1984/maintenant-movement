@@ -87,17 +87,40 @@ export interface ChangerStatutOptions {
   reservationId: string;
   nouveauStatut: StatutReservation;
   motif?: string;
+  /**
+   * Identifiant de la personne à l'origine du changement, journalisé
+   * dans `reservation_journal` (V2.3.15, doctrine D8bis). Optionnel
+   * pour rester rétro-compatible avec les transitions système (cron,
+   * expiration automatique). Quand non fourni, le journal enregistre
+   * `auteur_id = null`.
+   */
+  auteurId?: string;
 }
 
 /**
  * Change le statut d'une réservation. Les transitions autorisées sont
  * vérifiées côté applicatif (Server Action), pas dans cette fonction
  * qui se contente d'écrire. Helper `transitionAutorisee` exposé ci-dessous.
+ *
+ * Journalise la transition dans `reservation_journal` (V2.3.15) après le
+ * UPDATE réussi : fire-and-forget, l'échec du journal n'invalide pas la
+ * transition (le journal est une annexe de transparence, pas une source
+ * de vérité).
  */
 export async function changerStatutReservation(
   options: ChangerStatutOptions,
 ): Promise<ResultatReservation> {
   const supabase = await getSupabaseServer();
+
+  // Statut avant pour le journal. Tolère l'absence (cas dégradé : on
+  // journalise null → cible).
+  const { data: avant } = await supabase
+    .from('reservation')
+    .select('statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  const statutAvant = (avant?.statut ?? null) as StatutReservation | null;
+
   const { data, error } = await supabase
     .from('reservation')
     .update({
@@ -111,7 +134,120 @@ export async function changerStatutReservation(
   if (error !== null || data === null) {
     return { ok: false, message: error?.message ?? 'Mise à jour impossible.' };
   }
+
+  // Journal (V2.3.15) : seulement si la transition est effective.
+  if (statutAvant !== null && statutAvant !== options.nouveauStatut) {
+    await journaliserTransition({
+      reservationId: options.reservationId,
+      statutAvant,
+      statutApres: options.nouveauStatut,
+      motif: options.motif,
+      auteurId: options.auteurId,
+    });
+  }
+
   return { ok: true, reservation: ligneEnReservation(data) };
+}
+
+/**
+ * Insère une ligne dans `reservation_journal` (V2.3.15). Fire-and-forget :
+ * tout échec d'insertion est loggé mais n'invalide pas la transition de
+ * la réservation. Utilise le client serveur courant (service_role
+ * contourne la policy `insert_blocked`).
+ */
+async function journaliserTransition(options: {
+  reservationId: string;
+  statutAvant: StatutReservation;
+  statutApres: StatutReservation;
+  motif?: string;
+  auteurId?: string;
+}): Promise<void> {
+  try {
+    const supabase = await getSupabaseServer();
+    const { error } = await supabase.from('reservation_journal').insert({
+      reservation_id: options.reservationId,
+      statut_avant: options.statutAvant,
+      statut_apres: options.statutApres,
+      motif: options.motif?.trim() !== '' ? (options.motif ?? null) : null,
+      auteur_id: options.auteurId ?? null,
+    });
+    if (error !== null) {
+      console.warn('[reservation_journal] insert échoué :', error.message);
+    }
+  } catch (erreur) {
+    console.warn('[reservation_journal] exception :', erreur);
+  }
+}
+
+export interface EntreeJournalReservation {
+  id: string;
+  reservationId: string;
+  statutAvant: StatutReservation;
+  statutApres: StatutReservation;
+  motif: string | null;
+  auteurId: string | null;
+  changedAt: string;
+}
+
+/**
+ * Lit le journal d'une réservation, trié par date croissante (de l'amorce
+ * vers le présent). La RLS filtre côté lecture : demandeur + admins
+ * autorisés. Le côté propriétaire d'offre passe par une Server Action
+ * dédiée qui vérifie la propriété AVANT d'appeler ce helper.
+ */
+export async function listerJournalReservation(
+  reservationId: string,
+): Promise<EntreeJournalReservation[]> {
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase
+    .from('reservation_journal')
+    .select('*')
+    .eq('reservation_id', reservationId)
+    .order('changed_at', { ascending: true });
+  if (error !== null || data === null) return [];
+  return data.map((l) => ({
+    id: l.id,
+    reservationId: l.reservation_id,
+    statutAvant: l.statut_avant as StatutReservation,
+    statutApres: l.statut_apres as StatutReservation,
+    motif: l.motif,
+    auteurId: l.auteur_id,
+    changedAt: l.changed_at,
+  }));
+}
+
+/**
+ * Variante batch de `listerJournalReservation` : retourne un Map
+ * `reservation_id → entrées triées`. Utile pour afficher l'historique
+ * sur une liste de réservations sans faire N+1 requêtes.
+ */
+export async function listerJournauxReservations(
+  reservationIds: string[],
+): Promise<Map<string, EntreeJournalReservation[]>> {
+  const resultat = new Map<string, EntreeJournalReservation[]>();
+  if (reservationIds.length === 0) return resultat;
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase
+    .from('reservation_journal')
+    .select('*')
+    .in('reservation_id', reservationIds)
+    .order('changed_at', { ascending: true });
+  if (error !== null || data === null) return resultat;
+  for (const l of data) {
+    const entree: EntreeJournalReservation = {
+      id: l.id,
+      reservationId: l.reservation_id,
+      statutAvant: l.statut_avant as StatutReservation,
+      statutApres: l.statut_apres as StatutReservation,
+      motif: l.motif,
+      auteurId: l.auteur_id,
+      changedAt: l.changed_at,
+    };
+    const liste = resultat.get(entree.reservationId);
+    if (liste === undefined) resultat.set(entree.reservationId, [entree]);
+    else liste.push(entree);
+  }
+  return resultat;
 }
 
 /**

@@ -1,7 +1,12 @@
 import { BoutonsProprietaireReservation } from '@/components/reservation/BoutonsProprietaireReservation';
+import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
-import { listerReservationsRecuesParProprietaire } from '@/lib/reservation';
+import {
+  type EntreeJournalReservation,
+  listerJournauxReservations,
+  listerReservationsRecuesParProprietaire,
+} from '@/lib/reservation';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare, Users } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -23,7 +28,10 @@ export const metadata: Metadata = {
 export default async function PageDemandesReservations() {
   const session = await getSessionOuRediriger('/profil/demandes-reservations');
   const reservations = await listerReservationsRecuesParProprietaire(session.userId);
-  const titresParId = await chargerTitresOffres(reservations);
+  const [titresParId, journauxParId] = await Promise.all([
+    chargerTitresOffres(reservations),
+    listerJournauxReservations(reservations.map((r) => r.id)),
+  ]);
 
   return (
     <Container taille="md" className="py-12">
@@ -48,6 +56,7 @@ export default async function PageDemandesReservations() {
               <CarteDemande
                 reservation={reservation}
                 titreOffre={titresParId.get(reservation.offreId) ?? null}
+                journal={journauxParId.get(reservation.id) ?? []}
               />
             </li>
           ))}
@@ -98,9 +107,11 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
 function CarteDemande({
   reservation,
   titreOffre,
+  journal,
 }: {
   reservation: import('@/lib/reservation').Reservation;
   titreOffre: { titre: string; cheminPage: string | null } | null;
+  journal: EntreeJournalReservation[];
 }) {
   const titreAffiche = titreOffre?.titre ?? '(offre supprimée)';
 
@@ -166,6 +177,8 @@ function CarteDemande({
         </summary>
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>
+
+      <HistoriqueTransitions entrees={journal} />
 
       <BoutonsProprietaireReservation
         reservationId={reservation.id}

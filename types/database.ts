@@ -2787,6 +2787,44 @@ export type Database = {
           },
         ];
       };
+      reservation_journal: {
+        Row: {
+          id: string;
+          reservation_id: string;
+          statut_avant: string;
+          statut_apres: string;
+          motif: string | null;
+          auteur_id: string | null;
+          changed_at: string;
+        };
+        Insert: {
+          id?: string;
+          reservation_id: string;
+          statut_avant: string;
+          statut_apres: string;
+          motif?: string | null;
+          auteur_id?: string | null;
+          changed_at?: string;
+        };
+        Update: {
+          id?: string;
+          reservation_id?: string;
+          statut_avant?: string;
+          statut_apres?: string;
+          motif?: string | null;
+          auteur_id?: string | null;
+          changed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reservation_journal_reservation_id_fkey';
+            columns: ['reservation_id'];
+            isOneToOne: false;
+            referencedRelation: 'reservation';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       caisse: {
         Row: {
           id: string;

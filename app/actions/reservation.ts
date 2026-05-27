@@ -275,6 +275,7 @@ async function executerTransitionProprietaire(
     reservationId: options.reservationId,
     nouveauStatut: cible,
     motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+    auteurId: session.userId,
   });
   if (!resultat.ok) return { ok: false, message: resultat.message };
   if (options.cheminRevalidation !== undefined) {
@@ -369,6 +370,7 @@ export async function confirmerReservationAction(options: {
     reservationId: options.reservationId,
     nouveauStatut: 'confirmee',
     motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+    auteurId: session.userId,
   });
 
   if (!resultat.ok) {
@@ -446,6 +448,7 @@ export async function annulerReservationAction(options: {
     reservationId: options.reservationId,
     nouveauStatut: 'annulee',
     motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+    auteurId: session.userId,
   });
 
   if (!resultat.ok) {
