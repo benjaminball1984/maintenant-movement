@@ -5,15 +5,47 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { faireDonEuros, faireDonT99CP } from '../actions';
+
+const FALLBACKS = {
+  retour: '← Toutes les cagnottes',
+  badgeSuspendue: 'Suspendue',
+  badgeCloturee: 'Clôturée',
+  alertSuspendueTitre: 'Cagnotte suspendue',
+  alertSuspendueAmorce: 'Raison :',
+  alertSuspendueNonPrecisee: 'non précisée',
+  alertSuspendueFin:
+    ". Les dons sont temporairement bloqués. La porteuse peut contacter l'équipe Maintenant! pour discuter du rétablissement.",
+  alertClotureeTitre: 'Cagnotte clôturée',
+  alertClotureeCorps: "Cette cagnotte n'accepte plus de dons. Merci aux contributeur·ices.",
+  alertAnnuleTitre: 'Don annulé',
+  alertAnnuleCorps: "Tu as interrompu le paiement. Aucune somme n'a été débitée.",
+  alertSuccesTitre: 'Merci !',
+  alertSuccesCorps:
+    "Ton don est enregistré et abonde la cagnotte. Reçu envoyé par email si tu l'as renseigné.",
+  sectionPresentation: 'Présentation',
+  sectionSoutenir: 'Soutenir',
+  cardDonEurosTitre: 'Don en euros',
+  cardDonEurosBadge: 'Frais 5 %',
+  cardDonT99cpTitre: 'Don en 99-coin',
+  cardDonT99cpBadge: 'Frais 0 %',
+  alertEurosIndisponibleTitre: 'Don en euros indisponible',
+  alertEurosIndisponibleCorps:
+    "Le KYC Stripe Connect du porteur n'est pas encore complété. En attendant, le don T99CP reste possible si la cagnotte expose une adresse wallet.",
+  footerAmorce: 'Portée par',
+  footerMilieu: '· ouverte le',
+  adminSectionTitre: 'Actions admin',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -46,7 +78,101 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 export default async function PageCagnotteDetail({ params, searchParams }: PageDetailProps) {
   const { slug } = await params;
   const { annule, succes } = await searchParams;
-  const [cagnotte, estAdmin] = await Promise.all([cagnotteParSlug(slug), estAdminCourant()]);
+  const [
+    cagnotte,
+    estAdmin,
+    retour,
+    badgeSuspendue,
+    badgeCloturee,
+    alertSuspendueTitre,
+    alertSuspendueAmorce,
+    alertSuspendueNonPrecisee,
+    alertSuspendueFin,
+    alertClotureeTitre,
+    alertClotureeCorps,
+    alertAnnuleTitre,
+    alertAnnuleCorps,
+    alertSuccesTitre,
+    alertSuccesCorps,
+    sectionPresentation,
+    sectionSoutenir,
+    cardDonEurosTitre,
+    cardDonEurosBadge,
+    cardDonT99cpTitre,
+    cardDonT99cpBadge,
+    alertEurosIndisponibleTitre,
+    alertEurosIndisponibleCorps,
+    footerAmorce,
+    footerMilieu,
+    adminSectionTitre,
+  ] = await Promise.all([
+    cagnotteParSlug(slug),
+    estAdminCourant(),
+    lireContenuEditorial('cagnottes.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('cagnottes.fiche.badge_suspendue', {
+      valeurMd: FALLBACKS.badgeSuspendue,
+    }),
+    lireContenuEditorial('cagnottes.fiche.badge_cloturee', { valeurMd: FALLBACKS.badgeCloturee }),
+    lireContenuEditorial('cagnottes.fiche.alert_suspendue_titre', {
+      valeurMd: FALLBACKS.alertSuspendueTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_suspendue_amorce', {
+      valeurMd: FALLBACKS.alertSuspendueAmorce,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_suspendue_non_precisee', {
+      valeurMd: FALLBACKS.alertSuspendueNonPrecisee,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_suspendue_fin', {
+      valeurMd: FALLBACKS.alertSuspendueFin,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_cloturee_titre', {
+      valeurMd: FALLBACKS.alertClotureeTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_cloturee_corps', {
+      valeurMd: FALLBACKS.alertClotureeCorps,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_annule_titre', {
+      valeurMd: FALLBACKS.alertAnnuleTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_annule_corps', {
+      valeurMd: FALLBACKS.alertAnnuleCorps,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_succes_titre', {
+      valeurMd: FALLBACKS.alertSuccesTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_succes_corps', {
+      valeurMd: FALLBACKS.alertSuccesCorps,
+    }),
+    lireContenuEditorial('cagnottes.fiche.section_presentation', {
+      valeurMd: FALLBACKS.sectionPresentation,
+    }),
+    lireContenuEditorial('cagnottes.fiche.section_soutenir', {
+      valeurMd: FALLBACKS.sectionSoutenir,
+    }),
+    lireContenuEditorial('cagnottes.fiche.card_don_euros_titre', {
+      valeurMd: FALLBACKS.cardDonEurosTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.card_don_euros_badge', {
+      valeurMd: FALLBACKS.cardDonEurosBadge,
+    }),
+    lireContenuEditorial('cagnottes.fiche.card_don_t99cp_titre', {
+      valeurMd: FALLBACKS.cardDonT99cpTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.card_don_t99cp_badge', {
+      valeurMd: FALLBACKS.cardDonT99cpBadge,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_euros_indisponible_titre', {
+      valeurMd: FALLBACKS.alertEurosIndisponibleTitre,
+    }),
+    lireContenuEditorial('cagnottes.fiche.alert_euros_indisponible_corps', {
+      valeurMd: FALLBACKS.alertEurosIndisponibleCorps,
+    }),
+    lireContenuEditorial('cagnottes.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
+    lireContenuEditorial('cagnottes.fiche.footer_milieu', { valeurMd: FALLBACKS.footerMilieu }),
+    lireContenuEditorial('cagnottes.fiche.admin_section_titre', {
+      valeurMd: FALLBACKS.adminSectionTitre,
+    }),
+  ]);
   if (cagnotte === null) {
     notFound();
   }
@@ -58,9 +184,19 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/mobiliser/cagnottes" className="hover:text-brand">
-          ← Toutes les cagnottes
-        </Link>
+        <TexteEditableAdmin
+          cle="cagnottes.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste cagnottes"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Link href="/mobiliser/cagnottes" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-8">
@@ -70,8 +206,28 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
               <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
                 {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
               </Badge>
-              {cagnotte.statut === 'suspendue' ? <Badge variant="warning">Suspendue</Badge> : null}
-              {cagnotte.statut === 'cloturee' ? <Badge variant="default">Clôturée</Badge> : null}
+              {cagnotte.statut === 'suspendue' ? (
+                <TexteEditableAdmin
+                  cle="cagnottes.fiche.badge_suspendue"
+                  valeurInitiale={badgeSuspendue.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="badge Suspendue"
+                  longueurMax={30}
+                >
+                  {(t) => <Badge variant="warning">{t}</Badge>}
+                </TexteEditableAdmin>
+              ) : null}
+              {cagnotte.statut === 'cloturee' ? (
+                <TexteEditableAdmin
+                  cle="cagnottes.fiche.badge_cloturee"
+                  valeurInitiale={badgeCloturee.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="badge Cloturee"
+                  longueurMax={30}
+                >
+                  {(t) => <Badge variant="default">{t}</Badge>}
+                </TexteEditableAdmin>
+              ) : null}
             </div>
             <BoutonAdminEditer href={`/admin/moderation/cagnottes?id=${cagnotte.id}`}>
               Admin
@@ -94,29 +250,134 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
         </header>
 
         {cagnotte.statut === 'suspendue' ? (
-          <Alert variant="warning" titre="Cagnotte suspendue">
-            Raison : {cagnotte.raison_suspension ?? 'non précisée'}. Les dons sont temporairement
-            bloqués. La porteuse peut contacter l'équipe Maintenant! pour discuter du
-            rétablissement.
+          <Alert
+            variant="warning"
+            titre={
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.alert_suspendue_titre"
+                valeurInitiale={alertSuspendueTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte cagnotte suspendue"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.alert_suspendue_amorce"
+              valeurInitiale={alertSuspendueAmorce.valeurMd}
+              estAdmin={estAdmin}
+              libelle="amorce alerte suspendue (Raison :)"
+              longueurMax={30}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
+            {cagnotte.raison_suspension ?? (
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.alert_suspendue_non_precisee"
+                valeurInitiale={alertSuspendueNonPrecisee.valeurMd}
+                estAdmin={estAdmin}
+                libelle="fallback si pas de raison de suspension"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            )}
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.alert_suspendue_fin"
+              valeurInitiale={alertSuspendueFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="fin alerte cagnotte suspendue"
+              multilignes
+              longueurMax={400}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
         {cagnotte.statut === 'cloturee' ? (
-          <Alert variant="info" titre="Cagnotte clôturée">
-            Cette cagnotte n'accepte plus de dons. Merci aux contributeur·ices.
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.alert_cloturee_titre"
+                valeurInitiale={alertClotureeTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte cagnotte cloturee"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.alert_cloturee_corps"
+              valeurInitiale={alertClotureeCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte cagnotte cloturee"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
         {annule === '1' ? (
-          <Alert variant="info" titre="Don annulé">
-            Tu as interrompu le paiement. Aucune somme n'a été débitée.
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.alert_annule_titre"
+                valeurInitiale={alertAnnuleTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte don annule"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.alert_annule_corps"
+              valeurInitiale={alertAnnuleCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte don annule"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
         {succes === '1' ? (
-          <Alert variant="success" titre="Merci !">
-            Ton don est enregistré et abonde la cagnotte. Reçu envoyé par email si tu l'as
-            renseigné.
+          <Alert
+            variant="success"
+            titre={
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.alert_succes_titre"
+                valeurInitiale={alertSuccesTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte don succes"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.alert_succes_corps"
+              valeurInitiale={alertSuccesCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte don succes"
+              multilignes
+              longueurMax={400}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
@@ -131,9 +392,19 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
         </Card>
 
         <section className="grid gap-4">
-          <Heading niveau={2} apparenceComme={3}>
-            Présentation
-          </Heading>
+          <TexteEditableAdmin
+            cle="cagnottes.fiche.section_presentation"
+            valeurInitiale={sectionPresentation.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section presentation"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {cagnotte.texte}
           </div>
@@ -141,34 +412,101 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
 
         {estPubliee && (peutRecevoirEuros || peutRecevoirT99CP) ? (
           <section className="grid gap-6 border-t border-border pt-6">
-            <Heading niveau={2} apparenceComme={3}>
-              Soutenir
-            </Heading>
+            <TexteEditableAdmin
+              cle="cagnottes.fiche.section_soutenir"
+              valeurInitiale={sectionSoutenir.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section soutenir"
+              longueurMax={40}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={3}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
 
             {peutRecevoirEuros ? (
               <Card variant="ombre" className="grid gap-3">
                 <header className="flex items-center justify-between">
-                  <Heading niveau={3} apparenceComme={4}>
-                    Don en euros
-                  </Heading>
-                  <Badge variant="default">Frais 5 %</Badge>
+                  <TexteEditableAdmin
+                    cle="cagnottes.fiche.card_don_euros_titre"
+                    valeurInitiale={cardDonEurosTitre.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="titre card don euros"
+                    longueurMax={40}
+                  >
+                    {(t) => (
+                      <Heading niveau={3} apparenceComme={4}>
+                        {t}
+                      </Heading>
+                    )}
+                  </TexteEditableAdmin>
+                  <TexteEditableAdmin
+                    cle="cagnottes.fiche.card_don_euros_badge"
+                    valeurInitiale={cardDonEurosBadge.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="badge frais 5 %"
+                    longueurMax={20}
+                  >
+                    {(t) => <Badge variant="default">{t}</Badge>}
+                  </TexteEditableAdmin>
                 </header>
                 <FormulaireDonEuros cagnotteId={cagnotte.id} faireDonEuros={faireDonEuros} />
               </Card>
             ) : (
-              <Alert variant="info" titre="Don en euros indisponible">
-                Le KYC Stripe Connect du porteur n'est pas encore complété. En attendant, le don
-                T99CP reste possible si la cagnotte expose une adresse wallet.
+              <Alert
+                variant="info"
+                titre={
+                  <TexteEditableAdmin
+                    cle="cagnottes.fiche.alert_euros_indisponible_titre"
+                    valeurInitiale={alertEurosIndisponibleTitre.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="titre alerte euros indisponible"
+                    longueurMax={60}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                }
+              >
+                <TexteEditableAdmin
+                  cle="cagnottes.fiche.alert_euros_indisponible_corps"
+                  valeurInitiale={alertEurosIndisponibleCorps.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="corps alerte euros indisponible"
+                  multilignes
+                  longueurMax={400}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
               </Alert>
             )}
 
             {peutRecevoirT99CP && cagnotte.wallet_t99cp !== null ? (
               <Card variant="ombre" className="grid gap-3">
                 <header className="flex items-center justify-between">
-                  <Heading niveau={3} apparenceComme={4}>
-                    Don en 99-coin
-                  </Heading>
-                  <Badge variant="success">Frais 0 %</Badge>
+                  <TexteEditableAdmin
+                    cle="cagnottes.fiche.card_don_t99cp_titre"
+                    valeurInitiale={cardDonT99cpTitre.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="titre card don t99cp"
+                    longueurMax={40}
+                  >
+                    {(t) => (
+                      <Heading niveau={3} apparenceComme={4}>
+                        {t}
+                      </Heading>
+                    )}
+                  </TexteEditableAdmin>
+                  <TexteEditableAdmin
+                    cle="cagnottes.fiche.card_don_t99cp_badge"
+                    valeurInitiale={cardDonT99cpBadge.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="badge frais 0 %"
+                    longueurMax={20}
+                  >
+                    {(t) => <Badge variant="success">{t}</Badge>}
+                  </TexteEditableAdmin>
                 </header>
                 <FormulaireDonT99CP
                   cagnotteId={cagnotte.id}
@@ -183,13 +521,29 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {cagnotte.createurice_prenom !== null || cagnotte.createurice_nom !== null ? (
             <p>
-              Portée par{' '}
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.footer_amorce"
+                valeurInitiale={footerAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce footer (Portee par)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <strong className="text-text-2">
                 {[cagnotte.createurice_prenom, cagnotte.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
               </strong>{' '}
-              · ouverte le{' '}
+              <TexteEditableAdmin
+                cle="cagnottes.fiche.footer_milieu"
+                valeurInitiale={footerMilieu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="milieu footer (· ouverte le)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <time dateTime={cagnotte.created_at}>
                 {new Date(cagnotte.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
@@ -208,9 +562,19 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
           aria-label="Actions admin"
           className="mt-12 grid gap-3 border-t border-border pt-8"
         >
-          <Heading niveau={2} apparenceComme={4}>
-            Actions admin
-          </Heading>
+          <TexteEditableAdmin
+            cle="cagnottes.fiche.admin_section_titre"
+            valeurInitiale={adminSectionTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section actions admin"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           {cagnotte.statut !== 'cloturee' ? (
             <BoutonArchiverEntite
               id={cagnotte.id}

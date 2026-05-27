@@ -2,9 +2,11 @@ import { retirerMobilisationAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -14,6 +16,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { participerMobilisation } from '../actions';
+
+const FALLBACKS = {
+  retour: '← Toutes les mobilisations',
+  preheader: 'Mobilisation',
+  alertRetireeTitre: 'Mobilisation retirée',
+  alertRetireeAmorce: 'Raison :',
+  alertRetireeNonPrecisee: 'non précisée',
+  alertRetireeFin: '. Tu peux republier une version corrigée si tu en es la créateurice.',
+  labelQuand: 'Quand',
+  labelOu: 'Où',
+  coordonneesPrefix: 'Coordonnées :',
+  voirCarte: 'voir sur la carte',
+  sectionDescription: 'Description',
+  footerAmorce: 'Organisée par',
+  adminSectionTitre: 'Actions admin',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -48,9 +66,54 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
  */
 export default async function PageMobilisationDetail({ params }: PageDetailProps) {
   const { slug } = await params;
-  const [mobilisation, estAdmin] = await Promise.all([
+  const [
+    mobilisation,
+    estAdmin,
+    retour,
+    preheader,
+    alertRetireeTitre,
+    alertRetireeAmorce,
+    alertRetireeNonPrecisee,
+    alertRetireeFin,
+    labelQuand,
+    labelOu,
+    coordonneesPrefix,
+    voirCarte,
+    sectionDescription,
+    footerAmorce,
+    adminSectionTitre,
+  ] = await Promise.all([
     mobilisationParSlug(slug),
     estAdminCourant(),
+    lireContenuEditorial('mobilisations.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('mobilisations.fiche.preheader', { valeurMd: FALLBACKS.preheader }),
+    lireContenuEditorial('mobilisations.fiche.alert_retiree_titre', {
+      valeurMd: FALLBACKS.alertRetireeTitre,
+    }),
+    lireContenuEditorial('mobilisations.fiche.alert_retiree_amorce', {
+      valeurMd: FALLBACKS.alertRetireeAmorce,
+    }),
+    lireContenuEditorial('mobilisations.fiche.alert_retiree_non_precisee', {
+      valeurMd: FALLBACKS.alertRetireeNonPrecisee,
+    }),
+    lireContenuEditorial('mobilisations.fiche.alert_retiree_fin', {
+      valeurMd: FALLBACKS.alertRetireeFin,
+    }),
+    lireContenuEditorial('mobilisations.fiche.label_quand', { valeurMd: FALLBACKS.labelQuand }),
+    lireContenuEditorial('mobilisations.fiche.label_ou', { valeurMd: FALLBACKS.labelOu }),
+    lireContenuEditorial('mobilisations.fiche.coordonnees_prefix', {
+      valeurMd: FALLBACKS.coordonneesPrefix,
+    }),
+    lireContenuEditorial('mobilisations.fiche.voir_carte', { valeurMd: FALLBACKS.voirCarte }),
+    lireContenuEditorial('mobilisations.fiche.section_description', {
+      valeurMd: FALLBACKS.sectionDescription,
+    }),
+    lireContenuEditorial('mobilisations.fiche.footer_amorce', {
+      valeurMd: FALLBACKS.footerAmorce,
+    }),
+    lireContenuEditorial('mobilisations.fiche.admin_section_titre', {
+      valeurMd: FALLBACKS.adminSectionTitre,
+    }),
   ]);
 
   if (mobilisation === null) {
@@ -63,15 +126,33 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/mobiliser/mobilisations" className="hover:text-brand">
-          ← Toutes les mobilisations
-        </Link>
+        <TexteEditableAdmin
+          cle="mobilisations.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste mobilisations"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Link href="/mobiliser/mobilisations" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-8">
         <header className="grid gap-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-cap text-text-3">Mobilisation</p>
+            <TexteEditableAdmin
+              cle="mobilisations.fiche.preheader"
+              valeurInitiale={preheader.valeurMd}
+              estAdmin={estAdmin}
+              libelle="preheader 'Mobilisation'"
+              longueurMax={30}
+            >
+              {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+            </TexteEditableAdmin>
             <div className="flex items-center gap-2">
               <p className="text-xs font-bold uppercase tracking-cap text-brand">
                 {formaterRelativeAVenir(mobilisation.date_debut)}
@@ -98,9 +179,50 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
         </header>
 
         {!estPubliee ? (
-          <Alert variant="danger" titre="Mobilisation retirée">
-            Raison : {mobilisation.raison_retrait ?? 'non précisée'}. Tu peux republier une version
-            corrigée si tu en es la créateurice.
+          <Alert
+            variant="danger"
+            titre={
+              <TexteEditableAdmin
+                cle="mobilisations.fiche.alert_retiree_titre"
+                valeurInitiale={alertRetireeTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte mobilisation retiree"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="mobilisations.fiche.alert_retiree_amorce"
+              valeurInitiale={alertRetireeAmorce.valeurMd}
+              estAdmin={estAdmin}
+              libelle="amorce alerte retiree (Raison :)"
+              longueurMax={30}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
+            {mobilisation.raison_retrait ?? (
+              <TexteEditableAdmin
+                cle="mobilisations.fiche.alert_retiree_non_precisee"
+                valeurInitiale={alertRetireeNonPrecisee.valeurMd}
+                estAdmin={estAdmin}
+                libelle="fallback si pas de raison"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            )}
+            <TexteEditableAdmin
+              cle="mobilisations.fiche.alert_retiree_fin"
+              valeurInitiale={alertRetireeFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="fin alerte retiree"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
@@ -108,7 +230,15 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
           <div className="flex items-start gap-3">
             <Calendar size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <dt className="font-bold text-text-3">Quand</dt>
+              <TexteEditableAdmin
+                cle="mobilisations.fiche.label_quand"
+                valeurInitiale={labelQuand.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label 'Quand'"
+                longueurMax={20}
+              >
+                {(t) => <dt className="font-bold text-text-3">{t}</dt>}
+              </TexteEditableAdmin>
               <dd className="text-text-1">
                 {formaterPlage(mobilisation.date_debut, mobilisation.date_fin)}
               </dd>
@@ -117,15 +247,41 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
           <div className="flex items-start gap-3">
             <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <dt className="font-bold text-text-3">Où</dt>
+              <TexteEditableAdmin
+                cle="mobilisations.fiche.label_ou"
+                valeurInitiale={labelOu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label 'Ou'"
+                longueurMax={20}
+              >
+                {(t) => <dt className="font-bold text-text-3">{t}</dt>}
+              </TexteEditableAdmin>
               <dd className="text-text-1">{mobilisation.lieu}</dd>
               {mobilisation.latitude !== null && mobilisation.longitude !== null ? (
                 <dd className="mt-1 text-xs text-text-3">
-                  Coordonnées : {mobilisation.latitude.toFixed(4)},{' '}
-                  {mobilisation.longitude.toFixed(4)} ·{' '}
-                  <Link href="/carte" className="text-brand hover:underline">
-                    voir sur la carte
-                  </Link>
+                  <TexteEditableAdmin
+                    cle="mobilisations.fiche.coordonnees_prefix"
+                    valeurInitiale={coordonneesPrefix.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="prefixe coordonnees"
+                    longueurMax={30}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>{' '}
+                  {mobilisation.latitude.toFixed(4)}, {mobilisation.longitude.toFixed(4)} ·{' '}
+                  <TexteEditableAdmin
+                    cle="mobilisations.fiche.voir_carte"
+                    valeurInitiale={voirCarte.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="libelle lien voir sur la carte"
+                    longueurMax={40}
+                  >
+                    {(t) => (
+                      <Link href="/carte" className="text-brand hover:underline">
+                        {t}
+                      </Link>
+                    )}
+                  </TexteEditableAdmin>
                 </dd>
               ) : null}
             </div>
@@ -144,9 +300,19 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
         ) : null}
 
         <section className="grid gap-4">
-          <Heading niveau={2} apparenceComme={3}>
-            Description
-          </Heading>
+          <TexteEditableAdmin
+            cle="mobilisations.fiche.section_description"
+            valeurInitiale={sectionDescription.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section description"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {mobilisation.description}
           </div>
@@ -155,7 +321,15 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {mobilisation.createurice_prenom !== null || mobilisation.createurice_nom !== null ? (
             <p>
-              Organisée par{' '}
+              <TexteEditableAdmin
+                cle="mobilisations.fiche.footer_amorce"
+                valeurInitiale={footerAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce footer (Organisee par)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <strong className="text-text-2">
                 {[mobilisation.createurice_prenom, mobilisation.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
@@ -172,9 +346,19 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
           aria-label="Actions admin"
           className="mt-12 grid gap-3 border-t border-border pt-8"
         >
-          <Heading niveau={2} apparenceComme={4}>
-            Actions admin
-          </Heading>
+          <TexteEditableAdmin
+            cle="mobilisations.fiche.admin_section_titre"
+            valeurInitiale={adminSectionTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section actions admin"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           {mobilisation.statut !== 'retiree' ? (
             <BoutonArchiverEntite
               id={mobilisation.id}

@@ -1,7 +1,10 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { petitionParSlug } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
@@ -10,6 +13,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { signerPetition } from '../actions';
+
+const FALLBACKS = {
+  retour: '← Toutes les pétitions',
+  preheaderAmorce: 'Pétition à',
+  alertModerationTitre: 'En attente de modération',
+  alertModerationCorps:
+    "L'équipe Maintenant! examine ta pétition. Délai habituel : 24 à 48 heures.",
+  alertRejeteeTitre: 'Pétition rejetée',
+  alertRejeteeAmorce: 'Raison :',
+  alertRejeteeNonPrecisee: 'non précisée',
+  alertRejeteeFin: '. Tu peux soumettre une nouvelle version corrigée.',
+  alertArchiveeTitre: 'Pétition archivée',
+  alertArchiveeCorps: "Cette pétition n'accepte plus de signatures (archivage manuel).",
+  ctaSigner: 'Signer cette pétition',
+  sectionTexte: 'Le texte',
+  footerAmorce: 'Lancée par',
+  footerMilieu: 'le',
+};
 
 interface ParamsPetition {
   slug: string;
@@ -48,7 +69,59 @@ export async function generateMetadata({ params }: PagePetitionProps): Promise<M
 
 export default async function PagePetition({ params }: PagePetitionProps) {
   const { slug } = await params;
-  const petition = await petitionParSlug(slug);
+  const [
+    petition,
+    estAdmin,
+    retour,
+    preheaderAmorce,
+    alertModerationTitre,
+    alertModerationCorps,
+    alertRejeteeTitre,
+    alertRejeteeAmorce,
+    alertRejeteeNonPrecisee,
+    alertRejeteeFin,
+    alertArchiveeTitre,
+    alertArchiveeCorps,
+    ctaSigner,
+    sectionTexte,
+    footerAmorce,
+    footerMilieu,
+  ] = await Promise.all([
+    petitionParSlug(slug),
+    estAdminCourant(),
+    lireContenuEditorial('petitions.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('petitions.fiche.preheader_amorce', {
+      valeurMd: FALLBACKS.preheaderAmorce,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_moderation_titre', {
+      valeurMd: FALLBACKS.alertModerationTitre,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_moderation_corps', {
+      valeurMd: FALLBACKS.alertModerationCorps,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_rejetee_titre', {
+      valeurMd: FALLBACKS.alertRejeteeTitre,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_rejetee_amorce', {
+      valeurMd: FALLBACKS.alertRejeteeAmorce,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_rejetee_non_precisee', {
+      valeurMd: FALLBACKS.alertRejeteeNonPrecisee,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_rejetee_fin', {
+      valeurMd: FALLBACKS.alertRejeteeFin,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_archivee_titre', {
+      valeurMd: FALLBACKS.alertArchiveeTitre,
+    }),
+    lireContenuEditorial('petitions.fiche.alert_archivee_corps', {
+      valeurMd: FALLBACKS.alertArchiveeCorps,
+    }),
+    lireContenuEditorial('petitions.fiche.cta_signer', { valeurMd: FALLBACKS.ctaSigner }),
+    lireContenuEditorial('petitions.fiche.section_texte', { valeurMd: FALLBACKS.sectionTexte }),
+    lireContenuEditorial('petitions.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
+    lireContenuEditorial('petitions.fiche.footer_milieu', { valeurMd: FALLBACKS.footerMilieu }),
+  ]);
 
   if (petition === null) {
     notFound();
@@ -66,16 +139,35 @@ export default async function PagePetition({ params }: PagePetitionProps) {
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/mobiliser/petitions" className="hover:text-brand">
-          ← Toutes les pétitions
-        </Link>
+        <TexteEditableAdmin
+          cle="petitions.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste petitions"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Link href="/mobiliser/petitions" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-8">
         <header className="grid gap-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-              Pétition à <strong className="text-text-2">{petition.destinataire}</strong>
+              <TexteEditableAdmin
+                cle="petitions.fiche.preheader_amorce"
+                valeurInitiale={preheaderAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce preheader (defaut : Petition a)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
+              <strong className="text-text-2">{petition.destinataire}</strong>
             </p>
             <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>Admin</BoutonAdminEditer>
           </div>
@@ -83,11 +175,6 @@ export default async function PagePetition({ params }: PagePetitionProps) {
 
           {petition.image_url !== null ? (
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
-              {/*
-                On utilise <Image /> avec `unoptimized` parce que les URL
-                proviennent d'uploads externes non connus au build (cf.
-                Supabase Storage, chantier ultérieur).
-              */}
               <Image
                 src={petition.image_url}
                 alt=""
@@ -104,22 +191,94 @@ export default async function PagePetition({ params }: PagePetitionProps) {
           <Alert
             variant={petition.statut === 'rejetee' ? 'danger' : 'warning'}
             titre={
-              petition.statut === 'en_moderation'
-                ? 'En attente de modération'
-                : petition.statut === 'rejetee'
-                  ? 'Pétition rejetée'
-                  : 'Pétition archivée'
+              petition.statut === 'en_moderation' ? (
+                <TexteEditableAdmin
+                  cle="petitions.fiche.alert_moderation_titre"
+                  valeurInitiale={alertModerationTitre.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="titre alerte 'en moderation'"
+                  longueurMax={60}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              ) : petition.statut === 'rejetee' ? (
+                <TexteEditableAdmin
+                  cle="petitions.fiche.alert_rejetee_titre"
+                  valeurInitiale={alertRejeteeTitre.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="titre alerte 'rejetee'"
+                  longueurMax={60}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              ) : (
+                <TexteEditableAdmin
+                  cle="petitions.fiche.alert_archivee_titre"
+                  valeurInitiale={alertArchiveeTitre.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="titre alerte 'archivee'"
+                  longueurMax={60}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              )
             }
           >
             {petition.statut === 'en_moderation' ? (
-              <>L'équipe Maintenant! examine ta pétition. Délai habituel : 24 à 48 heures.</>
+              <TexteEditableAdmin
+                cle="petitions.fiche.alert_moderation_corps"
+                valeurInitiale={alertModerationCorps.valeurMd}
+                estAdmin={estAdmin}
+                libelle="corps alerte 'en moderation'"
+                multilignes
+                longueurMax={300}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
             ) : petition.statut === 'rejetee' ? (
               <>
-                Raison : {petition.raison_rejet ?? 'non précisée'}. Tu peux soumettre une nouvelle
-                version corrigée.
+                <TexteEditableAdmin
+                  cle="petitions.fiche.alert_rejetee_amorce"
+                  valeurInitiale={alertRejeteeAmorce.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="amorce alerte rejetee (Raison :)"
+                  longueurMax={30}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>{' '}
+                {petition.raison_rejet ?? (
+                  <TexteEditableAdmin
+                    cle="petitions.fiche.alert_rejetee_non_precisee"
+                    valeurInitiale={alertRejeteeNonPrecisee.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="fallback si pas de raison"
+                    longueurMax={30}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                )}
+                <TexteEditableAdmin
+                  cle="petitions.fiche.alert_rejetee_fin"
+                  valeurInitiale={alertRejeteeFin.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="fin alerte rejetee"
+                  multilignes
+                  longueurMax={200}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
               </>
             ) : (
-              <>Cette pétition n'accepte plus de signatures (archivage manuel).</>
+              <TexteEditableAdmin
+                cle="petitions.fiche.alert_archivee_corps"
+                valeurInitiale={alertArchiveeCorps.valeurMd}
+                estAdmin={estAdmin}
+                libelle="corps alerte 'archivee'"
+                multilignes
+                longueurMax={300}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
             )}
           </Alert>
         ) : null}
@@ -138,23 +297,43 @@ export default async function PagePetition({ params }: PagePetitionProps) {
               createuricePrenom={createuricePrenomAffiche}
               signerPetition={signerPetition}
               declencheur={
-                <span
-                  className={cn(
-                    'inline-flex h-12 items-center justify-center rounded-md bg-grad px-6',
-                    'font-body text-base font-bold text-white shadow-brand transition hover:brightness-110',
-                  )}
+                <TexteEditableAdmin
+                  cle="petitions.fiche.cta_signer"
+                  valeurInitiale={ctaSigner.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="CTA Signer (declenche la modale)"
+                  longueurMax={60}
                 >
-                  Signer cette pétition
-                </span>
+                  {(t) => (
+                    <span
+                      className={cn(
+                        'inline-flex h-12 items-center justify-center rounded-md bg-grad px-6',
+                        'font-body text-base font-bold text-white shadow-brand transition hover:brightness-110',
+                      )}
+                    >
+                      {t}
+                    </span>
+                  )}
+                </TexteEditableAdmin>
               }
             />
           ) : null}
         </Card>
 
         <section className="grid gap-4">
-          <Heading niveau={2} apparenceComme={3}>
-            Le texte
-          </Heading>
+          <TexteEditableAdmin
+            cle="petitions.fiche.section_texte"
+            valeurInitiale={sectionTexte.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section texte de la petition"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {petition.texte}
           </div>
@@ -163,13 +342,29 @@ export default async function PagePetition({ params }: PagePetitionProps) {
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {petition.createurice_prenom !== null || petition.createurice_nom !== null ? (
             <p>
-              Lancée par{' '}
+              <TexteEditableAdmin
+                cle="petitions.fiche.footer_amorce"
+                valeurInitiale={footerAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce footer (Lancee par)"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <strong className="text-text-2">
                 {[petition.createurice_prenom, petition.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
               </strong>{' '}
-              le{' '}
+              <TexteEditableAdmin
+                cle="petitions.fiche.footer_milieu"
+                valeurInitiale={footerMilieu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="conjonction footer (le)"
+                longueurMax={10}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
               <time dateTime={petition.created_at}>
                 {new Date(petition.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
