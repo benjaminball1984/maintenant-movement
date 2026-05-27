@@ -64,6 +64,160 @@ export type Database = {
           },
         ];
       };
+      salle_decider: {
+        Row: {
+          id: string;
+          slug: string;
+          nom: string;
+          description: string | null;
+          espace_type: string;
+          espace_id: string | null;
+          type_visibilite: string;
+          livekit_room_name: string | null;
+          metadata: Json;
+          createurice_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          nom: string;
+          description?: string | null;
+          espace_type: string;
+          espace_id?: string | null;
+          type_visibilite?: string;
+          livekit_room_name?: string | null;
+          metadata?: Json;
+          createurice_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          nom?: string;
+          description?: string | null;
+          espace_type?: string;
+          espace_id?: string | null;
+          type_visibilite?: string;
+          livekit_room_name?: string | null;
+          metadata?: Json;
+          createurice_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      reunion_decider: {
+        Row: {
+          id: string;
+          salle_id: string;
+          titre: string;
+          ordre_jour_md: string;
+          debut_le: string;
+          fin_le: string | null;
+          mode_decision: string;
+          statut: string;
+          enregistree: boolean;
+          pv_md: string | null;
+          convoque_par_personne_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          salle_id: string;
+          titre: string;
+          ordre_jour_md?: string;
+          debut_le: string;
+          fin_le?: string | null;
+          mode_decision?: string;
+          statut?: string;
+          enregistree?: boolean;
+          pv_md?: string | null;
+          convoque_par_personne_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          salle_id?: string;
+          titre?: string;
+          ordre_jour_md?: string;
+          debut_le?: string;
+          fin_le?: string | null;
+          mode_decision?: string;
+          statut?: string;
+          enregistree?: boolean;
+          pv_md?: string | null;
+          convoque_par_personne_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reunion_decider_salle_id_fkey';
+            columns: ['salle_id'];
+            isOneToOne: false;
+            referencedRelation: 'salle_decider';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      vote_decider: {
+        Row: {
+          id: string;
+          reunion_id: string;
+          question: string;
+          mode: string;
+          options: string[];
+          statut: string;
+          resultat: string | null;
+          recapitulatif_md: string | null;
+          ouvert_le: string;
+          clos_le: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reunion_id: string;
+          question: string;
+          mode: string;
+          options?: string[];
+          statut?: string;
+          resultat?: string | null;
+          recapitulatif_md?: string | null;
+          ouvert_le?: string;
+          clos_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          reunion_id?: string;
+          question?: string;
+          mode?: string;
+          options?: string[];
+          statut?: string;
+          resultat?: string | null;
+          recapitulatif_md?: string | null;
+          ouvert_le?: string;
+          clos_le?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'vote_decider_reunion_id_fkey';
+            columns: ['reunion_id'];
+            isOneToOne: false;
+            referencedRelation: 'reunion_decider';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       contenu_editorial: {
         Row: {
           cle: string;
