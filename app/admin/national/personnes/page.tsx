@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Avatar, Badge, Card, Heading, Pagination } from '@/components/ui';
 import { type OptionsListePersonnes, listerPersonnesAdminPagine } from '@/lib/admin/personnes';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { lirePageDepuisParams, paginer } from '@/lib/pagination';
 import { compter } from '@/lib/pluriel';
 import { CheckCircle, Mail, ShieldOff, UserX, Users } from 'lucide-react';
@@ -69,22 +72,59 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
           debutIdx: pagination.debutIdx,
         });
   const personnes = resultat.lignes;
+  const [estAdmin, titre, intro, exportCta] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.personnes.titre', { valeurMd: 'Personnes' }),
+    lireContenuEditorial('admin.national.personnes.intro', {
+      valeurMd: 'Lecture seule. Recherche par email / prénom / nom. Limite 100 résultats par page.',
+    }),
+    lireContenuEditorial('admin.national.personnes.export_cta', {
+      valeurMd: 'Export CSV (5000 max) ↓',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Users size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Personnes
+        <TexteEditableAdmin
+          cle="admin.national.personnes.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console personnes"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Lecture seule. Recherche par email / prénom / nom. Limite 100 résultats par page.{' '}
-        <a
-          href="/admin/national/personnes/export.csv"
-          className="text-brand hover:underline"
-          download
+        <TexteEditableAdmin
+          cle="admin.national.personnes.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console personnes"
+          multilignes
+          longueurMax={300}
         >
-          Export CSV (5000 max) ↓
-        </a>
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
+        <TexteEditableAdmin
+          cle="admin.national.personnes.export_cta"
+          valeurInitiale={exportCta.valeurMd}
+          estAdmin={estAdmin}
+          libelle="CTA Export CSV"
+          longueurMax={50}
+        >
+          {(t) => (
+            <a
+              href="/admin/national/personnes/export.csv"
+              className="text-brand hover:underline"
+              download
+            >
+              {t}
+            </a>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <form

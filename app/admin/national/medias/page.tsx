@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeMedias, listerMediasAdmin } from '@/lib/admin/medias';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateCourte } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
 import { ExternalLink, Newspaper } from 'lucide-react';
@@ -57,14 +60,40 @@ export default async function PageAdminMedias({ searchParams }: Props) {
     type: typeFiltre === '' ? undefined : typeFiltre,
   });
 
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.medias.titre', { valeurMd: 'Médias' }),
+    lireContenuEditorial('admin.national.medias.intro', {
+      valeurMd:
+        'Articles, brèves, podcasts, vidéos. Filtres : mot-clé, statut, type. Lecture seule.',
+    }),
+  ]);
+
   return (
     <>
       <Heading niveau={1}>
         <Newspaper size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Médias
+        <TexteEditableAdmin
+          cle="admin.national.medias.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console medias"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Articles, brèves, podcasts, vidéos. Filtres : mot-clé, statut, type. Lecture seule.{' '}
+        <TexteEditableAdmin
+          cle="admin.national.medias.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console medias"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a href="/admin/national/medias/export.csv" className="text-brand hover:underline" download>
           Export CSV ↓
         </a>

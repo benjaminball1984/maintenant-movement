@@ -1,9 +1,12 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading, Pagination } from '@/components/ui';
 import {
   type OptionsListeCommunes,
   compterCommunes,
   listerCommunesAdminPagine,
 } from '@/lib/admin/communes';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { lirePageDepuisParams, paginer } from '@/lib/pagination';
 import { compter } from '@/lib/pluriel';
 import { ExternalLink, MapPin } from 'lucide-react';
@@ -71,16 +74,40 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
           debutIdx: pagination.debutIdx,
         });
   const communes = resultat.lignes;
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.communes.titre', { valeurMd: 'Communes' }),
+    lireContenuEditorial('admin.national.communes.intro', {
+      valeurMd:
+        'Référentiel des communes. Filtres : mot-clé, statut (libres vs coquilles pré-créées), département.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <MapPin size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Communes
+        <TexteEditableAdmin
+          cle="admin.national.communes.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console communes"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Référentiel des communes. Filtres : mot-clé, statut (libres vs coquilles pré-créées),
-        département.{' '}
+        <TexteEditableAdmin
+          cle="admin.national.communes.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console communes"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a
           href="/admin/national/communes/export.csv"
           className="text-brand hover:underline"

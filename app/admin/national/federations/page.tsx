@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeFederations, listerFederationsAdmin } from '@/lib/admin/federations';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { ExternalLink, Network } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -39,16 +42,40 @@ export default async function PageAdminFederations({ searchParams }: Props) {
     motCle: motCle === '' ? undefined : motCle,
     type: typeFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.federations.titre', { valeurMd: 'Fédérations' }),
+    lireContenuEditorial('admin.national.federations.intro', {
+      valeurMd:
+        'Référentiel des fédérations (regroupements de communes ou groupes thématiques). Filtres : mot-clé, type. Lecture seule, limite 100 lignes.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Network size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Fédérations
+        <TexteEditableAdmin
+          cle="admin.national.federations.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console federations"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Référentiel des fédérations (regroupements de communes ou groupes thématiques). Filtres :
-        mot-clé, type. Lecture seule, limite 100 lignes.{' '}
+        <TexteEditableAdmin
+          cle="admin.national.federations.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console federations"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a
           href="/admin/national/federations/export.csv"
           className="text-brand hover:underline"
