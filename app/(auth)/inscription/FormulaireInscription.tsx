@@ -13,19 +13,58 @@ import { inscrire } from '../actions';
 
 /**
  * Libelles surchargeables admin via CMS, passes en props par le Server
- * Component parent (/inscription/page.tsx en V2.4.135). Si un parent ne
- * fournit pas `libelles`, on retombe sur les defauts hardcodes.
+ * Component parent (/inscription/page.tsx). Si un parent ne fournit pas
+ * `libelles`, on retombe sur les defauts hardcodes.
+ *
+ * V2.4.135 : CTAs du bouton de submit (3 etats).
+ * V2.4.136 : labels et hints de tous les champs.
  */
 export interface LibellesInscription {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaChargement: string;
+  labelPrenom: string;
+  labelNom: string;
+  labelPronom: string;
+  hintPronom: string;
+  placeholderPronom: string;
+  labelEmail: string;
+  labelCodePostal: string;
+  labelTelephone: string;
+  placeholderTelephone: string;
+  labelDateNaissance: string;
+  hintDateNaissance: string;
+  labelMotDePasse: string;
+  hintMotDePasse: string;
+  labelCgu: string;
+  alertErreurTitre: string;
+  alertDejaInscritTitre: string;
+  lienAllerConnexion: string;
+  lienResetMdp: string;
 }
 
 const LIBELLES_DEFAUT: LibellesInscription = {
   ctaSubmit: 'Créer mon compte',
   ctaEnCours: 'Envoi en cours...',
   ctaChargement: 'Chargement…',
+  labelPrenom: 'Prénom',
+  labelNom: 'Nom',
+  labelPronom: 'Pronom',
+  hintPronom: 'Demandé pour te genrer correctement dans la newsletter et les communications.',
+  placeholderPronom: 'ex : elle, il, iel, elle/il...',
+  labelEmail: 'Adresse email',
+  labelCodePostal: 'Code postal',
+  labelTelephone: 'Téléphone (optionnel)',
+  placeholderTelephone: '06 12 34 56 78',
+  labelDateNaissance: 'Date de naissance',
+  hintDateNaissance: '15 ans révolus minimum (recommandation CNIL).',
+  labelMotDePasse: 'Mot de passe',
+  hintMotDePasse: '12 caractères minimum, au moins 1 minuscule, 1 majuscule et 1 chiffre.',
+  labelCgu: 'J’accepte la politique de confidentialité de Maintenant!.',
+  alertErreurTitre: 'Erreur',
+  alertDejaInscritTitre: 'Email déjà inscrit',
+  lienAllerConnexion: 'Aller à la connexion',
+  lienResetMdp: 'Réinitialiser mon mot de passe',
 };
 
 /**
@@ -97,19 +136,19 @@ export function FormulaireInscription({
       {erreurServeur !== null ? (
         <Alert
           variant={dejaInscrit ? 'info' : 'danger'}
-          titre={dejaInscrit ? 'Email déjà inscrit' : 'Erreur'}
+          titre={dejaInscrit ? libelles.alertDejaInscritTitre : libelles.alertErreurTitre}
         >
           <p>{erreurServeur}</p>
           {dejaInscrit ? (
             <p className="mt-2 flex flex-wrap gap-3 text-sm">
               <Link href="/connexion" className="text-brand underline-offset-4 hover:underline">
-                Aller à la connexion
+                {libelles.lienAllerConnexion}
               </Link>
               <Link
                 href="/mot-de-passe-oublie"
                 className="text-brand underline-offset-4 hover:underline"
               >
-                Réinitialiser mon mot de passe
+                {libelles.lienResetMdp}
               </Link>
             </p>
           ) : null}
@@ -119,7 +158,7 @@ export function FormulaireInscription({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="ins-prenom" obligatoire>
-            Prénom
+            {libelles.labelPrenom}
           </Label>
           <Input
             id="ins-prenom"
@@ -133,7 +172,7 @@ export function FormulaireInscription({
         </div>
         <div>
           <Label htmlFor="ins-nom" obligatoire>
-            Nom
+            {libelles.labelNom}
           </Label>
           <Input
             id="ins-nom"
@@ -149,17 +188,17 @@ export function FormulaireInscription({
 
       <div>
         <Label htmlFor="ins-pronom" obligatoire>
-          Pronom
+          {libelles.labelPronom}
         </Label>
         <Input
           id="ins-pronom"
-          placeholder="ex : elle, il, iel, elle/il..."
+          placeholder={libelles.placeholderPronom}
           aria-invalid={errors.pronom !== undefined}
           aria-describedby="ins-pronom-aide"
           {...register('pronom')}
         />
         <p id="ins-pronom-aide" className="mt-1 text-xs text-text-3">
-          Demandé pour te genrer correctement dans la newsletter et les communications.
+          {libelles.hintPronom}
         </p>
         {errors.pronom !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.pronom.message}</p>
@@ -168,7 +207,7 @@ export function FormulaireInscription({
 
       <div>
         <Label htmlFor="ins-email" obligatoire>
-          Adresse email
+          {libelles.labelEmail}
         </Label>
         <Input
           id="ins-email"
@@ -185,7 +224,7 @@ export function FormulaireInscription({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="ins-code-postal" obligatoire>
-            Code postal
+            {libelles.labelCodePostal}
           </Label>
           <Input
             id="ins-code-postal"
@@ -200,12 +239,12 @@ export function FormulaireInscription({
           ) : null}
         </div>
         <div>
-          <Label htmlFor="ins-telephone">Téléphone (optionnel)</Label>
+          <Label htmlFor="ins-telephone">{libelles.labelTelephone}</Label>
           <Input
             id="ins-telephone"
             type="tel"
             autoComplete="tel"
-            placeholder="06 12 34 56 78"
+            placeholder={libelles.placeholderTelephone}
             aria-invalid={errors.telephone !== undefined}
             {...register('telephone')}
           />
@@ -217,7 +256,7 @@ export function FormulaireInscription({
 
       <div>
         <Label htmlFor="ins-date-naissance" obligatoire>
-          Date de naissance
+          {libelles.labelDateNaissance}
         </Label>
         <Input
           id="ins-date-naissance"
@@ -227,7 +266,7 @@ export function FormulaireInscription({
           {...register('date_naissance')}
         />
         <p id="ins-date-aide" className="mt-1 text-xs text-text-3">
-          15 ans révolus minimum (recommandation CNIL).
+          {libelles.hintDateNaissance}
         </p>
         {errors.date_naissance !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.date_naissance.message}</p>
@@ -236,7 +275,7 @@ export function FormulaireInscription({
 
       <div>
         <Label htmlFor="ins-mdp" obligatoire>
-          Mot de passe
+          {libelles.labelMotDePasse}
         </Label>
         <ChampMotDePasse
           id="ins-mdp"
@@ -246,7 +285,7 @@ export function FormulaireInscription({
           {...register('mot_de_passe')}
         />
         <p id="ins-mdp-aide" className="mt-1 text-xs text-text-3">
-          12 caractères minimum, au moins 1 minuscule, 1 majuscule et 1 chiffre.
+          {libelles.hintMotDePasse}
         </p>
         {errors.mot_de_passe !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.mot_de_passe.message}</p>
@@ -262,7 +301,7 @@ export function FormulaireInscription({
           {...register('cgu_acceptees')}
         />
         <Label htmlFor="ins-cgu" className="m-0 text-sm font-normal text-text-2" obligatoire>
-          J'accepte la politique de confidentialité de Maintenant!.
+          {libelles.labelCgu}
         </Label>
       </div>
       {errors.cgu_acceptees !== undefined ? (

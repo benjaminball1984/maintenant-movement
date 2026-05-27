@@ -24,18 +24,61 @@ const FALLBACKS = {
  * Client Component (`FormulaireInscription`) parce qu'il a besoin de
  * `react-hook-form` (state + onSubmit).
  */
+// Helper local pour reduire la verbosite (V2.4.136).
+async function lireLibellesFormulaire() {
+  const cles = [
+    ['labelPrenom', 'Prénom'],
+    ['labelNom', 'Nom'],
+    ['labelPronom', 'Pronom'],
+    ['hintPronom', 'Demandé pour te genrer correctement dans la newsletter et les communications.'],
+    ['placeholderPronom', 'ex : elle, il, iel, elle/il...'],
+    ['labelEmail', 'Adresse email'],
+    ['labelCodePostal', 'Code postal'],
+    ['labelTelephone', 'Téléphone (optionnel)'],
+    ['placeholderTelephone', '06 12 34 56 78'],
+    ['labelDateNaissance', 'Date de naissance'],
+    ['hintDateNaissance', '15 ans révolus minimum (recommandation CNIL).'],
+    ['labelMotDePasse', 'Mot de passe'],
+    ['hintMotDePasse', '12 caractères minimum, au moins 1 minuscule, 1 majuscule et 1 chiffre.'],
+    ['labelCgu', 'J’accepte la politique de confidentialité de Maintenant!.'],
+    ['alertErreurTitre', 'Erreur'],
+    ['alertDejaInscritTitre', 'Email déjà inscrit'],
+    ['lienAllerConnexion', 'Aller à la connexion'],
+    ['lienResetMdp', 'Réinitialiser mon mot de passe'],
+  ] as const;
+  const lectures = await Promise.all(
+    cles.map(([nom, defaut]) =>
+      lireContenuEditorial(`inscription.formulaire.${nom}`, { valeurMd: defaut }),
+    ),
+  );
+  return Object.fromEntries(cles.map(([nom], i) => [nom, lectures[i]?.valeurMd ?? ''])) as Record<
+    (typeof cles)[number][0],
+    string
+  >;
+}
+
 export default async function PageInscription() {
-  const [estAdmin, titre, intro, bottomAmorce, bottomLien, ctaSubmit, ctaEnCours, ctaChargement] =
-    await Promise.all([
-      estAdminCourant(),
-      lireContenuEditorial('inscription.titre', { valeurMd: FALLBACKS.titre }),
-      lireContenuEditorial('inscription.intro', { valeurMd: FALLBACKS.intro }),
-      lireContenuEditorial('inscription.bottom.amorce', { valeurMd: FALLBACKS.bottomAmorce }),
-      lireContenuEditorial('inscription.bottom.lien', { valeurMd: FALLBACKS.bottomLien }),
-      lireContenuEditorial('inscription.cta_submit', { valeurMd: 'Créer mon compte' }),
-      lireContenuEditorial('inscription.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
-      lireContenuEditorial('inscription.cta_chargement', { valeurMd: 'Chargement…' }),
-    ]);
+  const [
+    estAdmin,
+    titre,
+    intro,
+    bottomAmorce,
+    bottomLien,
+    ctaSubmit,
+    ctaEnCours,
+    ctaChargement,
+    libellesFormulaire,
+  ] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('inscription.titre', { valeurMd: FALLBACKS.titre }),
+    lireContenuEditorial('inscription.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('inscription.bottom.amorce', { valeurMd: FALLBACKS.bottomAmorce }),
+    lireContenuEditorial('inscription.bottom.lien', { valeurMd: FALLBACKS.bottomLien }),
+    lireContenuEditorial('inscription.cta_submit', { valeurMd: 'Créer mon compte' }),
+    lireContenuEditorial('inscription.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
+    lireContenuEditorial('inscription.cta_chargement', { valeurMd: 'Chargement…' }),
+    lireLibellesFormulaire(),
+  ]);
 
   return (
     <article className="grid gap-6">
@@ -66,6 +109,7 @@ export default async function PageInscription() {
           ctaSubmit: ctaSubmit.valeurMd,
           ctaEnCours: ctaEnCours.valeurMd,
           ctaChargement: ctaChargement.valeurMd,
+          ...libellesFormulaire,
         }}
       />
 
