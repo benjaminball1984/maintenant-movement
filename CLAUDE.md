@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 Avatar UI + ago-compact + log-erreur)
-**Dernier chantier terminé** : V2.4.82 (`lib/log-erreur.ts` + 14 tests) — sur `main` (tip `0b7dcf8`). 828 tests verts. Logger centralisé, format structuré, échec silencieux pour ne pas casser l'appelant.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 durée + force-password + Skeleton UI)
+**Dernier chantier terminé** : V2.4.85 (composant `Skeleton` UI) — sur `main` (tip `f7e672a`). 3 variantes (`Skeleton`, `SkeletonText`, `SkeletonCarte`), animate-pulse, aria-busy.
+**Dernier chantier terminé (antérieur)** : V2.4.84 (`lib/force-password.ts` + 13 tests) — sur `main` (tip `1e0b095`). 6 critères → score 0-6, 5 niveaux, suggestions FR. UX uniquement (sécurité = double opt-in).
+**Dernier chantier terminé (antérieur)** : V2.4.83 (`lib/duree.ts` + 15 tests) — sur `main` (tip `226ffed`). `formaterDureeCompacte` 2 unités max, `formaterDureeLongue` pluralisée.
+**Dernier chantier terminé (antérieur)** : V2.4.82 (`lib/log-erreur.ts` + 14 tests) — sur `main` (tip `0b7dcf8`). 828 tests verts. Logger centralisé, format structuré, échec silencieux pour ne pas casser l'appelant.
 **Dernier chantier terminé (antérieur)** : V2.4.81 (`lib/ago-compact.ts` + 7 tests) — sur `main` (tip `9688c2f`). Variante compacte de `formaterRelativePassee` : « 5min », « 3h », « 2j », « 4mo », « 1a ».
 **Dernier chantier terminé (antérieur)** : V2.4.80 (composant `Avatar` UI + branchement admin personnes) — sur `main` (tip `2534b44`). 3 tailles (32/48/64px), photo ou initiales+couleur HSL déterministe, exporté depuis `components/ui`.
 **Dernier chantier terminé (antérieur)** : V2.4.79 (`lib/sha256.ts` Web Crypto + 10 tests) — sur `main` (tip `cf310a6`). 807 tests verts. SHA-256 natif Node 16+/Edge, vecteurs officiels.
