@@ -1,8 +1,10 @@
+import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -63,6 +65,20 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
   const estPubliee = campagne.statut === 'publiee';
   const session = await getSession();
 
+  // V2.3.34 : appartenance courante (pour le bouton Rejoindre/Quitter).
+  let estMembre = false;
+  if (session !== null && estPubliee) {
+    const supabase = await getSupabaseServer();
+    const { data: appartenance } = await supabase
+      .from('appartenance_campagne')
+      .select('id')
+      .eq('personne_id', session.userId)
+      .eq('campagne_id', campagne.id)
+      .eq('est_active', true)
+      .maybeSingle();
+    estMembre = appartenance !== null;
+  }
+
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
@@ -87,6 +103,10 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
                 className="object-cover"
               />
             </div>
+          ) : null}
+
+          {session !== null && estPubliee ? (
+            <BoutonAppartenanceCampagne campagneId={campagne.id} estMembreInitial={estMembre} />
           ) : null}
         </header>
 
