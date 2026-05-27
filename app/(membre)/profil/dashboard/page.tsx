@@ -281,6 +281,16 @@ export default async function PageDashboard() {
             titre="Réseau social"
             description="Flux, messages, profil public."
           />
+          <RaccourciCard
+            href="/profil/decider"
+            titre="Mes réunions Décider"
+            description="Prochaines réunions et dernières décisions visibles."
+          />
+          <RaccourciCard
+            href="/profil/mes-creations"
+            titre="Mes créations"
+            description="Tout ce que tu as créé : pétitions, cagnottes, articles…"
+          />
         </div>
       </section>
     </article>
