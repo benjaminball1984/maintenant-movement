@@ -78,6 +78,36 @@ export function formaterPlage(dateDebutIso: string, dateFinIso: string | null): 
 }
 
 /**
+ * « il y a 3 jours », « il y a 2 heures », « à l'instant ». Dual de
+ * `formaterRelativeAVenir`, pour les contenus historiques (V2.4.32).
+ *
+ * Renvoie « à venir » si la date est dans le futur (sécurité).
+ */
+export function formaterRelativePassee(dateIso: string, maintenant = new Date()): string {
+  const date = new Date(dateIso);
+  const diffMs = maintenant.getTime() - date.getTime();
+
+  if (diffMs < 0) return 'à venir';
+  if (diffMs < 60 * 1000) return 'à l’instant';
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  if (diffMinutes < 60) return `il y a ${diffMinutes} min`;
+
+  const diffHeures = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHeures < 24) return `il y a ${diffHeures} h`;
+
+  const diffJours = Math.floor(diffHeures / 24);
+  if (diffJours === 1) return 'hier';
+  if (diffJours < 30) return `il y a ${diffJours} jours`;
+
+  const diffMois = Math.floor(diffJours / 30);
+  if (diffMois < 12) return `il y a ${diffMois} mois`;
+
+  const diffAns = Math.floor(diffMois / 12);
+  return `il y a ${diffAns} an${diffAns > 1 ? 's' : ''}`;
+}
+
+/**
  * « Dans 3 jours », « Dans 2 heures », « Passée ». Utile pour les listes.
  */
 export function formaterRelativeAVenir(dateDebutIso: string, maintenant = new Date()): string {

@@ -1,6 +1,7 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { chargerDashboardMembre } from '@/lib/dashboard-membre';
+import { formaterRelativePassee } from '@/lib/mobilisations/dates';
 import {
   Bell,
   CalendarCheck,
@@ -194,8 +195,11 @@ export default async function PageDashboard() {
                   <Card variant="plat" className="grid gap-1">
                     <div className="flex items-center justify-between gap-2">
                       <Badge variant="default">{LIBELLE_ACTIVITE[a.type]}</Badge>
-                      <span className="text-text-3 text-xs">
-                        {FORMATEUR_DATE.format(new Date(a.date))}
+                      <span
+                        className="text-text-3 text-xs"
+                        title={FORMATEUR_DATE.format(new Date(a.date))}
+                      >
+                        {formaterRelativePassee(a.date)}
                       </span>
                     </div>
                     <p className="font-medium text-sm text-text-1">{a.titre}</p>
