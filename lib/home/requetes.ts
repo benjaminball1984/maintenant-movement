@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 export interface CompteursHome {
   newsletter: number;
@@ -17,18 +17,20 @@ export interface CompteursHome {
  *   d'opt-in pour être contacté·e par la plateforme. C'est la base de
  *   l'envoi de la newsletter (V1 et import Base44 inclus).
  *
- * Note : `accepte_contact_createurice` (autre opt-in, pour que la
- * créatrice de la pétition puisse exporter un CSV de ses signataires
- * qui l'autorisent) n'est pas exposé ici car ce n'est pas un indicateur
- * public — il sert à l'export CSV côté admin pétition.
+ * Important : on utilise le client admin (service_role) car les compteurs
+ * sont affichés à TOUS LES VISITEURS, y compris anonymes. La RLS de
+ * `personne` bloque les lectures anonymes (PII). En passant par
+ * service_role, on contourne la RLS mais on n'expose qu'un COUNT
+ * agrégé (aucune ligne individuelle), ce qui est acceptable RGPD :
+ * les chiffres globaux d'un mouvement politique sont publics par
+ * nature.
  *
- * Tolérance d'erreur : si Supabase est inaccessible (clés manquantes
- * en dev par exemple), on retourne 0 partout plutôt que de crasher la
- * home, parce que la home doit rester accessible.
+ * Tolérance d'erreur : si Supabase est inaccessible, on retourne 0
+ * partout plutôt que de crasher la home.
  */
 export async function getCompteursHome(): Promise<CompteursHome> {
   try {
-    const supabase = await getSupabaseServer();
+    const supabase = getSupabaseAdmin();
     const [membresRes, signataresRes, newsletterRes] = await Promise.all([
       supabase.from('personne').select('id', { count: 'exact', head: true }).eq('statut', 'actif'),
       supabase.from('signature_petition').select('id', { count: 'exact', head: true }),
@@ -44,8 +46,6 @@ export async function getCompteursHome(): Promise<CompteursHome> {
       signataires: signataresRes.count ?? 0,
     };
   } catch (_erreur) {
-    // En dev sans Supabase ou si la table n'a pas encore été migrée,
-    // on dégrade proprement plutôt que de casser la home.
     return { newsletter: 0, membres: 0, signataires: 0 };
   }
 }
