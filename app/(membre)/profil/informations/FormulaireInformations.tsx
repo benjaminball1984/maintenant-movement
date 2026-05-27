@@ -7,15 +7,66 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { mettreAJourProfil } from '../actions';
 
+/** Libelles surchargeables admin via CMS (V2.4.138). */
+export interface LibellesInformations {
+  alertErreurTitre: string;
+  alertSuccesTitre: string;
+  alertSuccesMessage: string;
+  sectionIdentite: string;
+  labelPrenom: string;
+  labelNom: string;
+  labelPronom: string;
+  sectionCoordonnees: string;
+  labelCodePostal: string;
+  labelTelephone: string;
+  sectionPresentation: string;
+  labelPhoto: string;
+  labelBio: string;
+  sectionPreference: string;
+  labelTheme: string;
+  themeAuto: string;
+  themeClair: string;
+  themeSombre: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesInformations = {
+  alertErreurTitre: 'Sauvegarde impossible',
+  alertSuccesTitre: 'Modifications enregistrées',
+  alertSuccesMessage: 'Tes informations sont à jour.',
+  sectionIdentite: 'Identité',
+  labelPrenom: 'Prénom',
+  labelNom: 'Nom',
+  labelPronom: 'Pronom',
+  sectionCoordonnees: 'Coordonnées',
+  labelCodePostal: 'Code postal',
+  labelTelephone: 'Téléphone (optionnel)',
+  sectionPresentation: 'Présentation publique',
+  labelPhoto: 'Photo de profil (URL)',
+  labelBio: 'Bio courte (500 caractères max)',
+  sectionPreference: 'Préférence d’interface',
+  labelTheme: 'Thème par défaut',
+  themeAuto: 'Automatique (suit le système)',
+  themeClair: 'Clair',
+  themeSombre: 'Sombre',
+  ctaSubmit: 'Enregistrer les modifications',
+  ctaEnCours: 'Envoi en cours...',
+};
+
 interface FormulaireInformationsProps {
   valeursInitiales: DonneesMiseAJourProfil;
+  libelles?: LibellesInformations;
 }
 
 /**
  * Formulaire d'édition des informations de profil.
  * Pré-rempli avec les valeurs serveur.
  */
-export function FormulaireInformations({ valeursInitiales }: FormulaireInformationsProps) {
+export function FormulaireInformations({
+  valeursInitiales,
+  libelles = LIBELLES_DEFAUT,
+}: FormulaireInformationsProps) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -51,24 +102,24 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
       aria-label="Modifier mes informations"
     >
       {erreur !== null ? (
-        <Alert variant="danger" titre="Sauvegarde impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
       {succes ? (
-        <Alert variant="success" titre="Modifications enregistrées">
-          Tes informations sont à jour.
+        <Alert variant="success" titre={libelles.alertSuccesTitre}>
+          {libelles.alertSuccesMessage}
         </Alert>
       ) : null}
 
       <section>
         <Heading niveau={3} className="mb-3 text-lg">
-          Identité
+          {libelles.sectionIdentite}
         </Heading>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="inf-prenom" obligatoire>
-              Prénom
+              {libelles.labelPrenom}
             </Label>
             <Input id="inf-prenom" {...register('prenom')} />
             {errors.prenom !== undefined ? (
@@ -77,7 +128,7 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
           </div>
           <div>
             <Label htmlFor="inf-nom" obligatoire>
-              Nom
+              {libelles.labelNom}
             </Label>
             <Input id="inf-nom" {...register('nom')} />
             {errors.nom !== undefined ? (
@@ -87,7 +138,7 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
         </div>
         <div className="mt-4">
           <Label htmlFor="inf-pronom" obligatoire>
-            Pronom
+            {libelles.labelPronom}
           </Label>
           <Input id="inf-pronom" {...register('pronom')} />
           {errors.pronom !== undefined ? (
@@ -98,12 +149,12 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
 
       <section>
         <Heading niveau={3} className="mb-3 text-lg">
-          Coordonnées
+          {libelles.sectionCoordonnees}
         </Heading>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="inf-code-postal" obligatoire>
-              Code postal
+              {libelles.labelCodePostal}
             </Label>
             <Input
               id="inf-code-postal"
@@ -116,7 +167,7 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
             ) : null}
           </div>
           <div>
-            <Label htmlFor="inf-telephone">Téléphone (optionnel)</Label>
+            <Label htmlFor="inf-telephone">{libelles.labelTelephone}</Label>
             <Input id="inf-telephone" type="tel" {...register('telephone')} />
             {errors.telephone !== undefined ? (
               <p className="mt-1 text-xs text-danger">{errors.telephone.message}</p>
@@ -127,17 +178,17 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
 
       <section>
         <Heading niveau={3} className="mb-3 text-lg">
-          Présentation publique
+          {libelles.sectionPresentation}
         </Heading>
         <div>
-          <Label htmlFor="inf-photo">Photo de profil (URL)</Label>
+          <Label htmlFor="inf-photo">{libelles.labelPhoto}</Label>
           <Input id="inf-photo" type="url" {...register('photo_url')} />
           {errors.photo_url !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.photo_url.message}</p>
           ) : null}
         </div>
         <div className="mt-4">
-          <Label htmlFor="inf-bio">Bio courte (500 caractères max)</Label>
+          <Label htmlFor="inf-bio">{libelles.labelBio}</Label>
           <Textarea id="inf-bio" rows={4} {...register('bio')} />
           {errors.bio !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.bio.message}</p>
@@ -147,24 +198,24 @@ export function FormulaireInformations({ valeursInitiales }: FormulaireInformati
 
       <section>
         <Heading niveau={3} className="mb-3 text-lg">
-          Préférence d’interface
+          {libelles.sectionPreference}
         </Heading>
         <div>
-          <Label htmlFor="inf-theme">Thème par défaut</Label>
+          <Label htmlFor="inf-theme">{libelles.labelTheme}</Label>
           <select
             id="inf-theme"
             className="block w-full rounded-md border border-border bg-surface px-4 py-2.5 font-body text-base text-text-1"
             {...register('mode_theme')}
           >
-            <option value="auto">Automatique (suit le système)</option>
-            <option value="light">Clair</option>
-            <option value="dark">Sombre</option>
+            <option value="auto">{libelles.themeAuto}</option>
+            <option value="light">{libelles.themeClair}</option>
+            <option value="dark">{libelles.themeSombre}</option>
           </select>
         </div>
       </section>
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Envoi en cours...' : 'Enregistrer les modifications'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

@@ -6,7 +6,40 @@ import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getNumeroUnifie } from '@/lib/profil/unifie';
 import type { DonneesMiseAJourProfil } from '@/lib/validations/profil';
 import type { Metadata } from 'next';
-import { FormulaireInformations } from './FormulaireInformations';
+import { FormulaireInformations, type LibellesInformations } from './FormulaireInformations';
+
+async function lireLibellesFormulaire(): Promise<LibellesInformations> {
+  const cles = [
+    ['alertErreurTitre', 'Sauvegarde impossible'],
+    ['alertSuccesTitre', 'Modifications enregistrées'],
+    ['alertSuccesMessage', 'Tes informations sont à jour.'],
+    ['sectionIdentite', 'Identité'],
+    ['labelPrenom', 'Prénom'],
+    ['labelNom', 'Nom'],
+    ['labelPronom', 'Pronom'],
+    ['sectionCoordonnees', 'Coordonnées'],
+    ['labelCodePostal', 'Code postal'],
+    ['labelTelephone', 'Téléphone (optionnel)'],
+    ['sectionPresentation', 'Présentation publique'],
+    ['labelPhoto', 'Photo de profil (URL)'],
+    ['labelBio', 'Bio courte (500 caractères max)'],
+    ['sectionPreference', 'Préférence d’interface'],
+    ['labelTheme', 'Thème par défaut'],
+    ['themeAuto', 'Automatique (suit le système)'],
+    ['themeClair', 'Clair'],
+    ['themeSombre', 'Sombre'],
+    ['ctaSubmit', 'Enregistrer les modifications'],
+    ['ctaEnCours', 'Envoi en cours...'],
+  ] as const;
+  const lectures = await Promise.all(
+    cles.map(([nom, defaut]) =>
+      lireContenuEditorial(`profil.informations.form.${nom}`, { valeurMd: defaut }),
+    ),
+  );
+  return Object.fromEntries(
+    cles.map(([nom], i) => [nom, lectures[i]?.valeurMd ?? '']),
+  ) as unknown as LibellesInformations;
+}
 
 export const metadata: Metadata = {
   title: 'Mes informations',
@@ -32,6 +65,7 @@ export default async function PageInformations() {
     cardNumeroLabel,
     cardNumeroEnAttente,
     cardNumeroHint,
+    libellesFormulaire,
   ] = await Promise.all([
     getNumeroUnifie(personne.id),
     estAdminCourant(),
@@ -46,6 +80,7 @@ export default async function PageInformations() {
     lireContenuEditorial('profil.informations.card_numero_hint', {
       valeurMd: FALLBACKS.cardNumeroHint,
     }),
+    lireLibellesFormulaire(),
   ]);
 
   const valeursInitiales: DonneesMiseAJourProfil = {
@@ -118,7 +153,7 @@ export default async function PageInformations() {
         </TexteEditableAdmin>
       </Card>
 
-      <FormulaireInformations valeursInitiales={valeursInitiales} />
+      <FormulaireInformations valeursInitiales={valeursInitiales} libelles={libellesFormulaire} />
     </article>
   );
 }
