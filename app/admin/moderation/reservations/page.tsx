@@ -1,9 +1,13 @@
 import { BoutonsResolutionLitige } from '@/components/admin/moderation/BoutonsResolutionLitige';
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import {
+  chargerIdentitesAffichables,
+  nomAffichageRespectantVisibilite,
+} from '@/lib/reseau/identite';
 import { listerJournauxReservations, listerReservationsEnLitige } from '@/lib/reservation';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
-import { AlertTriangle, CalendarRange, MessageSquare } from 'lucide-react';
+import { AlertTriangle, CalendarRange, MessageSquare, User } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -31,6 +35,15 @@ export default async function PageModerationReservationsEnLitige() {
     listerJournauxReservations(reservations.map((r) => r.id)),
   ]);
 
+  const idsAResoudre = new Set<string>();
+  for (const r of reservations) idsAResoudre.add(r.demandeurPersonneId);
+  for (const lignes of journauxParId.values()) {
+    for (const l of lignes) {
+      if (l.auteurId !== null) idsAResoudre.add(l.auteurId);
+    }
+  }
+  const identitesParId = await chargerIdentitesAffichables([...idsAResoudre]);
+
   return (
     <>
       <Heading niveau={1}>Modération — Réservations en litige</Heading>
@@ -50,6 +63,9 @@ export default async function PageModerationReservationsEnLitige() {
           {reservations.map((reservation) => {
             const titreOffre = titresParId.get(reservation.offreId) ?? null;
             const journal = journauxParId.get(reservation.id) ?? [];
+            const identiteDemandeur = identitesParId.get(reservation.demandeurPersonneId);
+            const numeroDemandeur = identiteDemandeur?.numero ?? null;
+            const nomDemandeur = nomAffichageRespectantVisibilite(identiteDemandeur);
             return (
               <li key={reservation.id}>
                 <Card variant="ombre" className="grid gap-3">
@@ -87,6 +103,24 @@ export default async function PageModerationReservationsEnLitige() {
                     </span>
                   </div>
 
+                  <div className="flex items-start gap-2 text-sm text-text-3">
+                    <User size={14} className="mt-0.5" aria-hidden="true" />
+                    <span>
+                      Demandeur·euse :{' '}
+                      {numeroDemandeur !== null ? (
+                        <Link
+                          href={`/s-informer/reseau/${numeroDemandeur}`}
+                          className="text-brand hover:underline"
+                          title="Voir le profil réseau"
+                        >
+                          {nomDemandeur}
+                        </Link>
+                      ) : (
+                        <span className="text-text-2">{nomDemandeur}</span>
+                      )}
+                    </span>
+                  </div>
+
                   {reservation.motifDecision !== null ? (
                     <div className="rounded-md border border-danger bg-danger-light p-3 text-sm">
                       <p className="font-medium text-text-1">Motif du litige :</p>
@@ -104,7 +138,7 @@ export default async function PageModerationReservationsEnLitige() {
                     </p>
                   </details>
 
-                  <HistoriqueTransitions entrees={journal} />
+                  <HistoriqueTransitions entrees={journal} identites={identitesParId} />
 
                   <BoutonsResolutionLitige
                     reservationId={reservation.id}

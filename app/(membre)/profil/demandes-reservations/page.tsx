@@ -3,12 +3,17 @@ import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransi
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
 import {
+  type IdentiteAffichee,
+  chargerIdentitesAffichables,
+  nomAffichageRespectantVisibilite,
+} from '@/lib/reseau/identite';
+import {
   type EntreeJournalReservation,
   listerJournauxReservations,
   listerReservationsRecuesParProprietaire,
 } from '@/lib/reservation';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
-import { CalendarRange, MessageSquare, Users } from 'lucide-react';
+import { CalendarRange, MessageSquare, User } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -32,6 +37,15 @@ export default async function PageDemandesReservations() {
     chargerTitresOffres(reservations),
     listerJournauxReservations(reservations.map((r) => r.id)),
   ]);
+
+  const idsAResoudre = new Set<string>();
+  for (const r of reservations) idsAResoudre.add(r.demandeurPersonneId);
+  for (const lignes of journauxParId.values()) {
+    for (const l of lignes) {
+      if (l.auteurId !== null) idsAResoudre.add(l.auteurId);
+    }
+  }
+  const identitesParId = await chargerIdentitesAffichables([...idsAResoudre]);
 
   return (
     <Container taille="md" className="py-12">
@@ -57,6 +71,7 @@ export default async function PageDemandesReservations() {
                 reservation={reservation}
                 titreOffre={titresParId.get(reservation.offreId) ?? null}
                 journal={journauxParId.get(reservation.id) ?? []}
+                identites={identitesParId}
               />
             </li>
           ))}
@@ -108,11 +123,16 @@ function CarteDemande({
   reservation,
   titreOffre,
   journal,
+  identites,
 }: {
   reservation: import('@/lib/reservation').Reservation;
   titreOffre: { titre: string; cheminPage: string | null } | null;
   journal: EntreeJournalReservation[];
+  identites: Map<string, IdentiteAffichee>;
 }) {
+  const identiteDemandeur = identites.get(reservation.demandeurPersonneId);
+  const numeroDemandeur = identiteDemandeur?.numero ?? null;
+  const nomDemandeur = nomAffichageRespectantVisibilite(identiteDemandeur);
   const titreAffiche = titreOffre?.titre ?? '(offre supprimée)';
 
   return (
@@ -151,16 +171,20 @@ function CarteDemande({
       </div>
 
       <div className="flex items-start gap-2 text-sm text-text-3">
-        <Users size={14} className="mt-0.5" aria-hidden="true" />
+        <User size={14} className="mt-0.5" aria-hidden="true" />
         <span>
           Demandeur·euse :{' '}
-          <Link
-            href="/s-informer/reseau"
-            className="text-brand hover:underline"
-            title="Voir la messagerie pour échanger"
-          >
-            voir dans la messagerie
-          </Link>
+          {numeroDemandeur !== null ? (
+            <Link
+              href={`/s-informer/reseau/${numeroDemandeur}`}
+              className="text-brand hover:underline"
+              title="Voir le profil réseau"
+            >
+              {nomDemandeur}
+            </Link>
+          ) : (
+            <span className="text-text-2">{nomDemandeur}</span>
+          )}
         </span>
       </div>
 
@@ -178,7 +202,7 @@ function CarteDemande({
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>
 
-      <HistoriqueTransitions entrees={journal} />
+      <HistoriqueTransitions entrees={journal} identites={identites} />
 
       <BoutonsProprietaireReservation
         reservationId={reservation.id}

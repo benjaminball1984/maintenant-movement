@@ -1,3 +1,5 @@
+import type { IdentiteAffichee } from '@/lib/reseau/identite';
+import { nomAffichageRespectantVisibilite } from '@/lib/reseau/identite';
 import type { EntreeJournalReservation } from '@/lib/reservation';
 import { History } from 'lucide-react';
 
@@ -33,8 +35,11 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
 
 export function HistoriqueTransitions({
   entrees,
+  identites,
 }: {
   entrees: EntreeJournalReservation[];
+  /** Identités optionnelles pour afficher l'auteur de chaque transition. */
+  identites?: Map<string, IdentiteAffichee>;
 }) {
   if (entrees.length === 0) return null;
 
@@ -45,19 +50,33 @@ export function HistoriqueTransitions({
         Historique ({entrees.length})
       </summary>
       <ol className="mt-3 grid gap-2">
-        {entrees.map((e) => (
-          <li key={e.id} className="border-border border-l-2 pl-3">
-            <p className="text-text-1">
-              <strong>{LIBELLE[e.statutAvant]}</strong> → <strong>{LIBELLE[e.statutApres]}</strong>
-              <span className="ml-2 text-text-3 text-xs">
-                {FORMATEUR.format(new Date(e.changedAt))}
-              </span>
-            </p>
-            {e.motif !== null ? (
-              <p className="mt-0.5 text-text-3 text-xs italic">« {e.motif} »</p>
-            ) : null}
-          </li>
-        ))}
+        {entrees.map((e) => {
+          const auteur =
+            e.auteurId !== null && identites !== undefined ? identites.get(e.auteurId) : undefined;
+          const auteurEtiquette =
+            e.auteurId === null
+              ? 'système'
+              : auteur !== undefined
+                ? nomAffichageRespectantVisibilite(auteur)
+                : null;
+          return (
+            <li key={e.id} className="border-border border-l-2 pl-3">
+              <p className="text-text-1">
+                <strong>{LIBELLE[e.statutAvant]}</strong> →{' '}
+                <strong>{LIBELLE[e.statutApres]}</strong>
+                <span className="ml-2 text-text-3 text-xs">
+                  {FORMATEUR.format(new Date(e.changedAt))}
+                </span>
+                {auteurEtiquette !== null ? (
+                  <span className="ml-2 text-text-3 text-xs">· par {auteurEtiquette}</span>
+                ) : null}
+              </p>
+              {e.motif !== null ? (
+                <p className="mt-0.5 text-text-3 text-xs italic">« {e.motif} »</p>
+              ) : null}
+            </li>
+          );
+        })}
       </ol>
     </details>
   );

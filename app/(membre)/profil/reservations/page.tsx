@@ -4,6 +4,7 @@ import { BoutonSignalerLitigeReservation } from '@/components/reservation/Bouton
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { type IdentiteAffichee, chargerIdentitesAffichables } from '@/lib/reseau/identite';
 import {
   type EntreeJournalReservation,
   listerJournauxReservations,
@@ -44,6 +45,14 @@ export default async function PageMesReservations() {
     listerJournauxReservations(reservations.map((r) => r.id)),
   ]);
 
+  const idsAuteurs = new Set<string>();
+  for (const lignes of journauxParId.values()) {
+    for (const l of lignes) {
+      if (l.auteurId !== null) idsAuteurs.add(l.auteurId);
+    }
+  }
+  const identitesParId = await chargerIdentitesAffichables([...idsAuteurs]);
+
   return (
     <Container taille="md" className="py-12">
       <Heading niveau={1}>Mes réservations</Heading>
@@ -68,6 +77,7 @@ export default async function PageMesReservations() {
                 reservation={reservation}
                 titreOffre={titresParId.get(reservation.offreId) ?? null}
                 journal={journauxParId.get(reservation.id) ?? []}
+                identites={identitesParId}
               />
             </li>
           ))}
@@ -119,10 +129,12 @@ function CarteReservation({
   reservation,
   titreOffre,
   journal,
+  identites,
 }: {
   reservation: import('@/lib/reservation').Reservation;
   titreOffre: { titre: string; cheminPage: string | null } | null;
   journal: EntreeJournalReservation[];
+  identites: Map<string, IdentiteAffichee>;
 }) {
   const variantStatut = VARIANT_STATUT[reservation.statut];
   const titreAffiche = titreOffre?.titre ?? '(offre non trouvée)';
@@ -174,7 +186,7 @@ function CarteReservation({
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>
 
-      <HistoriqueTransitions entrees={journal} />
+      <HistoriqueTransitions entrees={journal} identites={identites} />
 
       {transitionAutorisee(reservation.statut, 'confirmee') ? (
         <BoutonConfirmerReservation
