@@ -1,12 +1,18 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ESPACES } from '@/config/espaces';
 import { SITE } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { HeaderCloche } from './HeaderCloche';
 import { HeaderProfilMenu } from './HeaderProfilMenu';
+
+const FALLBACK_RECHERCHE_ARIA = 'Recherche globale';
+const FALLBACK_CONNEXION = 'Se connecter';
+const FALLBACK_INSCRIPTION = 'Créer un compte';
 
 /**
  * Header du site (chantier 2.1).
@@ -26,7 +32,12 @@ import { HeaderProfilMenu } from './HeaderProfilMenu';
  */
 export async function Header() {
   const session = await getSession();
-  const estAdmin = session !== null ? await estAdminCourant() : false;
+  const [estAdmin, rechercheAria, connexion, inscription] = await Promise.all([
+    session !== null ? estAdminCourant() : Promise.resolve(false),
+    lireContenuEditorial('header.recherche_aria', { valeurMd: FALLBACK_RECHERCHE_ARIA }),
+    lireContenuEditorial('header.connexion', { valeurMd: FALLBACK_CONNEXION }),
+    lireContenuEditorial('header.inscription', { valeurMd: FALLBACK_INSCRIPTION }),
+  ]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
@@ -56,7 +67,7 @@ export async function Header() {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/recherche"
-            aria-label="Recherche globale"
+            aria-label={rechercheAria.valeurMd}
             className="inline-flex h-10 w-10 items-center justify-center rounded-md text-text-2 hover:bg-surface-2 hover:text-text-1"
           >
             <Search size={18} aria-hidden="true" />
@@ -73,18 +84,38 @@ export async function Header() {
             </>
           ) : (
             <>
-              <Link
-                href="/connexion"
-                className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
+              <TexteEditableAdmin
+                cle="header.connexion"
+                valeurInitiale={connexion.valeurMd}
+                estAdmin={estAdmin}
+                libelle="CTA Se connecter du header"
+                longueurMax={40}
               >
-                Se connecter
-              </Link>
-              <Link
-                href="/inscription"
-                className="inline-flex h-10 items-center rounded-md bg-grad px-4 text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+                {(t) => (
+                  <Link
+                    href="/connexion"
+                    className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
+                  >
+                    {t}
+                  </Link>
+                )}
+              </TexteEditableAdmin>
+              <TexteEditableAdmin
+                cle="header.inscription"
+                valeurInitiale={inscription.valeurMd}
+                estAdmin={estAdmin}
+                libelle="CTA Creer un compte du header"
+                longueurMax={40}
               >
-                Créer un compte
-              </Link>
+                {(t) => (
+                  <Link
+                    href="/inscription"
+                    className="inline-flex h-10 items-center rounded-md bg-grad px-4 text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+                  >
+                    {t}
+                  </Link>
+                )}
+              </TexteEditableAdmin>
             </>
           )}
         </div>
