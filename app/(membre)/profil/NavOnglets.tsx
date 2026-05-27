@@ -23,6 +23,7 @@ const ONGLETS = [
   { slug: 'dashboard', libelle: 'Vue d’ensemble' },
   { slug: 'informations', libelle: 'Informations' },
   { slug: 'mes-groupes', libelle: 'Mes groupes' },
+  { slug: 'mes-creations', libelle: 'Mes créations' },
   { slug: 'communes', libelle: 'Communes' },
   { slug: 'contributions', libelle: 'Contributions' },
   { slug: 'reservations', libelle: 'Mes réservations' },
