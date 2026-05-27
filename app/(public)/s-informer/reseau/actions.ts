@@ -2,7 +2,7 @@
 
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
-import { poserNotification } from '@/lib/notification';
+import { poserNotificationTemplee } from '@/lib/notification-templates';
 import { type CommentaireAffiche, listerCommentaires } from '@/lib/reseau/requetes';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -174,12 +174,14 @@ export async function basculerSoutien(
       .eq('id', postId)
       .maybeSingle();
     if (post !== null) {
-      await poserNotification(
+      // V2.4.131 : template editable admin via CMS (notification.reseau_post_soutenu.*).
+      // L'ancien message « Quelqu’un a soutenu » est repris dans le defaut du template
+      // (lib/notification-templates.ts), mais l'admin peut le personnaliser ({auteur}).
+      await poserNotificationTemplee(
+        'reseau_post_soutenu',
+        { auteur: 'Quelqu’un' },
         {
           destinatairePersonneId: post.auteurice_id,
-          type: 'reseau_post_soutenu',
-          titre: 'Nouveau soutien',
-          message: 'Quelqu’un a soutenu ta publication.',
           href: '/s-informer/reseau',
           cibleId: postId,
           cibleTable: 'post_reseau',
@@ -271,13 +273,14 @@ export async function envoyerMessage(donneesBrutes: unknown): Promise<ResultatAc
     return { ok: false, message: `Envoi impossible : ${error.message}` };
   }
 
-  // V2.3.30 : notification cloche typée (canal 1 du CDC §7).
-  await poserNotification(
+  // V2.3.30 + V2.4.131 : template editable admin (notification.reseau_message_recu.*).
+  // L'apercu du texte est passe en parametre {auteur} pour donner un contexte
+  // (utilise dans le template par defaut). Admin peut decider de l'inclure ou non.
+  await poserNotificationTemplee(
+    'reseau_message_recu',
+    { auteur: donnees.texte.slice(0, 140) },
     {
       destinatairePersonneId: donnees.destinataire_id,
-      type: 'reseau_message_recu',
-      titre: 'Nouveau message',
-      message: donnees.texte.slice(0, 140),
       href: '/s-informer/reseau/messages',
       cibleTable: 'message_reseau',
     },
@@ -374,15 +377,14 @@ async function retirerContenu(
     nouvelEtat: { statut: 'retire', raison: donnees.raison },
   });
 
-  // V2.3.37 : notifie l'auteurice du contenu retiré.
+  // V2.3.37 + V2.4.131 : notifie l'auteurice via template editable admin.
+  // Le titre garde sa variante (post vs commentaire) en passant le bon defaut.
   if (contenuAvant !== null && typeof contenuAvant.auteurice_id === 'string') {
-    await poserNotification(
+    await poserNotificationTemplee(
+      'moderation_me_concerne',
+      { motif: donnees.raison },
       {
         destinatairePersonneId: contenuAvant.auteurice_id,
-        type: 'moderation_me_concerne',
-        titre:
-          table === 'post_reseau' ? 'Ta publication a été retirée' : 'Ton commentaire a été retiré',
-        message: `Raison : ${donnees.raison}`,
         href: '/s-informer/reseau',
         cibleId: donnees.cible_id,
         cibleTable: table,
@@ -417,13 +419,12 @@ async function notifierAuteuricePost(
       .eq('id', postId)
       .maybeSingle();
     if (post === null) return;
-    // V2.3.30 : type spécifique au lieu de 'autre'.
-    await poserNotification(
+    // V2.3.30 + V2.4.131 : template editable admin via CMS.
+    await poserNotificationTemplee(
+      'reseau_post_commente',
+      { auteur: 'Quelqu’un' },
       {
         destinatairePersonneId: post.auteurice_id,
-        type: 'reseau_post_commente',
-        titre: 'Nouveau commentaire',
-        message: 'Quelqu’un a commenté ta publication.',
         href: '/s-informer/reseau',
         cibleId: postId,
         cibleTable: 'post_reseau',
