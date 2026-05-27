@@ -2,6 +2,7 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { formaterTempsLecture } from '@/lib/temps-lecture';
 import type { TypeMedia } from '@/types/database';
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -77,6 +78,7 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
               .filter((s) => s !== null && s.trim() !== '')
               .join(' ') || 'Rédaction'}
             {media.publie_le !== null ? ` · ${FORMATEUR.format(new Date(media.publie_le))}` : ''}
+            {media.corps.trim() !== '' ? ` · ${formaterTempsLecture(media.corps)}` : ''}
           </p>
         </header>
 
