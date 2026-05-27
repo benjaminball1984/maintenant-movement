@@ -432,8 +432,10 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 admin campagnes + composant Pagination + helpers URL)
-**Dernier chantier terminé** : V2.4.59 (`lib/url.ts` + 12 tests) — sur `main` (tip `99a16ea`). 593 tests verts. 4 helpers : `urlAbsolue`, `lienPartageMailto`, `lienPartageMastodon`, `extraireDomaine`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 admin réservations + telephone-fr)
+**Dernier chantier terminé** : V2.4.61 (`lib/telephone-fr.ts` + 19 tests) — sur `main` (tip `4aca486`). 612 tests verts. 3 helpers : `estTelephoneFrValide`, `normaliserTelephoneFr`, `formaterTelephoneFr`.
+**Dernier chantier terminé (antérieur)** : V2.4.60 (admin réservations `/admin/national/reservations`) — sur `main` (tip `9eab993`). Vue globale, recherche message, double filtre statut+type (cycle D8 complet), motif de décision en exergue.
+**Dernier chantier terminé (antérieur)** : V2.4.59 (`lib/url.ts` + 12 tests) — sur `main` (tip `99a16ea`). 593 tests verts. 4 helpers : `urlAbsolue`, `lienPartageMailto`, `lienPartageMastodon`, `extraireDomaine`.
 **Dernier chantier terminé (antérieur)** : V2.4.58 (composant `Pagination` UI réutilisable) — sur `main` (tip `a82ffc6`). Server Component branché sur `lib/pagination.ts`, fenêtre + ellipses, préserve les params de recherche, exporté depuis `components/ui`.
 **Dernier chantier terminé (antérieur)** : V2.4.57 (admin campagnes `/admin/national/campagnes`) — sur `main` (tip `f88cc9e`). Filtres statut, raison de rejet visible.
 **Dernier chantier terminé (antérieur)** : V2.4.56 (`estSlugValide` + 8 tests) — sur `main` (tip `ea7afea`). 581 tests verts. Validation idempotente des slugs en paramètre.
