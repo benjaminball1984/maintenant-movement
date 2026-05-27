@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Heading } from '@/components/ui';
 import { chargerCompteursFileModeration } from '@/lib/admin/file-moderation';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   AlertTriangle,
   CalendarRange,
@@ -41,115 +44,144 @@ interface LigneFile {
  * Chaque ligne pointe directement vers la console spécialisée du module.
  */
 export default async function PageModerationGlobale() {
-  const c = await chargerCompteursFileModeration();
+  const [c, estAdmin, titre, intro, totalLabel, videMessage] = await Promise.all([
+    chargerCompteursFileModeration(),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.titre', { valeurMd: 'File de modération' }),
+    lireContenuEditorial('admin.moderation.intro', {
+      valeurMd:
+        "Vue agrégée de tout ce qui est en attente d'action côté modération. Cliquer une ligne ouvre la console spécialisée du module.",
+    }),
+    lireContenuEditorial('admin.moderation.total_label', { valeurMd: 'Total en attente' }),
+    lireContenuEditorial('admin.moderation.vide_message', {
+      valeurMd: 'Aucune action de modération en attente. Tu peux respirer.',
+    }),
+  ]);
 
-  const lignes: LigneFile[] = [
+  // Definition des 15 lignes : slug stable + fallback libelle + href + compteur + icone.
+  // Chaque libelle est editable admin via cle CMS `admin.moderation.ligne.{slug}.libelle`.
+  const LIGNES_CONFIG = [
     {
-      cle: 'petitions',
+      slug: 'petitions',
       libelle: 'Pétitions à modérer',
       href: '/admin/moderation/petitions',
       nb: c.petitionsEnModeration,
       icone: PenSquare,
     },
     {
-      cle: 'campagnes',
+      slug: 'campagnes',
       libelle: 'Campagnes à modérer',
       href: '/admin/moderation/campagnes',
       nb: c.campagnesEnModeration,
       icone: Flag,
     },
     {
-      cle: 'mobilisations',
+      slug: 'mobilisations',
       libelle: 'Mobilisations retirées (à examiner)',
       href: '/admin/moderation/mobilisations',
       nb: c.mobilisationsRetirees,
       icone: CalendarRange,
     },
     {
-      cle: 'cagnottes',
+      slug: 'cagnottes',
       libelle: 'Cagnottes suspendues (à examiner)',
       href: '/admin/moderation/cagnottes',
       nb: c.cagnottesSuspendues,
       icone: Wallet,
     },
     {
-      cle: 'media',
+      slug: 'media',
       libelle: 'Médias non publiés (à modérer)',
       href: '/admin/moderation/media',
       nb: c.mediasEnAttente,
       icone: IconeImage,
     },
     {
-      cle: 'sondages',
+      slug: 'sondages',
       libelle: 'Sondages en modération',
       href: '/admin/moderation/sondages',
       nb: c.sondagesEnModeration,
       icone: Vote,
     },
     {
-      cle: 'reservations',
+      slug: 'reservations',
       libelle: 'Réservations en litige (à arbitrer)',
       href: '/admin/moderation/reservations',
       nb: c.reservationsEnLitige,
       icone: AlertTriangle,
     },
     {
-      cle: 'reseau-posts',
+      slug: 'reseau-posts',
       libelle: 'Posts réseau signalés',
       href: '/admin/moderation/reseau',
       nb: c.reseauPostsSignales,
       icone: MessageSquare,
     },
     {
-      cle: 'reseau-messages',
+      slug: 'reseau-messages',
       libelle: 'Messages réseau signalés',
       href: '/admin/moderation/reseau',
       nb: c.reseauMessagesSignales,
       icone: MessageSquare,
     },
     {
-      cle: 'sel-contestees',
+      slug: 'sel-contestees',
       libelle: 'Prestations SEL contestées',
       href: '/admin/moderation/sel',
       nb: c.selPrestationsContestees,
       icone: Package,
     },
     {
-      cle: 'sel-moderation',
+      slug: 'sel-moderation',
       libelle: 'Prestations SEL en modération',
       href: '/admin/moderation/sel',
       nb: c.selPrestationsEnModeration,
       icone: Package,
     },
     {
-      cle: 'groupes-entraide',
+      slug: 'groupes-entraide',
       libelle: 'Groupes d’entraide à modérer',
       href: '/admin/moderation/groupes-locaux',
       nb: c.groupesEntraideEnModeration,
       icone: Users,
     },
     {
-      cle: 'marche',
+      slug: 'marche',
       libelle: 'Produits marché retirés (à examiner)',
       href: '/admin/moderation/marche',
       nb: c.marcheProduitsSignales,
       icone: ShoppingBag,
     },
     {
-      cle: 'moments',
+      slug: 'moments',
       libelle: 'Moments solidaires retirés (à examiner)',
       href: '/admin/moderation/moments',
       nb: c.momentsAModerer,
       icone: CalendarRange,
     },
     {
-      cle: 'contenus',
+      slug: 'contenus',
       libelle: 'Pages éditoriales à rédiger',
       href: '/admin/national/contenus',
       nb: c.contenusEditoriauxARediger,
       icone: FileText,
     },
   ];
+
+  // Lecture des 15 libelles via CMS, en parallele.
+  const libellesCms = await Promise.all(
+    LIGNES_CONFIG.map((l) =>
+      lireContenuEditorial(`admin.moderation.ligne.${l.slug}.libelle`, { valeurMd: l.libelle }),
+    ),
+  );
+
+  const lignes: LigneFile[] = LIGNES_CONFIG.map((l, i) => ({
+    cle: l.slug,
+    libelle: libellesCms[i]?.valeurMd ?? l.libelle,
+    href: l.href,
+    nb: l.nb,
+    icone: l.icone,
+  }));
 
   const lignesTriees = [...lignes].sort((a, b) => b.nb - a.nb);
   const totalEnAttente = lignes.reduce((acc, l) => acc + l.nb, 0);
@@ -159,21 +191,51 @@ export default async function PageModerationGlobale() {
       <header className="mb-6">
         <Heading niveau={1}>
           <Flag size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-          File de modération
+          <TexteEditableAdmin
+            cle="admin.moderation.titre"
+            valeurInitiale={titre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre file moderation"
+            longueurMax={40}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Heading>
-        <p className="mt-1 text-sm text-text-3">
-          Vue agrégée de tout ce qui est en attente d'action côté modération. Cliquer une ligne
-          ouvre la console spécialisée du module.
-        </p>
+        <TexteEditableAdmin
+          cle="admin.moderation.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro file moderation"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mt-1 text-sm text-text-3">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       <Card variant="ombre" className="mb-6 grid gap-1">
-        <p className="text-xs font-bold uppercase tracking-cap text-text-3">Total en attente</p>
+        <TexteEditableAdmin
+          cle="admin.moderation.total_label"
+          valeurInitiale={totalLabel.valeurMd}
+          estAdmin={estAdmin}
+          libelle="label Total en attente"
+          longueurMax={40}
+        >
+          {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+        </TexteEditableAdmin>
         <p className="font-display text-3xl text-text-1">{FORMATEUR_NB.format(totalEnAttente)}</p>
         {totalEnAttente === 0 ? (
           <p className="text-sm text-success">
             <CheckCircle size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
-            Aucune action de modération en attente. Tu peux respirer.
+            <TexteEditableAdmin
+              cle="admin.moderation.vide_message"
+              valeurInitiale={videMessage.valeurMd}
+              estAdmin={estAdmin}
+              libelle="message si file vide"
+              longueurMax={150}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </p>
         ) : null}
       </Card>
@@ -193,7 +255,17 @@ export default async function PageModerationGlobale() {
                     className={l.nb > 0 ? 'text-brand' : 'text-text-3'}
                     aria-hidden="true"
                   />
-                  <p className={l.nb > 0 ? 'font-bold text-text-1' : 'text-text-2'}>{l.libelle}</p>
+                  <TexteEditableAdmin
+                    cle={`admin.moderation.ligne.${l.cle}.libelle`}
+                    valeurInitiale={l.libelle}
+                    estAdmin={estAdmin}
+                    libelle={`libelle ligne ${l.cle}`}
+                    longueurMax={100}
+                  >
+                    {(t) => (
+                      <p className={l.nb > 0 ? 'font-bold text-text-1' : 'text-text-2'}>{t}</p>
+                    )}
+                  </TexteEditableAdmin>
                   {l.nb > 0 ? (
                     <Badge variant={l.nb >= 5 ? 'danger' : 'warning'}>
                       {FORMATEUR_NB.format(l.nb)}
