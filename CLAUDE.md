@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 qualité : extraction helpers purs + tests, admin personnes)
-**Dernier chantier terminé** : V2.4.31 (extraire `formaterTailleOctets` + 5 tests) — sur `main` (tip `718b29c`). 448 tests verts.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 qualité : helpers purs + admin communes + dashboard relatif)
+**Dernier chantier terminé** : V2.4.34 (`lib/format-euros.ts` + 10 tests) — sur `main` (tip `4024f63`). 2 variantes `formaterEurosDepuisCentimes` + `formaterEuros`. Résilient à l'espace insécable étroite U+202F. 473 tests verts.
+**Dernier chantier terminé (antérieur)** : V2.4.33 (page admin `/admin/national/communes` filtrable) — sur `main` (tip `c61a651`). 3 compteurs (Total/Libres/Coquilles), filtres mot-clé + département + statut, lien vers page publique.
+**Dernier chantier terminé (antérieur)** : V2.4.32 (helper `formaterRelativePassee` + 15 tests + branchement dashboard) — sur `main` (tip `708dd82`). Dual de `formaterRelativeAVenir`, retourne « il y a X min/h/jours/mois/an(s) ». Dashboard membre : colonne date des activités récentes passe de date statique à temps relatif avec `title=` au survol.
+**Dernier chantier terminé (antérieur)** : V2.4.31 (extraire `formaterTailleOctets` + 5 tests) — sur `main` (tip `718b29c`). 448 tests verts.
 **Dernier chantier terminé (antérieur)** : V2.4.30 (extraire `trierParPertinence` + 7 tests) — sur `main` (tip `4a54cd1`). Non-mutation garantie, insensible casse, prefixe avant infixe, longueur à égalité.
 **Dernier chantier terminé (antérieur)** : V2.4.29 (page admin `/admin/national/personnes` filtrable) — sur `main` (tip `6ab2bf8`). Recherche email/prénom/nom (ilike OR), filtre par statut (tous/actifs/anonymisés/suppression), badges visuels.
 **Dernier chantier terminé (antérieur)** : V2.4.28 (helper `slugifier` commun + 9 tests) — sur `main` (tip `91a7506`). Extrait des slugify locaux Décider+Journal qui se répétaient. DRY -16 lignes.
