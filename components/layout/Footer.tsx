@@ -10,21 +10,75 @@ const FALLBACK_RESEAUX =
 const FALLBACK_RGPD =
   'Données hébergées en région UE (Supabase Francfort). Pas de cookie publicitaire, pas de traceur tiers, pas de bandeau de consentement (cookies strictement techniques).';
 
+// Définition des sections du footer avec leurs liens. Chaque libellé
+// est éditable indépendamment via le CMS (clés `footer.section.X` et
+// `footer.lien.X`). Les `href` restent en dur (changer une URL casse
+// la navigation, on ne laisse pas ça à l'admin éditorial).
+const SECTION_APROPOS = {
+  cleSection: 'footer.section.apropos',
+  fallbackSection: 'À propos',
+  liens: [
+    { cle: 'footer.lien.qui', href: '/a-propos', fallback: 'Qui sommes-nous' },
+    { cle: 'footer.lien.mentions', href: '/mentions-legales', fallback: 'Mentions légales' },
+    {
+      cle: 'footer.lien.confidentialite',
+      href: '/confidentialite',
+      fallback: 'Politique de confidentialité',
+    },
+    { cle: 'footer.lien.contact', href: '/contact', fallback: 'Contact' },
+  ],
+};
+
+const SECTION_EXPLORER = {
+  cleSection: 'footer.section.explorer',
+  fallbackSection: 'Explorer',
+  liens: [
+    { cle: 'footer.lien.recherche', href: '/recherche', fallback: 'Recherche globale' },
+    { cle: 'footer.lien.agenda', href: '/agenda', fallback: 'Agenda (tous les événements)' },
+    { cle: 'footer.lien.cartes', href: '/cartes', fallback: 'Cartes' },
+    { cle: 'footer.lien.decider', href: '/s-informer/decider', fallback: 'Décider (réunions)' },
+    { cle: 'footer.lien.journal', href: '/s-informer/journal', fallback: 'Maintenant Médias' },
+  ],
+};
+
+const SECTION_RESEAUX = {
+  cleSection: 'footer.section.reseaux',
+  fallbackSection: 'Sur les réseaux',
+};
+
 /**
  * Footer commun aux pages publiques.
  *
- * 3 textes éditables par admin via le CMS (`contenu_editorial`) :
- * - `footer.baseline` (sous le logo Maintenant!)
- * - `footer.reseaux` (colonne « Sur les réseaux »)
- * - `footer.rgpd` (mention bas de page)
+ * Tous les libellés sont éditables par admin via le CMS (clés `footer.*`).
+ * Les URLs des liens restent en dur dans le code (changer une URL casse
+ * la navigation, c'est de la config technique pas du texte éditorial).
  */
 export async function Footer() {
-  const [estAdmin, baseline, reseaux, rgpd] = await Promise.all([
-    estAdminCourant(),
-    lireContenuEditorial('footer.baseline', { valeurMd: FALLBACK_BASELINE }),
-    lireContenuEditorial('footer.reseaux', { valeurMd: FALLBACK_RESEAUX }),
-    lireContenuEditorial('footer.rgpd', { valeurMd: FALLBACK_RGPD }),
-  ]);
+  const estAdmin = await estAdminCourant();
+
+  // Lecture en parallèle de tous les textes éditables.
+  const allLiens = [...SECTION_APROPOS.liens, ...SECTION_EXPLORER.liens];
+  const [baseline, reseauxTxt, rgpd, sectionApropos, sectionExplorer, sectionReseaux, ...liens] =
+    await Promise.all([
+      lireContenuEditorial('footer.baseline', { valeurMd: FALLBACK_BASELINE }),
+      lireContenuEditorial('footer.reseaux', { valeurMd: FALLBACK_RESEAUX }),
+      lireContenuEditorial('footer.rgpd', { valeurMd: FALLBACK_RGPD }),
+      lireContenuEditorial(SECTION_APROPOS.cleSection, {
+        valeurMd: SECTION_APROPOS.fallbackSection,
+      }),
+      lireContenuEditorial(SECTION_EXPLORER.cleSection, {
+        valeurMd: SECTION_EXPLORER.fallbackSection,
+      }),
+      lireContenuEditorial(SECTION_RESEAUX.cleSection, {
+        valeurMd: SECTION_RESEAUX.fallbackSection,
+      }),
+      ...allLiens.map((l) => lireContenuEditorial(l.cle, { valeurMd: l.fallback })),
+    ]);
+
+  const valeurLien = (cle: string, fallback: string): string => {
+    const found = liens.find((l) => l.cle === cle);
+    return found?.valeurMd ?? fallback;
+  };
 
   return (
     <footer className="border-t border-border bg-surface-2">
@@ -44,47 +98,76 @@ export async function Footer() {
         </div>
 
         <nav aria-label="Pages du site" className="grid gap-2 text-sm">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">À propos</p>
-          <Link href="/a-propos" className="text-text-2 hover:text-brand">
-            Qui sommes-nous
-          </Link>
-          <Link href="/mentions-legales" className="text-text-2 hover:text-brand">
-            Mentions légales
-          </Link>
-          <Link href="/confidentialite" className="text-text-2 hover:text-brand">
-            Politique de confidentialité
-          </Link>
-          <Link href="/contact" className="text-text-2 hover:text-brand">
-            Contact
-          </Link>
+          <TexteEditableAdmin
+            cle={SECTION_APROPOS.cleSection}
+            valeurInitiale={sectionApropos.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section À propos du footer"
+            longueurMax={50}
+          >
+            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+          </TexteEditableAdmin>
+          {SECTION_APROPOS.liens.map((l) => (
+            <TexteEditableAdmin
+              key={l.cle}
+              cle={l.cle}
+              valeurInitiale={valeurLien(l.cle, l.fallback)}
+              estAdmin={estAdmin}
+              libelle={`libellé du lien ${l.href}`}
+              longueurMax={80}
+            >
+              {(t) => (
+                <Link href={l.href} className="text-text-2 hover:text-brand">
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>
+          ))}
         </nav>
 
         <nav aria-label="Explorer le site" className="grid gap-2 text-sm">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Explorer</p>
-          <Link href="/recherche" className="text-text-2 hover:text-brand">
-            Recherche globale
-          </Link>
-          <Link href="/agenda" className="text-text-2 hover:text-brand">
-            Agenda (tous les événements)
-          </Link>
-          <Link href="/cartes" className="text-text-2 hover:text-brand">
-            Cartes
-          </Link>
-          <Link href="/s-informer/decider" className="text-text-2 hover:text-brand">
-            Décider (réunions)
-          </Link>
-          <Link href="/s-informer/journal" className="text-text-2 hover:text-brand">
-            Maintenant Médias
-          </Link>
+          <TexteEditableAdmin
+            cle={SECTION_EXPLORER.cleSection}
+            valeurInitiale={sectionExplorer.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Explorer du footer"
+            longueurMax={50}
+          >
+            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+          </TexteEditableAdmin>
+          {SECTION_EXPLORER.liens.map((l) => (
+            <TexteEditableAdmin
+              key={l.cle}
+              cle={l.cle}
+              valeurInitiale={valeurLien(l.cle, l.fallback)}
+              estAdmin={estAdmin}
+              libelle={`libellé du lien ${l.href}`}
+              longueurMax={80}
+            >
+              {(t) => (
+                <Link href={l.href} className="text-text-2 hover:text-brand">
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>
+          ))}
         </nav>
 
         <div className="grid gap-2 text-sm">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Sur les réseaux</p>
+          <TexteEditableAdmin
+            cle={SECTION_RESEAUX.cleSection}
+            valeurInitiale={sectionReseaux.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Sur les réseaux du footer"
+            longueurMax={50}
+          >
+            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+          </TexteEditableAdmin>
           <TexteEditableAdmin
             cle="footer.reseaux"
-            valeurInitiale={reseaux.valeurMd}
+            valeurInitiale={reseauxTxt.valeurMd}
             estAdmin={estAdmin}
-            libelle="colonne réseaux sociaux du footer"
+            libelle="texte colonne réseaux sociaux"
             multilignes
             longueurMax={500}
           >
