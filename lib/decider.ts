@@ -125,6 +125,46 @@ export async function listerReunionsSalle(
   }));
 }
 
+export interface ReunionAvecSalle extends ReunionDecider {
+  salleSlug: string;
+  salleNom: string;
+}
+
+/**
+ * Liste les prochaines réunions toutes salles confondues (V2.4.20).
+ * Pour la home Décider.
+ */
+export async function listerProchainesReunionsToutesSalles(
+  limite = 20,
+): Promise<ReunionAvecSalle[]> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from('reunion_decider')
+    .select('*, salle:salle_decider(id, slug, nom)')
+    .in('statut', ['planifiee', 'en_cours'])
+    .gte('debut_le', new Date().toISOString())
+    .order('debut_le', { ascending: true })
+    .limit(limite);
+  return (data ?? []).map((r) => {
+    // biome-ignore lint/suspicious/noExplicitAny: jointure non typée précisément
+    const salle = (r as any).salle as { slug: string; nom: string } | null;
+    return {
+      id: r.id,
+      salleId: r.salle_id,
+      titre: r.titre,
+      ordreJourMd: r.ordre_jour_md,
+      debutLe: r.debut_le,
+      finLe: r.fin_le,
+      modeDecision: r.mode_decision as ModeDecision,
+      statut: r.statut as StatutReunion,
+      enregistree: r.enregistree,
+      pvMd: r.pv_md,
+      salleSlug: salle?.slug ?? '',
+      salleNom: salle?.nom ?? '',
+    };
+  });
+}
+
 export async function chargerReunionParId(id: string): Promise<ReunionDecider | null> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('reunion_decider').select('*').eq('id', id).maybeSingle();

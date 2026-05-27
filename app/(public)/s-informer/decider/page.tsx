@@ -1,7 +1,12 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
-import { listerSallesDecider } from '@/lib/decider';
-import { CalendarRange, Globe, Lock, Users, Video } from 'lucide-react';
+import {
+  LIBELLE_MODE,
+  LIBELLE_STATUT,
+  listerProchainesReunionsToutesSalles,
+  listerSallesDecider,
+} from '@/lib/decider';
+import { CalendarRange, Clock, Globe, Lock, Users, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -44,8 +49,19 @@ const LIBELLE_VISIBILITE: Record<string, string> = {
  * quand `LIVEKIT_PROVIDER=livekit` sera défini en env. En attendant,
  * cette page sert de hub d'annonce + accès aux PV des réunions passées.
  */
+const FORMATEUR_REUNION = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 export default async function PageDecider() {
-  const salles = await listerSallesDecider();
+  const [salles, prochaines] = await Promise.all([
+    listerSallesDecider(),
+    listerProchainesReunionsToutesSalles(10),
+  ]);
 
   return (
     <Container taille="lg" className="py-12">
@@ -82,6 +98,41 @@ export default async function PageDecider() {
           </p>
         </Card>
       </section>
+
+      {prochaines.length > 0 ? (
+        <section className="mt-12">
+          <Heading niveau={2} apparenceComme={3}>
+            <Clock size={20} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
+            Prochaines réunions ({prochaines.length})
+          </Heading>
+          <ul className="mt-4 grid gap-2">
+            {prochaines.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/s-informer/decider/${r.salleSlug}/${r.id}`}
+                  className="block hover:opacity-90"
+                >
+                  <Card variant="ombre" className="grid gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-text-3 text-xs">{r.salleNom}</span>
+                      <span className="font-bold text-brand text-xs">
+                        {FORMATEUR_REUNION.format(new Date(r.debutLe))}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-text-1">{r.titre}</h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={r.statut === 'en_cours' ? 'success' : 'warning'}>
+                        {LIBELLE_STATUT[r.statut]}
+                      </Badge>
+                      <Badge variant="info">{LIBELLE_MODE[r.modeDecision]}</Badge>
+                    </div>
+                  </Card>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="mt-12">
         <Heading niveau={2} apparenceComme={3}>
