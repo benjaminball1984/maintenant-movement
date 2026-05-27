@@ -432,8 +432,12 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 qualité : helpers purs + admin communes + dashboard relatif)
-**Dernier chantier terminé** : V2.4.34 (`lib/format-euros.ts` + 10 tests) — sur `main` (tip `4024f63`). 2 variantes `formaterEurosDepuisCentimes` + `formaterEuros`. Résilient à l'espace insécable étroite U+202F. 473 tests verts.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 outillage admin : fédérations + exports CSV)
+**Dernier chantier terminé** : V2.4.38 (export CSV pétitions) — sur `main` (tip `11a6bbf`). 8 colonnes avec `nombre_signatures` via jointure sur `petition_compteur`.
+**Dernier chantier terminé (antérieur)** : V2.4.37 (exports CSV communes + fédérations) — sur `main` (tip `fd84beb`). 2 routes GET admin, BOM UTF-8 pour Excel, filename horodaté.
+**Dernier chantier terminé (antérieur)** : V2.4.36 (`lib/export-csv.ts` RFC 4180 + 13 tests + endpoint export personnes) — sur `main` (tip `cf6ac54`). 486 tests verts.
+**Dernier chantier terminé (antérieur)** : V2.4.35 (page admin `/admin/national/federations` filtrable) — sur `main` (tip `afb1bb3`). Compteur communes par fédération via 1 requête agrégée (anti N+1), filtres mot-clé + type.
+**Dernier chantier terminé (antérieur)** : V2.4.34 (`lib/format-euros.ts` + 10 tests) — sur `main` (tip `4024f63`). 2 variantes `formaterEurosDepuisCentimes` + `formaterEuros`. Résilient à l'espace insécable étroite U+202F. 473 tests verts.
 **Dernier chantier terminé (antérieur)** : V2.4.33 (page admin `/admin/national/communes` filtrable) — sur `main` (tip `c61a651`). 3 compteurs (Total/Libres/Coquilles), filtres mot-clé + département + statut, lien vers page publique.
 **Dernier chantier terminé (antérieur)** : V2.4.32 (helper `formaterRelativePassee` + 15 tests + branchement dashboard) — sur `main` (tip `708dd82`). Dual de `formaterRelativeAVenir`, retourne « il y a X min/h/jours/mois/an(s) ». Dashboard membre : colonne date des activités récentes passe de date statique à temps relatif avec `title=` au survol.
 **Dernier chantier terminé (antérieur)** : V2.4.31 (extraire `formaterTailleOctets` + 5 tests) — sur `main` (tip `718b29c`). 448 tests verts.
