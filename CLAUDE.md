@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 admin réservations + telephone-fr)
-**Dernier chantier terminé** : V2.4.61 (`lib/telephone-fr.ts` + 19 tests) — sur `main` (tip `4aca486`). 612 tests verts. 3 helpers : `estTelephoneFrValide`, `normaliserTelephoneFr`, `formaterTelephoneFr`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 helpers identité : âge + code postal + UUID)
+**Dernier chantier terminé** : V2.4.64 (`lib/uuid.ts` + 12 tests) — sur `main` (tip `fbc5d4a`). 650 tests verts. `estUuidValide` (v1-v5, case insensible) + `normaliserUuid`.
+**Dernier chantier terminé (antérieur)** : V2.4.63 (`lib/code-postal-fr.ts` + 14 tests) — sur `main` (tip `ebe82a2`). `estCodePostalFrValide` + `extraireDepartementFr` (métropole 2 chiffres, DROM 97x/98x 3 chiffres).
+**Dernier chantier terminé (antérieur)** : V2.4.62 (`lib/age.ts` + 12 tests) — sur `main` (tip `2c5d7f9`). `calculerAge` (tient compte mois/jour) + `estMajeur`.
+**Dernier chantier terminé (antérieur)** : V2.4.61 (`lib/telephone-fr.ts` + 19 tests) — sur `main` (tip `4aca486`). 612 tests verts. 3 helpers : `estTelephoneFrValide`, `normaliserTelephoneFr`, `formaterTelephoneFr`.
 **Dernier chantier terminé (antérieur)** : V2.4.60 (admin réservations `/admin/national/reservations`) — sur `main` (tip `9eab993`). Vue globale, recherche message, double filtre statut+type (cycle D8 complet), motif de décision en exergue.
 **Dernier chantier terminé (antérieur)** : V2.4.59 (`lib/url.ts` + 12 tests) — sur `main` (tip `99a16ea`). 593 tests verts. 4 helpers : `urlAbsolue`, `lienPartageMailto`, `lienPartageMastodon`, `extraireDomaine`.
 **Dernier chantier terminé (antérieur)** : V2.4.58 (composant `Pagination` UI réutilisable) — sur `main` (tip `a82ffc6`). Server Component branché sur `lib/pagination.ts`, fenêtre + ellipses, préserve les params de recherche, exporté depuis `components/ui`.
