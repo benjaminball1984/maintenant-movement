@@ -1,5 +1,6 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
+import { calculerSoldeCaisse } from '@/lib/caisse-solde';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -48,6 +49,7 @@ export default async function PageDetailCaisse({
   if (detail === null) notFound();
 
   const { caisse, receptacles, transactions } = detail;
+  const solde = await calculerSoldeCaisse(caisseId);
 
   const idsPersonnes = new Set<string>();
   for (const t of transactions) {
@@ -83,6 +85,29 @@ export default async function PageDetailCaisse({
           ? ` · fermée le ${FORMATEUR_DATE.format(new Date(caisse.fermeeLe))}`
           : ''}
       </p>
+
+      <section className="mt-6 grid gap-3 rounded-md border border-border bg-surface p-4 sm:grid-cols-2">
+        <div>
+          <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Solde €</p>
+          <p className="mt-1 font-display font-bold text-2xl text-text-1">
+            {FORMATEUR_EURO.format(solde.euro.solde)}
+          </p>
+          <p className="text-text-3 text-xs">
+            {FORMATEUR_EURO.format(solde.euro.entrees)} entrées −{' '}
+            {FORMATEUR_EURO.format(solde.euro.sorties)} sorties
+          </p>
+        </div>
+        <div>
+          <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Solde 99-coin</p>
+          <p className="mt-1 font-display font-bold text-2xl text-text-1">
+            {solde.coin99.solde.toLocaleString('fr-FR')} 99c
+          </p>
+          <p className="text-text-3 text-xs">
+            {solde.coin99.entrees.toLocaleString('fr-FR')} entrées −{' '}
+            {solde.coin99.sorties.toLocaleString('fr-FR')} sorties
+          </p>
+        </div>
+      </section>
 
       <Alert variant="warning" titre="Rappel D12bis" className="mt-6">
         Toute transaction sortante exige un <strong>justificatif obligatoire</strong>. L’UI

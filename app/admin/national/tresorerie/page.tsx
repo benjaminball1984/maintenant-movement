@@ -1,5 +1,6 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { listerCaissesPourDashboard } from '@/lib/admin/tresorerie';
+import { type SoldeCaisse, calculerSoldesCaisses } from '@/lib/caisse-solde';
 import { Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -23,8 +24,19 @@ export const metadata: Metadata = {
  * on pourra étendre l'accès aux trésorier·ière·s cooptés (droit
  * atomique `gerer_caisse`).
  */
+const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+});
+
+function formaterMontantCanal(montant: number, canal: 'euro' | 'coin99'): string {
+  if (canal === 'euro') return FORMATEUR_EURO.format(montant);
+  return `${montant.toLocaleString('fr-FR')} 99c`;
+}
+
 export default async function PageDashboardTresorerie() {
   const caisses = await listerCaissesPourDashboard();
+  const soldesParId = await calculerSoldesCaisses(caisses.map((c) => c.caisse.id));
 
   return (
     <section className="grid gap-6">
@@ -52,7 +64,7 @@ export default async function PageDashboardTresorerie() {
         <ul className="grid gap-4">
           {caisses.map((ligne) => (
             <li key={ligne.caisse.id}>
-              <CarteCaisse ligne={ligne} />
+              <CarteCaisse ligne={ligne} solde={soldesParId.get(ligne.caisse.id) ?? null} />
             </li>
           ))}
         </ul>
@@ -83,8 +95,10 @@ const LIBELLE_TYPE_CAISSE = {
 
 function CarteCaisse({
   ligne,
+  solde,
 }: {
   ligne: import('@/lib/admin/tresorerie').CaisseEnrichie;
+  solde: SoldeCaisse | null;
 }) {
   const { caisse, nbReceptaclesActifs, nbTransactionsSortantes, derniereTransactionLe } = ligne;
 
@@ -142,6 +156,36 @@ function CarteCaisse({
           </dd>
         </div>
       </dl>
+
+      {solde !== null &&
+      solde.euro.entrees + solde.euro.sorties + solde.coin99.entrees + solde.coin99.sorties > 0 ? (
+        <div className="grid gap-2 rounded-md border border-border bg-surface p-3 sm:grid-cols-2">
+          {solde.euro.entrees + solde.euro.sorties > 0 ? (
+            <div>
+              <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Solde €</p>
+              <p className="mt-1 font-display font-bold text-lg text-text-1">
+                {formaterMontantCanal(solde.euro.solde, 'euro')}
+              </p>
+              <p className="text-text-3 text-xs">
+                {formaterMontantCanal(solde.euro.entrees, 'euro')} entrées −{' '}
+                {formaterMontantCanal(solde.euro.sorties, 'euro')} sorties
+              </p>
+            </div>
+          ) : null}
+          {solde.coin99.entrees + solde.coin99.sorties > 0 ? (
+            <div>
+              <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Solde 99c</p>
+              <p className="mt-1 font-display font-bold text-lg text-text-1">
+                {formaterMontantCanal(solde.coin99.solde, 'coin99')}
+              </p>
+              <p className="text-text-3 text-xs">
+                {formaterMontantCanal(solde.coin99.entrees, 'coin99')} entrées −{' '}
+                {formaterMontantCanal(solde.coin99.sorties, 'coin99')} sorties
+              </p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </Card>
   );
 }

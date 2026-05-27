@@ -2787,6 +2787,78 @@ export type Database = {
           },
         ];
       };
+      transaction_entrante: {
+        Row: {
+          id: string;
+          caisse_id: string;
+          receptacle_id: string | null;
+          source_type: string;
+          source_id: string | null;
+          montant: number;
+          canal: string;
+          statut: string;
+          motif: string | null;
+          payeur_personne_id: string | null;
+          payeur_externe_nom: string | null;
+          payeur_externe_email: string | null;
+          metadata: Json;
+          recue_le: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          caisse_id: string;
+          receptacle_id?: string | null;
+          source_type: string;
+          source_id?: string | null;
+          montant: number;
+          canal: string;
+          statut?: string;
+          motif?: string | null;
+          payeur_personne_id?: string | null;
+          payeur_externe_nom?: string | null;
+          payeur_externe_email?: string | null;
+          metadata?: Json;
+          recue_le?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          caisse_id?: string;
+          receptacle_id?: string | null;
+          source_type?: string;
+          source_id?: string | null;
+          montant?: number;
+          canal?: string;
+          statut?: string;
+          motif?: string | null;
+          payeur_personne_id?: string | null;
+          payeur_externe_nom?: string | null;
+          payeur_externe_email?: string | null;
+          metadata?: Json;
+          recue_le?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'transaction_entrante_caisse_id_fkey';
+            columns: ['caisse_id'];
+            isOneToOne: false;
+            referencedRelation: 'caisse';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'transaction_entrante_receptacle_id_fkey';
+            columns: ['receptacle_id'];
+            isOneToOne: false;
+            referencedRelation: 'receptacle_caisse';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       reservation_journal: {
         Row: {
           id: string;
