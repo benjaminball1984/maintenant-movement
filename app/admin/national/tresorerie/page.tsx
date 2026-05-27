@@ -1,6 +1,9 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { listerCaissesPourDashboard } from '@/lib/admin/tresorerie';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { type SoldeCaisse, calculerSoldesCaisses } from '@/lib/caisse-solde';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -37,21 +40,43 @@ function formaterMontantCanal(montant: number, canal: 'euro' | 'coin99'): string
 export default async function PageDashboardTresorerie() {
   const caisses = await listerCaissesPourDashboard();
   const soldesParId = await calculerSoldesCaisses(caisses.map((c) => c.caisse.id));
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.tresorerie.titre', { valeurMd: 'Trésorerie' }),
+    lireContenuEditorial('admin.national.tresorerie.intro', {
+      valeurMd:
+        'Lecture seule des caisses (régime B), des réceptacles datés et des reversements. Les actions (créer une caisse, poser un réceptacle, initier un reversement) viendront dans un chantier dédié — les helpers techniques sont prêts (cf. `lib/caisse.ts` posé en V2.2.3).',
+    }),
+  ]);
 
   return (
     <section className="grid gap-6">
       <header className="flex items-start gap-3">
         <Wallet size={28} className="mt-1 text-brand" aria-hidden="true" />
         <div>
-          <Heading niveau={1} apparenceComme={2}>
-            Trésorerie
-          </Heading>
-          <p className="mt-1 text-text-2">
-            Lecture seule des caisses (régime B), des réceptacles datés et des reversements. Les
-            actions (créer une caisse, poser un réceptacle, initier un reversement) viendront dans
-            un chantier dédié — les helpers techniques sont prêts (cf. <code>lib/caisse.ts</code>
-            posé en V2.2.3).
-          </p>
+          <TexteEditableAdmin
+            cle="admin.national.tresorerie.titre"
+            valeurInitiale={titre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre console tresorerie"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={1} apparenceComme={2}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
+          <TexteEditableAdmin
+            cle="admin.national.tresorerie.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro console tresorerie"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => <p className="mt-1 text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </div>
       </header>
 

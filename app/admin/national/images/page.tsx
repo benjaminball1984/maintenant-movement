@@ -1,9 +1,12 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import {
   PREFIXES_IMAGES,
   type PrefixeImage,
   listerFichiersBucketImages,
 } from '@/lib/admin/bibliotheque-images';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterTailleOctets } from '@/lib/format-taille';
 import { Image as IconeImage } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -43,16 +46,39 @@ export default async function PageBibliothequeImages({ searchParams }: Props) {
   const fichiers = await listerFichiersBucketImages(prefixeActuel);
   const totalOctets = fichiers.reduce((acc, f) => acc + f.tailleOctets, 0);
 
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.images.titre', { valeurMd: "Bibliothèque d'images" }),
+    lireContenuEditorial('admin.national.images.intro', {
+      valeurMd:
+        'Toutes les images téléversées sur Supabase Storage (bucket `media`). Tri par date de mise à jour décroissante.',
+    }),
+  ]);
+
   return (
     <>
       <Heading niveau={1}>
         <IconeImage size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Bibliothèque d'images
+        <TexteEditableAdmin
+          cle="admin.national.images.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console bibliotheque images"
+          longueurMax={50}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Toutes les images téléversées sur Supabase Storage (bucket <code>media</code>). Tri par date
-        de mise à jour décroissante.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.images.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console bibliotheque images"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-6">
         <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">

@@ -1,4 +1,7 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { listerSallesDecider } from '@/lib/decider';
 import { getSupabaseServer } from '@/lib/supabase';
 import { ExternalLink, Plus, Video } from 'lucide-react';
@@ -38,16 +41,39 @@ export default async function PageAdminDecider() {
     nbParSalle.set(c.salle_id, (nbParSalle.get(c.salle_id) ?? 0) + 1);
   }
 
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.decider.titre', { valeurMd: 'Décider — Console admin' }),
+    lireContenuEditorial('admin.national.decider.intro', {
+      valeurMd:
+        "Gestion des salles de décision et des réunions. LiveKit pas encore branché ; l'infrastructure stocke salles + ordres du jour + PV.",
+    }),
+  ]);
+
   return (
     <>
       <Heading niveau={1}>
         <Video size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Décider — Console admin
+        <TexteEditableAdmin
+          cle="admin.national.decider.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console decider admin"
+          longueurMax={60}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Gestion des salles de décision et des réunions. LiveKit pas encore branché ;
-        l'infrastructure stocke salles + ordres du jour + PV.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.decider.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console decider admin"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-8">
         <Heading niveau={2} apparenceComme={3}>

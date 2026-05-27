@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeCampagnes, listerCampagnesAdmin } from '@/lib/admin/campagnes';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateCourte } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
 import { ExternalLink, Flag } from 'lucide-react';
@@ -43,16 +46,38 @@ export default async function PageAdminCampagnes({ searchParams }: Props) {
     motCle: motCle === '' ? undefined : motCle,
     statut: statutFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.campagnes.titre', { valeurMd: 'Campagnes' }),
+    lireContenuEditorial('admin.national.campagnes.intro', {
+      valeurMd: 'Liste des campagnes tous statuts confondus. Recherche par titre, filtre statut.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Flag size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Campagnes
+        <TexteEditableAdmin
+          cle="admin.national.campagnes.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console campagnes admin"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Liste des campagnes tous statuts confondus. Recherche par titre, filtre statut.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.campagnes.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console campagnes admin"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <form
         method="get"

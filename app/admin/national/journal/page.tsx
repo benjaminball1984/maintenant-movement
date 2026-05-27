@@ -1,4 +1,7 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 import { FileText, Plus } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -33,15 +36,39 @@ export default async function PageAdminJournal() {
   const numeroSuggere =
     editions && editions.length > 0 ? Math.max(...editions.map((e) => e.numero)) + 1 : 1;
 
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.journal.titre', {
+      valeurMd: 'Maintenant Médias — Console admin',
+    }),
+    lireContenuEditorial('admin.national.journal.intro', {
+      valeurMd: 'Gestion des éditions du journal-affiche. Création, publication, archivage.',
+    }),
+  ]);
+
   return (
     <>
       <Heading niveau={1}>
         <FileText size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Maintenant Médias — Console admin
+        <TexteEditableAdmin
+          cle="admin.national.journal.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console journal admin"
+          longueurMax={60}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Gestion des éditions du journal-affiche. Création, publication, archivage.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.journal.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console journal admin"
+        longueurMax={200}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-8">
         <Heading niveau={2} apparenceComme={3}>

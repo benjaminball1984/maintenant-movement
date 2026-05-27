@@ -1,4 +1,7 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -36,17 +39,41 @@ export default async function PageAuditJournal() {
   const idsAuteurs = new Set<string>();
   for (const e of entrees) if (e.auteur_id !== null) idsAuteurs.add(e.auteur_id);
   const identitesParId = await chargerIdentitesAffichables([...idsAuteurs]);
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.audit.titre', {
+      valeurMd: 'Audit — Journal des transitions D8',
+    }),
+    lireContenuEditorial('admin.national.audit.intro', {
+      valeurMd:
+        '200 dernières transitions de réservation (V2.3.15). Inclut les actions de toutes les parties : demandeur, propriétaire, admin. Lecture seule.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <History size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Audit — Journal des transitions D8
+        <TexteEditableAdmin
+          cle="admin.national.audit.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console audit"
+          longueurMax={60}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        200 dernières transitions de réservation (V2.3.15). Inclut les actions de toutes les parties
-        : demandeur, propriétaire, admin. Lecture seule.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.audit.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console audit"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       {entrees.length === 0 ? (
         <p className="mt-6 text-text-2">Aucune entrée dans le journal pour le moment.</p>

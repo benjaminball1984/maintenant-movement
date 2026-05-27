@@ -1,4 +1,7 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 import { ExternalLink, FileText, Plus } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -65,16 +68,39 @@ export default async function PageContenusEditoriaux() {
     else nonEditees.push(p);
   }
 
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.contenus.titre', { valeurMd: 'Contenus éditoriaux' }),
+    lireContenuEditorial('admin.national.contenus.intro', {
+      valeurMd:
+        "CMS minimal V2.4.1. Pour modifier un contenu, va sur la page publique correspondante et clique sur « Modifier » (visible uniquement en tant qu'admin).",
+    }),
+  ]);
+
   return (
     <>
       <Heading niveau={1}>
         <FileText size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Contenus éditoriaux
+        <TexteEditableAdmin
+          cle="admin.national.contenus.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console contenus editoriaux"
+          longueurMax={50}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        CMS minimal V2.4.1. Pour modifier un contenu, va sur la page publique correspondante et
-        clique sur « Modifier » (visible uniquement en tant qu'admin).
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.contenus.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console contenus editoriaux"
+        multilignes
+        longueurMax={400}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-8">
         <Heading niveau={2} apparenceComme={3}>

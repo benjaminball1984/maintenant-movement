@@ -1,8 +1,11 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import {
   type OptionsListeGroupesEntraide,
   listerGroupesEntraideAdmin,
 } from '@/lib/admin/groupes-entraide';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compter } from '@/lib/pluriel';
 import { ExternalLink, Users } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -45,16 +48,41 @@ export default async function PageAdminGroupesEntraide({ searchParams }: Props) 
     motCle: motCle === '' ? undefined : motCle,
     statut: statutFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.groupes_entraide.titre', {
+      valeurMd: "Groupes d'entraide locaux",
+    }),
+    lireContenuEditorial('admin.national.groupes_entraide.intro', {
+      valeurMd:
+        "Référentiel des groupes d'entraide. Filtres : mot-clé, statut. Lecture seule, limite 100.",
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Users size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Groupes d'entraide locaux
+        <TexteEditableAdmin
+          cle="admin.national.groupes_entraide.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console groupes entraide admin"
+          longueurMax={60}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Référentiel des groupes d'entraide. Filtres : mot-clé, statut. Lecture seule, limite 100.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.national.groupes_entraide.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console groupes entraide admin"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <form
         method="get"

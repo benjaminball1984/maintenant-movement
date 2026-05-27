@@ -1,7 +1,10 @@
 import { BoutonRetirerDroit } from '@/components/admin/national/BoutonRetirerDroit';
 import { FormulaireAccorderDroit } from '@/components/admin/national/FormulaireAccorderDroit';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type DroitAdminAffichage, listerDroitsActifs } from '@/lib/admin/national/droits';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   LIBELLES_ONGLET,
   type OngletModeration,
@@ -22,17 +25,41 @@ export const metadata: Metadata = {
  */
 export default async function PageGestionDroits() {
   const droits = await listerDroitsActifs();
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.droits.titre', { valeurMd: 'Gestion des droits' }),
+    lireContenuEditorial('admin.national.droits.intro', {
+      valeurMd:
+        'Accorde ou retire les droits d’administration. Chaque action est consignée dans le journal d’audit.',
+    }),
+  ]);
 
   return (
     <section className="grid gap-8">
       <header>
-        <Heading niveau={1} apparenceComme={2}>
-          Gestion des droits
-        </Heading>
-        <p className="mt-2 text-text-2">
-          Accorde ou retire les droits d’administration. Chaque action est consignée dans le journal
-          d’audit.
-        </p>
+        <TexteEditableAdmin
+          cle="admin.national.droits.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console droits"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Heading niveau={1} apparenceComme={2}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="admin.national.droits.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console droits"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       <FormulaireAccorderDroit />

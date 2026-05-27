@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeMoments, listerMomentsAdmin } from '@/lib/admin/moments';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateHeure } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
 import { CalendarRange, ExternalLink, MapPin } from 'lucide-react';
@@ -58,16 +61,40 @@ export default async function PageAdminMoments({ searchParams }: Props) {
     statut: statutFiltre,
     type: typeFiltre === '' ? undefined : typeFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.moments.titre', { valeurMd: 'Moments solidaires' }),
+    lireContenuEditorial('admin.national.moments.intro', {
+      valeurMd:
+        'Liste des moments solidaires tous statuts confondus. Filtres : mot-clé, statut, type. Lecture seule, limite 100, triés par date de début décroissante.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <CalendarRange size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Moments solidaires
+        <TexteEditableAdmin
+          cle="admin.national.moments.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console moments admin"
+          longueurMax={60}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Liste des moments solidaires tous statuts confondus. Filtres : mot-clé, statut, type.
-        Lecture seule, limite 100, triés par date de début décroissante.{' '}
+        <TexteEditableAdmin
+          cle="admin.national.moments.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console moments admin"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a
           href="/admin/national/moments/export.csv"
           className="text-brand hover:underline"

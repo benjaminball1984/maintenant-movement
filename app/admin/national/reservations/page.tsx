@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeReservations, listerReservationsAdmin } from '@/lib/admin/reservations';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateHeure } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
 import { tronquerCaracteres } from '@/lib/texte-apercu';
@@ -65,15 +68,40 @@ export default async function PageAdminReservations({ searchParams }: Props) {
     statut: statutFiltre,
     offreType: typeFiltre === '' ? undefined : typeFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.reservations.titre', { valeurMd: 'Réservations' }),
+    lireContenuEditorial('admin.national.reservations.intro', {
+      valeurMd:
+        'Liste des réservations tous statuts confondus. Pour gérer les litiges spécifiquement, voir',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Inbox size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Réservations
+        <TexteEditableAdmin
+          cle="admin.national.reservations.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console reservations admin"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Liste des réservations tous statuts confondus. Pour gérer les litiges spécifiquement, voir{' '}
+        <TexteEditableAdmin
+          cle="admin.national.reservations.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console reservations admin"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a href="/admin/moderation/reservations" className="text-brand hover:underline">
           /admin/moderation/reservations
         </a>

@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { type OptionsListeSondages, listerSondagesAdmin } from '@/lib/admin/sondages';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateCourte } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
 import { ExternalLink, Vote } from 'lucide-react';
@@ -52,16 +55,40 @@ export default async function PageAdminSondages({ searchParams }: Props) {
     statut: statutFiltre,
     mode: modeFiltre,
   });
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('admin.national.sondages.titre', { valeurMd: 'Sondages' }),
+    lireContenuEditorial('admin.national.sondages.intro', {
+      valeurMd:
+        'Liste des sondages tous statuts confondus. Filtres : mot-clé, statut, mode. Lecture seule, limite 100.',
+    }),
+  ]);
 
   return (
     <>
       <Heading niveau={1}>
         <Vote size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Sondages
+        <TexteEditableAdmin
+          cle="admin.national.sondages.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console sondages admin"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Liste des sondages tous statuts confondus. Filtres : mot-clé, statut, mode. Lecture seule,
-        limite 100.{' '}
+        <TexteEditableAdmin
+          cle="admin.national.sondages.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console sondages admin"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
         <a
           href="/admin/national/sondages/export.csv"
           className="text-brand hover:underline"
