@@ -86,7 +86,16 @@ export function TexteEditableAdmin({
 
   if (enEdition) {
     return (
-      <div className="my-2 grid gap-2 rounded-md border-2 border-brand bg-surface p-3 text-left">
+      // Le `onClick` qui arrete la propagation est crucial quand ce composant
+      // est rendu a l'interieur d'un `<Link>` (cartes des pages hub) : sans
+      // ca, chaque clic sur l'input / le bouton remonterait au lien et
+      // declencherait une navigation.
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        role="presentation"
+        className="my-2 grid gap-2 rounded-md border-2 border-brand bg-surface p-3 text-left"
+      >
         <p className="font-bold text-text-3 text-xs uppercase tracking-cap">
           Édition · <code className="font-mono">{cle}</code>
         </p>
@@ -139,8 +148,14 @@ export function TexteEditableAdmin({
     <span className="group relative inline-block">
       <button
         type="button"
-        onClick={() => setEnEdition(true)}
-        className="absolute -top-2 -right-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-0.5 text-text-3 text-xs opacity-0 shadow-md transition-opacity hover:bg-surface-2 hover:text-text-1 group-hover:opacity-100"
+        onClick={(e) => {
+          // Coupe la propagation pour eviter qu'un eventuel `<Link>` parent
+          // (cartes des pages hub) ne navigue quand l'admin clique le crayon.
+          e.preventDefault();
+          e.stopPropagation();
+          setEnEdition(true);
+        }}
+        className="-top-2 -right-2 absolute z-20 inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-0.5 text-text-3 text-xs opacity-0 shadow-md transition-opacity hover:bg-surface-2 hover:text-text-1 group-hover:opacity-100"
         aria-label={`Modifier ${libelle ?? cle}`}
       >
         <Pencil size={12} aria-hidden="true" />

@@ -13,6 +13,18 @@ const FALLBACK_TITRE = 'Agir';
 const FALLBACK_INTRO =
   'Passer à l’action concrète : adhérer, activer ou rejoindre une commune libre, participer à un moment solidaire près de chez toi, ou agir autrement.';
 
+// Cf. /mobiliser : titres = vocabulaire fixe, descriptions = editorial editable.
+const CARTES_DESCRIPTIONS: Record<string, string> = {
+  adherer:
+    'Rejoindre Maintenant! Adhésion gratuite, en euros ou en 99-coin. Cotisation solidaire libre.',
+  communes:
+    'Activer une commune libre près de chez toi, rejoindre la sienne. Près de 35 000 communes pré-créées.',
+  federations: 'Regroupements géographiques ou thématiques de communes.',
+  'moments-solidaires':
+    'Porte-à-porte, maraudes, vide-greniers, manifestations, repas solidaires, concerts.',
+  'autres-moyens': 'Devenir bénévole sur un chantier, héberger un événement, prêter du matériel.',
+};
+
 export const metadata: Metadata = {
   title: 'Agir',
   description:
@@ -34,36 +46,46 @@ interface Carte {
 export default async function PageAgir() {
   const supabase = await getSupabaseServer();
 
-  const [communesLibres, momentsAVenir, federations, estAdmin, titre, intro] = await Promise.all([
-    supabase
-      .from('commune')
-      .select('id', { count: 'exact', head: true })
-      .neq('statut_creation', 'pre_creee'),
-    supabase
-      .from('moment_solidaire')
-      .select('id', { count: 'exact', head: true })
-      .in('statut', ['annonce', 'en_cours'])
-      .gte('commence_le', new Date().toISOString()),
-    supabase.from('federation').select('id', { count: 'exact', head: true }),
-    estAdminCourant(),
-    lireContenuEditorial('agir.titre', { valeurMd: FALLBACK_TITRE }),
-    lireContenuEditorial('agir.intro', { valeurMd: FALLBACK_INTRO }),
-  ]);
+  const slugsDescriptions = Object.keys(CARTES_DESCRIPTIONS);
+
+  const [communesLibres, momentsAVenir, federations, estAdmin, titre, intro, ...descriptionsLues] =
+    await Promise.all([
+      supabase
+        .from('commune')
+        .select('id', { count: 'exact', head: true })
+        .neq('statut_creation', 'pre_creee'),
+      supabase
+        .from('moment_solidaire')
+        .select('id', { count: 'exact', head: true })
+        .in('statut', ['annonce', 'en_cours'])
+        .gte('commence_le', new Date().toISOString()),
+      supabase.from('federation').select('id', { count: 'exact', head: true }),
+      estAdminCourant(),
+      lireContenuEditorial('agir.titre', { valeurMd: FALLBACK_TITRE }),
+      lireContenuEditorial('agir.intro', { valeurMd: FALLBACK_INTRO }),
+      ...slugsDescriptions.map((slug) =>
+        lireContenuEditorial(`agir.carte.${slug}.description`, {
+          valeurMd: CARTES_DESCRIPTIONS[slug] ?? '',
+        }),
+      ),
+    ]);
+
+  const descriptionParSlug = new Map<string, string>(
+    slugsDescriptions.map((slug, i) => [slug, descriptionsLues[i]?.valeurMd ?? '']),
+  );
 
   const cartes: Carte[] = [
     {
       slug: 'adherer',
       titre: 'Adhérer',
-      description:
-        'Rejoindre Maintenant! Adhésion gratuite, en euros ou en 99-coin. Cotisation solidaire libre.',
+      description: descriptionParSlug.get('adherer') ?? '',
       icone: HandHeart,
       href: '/agir/adherer',
     },
     {
       slug: 'communes',
       titre: 'Communes libres',
-      description:
-        'Activer une commune libre près de chez toi, rejoindre la sienne. Près de 35 000 communes pré-créées.',
+      description: descriptionParSlug.get('communes') ?? '',
       icone: MapPin,
       href: '/agir/communes',
       badge: `${communesLibres.count ?? 0} actives`,
@@ -71,7 +93,7 @@ export default async function PageAgir() {
     {
       slug: 'federations',
       titre: 'Fédérations',
-      description: 'Regroupements géographiques ou thématiques de communes.',
+      description: descriptionParSlug.get('federations') ?? '',
       icone: Users,
       href: '/agir/federations',
       badge: compter(federations.count ?? 0, 'fédération'),
@@ -79,8 +101,7 @@ export default async function PageAgir() {
     {
       slug: 'moments-solidaires',
       titre: 'Moments solidaires',
-      description:
-        'Porte-à-porte, maraudes, vide-greniers, manifestations, repas solidaires, concerts.',
+      description: descriptionParSlug.get('moments-solidaires') ?? '',
       icone: CalendarRange,
       href: '/agir/moments-solidaires',
       badge: `${momentsAVenir.count ?? 0} à venir`,
@@ -88,7 +109,7 @@ export default async function PageAgir() {
     {
       slug: 'autres-moyens',
       titre: 'D’autres moyens d’agir',
-      description: 'Devenir bénévole sur un chantier, héberger un événement, prêter du matériel.',
+      description: descriptionParSlug.get('autres-moyens') ?? '',
       icone: MoreHorizontal,
       href: '/agir/autres-moyens',
     },
@@ -129,7 +150,16 @@ export default async function PageAgir() {
                   {c.badge !== undefined ? <Badge variant="success">{c.badge}</Badge> : null}
                 </div>
                 <h2 className="font-display font-bold text-lg text-text-1">{c.titre}</h2>
-                <p className="text-sm text-text-2">{c.description}</p>
+                <TexteEditableAdmin
+                  cle={`agir.carte.${c.slug}.description`}
+                  valeurInitiale={c.description}
+                  estAdmin={estAdmin}
+                  libelle={`description de la carte ${c.titre}`}
+                  multilignes
+                  longueurMax={400}
+                >
+                  {(t) => <p className="text-sm text-text-2">{t}</p>}
+                </TexteEditableAdmin>
               </Card>
             </Link>
           );

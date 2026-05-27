@@ -13,6 +13,17 @@ const FALLBACK_TITRE = 'S’informer';
 const FALLBACK_INTRO =
   'Articles, brèves, podcasts, vidéos, sondages, journal-affiche imprimable, salles de décision, réseau social du mouvement. Tout ce qui circule à l’intérieur de Maintenant! et qui s’adresse au plus grand nombre.';
 
+// Cf. /mobiliser, /agir : titres = vocabulaire fixe, descriptions = editable.
+const CARTES_DESCRIPTIONS: Record<string, string> = {
+  media: 'Édito, tribune, articles, brèves, dessins, podcasts, vidéos, lives, newsletter.',
+  radio: 'Webradio communautaire (en construction).',
+  journal: 'Journal-affiche imprimable A3/A4 à coller dans l’espace public. Patchwork de modules.',
+  reseau: 'Flux hiérarchisé, profil par numéro M+7, publications, soutiens, messagerie interne.',
+  sondages: 'Sondages classiques et pondérés ouverts au mouvement. Résultats publics.',
+  decider:
+    'Infrastructure de la décision en réunion. 3 modes : consensus, levée d’objections, jugement majoritaire.',
+};
+
 export const metadata: Metadata = {
   title: 'S’informer',
   description:
@@ -39,31 +50,50 @@ interface CarteSousEspace {
 export default async function PageSInformer() {
   const supabase = await getSupabaseServer();
 
+  const slugsDescriptions = Object.keys(CARTES_DESCRIPTIONS);
+
   // Compteurs + textes editoriaux + estAdmin en parallèle pour ne pas allonger le TTFB.
-  const [mediasPub, journalPub, sondagesOuv, sallesDecider, postsReseau, estAdmin, titre, intro] =
-    await Promise.all([
-      supabase.from('media').select('id', { count: 'exact', head: true }).eq('statut', 'publie'),
-      supabase
-        .from('journal_affiche')
-        .select('id', { count: 'exact', head: true })
-        .eq('statut', 'publie'),
-      supabase.from('sondage').select('id', { count: 'exact', head: true }).eq('statut', 'ouvert'),
-      supabase.from('salle_decider').select('id', { count: 'exact', head: true }),
-      supabase
-        .from('post_reseau')
-        .select('id', { count: 'exact', head: true })
-        .eq('statut', 'publie'),
-      estAdminCourant(),
-      lireContenuEditorial('s-informer.titre', { valeurMd: FALLBACK_TITRE }),
-      lireContenuEditorial('s-informer.intro', { valeurMd: FALLBACK_INTRO }),
-    ]);
+  const [
+    mediasPub,
+    journalPub,
+    sondagesOuv,
+    sallesDecider,
+    postsReseau,
+    estAdmin,
+    titre,
+    intro,
+    ...descriptionsLues
+  ] = await Promise.all([
+    supabase.from('media').select('id', { count: 'exact', head: true }).eq('statut', 'publie'),
+    supabase
+      .from('journal_affiche')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'publie'),
+    supabase.from('sondage').select('id', { count: 'exact', head: true }).eq('statut', 'ouvert'),
+    supabase.from('salle_decider').select('id', { count: 'exact', head: true }),
+    supabase
+      .from('post_reseau')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'publie'),
+    estAdminCourant(),
+    lireContenuEditorial('s-informer.titre', { valeurMd: FALLBACK_TITRE }),
+    lireContenuEditorial('s-informer.intro', { valeurMd: FALLBACK_INTRO }),
+    ...slugsDescriptions.map((slug) =>
+      lireContenuEditorial(`s-informer.carte.${slug}.description`, {
+        valeurMd: CARTES_DESCRIPTIONS[slug] ?? '',
+      }),
+    ),
+  ]);
+
+  const descriptionParSlug = new Map<string, string>(
+    slugsDescriptions.map((slug, i) => [slug, descriptionsLues[i]?.valeurMd ?? '']),
+  );
 
   const sousEspaces: CarteSousEspace[] = [
     {
       slug: 'media',
       titre: 'Média Maintenant',
-      description:
-        'Édito, tribune, articles, brèves, dessins, podcasts, vidéos, lives, newsletter.',
+      description: descriptionParSlug.get('media') ?? '',
       icone: Newspaper,
       href: '/s-informer/media',
       compteurLibelle: 'publié',
@@ -72,7 +102,7 @@ export default async function PageSInformer() {
     {
       slug: 'radio',
       titre: 'Maintenant Radio',
-      description: 'Webradio communautaire (en construction).',
+      description: descriptionParSlug.get('radio') ?? '',
       icone: Radio,
       href: '/s-informer/radio',
       enConstruction: true,
@@ -80,8 +110,7 @@ export default async function PageSInformer() {
     {
       slug: 'journal',
       titre: 'Maintenant Médias',
-      description:
-        'Journal-affiche imprimable A3/A4 à coller dans l’espace public. Patchwork de modules.',
+      description: descriptionParSlug.get('journal') ?? '',
       icone: FileText,
       href: '/s-informer/journal',
       compteurLibelle: 'édition',
@@ -90,8 +119,7 @@ export default async function PageSInformer() {
     {
       slug: 'reseau',
       titre: 'Réseau social',
-      description:
-        'Flux hiérarchisé, profil par numéro M+7, publications, soutiens, messagerie interne.',
+      description: descriptionParSlug.get('reseau') ?? '',
       icone: Users,
       href: '/s-informer/reseau',
       compteurLibelle: 'publication',
@@ -100,7 +128,7 @@ export default async function PageSInformer() {
     {
       slug: 'sondages',
       titre: 'Sondages',
-      description: 'Sondages classiques et pondérés ouverts au mouvement. Résultats publics.',
+      description: descriptionParSlug.get('sondages') ?? '',
       icone: Vote,
       href: '/s-informer/sondages',
       compteurLibelle: 'ouvert',
@@ -109,8 +137,7 @@ export default async function PageSInformer() {
     {
       slug: 'decider',
       titre: 'Décider',
-      description:
-        'Infrastructure de la décision en réunion. 3 modes : consensus, levée d’objections, jugement majoritaire.',
+      description: descriptionParSlug.get('decider') ?? '',
       icone: Video,
       href: '/s-informer/decider',
       compteurLibelle: 'salle',
@@ -184,7 +211,16 @@ export default async function PageSInformer() {
                   ) : null}
                 </div>
                 <h2 className="font-display font-bold text-lg text-text-1">{c.titre}</h2>
-                <p className="text-sm text-text-2">{c.description}</p>
+                <TexteEditableAdmin
+                  cle={`s-informer.carte.${c.slug}.description`}
+                  valeurInitiale={c.description}
+                  estAdmin={estAdmin}
+                  libelle={`description de la carte ${c.titre}`}
+                  multilignes
+                  longueurMax={400}
+                >
+                  {(t) => <p className="text-sm text-text-2">{t}</p>}
+                </TexteEditableAdmin>
               </Card>
             </Link>
           );

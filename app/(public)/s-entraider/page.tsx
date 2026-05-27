@@ -17,6 +17,33 @@ const FALLBACK_TITRE = "S'entraider";
 const FALLBACK_INTRO =
   "L'entraide concrète et économique entre les gens : hébergement, transport, prêt d'objets, alimentation, SEL (système d'échange local), marché solidaire, groupes d'entraide locaux.";
 
+// Titres des 3 cartes hors-config (vocabulaire fixe, restent en dur).
+// Descriptions editables admin (cf. autres pages hub).
+const CARTES_HORS_CONFIG: ReadonlyArray<{ slug: string; titre: string; fallback: string }> = [
+  {
+    slug: 'sel',
+    titre: "SEL — Système d'échange local",
+    fallback:
+      'Échange de services entre membres. 1 T99CP = 1 € = 1 minute. Volontariat et services proposés/cherchés.',
+  },
+  {
+    slug: 'marche',
+    titre: 'Marché solidaire',
+    fallback:
+      'Produits, boutiques éphémères, mini-marchés physiques. Vente ou don gratuit. T99CP / € / G1 / MNLC.',
+  },
+  {
+    slug: 'groupes-locaux',
+    titre: "Groupes d'entraide locaux",
+    fallback:
+      'Groupes locaux qui activent leurs propres outils (prêt, marché, SEL) sur leur territoire.',
+  },
+];
+
+const FALLBACK_ALERT_TITRE = 'Tout est gratuit et libre';
+const FALLBACK_ALERT_CORPS =
+  "Les outils d'entraide sont accessibles à toute personne authentifiée, adhérente ou non. La modération a posteriori est assurée par l'équipe de modération.";
+
 /**
  * Page d'accueil de l'espace S'entraider.
  *
@@ -25,11 +52,30 @@ const FALLBACK_INTRO =
  * V2.4.105 : titre + intro éditables admin via CMS.
  */
 export default async function PageSEntraider() {
-  const [estAdmin, titre, intro] = await Promise.all([
+  // 1 + 2 textes hub + N descriptions cartes + 2 textes alert = tout lu en parallele.
+  const sousEspacesConfig = Object.values(SOUS_ESPACES);
+
+  const [estAdmin, titre, intro, alertTitre, alertCorps, ...descriptionsLues] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('s-entraider.titre', { valeurMd: FALLBACK_TITRE }),
     lireContenuEditorial('s-entraider.intro', { valeurMd: FALLBACK_INTRO }),
+    lireContenuEditorial('s-entraider.alert.titre', { valeurMd: FALLBACK_ALERT_TITRE }),
+    lireContenuEditorial('s-entraider.alert.corps', { valeurMd: FALLBACK_ALERT_CORPS }),
+    ...sousEspacesConfig.map((config) =>
+      lireContenuEditorial(`s-entraider.carte.${config.slug}.description`, {
+        valeurMd: config.description,
+      }),
+    ),
+    ...CARTES_HORS_CONFIG.map((c) =>
+      lireContenuEditorial(`s-entraider.carte.${c.slug}.description`, {
+        valeurMd: c.fallback,
+      }),
+    ),
   ]);
+
+  // Decoupe le tableau de descriptions : d'abord les sous-espaces config, puis hors-config.
+  const descriptionsConfig = descriptionsLues.slice(0, sousEspacesConfig.length);
+  const descriptionsHorsConfig = descriptionsLues.slice(sousEspacesConfig.length);
 
   return (
     <>
@@ -53,7 +99,7 @@ export default async function PageSEntraider() {
       </TexteEditableAdmin>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-        {Object.values(SOUS_ESPACES).map((config) => (
+        {sousEspacesConfig.map((config, i) => (
           <li key={config.type}>
             <Link
               href={`/s-entraider/${config.slug}`}
@@ -63,60 +109,69 @@ export default async function PageSEntraider() {
               )}
             >
               <p className="font-bold text-text-1">{config.titre}</p>
-              <p className="mt-1 text-sm text-text-3">{config.description}</p>
+              <TexteEditableAdmin
+                cle={`s-entraider.carte.${config.slug}.description`}
+                valeurInitiale={descriptionsConfig[i]?.valeurMd ?? config.description}
+                estAdmin={estAdmin}
+                libelle={`description de la carte ${config.titre}`}
+                multilignes
+                longueurMax={400}
+              >
+                {(t) => <p className="mt-1 text-sm text-text-3">{t}</p>}
+              </TexteEditableAdmin>
             </Link>
           </li>
         ))}
-        <li>
-          <Link
-            href="/s-entraider/sel"
-            className={cn(
-              'block rounded-lg border border-border bg-surface p-4 transition',
-              'hover:border-brand hover:bg-surface-2',
-            )}
-          >
-            <p className="font-bold text-text-1">SEL — Système d'échange local</p>
-            <p className="mt-1 text-sm text-text-3">
-              Échange de services entre membres. 1 T99CP = 1 € = 1 minute. Volontariat et services
-              proposés/cherchés.
-            </p>
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/s-entraider/marche"
-            className={cn(
-              'block rounded-lg border border-border bg-surface p-4 transition',
-              'hover:border-brand hover:bg-surface-2',
-            )}
-          >
-            <p className="font-bold text-text-1">Marché solidaire</p>
-            <p className="mt-1 text-sm text-text-3">
-              Produits, boutiques éphémères, mini-marchés physiques. Vente ou don gratuit. T99CP / €
-              / G1 / MNLC.
-            </p>
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/s-entraider/groupes-locaux"
-            className={cn(
-              'block rounded-lg border border-border bg-surface p-4 transition',
-              'hover:border-brand hover:bg-surface-2',
-            )}
-          >
-            <p className="font-bold text-text-1">Groupes d'entraide locaux</p>
-            <p className="mt-1 text-sm text-text-3">
-              Groupes locaux qui activent leurs propres outils (prêt, marché, SEL) sur leur
-              territoire.
-            </p>
-          </Link>
-        </li>
+        {CARTES_HORS_CONFIG.map((carte, i) => (
+          <li key={carte.slug}>
+            <Link
+              href={`/s-entraider/${carte.slug}`}
+              className={cn(
+                'block rounded-lg border border-border bg-surface p-4 transition',
+                'hover:border-brand hover:bg-surface-2',
+              )}
+            >
+              <p className="font-bold text-text-1">{carte.titre}</p>
+              <TexteEditableAdmin
+                cle={`s-entraider.carte.${carte.slug}.description`}
+                valeurInitiale={descriptionsHorsConfig[i]?.valeurMd ?? carte.fallback}
+                estAdmin={estAdmin}
+                libelle={`description de la carte ${carte.titre}`}
+                multilignes
+                longueurMax={400}
+              >
+                {(t) => <p className="mt-1 text-sm text-text-3">{t}</p>}
+              </TexteEditableAdmin>
+            </Link>
+          </li>
+        ))}
       </ul>
 
-      <Alert variant="info" titre="Tout est gratuit et libre" className="mt-8">
-        Les outils d'entraide sont accessibles à toute personne authentifiée, adhérente ou non. La
-        modération a posteriori est assurée par l'équipe de modération.
+      <Alert
+        variant="info"
+        titre={
+          <TexteEditableAdmin
+            cle="s-entraider.alert.titre"
+            valeurInitiale={alertTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre de l'alerte bas de page s-entraider"
+            longueurMax={80}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
+        }
+        className="mt-8"
+      >
+        <TexteEditableAdmin
+          cle="s-entraider.alert.corps"
+          valeurInitiale={alertCorps.valeurMd}
+          estAdmin={estAdmin}
+          libelle="corps de l'alerte bas de page s-entraider"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Alert>
     </>
   );

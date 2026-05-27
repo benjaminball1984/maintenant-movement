@@ -27,8 +27,13 @@ const ROLES_VARIANT: Record<VariantAlert, 'status' | 'alert'> = {
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   variant?: VariantAlert;
-  /** Titre optionnel. Si absent, seul le `children` est affiché. */
-  titre?: string;
+  /**
+   * Titre optionnel. Si absent, seul le `children` est affiche.
+   * Accepte un `ReactNode` (et pas seulement une `string`) pour autoriser
+   * un wrapping `TexteEditableAdmin` en mode admin sur les Alert dont le
+   * titre est gere par le CMS.
+   */
+  titre?: ReactNode;
   children: ReactNode;
 }
 
