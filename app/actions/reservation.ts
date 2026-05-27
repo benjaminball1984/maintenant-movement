@@ -1,7 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
-import { poserNotification } from '@/lib/notification';
+import { poserNotificationTemplee } from '@/lib/notification-templates';
 import {
   type OffreTypeReservation,
   changerStatutReservation,
@@ -116,13 +116,12 @@ export async function creerReservationAction(
       destinataireId: createurId,
       messageAmorce,
     });
-    // V2.3.25 : cloche pour le propriétaire d'offre.
-    await poserNotification(
+    // V2.3.25 + V2.4.132 : template editable admin via CMS.
+    await poserNotificationTemplee(
+      'reservation_demande_recue',
+      { titre_offre: titreOffre },
       {
         destinatairePersonneId: createurId,
-        type: 'reservation_demande_recue',
-        titre: 'Nouvelle demande de réservation',
-        message: `Sur ton offre : ${titreOffre}`,
         href: '/profil/demandes-reservations',
         cibleId: resultat.reservation.id,
         cibleTable: 'reservation',
@@ -308,18 +307,17 @@ async function executerTransitionProprietaire(
         : cible === 'refusee'
           ? 'reservation_refusee'
           : 'reservation_realisee';
-    const titreNotif =
-      cible === 'acceptee'
-        ? 'Réservation acceptée'
-        : cible === 'refusee'
-          ? 'Réservation refusée'
-          : 'Réservation marquée comme réalisée';
-    await poserNotification(
+    // V2.4.132 : 3 templates distincts (acceptee/refusee/realisee), editables admin.
+    // Le motif (s'il est passé) atterrit dans `{motif}` du template ; les templates
+    // par defaut l'incluent quand pertinent (refusee surtout).
+    await poserNotificationTemplee(
+      typeNotif,
+      {
+        motif: options.motif?.trim() ?? '',
+        titre_offre: '', // pas connu à ce point — admin peut adapter le template
+      },
       {
         destinatairePersonneId: demandeurId,
-        type: typeNotif,
-        titre: titreNotif,
-        message: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
         href: '/profil/reservations',
         cibleId: options.reservationId,
         cibleTable: 'reservation',
@@ -404,12 +402,13 @@ export async function signalerLitigeProprietaireAction(options: {
     .eq('id', options.reservationId)
     .maybeSingle();
   if (ligne?.demandeur_personne_id !== undefined && ligne?.demandeur_personne_id !== null) {
-    await poserNotification(
+    // V2.4.132 : template editable. Le titre par defaut est neutre,
+    // l'admin peut le specialiser cote-proprietaire si besoin.
+    await poserNotificationTemplee(
+      'reservation_litige_signale',
+      { motif: motifNettoye, titre_offre: '' },
       {
         destinatairePersonneId: ligne.demandeur_personne_id,
-        type: 'reservation_litige_signale',
-        titre: 'Litige signalé par le propriétaire',
-        message: motifNettoye,
         href: '/profil/reservations',
         cibleId: options.reservationId,
         cibleTable: 'reservation',
@@ -520,15 +519,16 @@ export async function resoudreLitigeReservationAction(options: {
       ligne.offre_type as OffreTypeReservation,
       ligne.offre_id,
     );
-    const corps = `Arbitrage : ${options.decision === 'confirmee' ? 'prestation confirmée' : 'réservation annulée'}. Motif : ${motifNettoye}`;
+    // V2.4.132 : decision exposee comme parametre {decision} du template.
+    const decisionAffichee =
+      options.decision === 'confirmee' ? 'prestation confirmée' : 'réservation annulée';
     for (const personneId of [ligne.demandeur_personne_id, proprietaireId]) {
       if (personneId !== null) {
-        await poserNotification(
+        await poserNotificationTemplee(
+          'reservation_litige_arbitre',
+          { decision: decisionAffichee, motif: motifNettoye, titre_offre: '' },
           {
             destinatairePersonneId: personneId,
-            type: 'reservation_litige_arbitre',
-            titre: 'Arbitrage de ton litige de réservation',
-            message: corps,
             href: '/profil/reservations',
             cibleId: options.reservationId,
             cibleTable: 'reservation',
@@ -735,12 +735,13 @@ export async function confirmerReservationAction(options: {
       r.offre_id,
     );
     if (createurId !== null) {
-      await poserNotification(
+      // V2.4.132 : template editable. Le defaut « Le cycle est clos » est
+      // generique ; admin peut decider d'expliciter le titre de l'offre via {titre_offre}.
+      await poserNotificationTemplee(
+        'reservation_confirmee',
+        { titre_offre: '' },
         {
           destinatairePersonneId: createurId,
-          type: 'reservation_confirmee',
-          titre: 'Réservation confirmée par le demandeur',
-          message: 'Le cycle est clos avec succès.',
           href: '/profil/demandes-reservations',
           cibleId: options.reservationId,
           cibleTable: 'reservation',
@@ -840,12 +841,12 @@ export async function annulerReservationAction(options: {
       r.offre_id,
     );
     if (createurId !== null) {
-      await poserNotification(
+      // V2.4.132 : template editable.
+      await poserNotificationTemplee(
+        'reservation_annulee',
+        { motif: options.motif?.trim() ?? '', titre_offre: '' },
         {
           destinatairePersonneId: createurId,
-          type: 'reservation_annulee',
-          titre: 'Réservation annulée par le demandeur',
-          message: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
           href: '/profil/demandes-reservations',
           cibleId: options.reservationId,
           cibleTable: 'reservation',
