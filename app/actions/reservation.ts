@@ -302,6 +302,86 @@ export async function marquerReservationRealiseeAction(
 }
 
 // ============================================================
+// Confirmation par le demandeur après réalisation (V2.3.14)
+// ============================================================
+
+export type ResultatConfirmation = { ok: true } | { ok: false; message: string };
+
+/**
+ * Confirme côté demandeur qu'une réservation marquée « réalisée » par
+ * le propriétaire correspond bien à ce qui s'est passé. Transition D8
+ * `realisee → confirmee` : c'est la fin du cycle de la réservation,
+ * elle est figée.
+ *
+ * Règles :
+ * - Seul le demandeur peut confirmer sa propre réservation (les admins
+ *   passent par leurs propres outils).
+ * - Transition autorisée par la machine à états D8 (`transitionAutorisee`) :
+ *   uniquement depuis `realisee`. Les autres états remontent un message
+ *   d'erreur explicite.
+ * - Action irréversible : une fois `confirmee`, la machine à états D8
+ *   n'autorise plus aucune transition (le seul recours est `realisee →
+ *   litige` côté demandeur, fait avant la confirmation).
+ *
+ * La RLS `reservation_update_demandeur` (V2.2.2) autorise déjà l'écriture
+ * par le demandeur ; on duplique le check applicatif pour un retour
+ * d'erreur lisible.
+ */
+export async function confirmerReservationAction(options: {
+  reservationId: string;
+  motif?: string;
+  cheminRevalidation?: string;
+}): Promise<ResultatConfirmation> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: existant, error: erreurLecture } = await supabase
+    .from('reservation')
+    .select('id, demandeur_personne_id, statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+
+  if (erreurLecture !== null || existant === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  if (existant.demandeur_personne_id !== session.userId) {
+    return { ok: false, message: 'Tu n’as pas l’autorisation de confirmer cette réservation.' };
+  }
+  const statutActuel = existant.statut as
+    | 'proposee'
+    | 'acceptee'
+    | 'refusee'
+    | 'realisee'
+    | 'confirmee'
+    | 'annulee'
+    | 'litige';
+  if (!transitionAutorisee(statutActuel, 'confirmee')) {
+    return {
+      ok: false,
+      message: `Une réservation au statut « ${statutActuel} » ne peut pas être confirmée (uniquement depuis « réalisée »).`,
+    };
+  }
+
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: 'confirmee',
+    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+  });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message };
+  }
+
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
+}
+
+// ============================================================
 // Annulation d'une réservation par le demandeur (V2.3.11)
 // ============================================================
 

@@ -1,6 +1,8 @@
+import { BoutonAnnulerReservation } from '@/components/reservation/BoutonAnnulerReservation';
+import { BoutonConfirmerReservation } from '@/components/reservation/BoutonConfirmerReservation';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
-import { listerReservationsDuDemandeur } from '@/lib/reservation';
+import { listerReservationsDuDemandeur, transitionAutorisee } from '@/lib/reservation';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -158,6 +160,19 @@ function CarteReservation({
         </summary>
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>
+
+      {transitionAutorisee(reservation.statut, 'confirmee') ? (
+        <BoutonConfirmerReservation
+          reservationId={reservation.id}
+          cheminRevalidation="/profil/reservations"
+        />
+      ) : null}
+      {transitionAutorisee(reservation.statut, 'annulee') ? (
+        <BoutonAnnulerReservation
+          reservationId={reservation.id}
+          cheminRevalidation="/profil/reservations"
+        />
+      ) : null}
     </Card>
   );
 }
