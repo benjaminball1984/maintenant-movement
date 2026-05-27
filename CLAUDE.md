@@ -432,8 +432,12 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 approfondissement : page réunion Décider, édition journal admin, agrégat home Décider, dashboard membre étendu)
-**Dernier chantier terminé** : V2.4.23 (compteur réunions à venir dans dashboard membre) — sur `main` (tip `9cd163f`). 16e requête parallèle dans `chargerDashboardMembre`, nouvelle carte « Réunions à venir » liée à `/profil/decider`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 approfondissement : recherche globale, bibliothèque images, footer enrichi, dashboard admin avec modération)
+**Dernier chantier terminé** : V2.4.27 (dashboard admin enrichi : état modération en tête) — sur `main` (tip `e813175`). Alerte « N éléments en attente » + 6 cartes file modération en haut de `/admin`.
+**Dernier chantier terminé (antérieur)** : V2.4.26 (footer enrichi avec colonne Explorer) — sur `main` (tip `23a5bb5`). 4e colonne : Recherche / Agenda / Cartes / Décider / Maintenant Médias.
+**Dernier chantier terminé (antérieur)** : V2.4.25 (bibliothèque d'images admin `/admin/national/images`) — sur `main` (tip `d0c0d58`). Liste fichiers Supabase Storage bucket `media`, filtres par préfixe, vignettes + métadonnées + URL clickable.
+**Dernier chantier terminé (antérieur)** : V2.4.24 (recherche globale `/recherche`) — sur `main` (tip `494a47d`). 11 requêtes ilike parallèles sur pétition/mobilisation/cagnotte/commune/fédération/média/sondage/salle/journal/groupe/campagne, tri pertinence, icône Search dans header.
+**Dernier chantier terminé (antérieur)** : V2.4.23 (compteur réunions à venir dans dashboard membre) — sur `main` (tip `9cd163f`). 16e requête parallèle dans `chargerDashboardMembre`, nouvelle carte « Réunions à venir » liée à `/profil/decider`.
 **Dernier chantier terminé (antérieur)** : V2.4.22 (page `/profil/decider` Mes réunions Décider) — sur `main` (tip `69a76c4`). Prochaines réunions visibles (RLS) + dernières décisions. Dashboard membre lié à `Mes réunions Décider` + `Mes créations` (qui n'était pas lié).
 **Dernier chantier terminé (antérieur)** : V2.4.21 (section « Décisions récentes » sur index Décider) — sur `main` (tip `77b990a`). Helper `listerDernieresReunionsAvecPV`, grille 2 colonnes des 6 dernières réunions terminées avec PV.
 **Dernier chantier terminé (antérieur)** : V2.4.20 (prochaines réunions agrégées sur index Décider) — sur `main` (tip `b9eb4f5`). Helper `listerProchainesReunionsToutesSalles` avec jointure salle, 10 prochaines réunions cliquables.
