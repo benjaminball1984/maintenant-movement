@@ -61,7 +61,14 @@ export default async function PageAdminSondages({ searchParams }: Props) {
       </Heading>
       <p className="mt-2 text-sm text-text-3">
         Liste des sondages tous statuts confondus. Filtres : mot-clé, statut, mode. Lecture seule,
-        limite 100.
+        limite 100.{' '}
+        <a
+          href="/admin/national/sondages/export.csv"
+          className="text-brand hover:underline"
+          download
+        >
+          Export CSV ↓
+        </a>
       </p>
 
       <form

@@ -67,7 +67,14 @@ export default async function PageAdminMoments({ searchParams }: Props) {
       </Heading>
       <p className="mt-2 text-sm text-text-3">
         Liste des moments solidaires tous statuts confondus. Filtres : mot-clé, statut, type.
-        Lecture seule, limite 100, triés par date de début décroissante.
+        Lecture seule, limite 100, triés par date de début décroissante.{' '}
+        <a
+          href="/admin/national/moments/export.csv"
+          className="text-brand hover:underline"
+          download
+        >
+          Export CSV ↓
+        </a>
       </p>
 
       <form

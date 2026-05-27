@@ -64,7 +64,10 @@ export default async function PageAdminMedias({ searchParams }: Props) {
         Médias
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Articles, brèves, podcasts, vidéos. Filtres : mot-clé, statut, type. Lecture seule.
+        Articles, brèves, podcasts, vidéos. Filtres : mot-clé, statut, type. Lecture seule.{' '}
+        <a href="/admin/national/medias/export.csv" className="text-brand hover:underline" download>
+          Export CSV ↓
+        </a>
       </p>
 
       <form
