@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_ADHESION_DEFAUT,
+  type MessagesValidationAdhesion,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace Adhérer (chantier 5.1).
@@ -34,11 +37,16 @@ export const MONTANT_ADHESION_T99CP_UNITES = (12n * 10n ** 18n).toString();
  * passer (forcé à 0 côté Server Action). Turnstile pour éviter les
  * inscriptions massives par bots.
  */
-export const adhererGratuitSchema = z
-  .object({
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerAdhererGratuitSchema(
+  messages: MessagesValidationAdhesion = MESSAGES_VALIDATION_ADHESION_DEFAUT,
+) {
+  return z
+    .object({
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const adhererGratuitSchema = creerAdhererGratuitSchema();
 
 export type DonneesAdhererGratuit = z.infer<typeof adhererGratuitSchema>;
 
@@ -46,11 +54,16 @@ export type DonneesAdhererGratuit = z.infer<typeof adhererGratuitSchema>;
 // Chemin euros (12 €)
 // ============================================================
 
-export const adhererEurosSchema = z
-  .object({
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerAdhererEurosSchema(
+  messages: MessagesValidationAdhesion = MESSAGES_VALIDATION_ADHESION_DEFAUT,
+) {
+  return z
+    .object({
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const adhererEurosSchema = creerAdhererEurosSchema();
 
 export type DonneesAdhererEuros = z.infer<typeof adhererEurosSchema>;
 
@@ -58,21 +71,26 @@ export type DonneesAdhererEuros = z.infer<typeof adhererEurosSchema>;
 // Chemin T99CP (12 unités)
 // ============================================================
 
-export const adhererT99CPSchema = z
-  .object({
-    /**
-     * Hash de transaction Polygon. Pour 5.1 v1, on accepte un tx_hash
-     * facultatif côté UI (le wallet réel n'est pas encore branché,
-     * cohérent avec 3.3 et 4.3) : la Server Action mockera le hash si
-     * vide. Quand un tx_hash est fourni, il doit respecter le format.
-     */
-    tx_hash: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{64}$/, 'tx_hash invalide (format 0x + 64 hex attendus).')
-      .optional()
-      .or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerAdhererT99CPSchema(
+  messages: MessagesValidationAdhesion = MESSAGES_VALIDATION_ADHESION_DEFAUT,
+) {
+  return z
+    .object({
+      /**
+       * Hash de transaction Polygon. Pour 5.1 v1, on accepte un tx_hash
+       * facultatif côté UI (le wallet réel n'est pas encore branché,
+       * cohérent avec 3.3 et 4.3) : la Server Action mockera le hash si
+       * vide. Quand un tx_hash est fourni, il doit respecter le format.
+       */
+      tx_hash: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat)
+        .optional()
+        .or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const adhererT99CPSchema = creerAdhererT99CPSchema();
 
 export type DonneesAdhererT99CP = z.infer<typeof adhererT99CPSchema>;

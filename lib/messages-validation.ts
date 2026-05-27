@@ -139,6 +139,20 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
 };
 
 // ============================================================
+// Adhesion (3 chemins : gratuit, euros, T99CP)
+// ============================================================
+
+export interface MessagesValidationAdhesion {
+  turnstileRequis: string;
+  txHashFormat: string;
+}
+
+export const MESSAGES_VALIDATION_ADHESION_DEFAUT: MessagesValidationAdhesion = {
+  turnstileRequis: 'Vérification anti-bot requise.',
+  txHashFormat: 'tx_hash invalide (format 0x + 64 hex attendus).',
+};
+
+// ============================================================
 // Lecture des messages depuis le CMS
 // ============================================================
 
@@ -163,6 +177,28 @@ export async function lireMessagesValidationAuth(): Promise<MessagesValidationAu
     resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_AUTH_DEFAUT[cle];
   });
   return resultat as unknown as MessagesValidationAuth;
+}
+
+/**
+ * Lit les messages de validation adhesion depuis le CMS et fusionne avec
+ * les defauts. Cles CMS : `validation.adhesion.<nomDuMessage>`.
+ */
+export async function lireMessagesValidationAdhesion(): Promise<MessagesValidationAdhesion> {
+  const cles = Object.keys(MESSAGES_VALIDATION_ADHESION_DEFAUT) as Array<
+    keyof MessagesValidationAdhesion
+  >;
+  const lectures = await Promise.all(
+    cles.map((cle) =>
+      lireContenuEditorial(`validation.adhesion.${cle}`, {
+        valeurMd: MESSAGES_VALIDATION_ADHESION_DEFAUT[cle],
+      }),
+    ),
+  );
+  const resultat: Record<string, string> = {};
+  cles.forEach((cle, i) => {
+    resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_ADHESION_DEFAUT[cle];
+  });
+  return resultat as unknown as MessagesValidationAdhesion;
 }
 
 /**
