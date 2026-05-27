@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 pagination communes + IBAN + couleur hex)
-**Dernier chantier terminé** : V2.4.70 (`lib/couleur-hex.ts` + 25 tests) — sur `main` (tip `3a95160`). 704 tests verts. 5 helpers : `estHexValide`, `normaliserHex`, `hexEnRgb`, `luminanceRelative` (WCAG), `contrastTexte` (seuil 0.179).
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 fichier/coin/hash)
+**Dernier chantier terminé** : V2.4.73 (`lib/hash.ts` FNV-1a + 10 tests) — sur `main` (tip `a28a0e1`). 739 tests verts. Hash non-crypto 32 bits pour cache-busting / ETag, vecteurs officiels validés.
+**Dernier chantier terminé (antérieur)** : V2.4.72 (`lib/conversion-99coin.ts` + 12 tests) — sur `main` (tip `833d6db`). Convention V1 : 1 T99CP = 10 ¢ (taux configurable). `coinsEnCentimes`, `centimesEnCoins`, `totalCentimes`.
+**Dernier chantier terminé (antérieur)** : V2.4.71 (`lib/validation-fichier.ts` + 13 tests) — sur `main` (tip `8be7cce`). `validerFichier` retourne `{ok, code?, message?}` avec 4 codes possibles, `TAILLES` constante, `mimeAutorise`.
+**Dernier chantier terminé (antérieur)** : V2.4.70 (`lib/couleur-hex.ts` + 25 tests) — sur `main` (tip `3a95160`). 704 tests verts. 5 helpers : `estHexValide`, `normaliserHex`, `hexEnRgb`, `luminanceRelative` (WCAG), `contrastTexte` (seuil 0.179).
 **Dernier chantier terminé (antérieur)** : V2.4.69 (`lib/iban.ts` + 14 tests) — sur `main` (tip `da35468`). ISO 13616 mod 97, longueurs par pays (12 pays), `normaliserIban`/`estIbanValide`/`formaterIban`.
 **Dernier chantier terminé (antérieur)** : V2.4.68 (Pagination sur admin communes — 35 011 lignes) — sur `main` (tip `84e6299`). 2ᵉ usage Pagination, PAR_PAGE=50, vraiment utile sur le référentiel des communes.
 **Dernier chantier terminé (antérieur)** : V2.4.67 (branchement `Pagination` sur admin personnes) — sur `main` (tip `641a62a`). Premier vrai usage du composant : `listerPersonnesAdminPagine` retourne `{lignes, total}`, PAR_PAGE=50, count exact, second appel ciblé si page>1.
