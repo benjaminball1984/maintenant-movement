@@ -4,6 +4,7 @@ import {
   type PrefixeImage,
   listerFichiersBucketImages,
 } from '@/lib/admin/bibliotheque-images';
+import { formaterTailleOctets } from '@/lib/format-taille';
 import { Image as IconeImage } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -23,12 +24,6 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
 
 interface Props {
   searchParams: Promise<{ prefixe?: string }>;
-}
-
-function formaterTaille(octets: number): string {
-  if (octets < 1024) return `${octets} o`;
-  if (octets < 1024 * 1024) return `${(octets / 1024).toFixed(1)} Ko`;
-  return `${(octets / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
 /**
@@ -85,8 +80,8 @@ export default async function PageBibliothequeImages({ searchParams }: Props) {
       </section>
 
       <p className="mt-4 text-text-3 text-xs">
-        {fichiers.length} fichier{fichiers.length > 1 ? 's' : ''} · {formaterTaille(totalOctets)}{' '}
-        total
+        {fichiers.length} fichier{fichiers.length > 1 ? 's' : ''} ·{' '}
+        {formaterTailleOctets(totalOctets)} total
       </p>
 
       {fichiers.length === 0 ? (
@@ -116,7 +111,9 @@ export default async function PageBibliothequeImages({ searchParams }: Props) {
                     {f.mimeType !== null ? (
                       <Badge variant="default">{f.mimeType.split('/')[1] ?? f.mimeType}</Badge>
                     ) : null}
-                    <span className="text-text-3 text-xs">{formaterTaille(f.tailleOctets)}</span>
+                    <span className="text-text-3 text-xs">
+                      {formaterTailleOctets(f.tailleOctets)}
+                    </span>
                     {f.derniereMaj !== null ? (
                       <span className="text-text-3 text-xs">
                         · {FORMATEUR_DATE.format(new Date(f.derniereMaj))}
