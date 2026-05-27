@@ -1,18 +1,10 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-
-const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 80);
 
 const schemaSalle = z.object({
   nom: z.string().min(1).max(200),
@@ -44,7 +36,7 @@ export async function creerSalleDeciderAction(donnees: unknown): Promise<Resulta
   if (!parse.success) return { ok: false, message: parse.error.issues[0]?.message ?? 'Invalide.' };
 
   const d = parse.data;
-  const baseSlug = slugify(d.nom);
+  const baseSlug = slugifier(d.nom);
   // Slug unique : suffixe avec timestamp si collision.
   const { data: existant } = await supabase
     .from('salle_decider')

@@ -1,18 +1,10 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-
-const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 80);
 
 const schemaEdition = z.object({
   titre: z.string().min(1).max(300),
@@ -47,7 +39,7 @@ export async function creerEditionJournalAction(donnees: unknown): Promise<Resul
   }
 
   const d = parse.data;
-  const baseSlug = slugify(d.titre);
+  const baseSlug = slugifier(d.titre);
   const { data: existant } = await supabase
     .from('journal_affiche')
     .select('slug')
