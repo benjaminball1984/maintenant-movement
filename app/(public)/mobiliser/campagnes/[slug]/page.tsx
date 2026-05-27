@@ -3,6 +3,7 @@ import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
+import { compterMembresEspace, formaterMembres } from '@/lib/compter-membres';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
@@ -64,6 +65,7 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
 
   const estPubliee = campagne.statut === 'publiee';
   const session = await getSession();
+  const nbMembres = estPubliee ? await compterMembresEspace('campagne', campagne.id) : 0;
 
   // V2.3.34 : appartenance courante (pour le bouton Rejoindre/Quitter).
   let estMembre = false;
@@ -89,7 +91,9 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
 
       <article className="grid gap-8">
         <header className="grid gap-4">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Campagne</p>
+          <p className="text-xs font-bold uppercase tracking-cap text-text-3">
+            Campagne {estPubliee ? `· ${formaterMembres(nbMembres)}` : ''}
+          </p>
           <Heading niveau={1}>{campagne.titre}</Heading>
 
           {campagne.image_url !== null ? (

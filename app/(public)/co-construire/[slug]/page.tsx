@@ -2,6 +2,7 @@ import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { BoutonAppartenanceGT } from '@/components/gt/BoutonAppartenanceGT';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { compterMembresEspace, formaterMembres } from '@/lib/compter-membres';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
@@ -55,6 +56,7 @@ export default async function PageGTDetail({ params }: PageDetailProps) {
   if (gt === null) notFound();
 
   const session = await getSession();
+  const nbMembres = await compterMembresEspace('gt_thematique', gt.id);
   let estMembre = false;
   if (session !== null) {
     const supabase = await getSupabaseServer();
@@ -78,7 +80,10 @@ export default async function PageGTDetail({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-4">
-          <Badge variant="info">GT thématique</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="info">GT thématique</Badge>
+            <span className="text-text-3 text-xs">· {formaterMembres(nbMembres)}</span>
+          </div>
           <Heading niveau={1}>{gt.nom}</Heading>
           <p className="text-text-2">{gt.sujet}</p>
 
