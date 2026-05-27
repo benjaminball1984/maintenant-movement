@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { type TypeCreation, chargerMesCreations } from '@/lib/mes-creations';
 import { Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -8,6 +11,16 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Mes créations',
   description: 'Tout ce que tu as créé sur Maintenant! : pétitions, cagnottes, offres, posts, …',
+};
+
+const FALLBACKS = {
+  titre: 'Mes créations',
+  introAmorce: 'Tout ce que tu as créé sur Maintenant! (',
+  introFin: ' au total). Regroupé par type, trié par date décroissante.',
+  emptyTitre: 'Tu n’as encore rien créé',
+  emptyCorps:
+    "Crée ta première pétition, cagnotte, mobilisation, offre d'entraide ou publication réseau. Tout apparaîtra ici.",
+  creeLe: 'Créé le',
 };
 
 const LIBELLE_TYPE: Record<TypeCreation, string> = {
@@ -42,7 +55,24 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
  */
 export default async function PageMesCreations() {
   const session = await getSessionOuRediriger('/profil/mes-creations');
-  const { total, parType } = await chargerMesCreations(session.userId);
+  const [data, estAdmin, titre, introAmorce, introFin, emptyTitre, emptyCorps, creeLe] =
+    await Promise.all([
+      chargerMesCreations(session.userId),
+      estAdminCourant(),
+      lireContenuEditorial('profil.mes_creations.titre', { valeurMd: FALLBACKS.titre }),
+      lireContenuEditorial('profil.mes_creations.intro_amorce', {
+        valeurMd: FALLBACKS.introAmorce,
+      }),
+      lireContenuEditorial('profil.mes_creations.intro_fin', { valeurMd: FALLBACKS.introFin }),
+      lireContenuEditorial('profil.mes_creations.empty_titre', {
+        valeurMd: FALLBACKS.emptyTitre,
+      }),
+      lireContenuEditorial('profil.mes_creations.empty_corps', {
+        valeurMd: FALLBACKS.emptyCorps,
+      }),
+      lireContenuEditorial('profil.mes_creations.cree_le', { valeurMd: FALLBACKS.creeLe }),
+    ]);
+  const { total, parType } = data;
 
   // Liste les types qui ont au moins une création.
   const typesNonVides = (Object.keys(parType) as TypeCreation[]).filter(
@@ -53,17 +83,64 @@ export default async function PageMesCreations() {
     <Container taille="md" className="py-12">
       <Heading niveau={1}>
         <Sparkles size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-        Mes créations
+        <TexteEditableAdmin
+          cle="profil.mes_creations.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre page mes creations"
+          longueurMax={40}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Heading>
       <p className="mt-2 text-text-2">
-        Tout ce que tu as créé sur Maintenant! ({total} au total). Regroupé par type, trié par date
-        décroissante.
+        <TexteEditableAdmin
+          cle="profil.mes_creations.intro_amorce"
+          valeurInitiale={introAmorce.valeurMd}
+          estAdmin={estAdmin}
+          libelle="amorce intro (avant le total)"
+          longueurMax={150}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
+        {total}
+        <TexteEditableAdmin
+          cle="profil.mes_creations.intro_fin"
+          valeurInitiale={introFin.valeurMd}
+          estAdmin={estAdmin}
+          libelle="fin intro (apres le total)"
+          longueurMax={200}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </p>
 
       {total === 0 ? (
-        <Alert variant="info" titre="Tu n’as encore rien créé" className="mt-8">
-          Crée ta première pétition, cagnotte, mobilisation, offre d'entraide ou publication réseau.
-          Tout apparaîtra ici.
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="profil.mes_creations.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty mes creations"
+              longueurMax={60}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+          className="mt-8"
+        >
+          <TexteEditableAdmin
+            cle="profil.mes_creations.empty_corps"
+            valeurInitiale={emptyCorps.valeurMd}
+            estAdmin={estAdmin}
+            libelle="corps empty mes creations"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Alert>
       ) : (
         <div className="mt-8 grid gap-8">
@@ -84,7 +161,7 @@ export default async function PageMesCreations() {
                           ) : null}
                         </div>
                         <p className="text-text-3 text-xs">
-                          Créé le {FORMATEUR.format(new Date(c.createdAt))}
+                          {creeLe.valeurMd} {FORMATEUR.format(new Date(c.createdAt))}
                         </p>
                       </Card>
                     </Link>
