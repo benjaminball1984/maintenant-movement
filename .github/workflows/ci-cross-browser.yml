@@ -1,0 +1,56 @@
+# Workflow E2E full cross-browser (Chromium + Firefox + WebKit).
+#
+# Le workflow `ci.yml` ne lance que les 5 viewports Chromium à chaque push,
+# pour rester rapide et éviter d'installer Firefox + WebKit sur chaque run.
+# Celui-ci tourne une fois par mois (et à la demande via workflow_dispatch)
+# avec `PLAYWRIGHT_FULL=1`, qui active dans `playwright.config.ts` les deux
+# projets `desktop-firefox` et `desktop-webkit`.
+#
+# Si un régression cross-browser apparaît : `workflow_dispatch` sur la
+# branche de fix, observer l'artefact `playwright-report-cross-browser`.
+name: CI cross-browser (mensuel)
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cross-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-e2e-full:
+    name: Tests E2E full cross-browser
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_FULL: '1'
+      NEXT_PUBLIC_SUPABASE_URL: https://localhost.supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      EMAIL_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      T99CP_NETWORK: mock
+      LIVEKIT_PROVIDER: mock
+      TURNSTILE_PROVIDER: mock
+      NEXT_PUBLIC_TURNSTILE_PROVIDER: mock
+      IMAGE_STORAGE_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-cross-browser
+          path: playwright-report/
+          retention-days: 30
