@@ -35,12 +35,20 @@ export default async function PageReseau() {
           <Heading niveau={1}>Réseau social</Heading>
         </div>
         {connecte ? (
-          <Link
-            href="/s-informer/reseau/messages"
-            className="text-sm font-bold text-brand hover:underline"
-          >
-            Mes messages{nonLus > 0 ? ` (${nonLus})` : ''}
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/s-informer/reseau/recherche"
+              className="text-sm font-bold text-brand hover:underline"
+            >
+              Rechercher
+            </Link>
+            <Link
+              href="/s-informer/reseau/messages"
+              className="text-sm font-bold text-brand hover:underline"
+            >
+              Mes messages{nonLus > 0 ? ` (${nonLus})` : ''}
+            </Link>
+          </div>
         ) : null}
       </header>
 
