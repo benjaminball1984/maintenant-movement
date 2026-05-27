@@ -1,4 +1,5 @@
 import { editerPetition } from '@/app/(public)/mobiliser/petitions/actions';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonArchiverPetition } from '@/components/petitions/BoutonArchiverPetition';
 import { FormulaireEditionPetition } from '@/components/petitions/FormulaireEditionPetition';
 import { Heading } from '@/components/ui';
@@ -56,6 +57,10 @@ export default async function PageEditionPetition({ params }: PageEditionPetitio
           un admin national.
         </div>
       )}
+
+      <div className="mt-6">
+        <BoutonSupprimerEntite table="petition" id={petition.id} redirigerVers="/admin/petitions" />
+      </div>
     </section>
   );
 }
