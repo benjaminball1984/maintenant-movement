@@ -1,7 +1,11 @@
 'use client';
 
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesEditerPetition, editerPetitionSchema } from '@/lib/validations/petition';
+import {
+  MESSAGES_VALIDATION_PETITION_DEFAUT,
+  type MessagesValidationPetition,
+} from '@/lib/messages-validation';
+import { type DonneesEditerPetition, creerEditerPetitionSchema } from '@/lib/validations/petition';
 import type { Petition } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -16,6 +20,7 @@ interface FormulaireEditionPetitionProps {
    * client/serveur, on ne l'importe pas côté client).
    */
   editerPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationPetition;
 }
 
 /**
@@ -40,6 +45,7 @@ function versInputDate(valeur: string | null): string {
 export function FormulaireEditionPetition({
   petition,
   editerPetition,
+  messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: FormulaireEditionPetitionProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -52,7 +58,7 @@ export function FormulaireEditionPetition({
     setValue,
     formState: { errors },
   } = useForm<DonneesEditerPetition>({
-    resolver: zodResolver(editerPetitionSchema),
+    resolver: zodResolver(creerEditerPetitionSchema(messages)),
     defaultValues: {
       petition_id: petition.id,
       titre: petition.titre,

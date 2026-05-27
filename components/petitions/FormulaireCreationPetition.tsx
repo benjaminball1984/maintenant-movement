@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerPetition, creerPetitionSchema } from '@/lib/validations/petition';
+import {
+  MESSAGES_VALIDATION_PETITION_DEFAUT,
+  type MessagesValidationPetition,
+} from '@/lib/messages-validation';
+import { type DonneesCreerPetition, creerPetitionFactory } from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -17,6 +21,7 @@ interface FormulaireCreationPetitionProps {
   creerPetition: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationPetition;
 }
 
 /**
@@ -33,7 +38,10 @@ interface FormulaireCreationPetitionProps {
  * attente de modération : la créatrice la voit grâce à la RLS, le reste
  * du public ne la voit qu'une fois publiée.
  */
-export function FormulaireCreationPetition({ creerPetition }: FormulaireCreationPetitionProps) {
+export function FormulaireCreationPetition({
+  creerPetition,
+  messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
+}: FormulaireCreationPetitionProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -44,7 +52,7 @@ export function FormulaireCreationPetition({ creerPetition }: FormulaireCreation
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerPetition>({
-    resolver: zodResolver(creerPetitionSchema),
+    resolver: zodResolver(creerPetitionFactory(messages)),
     defaultValues: {
       titre: '',
       texte: '',

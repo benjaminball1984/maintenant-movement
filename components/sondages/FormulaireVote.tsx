@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesVoterSondage, voterSondageSchema } from '@/lib/validations/sondages';
+import {
+  MESSAGES_VALIDATION_SONDAGES_DEFAUT,
+  type MessagesValidationSondages,
+} from '@/lib/messages-validation';
+import { type DonneesVoterSondage, creerVoterSondageSchema } from '@/lib/validations/sondages';
 import type { ModeSondage } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -14,13 +18,20 @@ interface FormulaireVoteProps {
   options: string[];
   mode: ModeSondage;
   voterSondage: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationSondages;
 }
 
 /**
  * Formulaire de vote. En mode pondéré, on affiche aussi les champs
  * sociodémo optionnels (la personne peut refuser).
  */
-export function FormulaireVote({ sondageId, options, mode, voterSondage }: FormulaireVoteProps) {
+export function FormulaireVote({
+  sondageId,
+  options,
+  mode,
+  voterSondage,
+  messages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
+}: FormulaireVoteProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -31,7 +42,7 @@ export function FormulaireVote({ sondageId, options, mode, voterSondage }: Formu
     setValue,
     formState: { errors },
   } = useForm<DonneesVoterSondage>({
-    resolver: zodResolver(voterSondageSchema),
+    resolver: zodResolver(creerVoterSondageSchema(messages)),
     defaultValues: {
       sondage_id: sondageId,
       option_index: 0,

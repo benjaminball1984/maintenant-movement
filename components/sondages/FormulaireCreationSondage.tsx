@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerSondage, creerSondageSchema } from '@/lib/validations/sondages';
+import {
+  MESSAGES_VALIDATION_SONDAGES_DEFAUT,
+  type MessagesValidationSondages,
+} from '@/lib/messages-validation';
+import { type DonneesCreerSondage, creerSondageFactory } from '@/lib/validations/sondages';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,9 +16,13 @@ interface FormulaireCreationSondageProps {
   creerSondage: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationSondages;
 }
 
-export function FormulaireCreationSondage({ creerSondage }: FormulaireCreationSondageProps) {
+export function FormulaireCreationSondage({
+  creerSondage,
+  messages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
+}: FormulaireCreationSondageProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -26,7 +34,7 @@ export function FormulaireCreationSondage({ creerSondage }: FormulaireCreationSo
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerSondage>({
-    resolver: zodResolver(creerSondageSchema),
+    resolver: zodResolver(creerSondageFactory(messages)),
     defaultValues: {
       titre: '',
       question: '',

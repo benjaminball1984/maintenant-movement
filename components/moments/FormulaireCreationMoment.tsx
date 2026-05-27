@@ -2,10 +2,14 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import {
+  MESSAGES_VALIDATION_MOMENTS_DEFAUT,
+  type MessagesValidationMoments,
+} from '@/lib/messages-validation';
 import { LISTE_TYPES_MOMENTS } from '@/lib/moments/config';
 import {
   type DonneesCreerMomentSolidaire,
-  creerMomentSolidaireSchema,
+  creerMomentSolidaireFactory,
 } from '@/lib/validations/moments';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -16,9 +20,13 @@ interface FormulaireProps {
   creerMomentSolidaire: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationMoments;
 }
 
-export function FormulaireCreationMoment({ creerMomentSolidaire }: FormulaireProps) {
+export function FormulaireCreationMoment({
+  creerMomentSolidaire,
+  messages = MESSAGES_VALIDATION_MOMENTS_DEFAUT,
+}: FormulaireProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -30,7 +38,7 @@ export function FormulaireCreationMoment({ creerMomentSolidaire }: FormulairePro
     watch,
     formState: { errors },
   } = useForm<DonneesCreerMomentSolidaire>({
-    resolver: zodResolver(creerMomentSolidaireSchema),
+    resolver: zodResolver(creerMomentSolidaireFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',

@@ -1,7 +1,14 @@
 'use client';
 
 import { Alert, Button, Label, Textarea } from '@/components/ui';
-import { type DonneesModererPetition, modererPetitionSchema } from '@/lib/validations/petition';
+import {
+  MESSAGES_VALIDATION_PETITION_DEFAUT,
+  type MessagesValidationPetition,
+} from '@/lib/messages-validation';
+import {
+  type DonneesModererPetition,
+  creerModererPetitionSchema,
+} from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,6 +16,7 @@ import { useForm } from 'react-hook-form';
 interface FormulaireModerationProps {
   petitionId: string;
   modererPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationPetition;
 }
 
 /**
@@ -21,7 +29,11 @@ interface FormulaireModerationProps {
  * La raison de rejet est masquée par défaut ; elle apparaît au clic sur
  * le bouton « Rejeter », pour ne pas pousser à la décision négative.
  */
-export function FormulaireModeration({ petitionId, modererPetition }: FormulaireModerationProps) {
+export function FormulaireModeration({
+  petitionId,
+  modererPetition,
+  messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
+}: FormulaireModerationProps) {
   const [modeRejet, setModeRejet] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [confirme, setConfirme] = useState<'publiee' | 'rejetee' | null>(null);
@@ -34,7 +46,7 @@ export function FormulaireModeration({ petitionId, modererPetition }: Formulaire
     setValue,
     trigger,
   } = useForm<DonneesModererPetition>({
-    resolver: zodResolver(modererPetitionSchema),
+    resolver: zodResolver(creerModererPetitionSchema(messages)),
     defaultValues: {
       petition_id: petitionId,
       decision: 'publiee',

@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerServiceSel, creerServiceSelSchema } from '@/lib/validations/sel';
+import {
+  MESSAGES_VALIDATION_SEL_DEFAUT,
+  type MessagesValidationSel,
+} from '@/lib/messages-validation';
+import { type DonneesCreerServiceSel, creerServiceSelFactory } from '@/lib/validations/sel';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,9 +16,13 @@ interface FormulaireCreationServiceProps {
   creerServiceSel: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationSel;
 }
 
-export function FormulaireCreationService({ creerServiceSel }: FormulaireCreationServiceProps) {
+export function FormulaireCreationService({
+  creerServiceSel,
+  messages = MESSAGES_VALIDATION_SEL_DEFAUT,
+}: FormulaireCreationServiceProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -25,7 +33,7 @@ export function FormulaireCreationService({ creerServiceSel }: FormulaireCreatio
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerServiceSel>({
-    resolver: zodResolver(creerServiceSelSchema),
+    resolver: zodResolver(creerServiceSelFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',
