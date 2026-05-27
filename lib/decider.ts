@@ -125,6 +125,24 @@ export async function listerReunionsSalle(
   }));
 }
 
+export async function chargerReunionParId(id: string): Promise<ReunionDecider | null> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase.from('reunion_decider').select('*').eq('id', id).maybeSingle();
+  if (data === null) return null;
+  return {
+    id: data.id,
+    salleId: data.salle_id,
+    titre: data.titre,
+    ordreJourMd: data.ordre_jour_md,
+    debutLe: data.debut_le,
+    finLe: data.fin_le,
+    modeDecision: data.mode_decision as ModeDecision,
+    statut: data.statut as StatutReunion,
+    enregistree: data.enregistree,
+    pvMd: data.pv_md,
+  };
+}
+
 export const LIBELLE_MODE: Record<ModeDecision, string> = {
   consensus: 'Consensus',
   levee_objections: 'Levée d’objections',

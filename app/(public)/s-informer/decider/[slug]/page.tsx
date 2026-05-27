@@ -87,25 +87,22 @@ export default async function PageSalleDecider({ params }: Props) {
           <ul className="mt-3 grid gap-2">
             {aVenir.map((r) => (
               <li key={r.id}>
-                <Card variant="ombre" className="grid gap-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge variant="success">{LIBELLE_STATUT[r.statut]}</Badge>
-                    <Badge variant="info">{LIBELLE_MODE[r.modeDecision]}</Badge>
-                  </div>
-                  <h3 className="font-display font-bold text-lg text-text-1">{r.titre}</h3>
-                  <p className="text-text-3 text-xs">
-                    {FORMATEUR.format(new Date(r.debutLe))}
-                    {r.finLe !== null ? ` → ${FORMATEUR.format(new Date(r.finLe))}` : ''}
-                  </p>
-                  {r.ordreJourMd !== '' ? (
-                    <details className="text-sm">
-                      <summary className="cursor-pointer text-text-2">Ordre du jour</summary>
-                      <pre className="mt-2 whitespace-pre-wrap font-body text-text-1">
-                        {r.ordreJourMd}
-                      </pre>
-                    </details>
-                  ) : null}
-                </Card>
+                <Link
+                  href={`/s-informer/decider/${slug}/${r.id}`}
+                  className="block hover:opacity-90"
+                >
+                  <Card variant="ombre" className="grid gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Badge variant="success">{LIBELLE_STATUT[r.statut]}</Badge>
+                      <Badge variant="info">{LIBELLE_MODE[r.modeDecision]}</Badge>
+                    </div>
+                    <h3 className="font-display font-bold text-lg text-text-1">{r.titre}</h3>
+                    <p className="text-text-3 text-xs">
+                      {FORMATEUR.format(new Date(r.debutLe))}
+                      {r.finLe !== null ? ` → ${FORMATEUR.format(new Date(r.finLe))}` : ''}
+                    </p>
+                  </Card>
+                </Link>
               </li>
             ))}
           </ul>
@@ -123,25 +120,27 @@ export default async function PageSalleDecider({ params }: Props) {
           <ul className="mt-3 grid gap-2">
             {reunionsPassees.map((r) => (
               <li key={r.id}>
-                <Card variant="plat" className="grid gap-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge variant={r.statut === 'terminee' ? 'success' : 'default'}>
-                      {LIBELLE_STATUT[r.statut]}
-                    </Badge>
-                    <span className="text-text-3 text-xs">
-                      {FORMATEUR.format(new Date(r.debutLe))}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-text-1">{r.titre}</h3>
-                  {r.pvMd !== null && r.pvMd !== '' ? (
-                    <details className="text-sm">
-                      <summary className="cursor-pointer text-text-2">Procès-verbal</summary>
-                      <pre className="mt-2 whitespace-pre-wrap font-body text-text-1">{r.pvMd}</pre>
-                    </details>
-                  ) : (
-                    <p className="text-text-3 text-xs">PV pas encore publié.</p>
-                  )}
-                </Card>
+                <Link
+                  href={`/s-informer/decider/${slug}/${r.id}`}
+                  className="block hover:opacity-90"
+                >
+                  <Card variant="plat" className="grid gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Badge variant={r.statut === 'terminee' ? 'success' : 'default'}>
+                        {LIBELLE_STATUT[r.statut]}
+                      </Badge>
+                      <span className="text-text-3 text-xs">
+                        {FORMATEUR.format(new Date(r.debutLe))}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-text-1">{r.titre}</h3>
+                    {r.pvMd !== null && r.pvMd !== '' ? (
+                      <p className="text-text-2 text-sm">PV disponible — cliquer pour lire.</p>
+                    ) : (
+                      <p className="text-text-3 text-xs">PV pas encore publié.</p>
+                    )}
+                  </Card>
+                </Link>
               </li>
             ))}
           </ul>

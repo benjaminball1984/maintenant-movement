@@ -115,3 +115,61 @@ export async function creerReunionAction(
   revalidatePath('/admin/national/decider');
   return { ok: true, id: data.id };
 }
+
+const schemaMajReunion = z.object({
+  id: z.string().uuid(),
+  ordre_jour_md: z.string().max(20000).optional(),
+  pv_md: z.string().max(50000).optional(),
+  statut: z.enum(['planifiee', 'en_cours', 'terminee', 'annulee']).optional(),
+});
+
+/**
+ * Met à jour une réunion existante (V2.4.18). Admin uniquement.
+ * Permet de modifier l'OJ, écrire le PV, changer le statut.
+ */
+export async function mettreAJourReunionAction(
+  donnees: unknown,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const session = await getSession();
+  if (session === null) return { ok: false, message: 'Connexion requise.' };
+
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) return { ok: false, message: 'Action réservée aux admins.' };
+
+  const parse = schemaMajReunion.safeParse(donnees);
+  if (!parse.success) return { ok: false, message: parse.error.issues[0]?.message ?? 'Invalide.' };
+
+  const d = parse.data;
+  // Charge le slug de la salle pour revalidation ciblée.
+  const { data: salleRow } = await supabase
+    .from('reunion_decider')
+    .select('salle_id, salle:salle_decider(slug)')
+    .eq('id', d.id)
+    .maybeSingle();
+
+  const maj: {
+    ordre_jour_md?: string;
+    pv_md?: string;
+    statut?: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
+  } = {};
+  if (d.ordre_jour_md !== undefined) maj.ordre_jour_md = d.ordre_jour_md;
+  if (d.pv_md !== undefined) maj.pv_md = d.pv_md;
+  if (d.statut !== undefined) maj.statut = d.statut;
+
+  if (Object.keys(maj).length === 0) {
+    return { ok: false, message: 'Rien à modifier.' };
+  }
+
+  const { error } = await supabase.from('reunion_decider').update(maj).eq('id', d.id);
+  if (error !== null) return { ok: false, message: error.message };
+
+  revalidatePath('/s-informer/decider');
+  // biome-ignore lint/suspicious/noExplicitAny: shape de jointure non typée précisément ici
+  const slug = (salleRow as any)?.salle?.slug;
+  if (typeof slug === 'string') {
+    revalidatePath(`/s-informer/decider/${slug}`);
+    revalidatePath(`/s-informer/decider/${slug}/${d.id}`);
+  }
+  return { ok: true };
+}
