@@ -1,7 +1,21 @@
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { listerOrganisationsParCategorie } from '@/lib/autres-moyens/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
+
+const FALLBACKS = {
+  intro:
+    "Il y a d'autres moyens d'agir, en voici quelques-uns. Cette liste est tenue par la modération de Maintenant! ; elle ne constitue pas un endossement, juste un repère. Une organisation peut être retirée si elle s'écarte de ses valeurs affichées.",
+  emptyTitre: 'Liste en construction',
+  emptyCorps:
+    "Aucune organisation listée pour l'instant. La modération l'enrichira au fur et à mesure.",
+  distance:
+    "**Distance protectrice :** Maintenant! ne répond pas des prises de position ni des actions de ces organisations. La liste existe par présomption d'utilité ; un retrait peut être demandé à tout moment via la page de contact.",
+};
 
 export const metadata: Metadata = {
   title: "D'autres moyens d'agir",
@@ -21,7 +35,14 @@ export const metadata: Metadata = {
  * un endossement. Le ton est neutre, sobre.
  */
 export default async function PageAutresMoyens() {
-  const groupes = await listerOrganisationsParCategorie();
+  const [groupes, estAdmin, intro, emptyTitre, emptyCorps, distance] = await Promise.all([
+    listerOrganisationsParCategorie(),
+    estAdminCourant(),
+    lireContenuEditorial('agir.autres_moyens.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('agir.autres_moyens.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
+    lireContenuEditorial('agir.autres_moyens.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
+    lireContenuEditorial('agir.autres_moyens.distance', { valeurMd: FALLBACKS.distance }),
+  ]);
   const entries = Array.from(groupes.entries()).sort(([a], [b]) => a.localeCompare(b));
 
   return (
@@ -29,16 +50,42 @@ export default async function PageAutresMoyens() {
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">Agir</p>
         <Heading niveau={1}>D'autres moyens d'agir</Heading>
-        <p className="mt-3 max-w-2xl text-text-2">
-          Il y a d'autres moyens d'agir, en voici quelques-uns. Cette liste est tenue par la
-          modération de Maintenant! ; elle ne constitue pas un endossement, juste un repère. Une
-          organisation peut être retirée si elle s'écarte de ses valeurs affichées.
-        </p>
+        <TexteEditableAdmin
+          cle="agir.autres_moyens.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro page autres moyens"
+          multilignes
+          longueurMax={600}
+        >
+          {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       {entries.length === 0 ? (
-        <Alert variant="info" titre="Liste en construction">
-          Aucune organisation listée pour l'instant. La modération l'enrichira au fur et à mesure.
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="agir.autres_moyens.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty state autres moyens"
+              longueurMax={60}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          <TexteEditableAdmin
+            cle="agir.autres_moyens.empty_corps"
+            valeurInitiale={emptyCorps.valeurMd}
+            estAdmin={estAdmin}
+            libelle="corps empty state autres moyens"
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Alert>
       ) : (
         <ul className="grid gap-8">
@@ -73,15 +120,16 @@ export default async function PageAutresMoyens() {
       )}
 
       <section className="mt-12 grid gap-2 rounded-md border border-border bg-surface-2 p-6 text-sm text-text-3">
-        <p>
-          <strong className="text-text-2">Distance protectrice :</strong> Maintenant! ne répond pas
-          des prises de position ni des actions de ces organisations. La liste existe par
-          présomption d'utilité ; un retrait peut être demandé à tout moment via la{' '}
-          <a href="/contact" className="underline">
-            page de contact
-          </a>
-          .
-        </p>
+        <TexteEditableAdmin
+          cle="agir.autres_moyens.distance"
+          valeurInitiale={distance.valeurMd}
+          estAdmin={estAdmin}
+          libelle="encart distance protectrice (Markdown leger)"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <MarkdownLeger texte={t} />}
+        </TexteEditableAdmin>
       </section>
     </Container>
   );

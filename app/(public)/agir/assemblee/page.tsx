@@ -1,8 +1,19 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { listerMandatsActifs } from '@/lib/communes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import type { EntiteConfederal } from '@/types/database';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACKS = {
+  intro:
+    'Binômes tirés au sort par entité (commune, fédération, confédération). Incompatibilité de cumul : un mandat à un niveau supérieur libère automatiquement les mandats inférieurs.',
+  emptyTitre: 'Aucun mandat actif pour ce filtre',
+  emptyCorps:
+    "Le tirage au sort est déclenché par l'admin national depuis la console d'administration. Tant qu'aucun tirage n'a eu lieu, cette liste reste vide.",
+};
 
 export const metadata: Metadata = {
   title: 'Assemblée Confédérale',
@@ -44,17 +55,29 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
 export default async function PageAssemblee({ searchParams }: PageAssembleeProps) {
   const { entite } = await searchParams;
   const filtre = estEntiteValide(entite) ? entite : undefined;
-  const mandats = await listerMandatsActifs(filtre);
+  const [mandats, estAdmin, intro, emptyTitre, emptyCorps] = await Promise.all([
+    listerMandatsActifs(filtre),
+    estAdminCourant(),
+    lireContenuEditorial('agir.assemblee.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('agir.assemblee.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
+    lireContenuEditorial('agir.assemblee.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
+  ]);
 
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">Agir</p>
         <Heading niveau={1}>Assemblée Confédérale des Communes et Territoires Libres</Heading>
-        <p className="mt-3 max-w-2xl text-text-2">
-          Binômes tirés au sort par entité (commune, fédération, confédération). Incompatibilité de
-          cumul : un mandat à un niveau supérieur libère automatiquement les mandats inférieurs.
-        </p>
+        <TexteEditableAdmin
+          cle="agir.assemblee.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro page Assemblee Confederale"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       <nav
@@ -80,9 +103,30 @@ export default async function PageAssemblee({ searchParams }: PageAssembleeProps
       </nav>
 
       {mandats.length === 0 ? (
-        <Alert variant="info" titre="Aucun mandat actif pour ce filtre">
-          Le tirage au sort est déclenché par l'admin national depuis la console d'administration.
-          Tant qu'aucun tirage n'a eu lieu, cette liste reste vide.
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="agir.assemblee.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty state assemblee"
+              longueurMax={80}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          <TexteEditableAdmin
+            cle="agir.assemblee.empty_corps"
+            valeurInitiale={emptyCorps.valeurMd}
+            estAdmin={estAdmin}
+            libelle="corps empty state assemblee"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Alert>
       ) : (
         <ul className="grid gap-3">
