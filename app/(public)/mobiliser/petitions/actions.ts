@@ -17,6 +17,7 @@ import {
 } from '@/lib/validations/petition';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 /**
  * Server Actions du sous-espace Pétitions (chantier 3.1).
@@ -202,6 +203,54 @@ export async function modererPetition(donneesBrutes: unknown): Promise<ResultatA
 
   revalidatePath('/admin/moderation/petitions');
   revalidatePath('/mobiliser/petitions');
+  return { ok: true };
+}
+
+// ============================================================
+// Archivage d'une pétition (admin)
+// ============================================================
+/**
+ * Archive une pétition : statut → 'archivee'. Elle disparaît de l'UI
+ * publique mais reste en base (signatures conservées, doctrine §0.3
+ * « on additionne, on ne soustrait jamais »). Réservé aux personnes
+ * avec droit de modération pétitions.
+ *
+ * Idempotent : ré-archiver une pétition déjà archivée ne fait rien.
+ */
+export async function archiverPetition(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parsed = z
+    .object({
+      petition_id: z.string().uuid(),
+      raison: z.string().min(1).max(500).optional(),
+    })
+    .safeParse(donneesBrutes);
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+
+  const session = await getSession();
+  if (session === null) return { ok: false, message: 'Authentification requise.' };
+
+  const supabase = await getSupabaseServer();
+  if (!(await aDroitModerationPetitions(supabase))) {
+    return { ok: false, message: 'Droit de modération requis.' };
+  }
+
+  const { error } = await supabase
+    .from('petition')
+    .update({
+      statut: 'archivee',
+      modere_par: session.userId,
+      modere_le: new Date().toISOString(),
+      raison_rejet: parsed.data.raison ?? null,
+    })
+    .eq('id', parsed.data.petition_id);
+
+  if (error !== null) return { ok: false, message: `Archivage impossible : ${error.message}` };
+
+  revalidatePath('/admin/petitions');
+  revalidatePath('/mobiliser/petitions');
+  revalidatePath('/admin/moderation/petitions');
   return { ok: true };
 }
 

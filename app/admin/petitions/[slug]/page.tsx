@@ -1,4 +1,5 @@
 import { editerPetition } from '@/app/(public)/mobiliser/petitions/actions';
+import { BoutonArchiverPetition } from '@/components/petitions/BoutonArchiverPetition';
 import { FormulaireEditionPetition } from '@/components/petitions/FormulaireEditionPetition';
 import { Heading } from '@/components/ui';
 import { petitionParSlug } from '@/lib/petitions/requetes';
@@ -44,6 +45,17 @@ export default async function PageEditionPetition({ params }: PageEditionPetitio
       </header>
 
       <FormulaireEditionPetition petition={petition} editerPetition={editerPetition} />
+
+      {petition.statut !== 'archivee' ? (
+        <div className="mt-6">
+          <BoutonArchiverPetition petitionId={petition.id} />
+        </div>
+      ) : (
+        <div className="mt-6 rounded-md border border-border bg-surface-2 p-4 text-sm text-text-3">
+          Cette pétition est déjà archivée. Pour la republier, modifie son statut en SQL ou contacte
+          un admin national.
+        </div>
+      )}
     </section>
   );
 }

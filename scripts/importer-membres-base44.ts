@@ -38,7 +38,7 @@ const FORMAT_PROGRESS = new Intl.NumberFormat('fr-FR');
  * Wrapper de log pour la sortie CLI. Évite de répéter `biome-ignore`
  * sur chacun des 22 `console.log` du script.
  */
-// biome-ignore lint/suspicious/noConsoleLog: usage CLI legitime, log wrappe console.log.
+
 const log = (s: string): void => {
   process.stdout.write(`${s}\n`);
 };
