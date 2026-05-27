@@ -20,4 +20,5 @@ export { Pagination, type PaginationProps } from './Pagination';
 export { ChampImageObjet, type ChampImageObjetProps } from './ChampImageObjet';
 export { TeleverseurImage, type TeleverseurImageProps } from './TeleverseurImage';
 export { Textarea, type TextareaProps } from './Textarea';
+export { Skeleton, SkeletonCarte, SkeletonText, type SkeletonProps } from './Skeleton';
 export { ScriptInitTheme, ThemeToggle, type ModeTheme } from './ThemeToggle';
