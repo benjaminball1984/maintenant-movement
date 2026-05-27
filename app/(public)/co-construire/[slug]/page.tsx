@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { BoutonAppartenanceGT } from '@/components/gt/BoutonAppartenanceGT';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
@@ -80,9 +81,12 @@ export default async function PageGTDetail({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="info">GT thématique</Badge>
-            <span className="text-text-3 text-xs">· {formaterMembres(nbMembres)}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="info">GT thématique</Badge>
+              <span className="text-text-3 text-xs">· {formaterMembres(nbMembres)}</span>
+            </div>
+            <BoutonAdminEditer href="/admin/moderation/reseau">Admin</BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{gt.nom}</Heading>
           <p className="text-text-2">{gt.sujet}</p>

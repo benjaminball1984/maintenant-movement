@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -91,9 +92,12 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
 
       <article className="grid gap-8">
         <header className="grid gap-4">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-            Campagne {estPubliee ? `· ${formaterMembres(nbMembres)}` : ''}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-cap text-text-3">
+              Campagne {estPubliee ? `· ${formaterMembres(nbMembres)}` : ''}
+            </p>
+            <BoutonAdminEditer href="/admin/moderation/campagnes">Admin</BoutonAdminEditer>
+          </div>
           <Heading niveau={1}>{campagne.titre}</Heading>
 
           {campagne.image_url !== null ? (
