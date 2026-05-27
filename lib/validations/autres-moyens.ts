@@ -1,3 +1,7 @@
+import {
+  MESSAGES_VALIDATION_AUTRES_MOYENS_DEFAUT,
+  type MessagesValidationAutresMoyens,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
 
 /**
@@ -11,40 +15,31 @@ import { z } from 'zod';
 /**
  * Schéma de validation pour l'ajout d'une organisation partenaire à la
  * liste publique « D'autres moyens d'agir ».
- *
- * Champs :
- * - `nom` : nom officiel de l'organisation (3-200 caractères).
- * - `description_courte` : 0-500 caractères, présentation neutre.
- * - `url` : URL absolue valide vers le site officiel.
- * - `categorie_slug` : slug d'une catégorie existante (slug minuscule,
- *   chiffres et tirets).
- *
- * Action réservée admin / modérateurice (présomption d'utilité, pas
- * d'endossement politique).
  */
-export const ajouterOrganisationPartenaireSchema = z
-  .object({
-    nom: z
-      .string()
-      .trim()
-      .min(3, 'Le nom doit comporter au moins 3 caractères.')
-      .max(200, 'Le nom doit faire 200 caractères maximum.'),
-    description_courte: z
-      .string()
-      .trim()
-      .max(500, 'La description doit faire 500 caractères maximum.')
-      .optional()
-      .or(z.literal('')),
-    url: z.string().trim().url('URL invalide.'),
-    categorie_slug: z
-      .string()
-      .trim()
-      .regex(/^[a-z0-9-]+$/, 'Slug de catégorie invalide.')
-      .max(60)
-      .optional()
-      .or(z.literal('')),
-  })
-  .strict();
+export function creerAjouterOrganisationPartenaireSchema(
+  messages: MessagesValidationAutresMoyens = MESSAGES_VALIDATION_AUTRES_MOYENS_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(3, messages.nomMin).max(200, messages.nomMax),
+      description_courte: z
+        .string()
+        .trim()
+        .max(500, messages.descriptionMax)
+        .optional()
+        .or(z.literal('')),
+      url: z.string().trim().url(messages.urlInvalide),
+      categorie_slug: z
+        .string()
+        .trim()
+        .regex(/^[a-z0-9-]+$/, messages.categorieSlugInvalide)
+        .max(60)
+        .optional()
+        .or(z.literal('')),
+    })
+    .strict();
+}
+export const ajouterOrganisationPartenaireSchema = creerAjouterOrganisationPartenaireSchema();
 
 export type DonneesAjouterOrganisationPartenaire = z.infer<
   typeof ajouterOrganisationPartenaireSchema
@@ -55,15 +50,16 @@ export type DonneesAjouterOrganisationPartenaire = z.infer<
  * la liste publique. Une raison explicite (>= 10 caractères) est exigée
  * pour pouvoir tracer la décision en `journal_admin`.
  */
-export const retirerOrganisationSchema = z
-  .object({
-    organisation_id: z.string().uuid(),
-    raison_retrait: z
-      .string()
-      .trim()
-      .min(10, 'La raison du retrait doit faire au moins 10 caractères.')
-      .max(500),
-  })
-  .strict();
+export function creerRetirerOrganisationSchema(
+  messages: MessagesValidationAutresMoyens = MESSAGES_VALIDATION_AUTRES_MOYENS_DEFAUT,
+) {
+  return z
+    .object({
+      organisation_id: z.string().uuid(),
+      raison_retrait: z.string().trim().min(10, messages.retraitRaisonMin).max(500),
+    })
+    .strict();
+}
+export const retirerOrganisationSchema = creerRetirerOrganisationSchema();
 
 export type DonneesRetirerOrganisation = z.infer<typeof retirerOrganisationSchema>;

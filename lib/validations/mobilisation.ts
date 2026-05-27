@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+  type MessagesValidationMobilisation,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace Mobilisations (chantier 3.2).
@@ -22,75 +25,72 @@ import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
  *   - latitude/longitude optionnels (couple : les deux ou aucun)
  *   - date_debut requis, date_fin optionnel (>= date_debut)
  */
-export const creerMobilisationSchema = z
-  .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, 'Le titre doit faire 200 caractères maximum.'),
-    description: z
-      .string()
-      .trim()
-      .min(50, 'La description doit comporter au moins 50 caractères.')
-      .max(3000, 'La description doit faire 3000 caractères maximum.'),
-    lieu: z
-      .string()
-      .trim()
-      .min(3, 'Le lieu est requis.')
-      .max(200, 'Le lieu doit faire 200 caractères maximum.'),
-    latitude: z
-      .number()
-      .min(-90, 'Latitude invalide.')
-      .max(90, 'Latitude invalide.')
-      .nullable()
-      .optional(),
-    longitude: z
-      .number()
-      .min(-180, 'Longitude invalide.')
-      .max(180, 'Longitude invalide.')
-      .nullable()
-      .optional(),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    /**
-     * Datetime ISO 8601 (string). On préfère un string côté Server Action
-     * pour éviter les bizarreries de sérialisation Date<->JSON ; la
-     * Server Action parse en `new Date(...)` au moment d'écrire.
-     */
-    date_debut: z
-      .string()
-      .datetime({ message: 'Date de début invalide (format ISO 8601 attendu).' }),
-    date_fin: z
-      .string()
-      .datetime({ message: 'Date de fin invalide (format ISO 8601 attendu).' })
-      .optional()
-      .or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  // Cohérence géo : couple complet ou rien.
-  .refine(
-    (d) => {
-      const aLat = d.latitude !== null && d.latitude !== undefined;
-      const aLng = d.longitude !== null && d.longitude !== undefined;
-      return aLat === aLng;
-    },
-    {
-      message: 'Latitude et longitude doivent être fournies ensemble (ou aucune).',
-      path: ['latitude'],
-    },
-  )
-  // Cohérence calendrier : date_fin >= date_debut quand fournie.
-  .refine(
-    (d) => {
-      if (d.date_fin === undefined || d.date_fin === '') return true;
-      return new Date(d.date_fin).getTime() >= new Date(d.date_debut).getTime();
-    },
-    {
-      message: 'La date de fin doit être postérieure ou égale à la date de début.',
-      path: ['date_fin'],
-    },
+export function creerMobilisationFactory(
+  messages: MessagesValidationMobilisation = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+) {
+  return (
+    z
+      .object({
+        titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+        description: z
+          .string()
+          .trim()
+          .min(50, messages.descriptionMin)
+          .max(3000, messages.descriptionMax),
+        lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
+        latitude: z
+          .number()
+          .min(-90, messages.latitudeFormat)
+          .max(90, messages.latitudeFormat)
+          .nullable()
+          .optional(),
+        longitude: z
+          .number()
+          .min(-180, messages.longitudeFormat)
+          .max(180, messages.longitudeFormat)
+          .nullable()
+          .optional(),
+        image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+        /**
+         * Datetime ISO 8601 (string). On préfère un string côté Server Action
+         * pour éviter les bizarreries de sérialisation Date<->JSON ; la
+         * Server Action parse en `new Date(...)` au moment d'écrire.
+         */
+        date_debut: z.string().datetime({ message: messages.dateDebutFormat }),
+        date_fin: z
+          .string()
+          .datetime({ message: messages.dateFinFormat })
+          .optional()
+          .or(z.literal('')),
+        token_turnstile: z.string().min(1, messages.turnstileRequis),
+      })
+      .strict()
+      // Cohérence géo : couple complet ou rien.
+      .refine(
+        (d) => {
+          const aLat = d.latitude !== null && d.latitude !== undefined;
+          const aLng = d.longitude !== null && d.longitude !== undefined;
+          return aLat === aLng;
+        },
+        {
+          message: messages.latLngEnsemble,
+          path: ['latitude'],
+        },
+      )
+      // Cohérence calendrier : date_fin >= date_debut quand fournie.
+      .refine(
+        (d) => {
+          if (d.date_fin === undefined || d.date_fin === '') return true;
+          return new Date(d.date_fin).getTime() >= new Date(d.date_debut).getTime();
+        },
+        {
+          message: messages.dateCoherence,
+          path: ['date_fin'],
+        },
+      )
   );
+}
+export const creerMobilisationSchema = creerMobilisationFactory();
 
 export type DonneesCreerMobilisation = z.infer<typeof creerMobilisationSchema>;
 
@@ -104,14 +104,24 @@ export type DonneesCreerMobilisation = z.infer<typeof creerMobilisationSchema>;
  * « code postal obligatoire sur tout formulaire SAUF le clic je
  * participe sur une mobilisation »).
  */
-export const participerMobilisationSchema = z
-  .object({
-    mobilisation_id: z.string().uuid('Identifiant de mobilisation invalide.'),
-    code_postal: codePostalFrancaisSchema.optional().or(z.literal('')),
-    accepte_notifications: z.boolean().default(false),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerParticiperMobilisationSchema(
+  messages: MessagesValidationMobilisation = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+) {
+  return z
+    .object({
+      mobilisation_id: z.string().uuid(messages.mobilisationUuid),
+      code_postal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat)
+        .optional()
+        .or(z.literal('')),
+      accepte_notifications: z.boolean().default(false),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const participerMobilisationSchema = creerParticiperMobilisationSchema();
 
 export type DonneesParticiperMobilisation = z.infer<typeof participerMobilisationSchema>;
 
@@ -123,16 +133,21 @@ export type DonneesParticiperMobilisation = z.infer<typeof participerMobilisatio
  * Retrait par modé/admin ou par la créateurice elle-même. Raison
  * obligatoire (transparence + journalisation).
  */
-export const retirerMobilisationSchema = z
-  .object({
-    mobilisation_id: z.string().uuid(),
-    raison_retrait: z
-      .string()
-      .trim()
-      .min(10, 'La raison du retrait doit comporter au moins 10 caractères.')
-      .max(500, 'La raison du retrait doit faire 500 caractères maximum.'),
-  })
-  .strict();
+export function creerRetirerMobilisationSchema(
+  messages: MessagesValidationMobilisation = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+) {
+  return z
+    .object({
+      mobilisation_id: z.string().uuid(),
+      raison_retrait: z
+        .string()
+        .trim()
+        .min(10, messages.retraitRaisonMin)
+        .max(500, messages.retraitRaisonMax),
+    })
+    .strict();
+}
+export const retirerMobilisationSchema = creerRetirerMobilisationSchema();
 
 export type DonneesRetirerMobilisation = z.infer<typeof retirerMobilisationSchema>;
 

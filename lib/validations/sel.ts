@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_SEL_DEFAUT,
+  type MessagesValidationSel,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace SEL (chantier 4.2).
@@ -9,39 +12,36 @@ import { tokenTurnstileSchema } from './auth';
  * Conversion 1 minute = 1 99-coin.
  */
 
-export const creerServiceSelSchema = z
-  .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, 'Le titre doit faire 200 caractères maximum.'),
-    description: z
-      .string()
-      .trim()
-      .min(30, 'La description doit comporter au moins 30 caractères.')
-      .max(3000),
-    categorie: z.enum(['service', 'volontariat']),
-    sens: z.enum(['propose', 'cherche']),
-    duree_minutes_estimee: z
-      .number()
-      .int('La durée doit être un nombre entier de minutes.')
-      .min(15, 'Durée minimum : 15 minutes.')
-      .max(480, 'Durée maximum : 480 minutes (8 heures).'),
-    lieu: z.string().trim().min(3, 'Le lieu est requis.').max(200),
-    latitude: z.number().min(-90).max(90).nullable().optional(),
-    longitude: z.number().min(-180).max(180).nullable().optional(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine(
-    (d) => {
-      const aLat = d.latitude !== null && d.latitude !== undefined;
-      const aLng = d.longitude !== null && d.longitude !== undefined;
-      return aLat === aLng;
-    },
-    { message: 'Latitude et longitude doivent être fournies ensemble.', path: ['latitude'] },
-  );
+export function creerServiceSelFactory(
+  messages: MessagesValidationSel = MESSAGES_VALIDATION_SEL_DEFAUT,
+) {
+  return z
+    .object({
+      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+      description: z.string().trim().min(30, messages.descriptionMin).max(3000),
+      categorie: z.enum(['service', 'volontariat']),
+      sens: z.enum(['propose', 'cherche']),
+      duree_minutes_estimee: z
+        .number()
+        .int(messages.dureeEntier)
+        .min(15, messages.dureeMin)
+        .max(480, messages.dureeMax),
+      lieu: z.string().trim().min(3, messages.lieuRequis).max(200),
+      latitude: z.number().min(-90).max(90).nullable().optional(),
+      longitude: z.number().min(-180).max(180).nullable().optional(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(
+      (d) => {
+        const aLat = d.latitude !== null && d.latitude !== undefined;
+        const aLng = d.longitude !== null && d.longitude !== undefined;
+        return aLat === aLng;
+      },
+      { message: messages.latLngEnsemble, path: ['latitude'] },
+    );
+}
+export const creerServiceSelSchema = creerServiceSelFactory();
 
 export type DonneesCreerServiceSel = z.infer<typeof creerServiceSelSchema>;
 
@@ -55,12 +55,17 @@ export type DonneesCreerServiceSel = z.infer<typeof creerServiceSelSchema>;
  * service (propose ou cherche), la personne qui réserve est prestataire
  * ou bénéficiaire.
  */
-export const reserverPrestationSchema = z
-  .object({
-    service_id: z.string().uuid(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerReserverPrestationSchema(
+  messages: MessagesValidationSel = MESSAGES_VALIDATION_SEL_DEFAUT,
+) {
+  return z
+    .object({
+      service_id: z.string().uuid(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const reserverPrestationSchema = creerReserverPrestationSchema();
 
 export type DonneesReserverPrestation = z.infer<typeof reserverPrestationSchema>;
 
@@ -72,16 +77,21 @@ export type DonneesReserverPrestation = z.infer<typeof reserverPrestationSchema>
  * Le prestataire déclare avoir réalisé la prestation, avec la durée
  * réelle. Démarre le compteur de modération 2 h.
  */
-export const declarerRealiseeSchema = z
-  .object({
-    prestation_id: z.string().uuid(),
-    duree_minutes_reelle: z
-      .number()
-      .int()
-      .min(1, 'Durée minimum : 1 minute.')
-      .max(480, 'Durée maximum : 480 minutes.'),
-  })
-  .strict();
+export function creerDeclarerRealiseeSchema(
+  messages: MessagesValidationSel = MESSAGES_VALIDATION_SEL_DEFAUT,
+) {
+  return z
+    .object({
+      prestation_id: z.string().uuid(),
+      duree_minutes_reelle: z
+        .number()
+        .int()
+        .min(1, messages.dureeReelleMin)
+        .max(480, messages.dureeReelleMax),
+    })
+    .strict();
+}
+export const declarerRealiseeSchema = creerDeclarerRealiseeSchema();
 
 export type DonneesDeclarerRealisee = z.infer<typeof declarerRealiseeSchema>;
 

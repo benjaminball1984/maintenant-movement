@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+  type MessagesValidationCommunes,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace Communes libres + Fédérations +
@@ -12,18 +15,23 @@ import { tokenTurnstileSchema } from './auth';
 // Adhésion d'une personne à une commune (1 clic)
 // ============================================================
 
-export const rejoindreCommuneSchema = z
-  .object({
-    commune_id: z.string().uuid(),
-    /**
-     * `confirme` doit être true quand on est au palier 2 ou 3 (modale
-     * de confirmation). Pour le palier 1 (1ère commune), peut rester
-     * false. La Server Action enforce.
-     */
-    confirme: z.boolean().optional(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerRejoindreCommuneSchema(
+  messages: MessagesValidationCommunes = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+) {
+  return z
+    .object({
+      commune_id: z.string().uuid(),
+      /**
+       * `confirme` doit être true quand on est au palier 2 ou 3 (modale
+       * de confirmation). Pour le palier 1 (1ère commune), peut rester
+       * false. La Server Action enforce.
+       */
+      confirme: z.boolean().optional(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const rejoindreCommuneSchema = creerRejoindreCommuneSchema();
 
 export type DonneesRejoindreCommune = z.infer<typeof rejoindreCommuneSchema>;
 
@@ -40,46 +48,47 @@ export type DonneesQuitterCommune = z.infer<typeof quitterCommuneSchema>;
 // d'Orgemont », exception à « pas de coquilles vides »).
 // ============================================================
 
-export const creerCommuneLibreSchema = z
-  .object({
-    nom: z
-      .string()
-      .trim()
-      .min(3, 'Le nom doit comporter au moins 3 caractères.')
-      .max(200, 'Le nom doit faire 200 caractères maximum.'),
-    description_courte: z
-      .string()
-      .trim()
-      .max(500, 'La description doit faire 500 caractères maximum.')
-      .optional()
-      .or(z.literal('')),
-    /**
-     * Code postal principal pour la géolocalisation. Pas obligatoire :
-     * une « commune libre » peut être virtuelle (ex : ZAD itinérante,
-     * quartier inter-communal). Cf. spec §7B « Territoires libres ».
-     */
-    code_postal_principal: z
-      .string()
-      .trim()
-      .regex(/^\d{5}$/, 'Code postal invalide.')
-      .optional()
-      .or(z.literal('')),
-    latitude: z.number().min(-90).max(90).nullable().optional(),
-    longitude: z.number().min(-180).max(180).nullable().optional(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine(
-    (d) => {
-      const aLat = d.latitude !== null && d.latitude !== undefined;
-      const aLng = d.longitude !== null && d.longitude !== undefined;
-      return aLat === aLng;
-    },
-    {
-      message: 'Latitude et longitude doivent être fournies ensemble.',
-      path: ['latitude'],
-    },
-  );
+export function creerCommuneLibreFactory(
+  messages: MessagesValidationCommunes = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(3, messages.nomMin).max(200, messages.nomMax),
+      description_courte: z
+        .string()
+        .trim()
+        .max(500, messages.descriptionMax)
+        .optional()
+        .or(z.literal('')),
+      /**
+       * Code postal principal pour la géolocalisation. Pas obligatoire :
+       * une « commune libre » peut être virtuelle (ex : ZAD itinérante,
+       * quartier inter-communal). Cf. spec §7B « Territoires libres ».
+       */
+      code_postal_principal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat)
+        .optional()
+        .or(z.literal('')),
+      latitude: z.number().min(-90).max(90).nullable().optional(),
+      longitude: z.number().min(-180).max(180).nullable().optional(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(
+      (d) => {
+        const aLat = d.latitude !== null && d.latitude !== undefined;
+        const aLng = d.longitude !== null && d.longitude !== undefined;
+        return aLat === aLng;
+      },
+      {
+        message: messages.latLngEnsemble,
+        path: ['latitude'],
+      },
+    );
+}
+export const creerCommuneLibreSchema = creerCommuneLibreFactory();
 
 export type DonneesCreerCommuneLibre = z.infer<typeof creerCommuneLibreSchema>;
 
@@ -87,18 +96,19 @@ export type DonneesCreerCommuneLibre = z.infer<typeof creerCommuneLibreSchema>;
 // Création d'une fédération (cf. spec §7B « fédération libre »).
 // ============================================================
 
-export const creerFederationSchema = z
-  .object({
-    nom: z
-      .string()
-      .trim()
-      .min(3, 'Le nom doit comporter au moins 3 caractères.')
-      .max(200, 'Le nom doit faire 200 caractères maximum.'),
-    type: z.enum(['geographique', 'thematique', 'mixte']),
-    description_courte: z.string().trim().max(500).optional().or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerFederationFactory(
+  messages: MessagesValidationCommunes = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(3, messages.nomMin).max(200, messages.nomMax),
+      type: z.enum(['geographique', 'thematique', 'mixte']),
+      description_courte: z.string().trim().max(500).optional().or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const creerFederationSchema = creerFederationFactory();
 
 export type DonneesCreerFederation = z.infer<typeof creerFederationSchema>;
 
@@ -106,17 +116,18 @@ export type DonneesCreerFederation = z.infer<typeof creerFederationSchema>;
 // Création d'une confédération.
 // ============================================================
 
-export const creerConfederationSchema = z
-  .object({
-    nom: z
-      .string()
-      .trim()
-      .min(3, 'Le nom doit comporter au moins 3 caractères.')
-      .max(200, 'Le nom doit faire 200 caractères maximum.'),
-    description_courte: z.string().trim().max(500).optional().or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerConfederationFactory(
+  messages: MessagesValidationCommunes = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(3, messages.nomMin).max(200, messages.nomMax),
+      description_courte: z.string().trim().max(500).optional().or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const creerConfederationSchema = creerConfederationFactory();
 
 export type DonneesCreerConfederation = z.infer<typeof creerConfederationSchema>;
 

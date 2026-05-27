@@ -1,3 +1,7 @@
+import {
+  MESSAGES_VALIDATION_MODERATION_DEFAUT,
+  type MessagesValidationModeration,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
 
 /**
@@ -11,31 +15,49 @@ import { z } from 'zod';
  */
 
 /** Raison de modération commune : 10 à 500 caractères. */
-const raisonModeration = z
-  .string()
-  .trim()
-  .min(10, 'Indique une raison d’au moins 10 caractères.')
-  .max(500, '500 caractères maximum.');
+function raisonModeration(messages: MessagesValidationModeration) {
+  return z.string().trim().min(10, messages.raisonMin).max(500, messages.raisonMax);
+}
 
-export const retirerMomentSchema = z.object({
-  moment_id: z.string().uuid('Moment invalide.'),
-  raison: raisonModeration,
-});
+export function creerRetirerMomentSchema(
+  messages: MessagesValidationModeration = MESSAGES_VALIDATION_MODERATION_DEFAUT,
+) {
+  return z.object({
+    moment_id: z.string().uuid(messages.momentUuid),
+    raison: raisonModeration(messages),
+  });
+}
+export const retirerMomentSchema = creerRetirerMomentSchema();
 export type DonneesRetirerMoment = z.infer<typeof retirerMomentSchema>;
 
-export const retirerSondageSchema = z.object({
-  sondage_id: z.string().uuid('Sondage invalide.'),
-  raison: raisonModeration,
-});
+export function creerRetirerSondageSchema(
+  messages: MessagesValidationModeration = MESSAGES_VALIDATION_MODERATION_DEFAUT,
+) {
+  return z.object({
+    sondage_id: z.string().uuid(messages.sondageUuid),
+    raison: raisonModeration(messages),
+  });
+}
+export const retirerSondageSchema = creerRetirerSondageSchema();
 export type DonneesRetirerSondage = z.infer<typeof retirerSondageSchema>;
 
-export const retirerServiceSelSchema = z.object({
-  service_id: z.string().uuid('Service invalide.'),
-  raison: raisonModeration,
-});
+export function creerRetirerServiceSelSchema(
+  messages: MessagesValidationModeration = MESSAGES_VALIDATION_MODERATION_DEFAUT,
+) {
+  return z.object({
+    service_id: z.string().uuid(messages.serviceUuid),
+    raison: raisonModeration(messages),
+  });
+}
+export const retirerServiceSelSchema = creerRetirerServiceSelSchema();
 export type DonneesRetirerServiceSel = z.infer<typeof retirerServiceSelSchema>;
 
-export const reafficherOrganisationSchema = z.object({
-  organisation_id: z.string().uuid('Organisation invalide.'),
-});
+export function creerReafficherOrganisationSchema(
+  messages: MessagesValidationModeration = MESSAGES_VALIDATION_MODERATION_DEFAUT,
+) {
+  return z.object({
+    organisation_id: z.string().uuid(messages.organisationUuid),
+  });
+}
+export const reafficherOrganisationSchema = creerReafficherOrganisationSchema();
 export type DonneesReafficherOrganisation = z.infer<typeof reafficherOrganisationSchema>;

@@ -1,3 +1,7 @@
+import {
+  MESSAGES_VALIDATION_DROIT_ADMIN_DEFAUT,
+  type MessagesValidationDroitAdmin,
+} from '@/lib/messages-validation';
 import type { NiveauDroitAdmin } from '@/types/database';
 import { z } from 'zod';
 
@@ -113,46 +117,56 @@ const niveauxAcceptes = NIVEAUX_DROIT.map((n) => n.valeur) as [
  * obligatoire pour l'animation, onglets réservés à la modération) sont
  * vérifiées dans le `superRefine` pour coller exactement aux CHECK SQL.
  */
-export const accorderDroitSchema = z
-  .object({
-    personne_id: z.string().uuid('Personne invalide.'),
-    niveau: z.enum(niveauxAcceptes),
-    perimetre_onglet: z.array(z.enum(ONGLETS_MODERATION)).optional(),
-    scope_commune_id: z.string().uuid('Commune invalide.').optional().nullable(),
-  })
-  .superRefine((valeurs, ctx) => {
-    if (valeurs.niveau === 'animation' && !valeurs.scope_commune_id) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['scope_commune_id'],
-        message: 'Une commune est requise pour un droit d’animation.',
-      });
-    }
-    if (valeurs.niveau !== 'animation' && valeurs.scope_commune_id) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['scope_commune_id'],
-        message: 'Seul un droit d’animation cible une commune.',
-      });
-    }
-    if (
-      valeurs.niveau !== 'moderation' &&
-      valeurs.perimetre_onglet !== undefined &&
-      valeurs.perimetre_onglet.length > 0
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['perimetre_onglet'],
-        message: 'Un périmètre d’onglets ne s’applique qu’à la modération.',
-      });
-    }
-  });
+export function creerAccorderDroitSchema(
+  messages: MessagesValidationDroitAdmin = MESSAGES_VALIDATION_DROIT_ADMIN_DEFAUT,
+) {
+  return z
+    .object({
+      personne_id: z.string().uuid(messages.personneUuid),
+      niveau: z.enum(niveauxAcceptes),
+      perimetre_onglet: z.array(z.enum(ONGLETS_MODERATION)).optional(),
+      scope_commune_id: z.string().uuid(messages.communeUuid).optional().nullable(),
+    })
+    .superRefine((valeurs, ctx) => {
+      if (valeurs.niveau === 'animation' && !valeurs.scope_commune_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['scope_commune_id'],
+          message: messages.animationCommuneRequise,
+        });
+      }
+      if (valeurs.niveau !== 'animation' && valeurs.scope_commune_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['scope_commune_id'],
+          message: messages.scopeCommuneInterdit,
+        });
+      }
+      if (
+        valeurs.niveau !== 'moderation' &&
+        valeurs.perimetre_onglet !== undefined &&
+        valeurs.perimetre_onglet.length > 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['perimetre_onglet'],
+          message: messages.perimetreOngletReserve,
+        });
+      }
+    });
+}
+export const accorderDroitSchema = creerAccorderDroitSchema();
 
 export type DonneesAccorderDroit = z.infer<typeof accorderDroitSchema>;
 
 /** Schéma de retrait d'un droit (on retire par identifiant de ligne). */
-export const retirerDroitSchema = z.object({
-  droit_id: z.string().uuid('Droit invalide.'),
-});
+export function creerRetirerDroitSchema(
+  messages: MessagesValidationDroitAdmin = MESSAGES_VALIDATION_DROIT_ADMIN_DEFAUT,
+) {
+  return z.object({
+    droit_id: z.string().uuid(messages.droitUuid),
+  });
+}
+export const retirerDroitSchema = creerRetirerDroitSchema();
 
 export type DonneesRetirerDroit = z.infer<typeof retirerDroitSchema>;

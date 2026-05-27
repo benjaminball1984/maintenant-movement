@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace Marché solidaire (chantier 4.3).
@@ -22,16 +25,18 @@ import { tokenTurnstileSchema } from './auth';
  * unité (équivalent wei). Cohérent avec le don T99CP (cf. cagnotte.ts).
  * `'0'` est autorisé (sentinel « pas de prix dans cette monnaie »).
  */
-const prixT99CPSchema = z
-  .string()
-  .regex(/^\d+$/, 'Montant T99CP invalide.')
-  .refine((v) => {
-    try {
-      return BigInt(v) <= 10n ** 27n;
-    } catch {
-      return false;
-    }
-  }, 'Montant T99CP déraisonnable.');
+function prixT99CPFactory(messages: MessagesValidationMarche) {
+  return z
+    .string()
+    .regex(/^\d+$/, messages.t99cpMontantFormat)
+    .refine((v) => {
+      try {
+        return BigInt(v) <= 10n ** 27n;
+      } catch {
+        return false;
+      }
+    }, messages.t99cpMontantMax);
+}
 
 /** Cohérence : lat/lng vont ensemble ou pas du tout. */
 function refineGeo<T extends { latitude?: number | null; longitude?: number | null }>(
@@ -46,91 +51,69 @@ function refineGeo<T extends { latitude?: number | null; longitude?: number | nu
 // Onglet 1 — Création d'un produit
 // ============================================================
 
-/**
- * Création d'un produit (vente ou don) du marché solidaire.
- *
- * Le toggle `mode` détermine la cohérence des prix :
- *   - `don`   → prix obligatoirement à 0 (EUR et T99CP).
- *   - `vente` → au moins un prix > 0 (EUR ou T99CP).
- *
- * La contrainte est aussi enforced en BDD via CHECK
- * `produit_marche_prix_coherent`.
- */
-export const creerProduitMarcheSchema = z
-  .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, 'Le titre doit faire 200 caractères maximum.'),
-    description: z
-      .string()
-      .trim()
-      .min(30, 'La description doit comporter au moins 30 caractères.')
-      .max(3000, 'La description doit faire 3000 caractères maximum.'),
-    mode: z.enum(['vente', 'don']),
-    /**
-     * Prix en EUR, exprimé en centimes (entier). 0 = pas de prix EUR.
-     */
-    prix_euros_centimes: z
-      .number()
-      .int('Le prix doit être un nombre entier de centimes.')
-      .min(0, 'Le prix ne peut pas être négatif.')
-      .max(1_000_000_00, 'Prix maximum : 1 000 000 € en une transaction.'),
-    /**
-     * Prix en T99CP, plus petite unité, string bigint-safe. '0' = pas
-     * de prix T99CP.
-     */
-    prix_t99cp_unites: prixT99CPSchema,
-    categorie_slug: z
-      .string()
-      .trim()
-      .max(60)
-      .regex(/^[a-z0-9-]+$/, 'Slug de catégorie invalide.')
-      .optional()
-      .or(z.literal('')),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    lieu: z
-      .string()
-      .trim()
-      .min(3, 'Le lieu de retrait est requis.')
-      .max(200, 'Le lieu doit faire 200 caractères maximum.'),
-    latitude: z.number().min(-90).max(90).nullable().optional(),
-    longitude: z.number().min(-180).max(180).nullable().optional(),
-    remise_main_propre: z.boolean(),
-    envoi_postal: z.boolean(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine(refineGeo, {
-    message: 'Latitude et longitude doivent être fournies ensemble.',
-    path: ['latitude'],
-  })
-  .refine((d) => d.remise_main_propre === true || d.envoi_postal === true, {
-    message: 'Au moins un mode de retrait doit être sélectionné.',
-    path: ['remise_main_propre'],
-  })
-  .refine(
-    (d) => {
-      if (d.mode === 'don') {
-        return d.prix_euros_centimes === 0 && d.prix_t99cp_unites === '0';
-      }
-      // vente : au moins un prix > 0
-      const aEur = d.prix_euros_centimes > 0;
-      let aT99CP = false;
-      try {
-        aT99CP = BigInt(d.prix_t99cp_unites) > 0n;
-      } catch {
-        aT99CP = false;
-      }
-      return aEur || aT99CP;
-    },
-    {
-      message:
-        'En mode vente, indique un prix en euros et/ou en T99CP. En mode don, laisse les prix à 0.',
-      path: ['prix_euros_centimes'],
-    },
-  );
+export function creerProduitMarcheFactory(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+      description: z
+        .string()
+        .trim()
+        .min(30, messages.descriptionMin)
+        .max(3000, messages.descriptionMax),
+      mode: z.enum(['vente', 'don']),
+      prix_euros_centimes: z
+        .number()
+        .int(messages.prixEurosEntier)
+        .min(0, messages.prixEurosMin)
+        .max(1_000_000_00, messages.prixEurosMax),
+      prix_t99cp_unites: prixT99CPFactory(messages),
+      categorie_slug: z
+        .string()
+        .trim()
+        .max(60)
+        .regex(/^[a-z0-9-]+$/, messages.categorieSlugInvalide)
+        .optional()
+        .or(z.literal('')),
+      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
+      latitude: z.number().min(-90).max(90).nullable().optional(),
+      longitude: z.number().min(-180).max(180).nullable().optional(),
+      remise_main_propre: z.boolean(),
+      envoi_postal: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(refineGeo, {
+      message: messages.latLngEnsemble,
+      path: ['latitude'],
+    })
+    .refine((d) => d.remise_main_propre === true || d.envoi_postal === true, {
+      message: messages.retraitChoix,
+      path: ['remise_main_propre'],
+    })
+    .refine(
+      (d) => {
+        if (d.mode === 'don') {
+          return d.prix_euros_centimes === 0 && d.prix_t99cp_unites === '0';
+        }
+        const aEur = d.prix_euros_centimes > 0;
+        let aT99CP = false;
+        try {
+          aT99CP = BigInt(d.prix_t99cp_unites) > 0n;
+        } catch {
+          aT99CP = false;
+        }
+        return aEur || aT99CP;
+      },
+      {
+        message: messages.modeCoherent,
+        path: ['prix_euros_centimes'],
+      },
+    );
+}
+export const creerProduitMarcheSchema = creerProduitMarcheFactory();
 
 export type DonneesCreerProduitMarche = z.infer<typeof creerProduitMarcheSchema>;
 
@@ -138,34 +121,35 @@ export type DonneesCreerProduitMarche = z.infer<typeof creerProduitMarcheSchema>
 // Retrait / clôture / marquer vendu
 // ============================================================
 
-export const retirerProduitSchema = z
-  .object({
-    produit_id: z.string().uuid(),
-    raison: z
-      .string()
-      .trim()
-      .min(5, 'Indique brièvement la raison.')
-      .max(500, '500 caractères maximum.'),
-  })
-  .strict();
+export function creerRetirerProduitSchema(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      produit_id: z.string().uuid(),
+      raison: z
+        .string()
+        .trim()
+        .min(5, messages.retraitRaisonMin)
+        .max(500, messages.retraitRaisonMax),
+    })
+    .strict();
+}
+export const retirerProduitSchema = creerRetirerProduitSchema();
 
 export type DonneesRetirerProduit = z.infer<typeof retirerProduitSchema>;
 
-/**
- * Marque un produit comme vendu (= ouvre la possibilité de notation
- * unilatérale). La Server Action vérifie que l'auteurice de l'appel
- * est bien la vendeureuse.
- *
- * `acheteureuse_id` est requis car la notation est liée au couple
- * (produit, acheteureuse) ; le marquer vendu déclare publiquement à
- * qui le produit a été vendu.
- */
-export const marquerVenduSchema = z
-  .object({
-    produit_id: z.string().uuid(),
-    acheteureuse_id: z.string().uuid('Identifiant d’acheteureuse invalide.'),
-  })
-  .strict();
+export function creerMarquerVenduSchema(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      produit_id: z.string().uuid(),
+      acheteureuse_id: z.string().uuid(messages.acheteureuseUuid),
+    })
+    .strict();
+}
+export const marquerVenduSchema = creerMarquerVenduSchema();
 
 export type DonneesMarquerVendu = z.infer<typeof marquerVenduSchema>;
 
@@ -173,24 +157,28 @@ export type DonneesMarquerVendu = z.infer<typeof marquerVenduSchema>;
 // Notation 5 étoiles unilatérale
 // ============================================================
 
-export const noterVendeureuseSchema = z
-  .object({
-    produit_id: z.string().uuid(),
-    /** 1 à 5 étoiles entiers. */
-    etoiles: z
-      .number()
-      .int('Le nombre d’étoiles doit être un entier.')
-      .min(1, 'Minimum 1 étoile.')
-      .max(5, 'Maximum 5 étoiles.'),
-    commentaire: z
-      .string()
-      .trim()
-      .max(1000, '1000 caractères maximum.')
-      .optional()
-      .or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerNoterVendeureuseSchema(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      produit_id: z.string().uuid(),
+      etoiles: z
+        .number()
+        .int(messages.etoilesEntier)
+        .min(1, messages.etoilesMin)
+        .max(5, messages.etoilesMax),
+      commentaire: z
+        .string()
+        .trim()
+        .max(1000, messages.commentaireMax)
+        .optional()
+        .or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const noterVendeureuseSchema = creerNoterVendeureuseSchema();
 
 export type DonneesNoterVendeureuse = z.infer<typeof noterVendeureuseSchema>;
 
@@ -198,60 +186,56 @@ export type DonneesNoterVendeureuse = z.infer<typeof noterVendeureuseSchema>;
 // Onglet 2 — Création d'une boutique éphémère
 // ============================================================
 
-export const creerBoutiqueSchema = z
-  .object({
-    nom: z
-      .string()
-      .trim()
-      .min(3, 'Le nom doit comporter au moins 3 caractères.')
-      .max(200, '200 caractères maximum.'),
-    description: z
-      .string()
-      .trim()
-      .min(30, 'La description doit comporter au moins 30 caractères.')
-      .max(3000, '3000 caractères maximum.'),
-    sens: z.enum(['propose', 'cherche']),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    /**
-     * Plage temporelle de la boutique éphémère. Si une seule des deux
-     * dates est renseignée, on rejette (ambiguïté).
-     */
-    ouverte_du: z
-      .string()
-      .datetime({ message: 'Date de début invalide (ISO 8601).' })
-      .optional()
-      .or(z.literal('')),
-    ouverte_au: z
-      .string()
-      .datetime({ message: 'Date de fin invalide (ISO 8601).' })
-      .optional()
-      .or(z.literal('')),
-    lieu: z.string().trim().max(200).optional().or(z.literal('')),
-    latitude: z.number().min(-90).max(90).nullable().optional(),
-    longitude: z.number().min(-180).max(180).nullable().optional(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine(refineGeo, {
-    message: 'Latitude et longitude doivent être fournies ensemble.',
-    path: ['latitude'],
-  })
-  .refine(
-    (d) => {
-      const a = d.ouverte_du !== undefined && d.ouverte_du !== '';
-      const b = d.ouverte_au !== undefined && d.ouverte_au !== '';
-      if (a !== b) return false;
-      if (a && b) {
-        return new Date(d.ouverte_du as string) <= new Date(d.ouverte_au as string);
-      }
-      return true;
-    },
-    {
-      message:
-        'Les dates d’ouverture doivent aller ensemble et la date de début doit précéder la fin.',
-      path: ['ouverte_du'],
-    },
-  );
+export function creerBoutiqueFactory(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(3, messages.nomMin).max(200, messages.nomMax),
+      description: z
+        .string()
+        .trim()
+        .min(30, messages.descriptionMin)
+        .max(3000, messages.descriptionMax),
+      sens: z.enum(['propose', 'cherche']),
+      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      ouverte_du: z
+        .string()
+        .datetime({ message: messages.ouverteDuFormat })
+        .optional()
+        .or(z.literal('')),
+      ouverte_au: z
+        .string()
+        .datetime({ message: messages.ouverteAuFormat })
+        .optional()
+        .or(z.literal('')),
+      lieu: z.string().trim().max(200).optional().or(z.literal('')),
+      latitude: z.number().min(-90).max(90).nullable().optional(),
+      longitude: z.number().min(-180).max(180).nullable().optional(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(refineGeo, {
+      message: messages.latLngEnsemble,
+      path: ['latitude'],
+    })
+    .refine(
+      (d) => {
+        const a = d.ouverte_du !== undefined && d.ouverte_du !== '';
+        const b = d.ouverte_au !== undefined && d.ouverte_au !== '';
+        if (a !== b) return false;
+        if (a && b) {
+          return new Date(d.ouverte_du as string) <= new Date(d.ouverte_au as string);
+        }
+        return true;
+      },
+      {
+        message: messages.ouvertureCoherente,
+        path: ['ouverte_du'],
+      },
+    );
+}
+export const creerBoutiqueSchema = creerBoutiqueFactory();
 
 export type DonneesCreerBoutique = z.infer<typeof creerBoutiqueSchema>;
 
@@ -262,43 +246,40 @@ export type DonneesCreerBoutique = z.infer<typeof creerBoutiqueSchema>;
 /** Catalogue strict des monnaies physiques (cf. spec §6F). */
 const monnaieMinimarcheSchema = z.enum(['T99CP', 'EUR', 'G1', 'MNLC']);
 
-export const creerMinimarcheSchema = z
-  .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, '200 caractères maximum.'),
-    description: z
-      .string()
-      .trim()
-      .min(30, 'La description doit comporter au moins 30 caractères.')
-      .max(3000, '3000 caractères maximum.'),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    lieu: z.string().trim().min(3, 'Le lieu est requis.').max(200),
-    latitude: z.number().min(-90).max(90).nullable().optional(),
-    longitude: z.number().min(-180).max(180).nullable().optional(),
-    commence_le: z.string().datetime({ message: 'Date de début invalide (ISO 8601).' }),
-    termine_le: z.string().datetime({ message: 'Date de fin invalide (ISO 8601).' }),
-    /**
-     * Tableau des monnaies acceptées. Au moins une, parmi les 4 du
-     * catalogue (T99CP, EUR, Ğ1, MNLC). Dédupliqué côté serveur.
-     */
-    monnaies_acceptees: z
-      .array(monnaieMinimarcheSchema)
-      .min(1, 'Au moins une monnaie doit être acceptée.')
-      .max(4, 'Catalogue limité à 4 monnaies (T99CP, EUR, Ğ1, MNLC).'),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine(refineGeo, {
-    message: 'Latitude et longitude doivent être fournies ensemble.',
-    path: ['latitude'],
-  })
-  .refine((d) => new Date(d.commence_le) <= new Date(d.termine_le), {
-    message: 'La date de fin doit suivre la date de début.',
-    path: ['termine_le'],
-  });
+export function creerMinimarcheFactory(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.nomMax),
+      description: z
+        .string()
+        .trim()
+        .min(30, messages.descriptionMin)
+        .max(3000, messages.descriptionMax),
+      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      lieu: z.string().trim().min(3, messages.lieuRequis).max(200),
+      latitude: z.number().min(-90).max(90).nullable().optional(),
+      longitude: z.number().min(-180).max(180).nullable().optional(),
+      commence_le: z.string().datetime({ message: messages.commenceLeFormat }),
+      termine_le: z.string().datetime({ message: messages.termineLeFormat }),
+      monnaies_acceptees: z
+        .array(monnaieMinimarcheSchema)
+        .min(1, messages.monnaieMin)
+        .max(4, messages.monnaieMax),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(refineGeo, {
+      message: messages.latLngEnsemble,
+      path: ['latitude'],
+    })
+    .refine((d) => new Date(d.commence_le) <= new Date(d.termine_le), {
+      message: messages.dateCoherence,
+      path: ['termine_le'],
+    });
+}
+export const creerMinimarcheSchema = creerMinimarcheFactory();
 
 export type DonneesCreerMinimarche = z.infer<typeof creerMinimarcheSchema>;
 
@@ -319,31 +300,26 @@ export type DonneesRattacherProduitBoutique = z.infer<typeof rattacherProduitBou
 // Achat en ligne (Stripe Checkout mock + T99CP)
 // ============================================================
 
-/**
- * Initiation d'un achat en ligne. La Server Action choisit le service
- * de paiement selon `monnaie` (Stripe mock pour EUR, T99CP service
- * pour T99CP) et passe le produit au statut `reserve` jusqu'à
- * confirmation côté webhook (3.3 patterns).
- */
-export const acheterProduitSchema = z
-  .object({
-    produit_id: z.string().uuid(),
-    monnaie: z.enum(['EUR', 'T99CP']),
-    /**
-     * `tx_hash` requis seulement pour T99CP (signature wallet). Pour
-     * EUR, le PaymentIntent est généré côté Server Action.
-     */
-    tx_hash: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{64}$/, 'tx_hash invalide (format 0x + 64 hex attendus).')
-      .optional()
-      .or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict()
-  .refine((d) => d.monnaie !== 'T99CP' || (d.tx_hash !== undefined && d.tx_hash !== ''), {
-    message: 'tx_hash requis pour un achat en T99CP.',
-    path: ['tx_hash'],
-  });
+export function creerAcheterProduitSchema(
+  messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+) {
+  return z
+    .object({
+      produit_id: z.string().uuid(),
+      monnaie: z.enum(['EUR', 'T99CP']),
+      tx_hash: z
+        .string()
+        .regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat)
+        .optional()
+        .or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine((d) => d.monnaie !== 'T99CP' || (d.tx_hash !== undefined && d.tx_hash !== ''), {
+      message: messages.txHashRequisT99CP,
+      path: ['tx_hash'],
+    });
+}
+export const acheterProduitSchema = creerAcheterProduitSchema();
 
 export type DonneesAcheterProduit = z.infer<typeof acheterProduitSchema>;
