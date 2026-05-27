@@ -1,4 +1,7 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -10,20 +13,44 @@ export const metadata: Metadata = {
     "L'entraide concrète et économique entre les gens : hébergement, transport, prêt d'objets, alimentation, SEL, marché solidaire.",
 };
 
+const FALLBACK_TITRE = "S'entraider";
+const FALLBACK_INTRO =
+  "L'entraide concrète et économique entre les gens : hébergement, transport, prêt d'objets, alimentation, SEL (système d'échange local), marché solidaire, groupes d'entraide locaux.";
+
 /**
  * Page d'accueil de l'espace S'entraider.
  *
  * V2.4 (refonte) : SEL et Marché solidaire sont désormais livrés, on
  * les ajoute en cartes à part entière en plus des sous-espaces config.
+ * V2.4.105 : titre + intro éditables admin via CMS.
  */
-export default function PageSEntraider() {
+export default async function PageSEntraider() {
+  const [estAdmin, titre, intro] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('s-entraider.titre', { valeurMd: FALLBACK_TITRE }),
+    lireContenuEditorial('s-entraider.intro', { valeurMd: FALLBACK_INTRO }),
+  ]);
+
   return (
     <>
-      <Heading niveau={1}>S'entraider</Heading>
-      <p className="mt-3 max-w-2xl text-text-2">
-        L'entraide concrète et économique entre les gens : hébergement, transport, prêt d'objets,
-        alimentation, SEL (système d'échange local), marché solidaire, groupes d'entraide locaux.
-      </p>
+      <TexteEditableAdmin
+        cle="s-entraider.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre de la page s-entraider"
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="s-entraider.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro de la page s-entraider"
+        multilignes
+        longueurMax={500}
+      >
+        {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+      </TexteEditableAdmin>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
         {Object.values(SOUS_ESPACES).map((config) => (

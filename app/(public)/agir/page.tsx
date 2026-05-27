@@ -1,10 +1,17 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compter } from '@/lib/pluriel';
 import { getSupabaseServer } from '@/lib/supabase';
 import { CalendarRange, HandHeart, MapPin, MoreHorizontal, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACK_TITRE = 'Agir';
+const FALLBACK_INTRO =
+  'Passer à l’action concrète : adhérer, activer ou rejoindre une commune libre, participer à un moment solidaire près de chez toi, ou agir autrement.';
 
 export const metadata: Metadata = {
   title: 'Agir',
@@ -27,7 +34,7 @@ interface Carte {
 export default async function PageAgir() {
   const supabase = await getSupabaseServer();
 
-  const [communesLibres, momentsAVenir, federations] = await Promise.all([
+  const [communesLibres, momentsAVenir, federations, estAdmin, titre, intro] = await Promise.all([
     supabase
       .from('commune')
       .select('id', { count: 'exact', head: true })
@@ -38,6 +45,9 @@ export default async function PageAgir() {
       .in('statut', ['annonce', 'en_cours'])
       .gte('commence_le', new Date().toISOString()),
     supabase.from('federation').select('id', { count: 'exact', head: true }),
+    estAdminCourant(),
+    lireContenuEditorial('agir.titre', { valeurMd: FALLBACK_TITRE }),
+    lireContenuEditorial('agir.intro', { valeurMd: FALLBACK_INTRO }),
   ]);
 
   const cartes: Carte[] = [
@@ -88,11 +98,24 @@ export default async function PageAgir() {
     <Container taille="lg" className="py-12">
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
-        <Heading niveau={1}>Agir</Heading>
-        <p className="mt-3 max-w-2xl text-text-2">
-          Passer à l’action concrète : adhérer, activer ou rejoindre une commune libre, participer à
-          un moment solidaire près de chez toi, ou agir autrement.
-        </p>
+        <TexteEditableAdmin
+          cle="agir.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre de la page agir"
+        >
+          {(t) => <Heading niveau={1}>{t}</Heading>}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="agir.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro de la page agir"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

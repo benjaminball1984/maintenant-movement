@@ -1,10 +1,17 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compter } from '@/lib/pluriel';
 import { getSupabaseServer } from '@/lib/supabase';
 import { CalendarRange, Flag, PenSquare, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACK_TITRE = 'Mobiliser';
+const FALLBACK_INTRO =
+  'Les outils de mobilisation du mouvement : interpeller, manifester, financer, regrouper.';
 
 export const metadata: Metadata = {
   title: 'Mobiliser',
@@ -26,16 +33,29 @@ interface Carte {
 export default async function PageMobiliser() {
   const supabase = await getSupabaseServer();
 
-  const [petitions, mobilisations, cagnottes, campagnes] = await Promise.all([
-    supabase.from('petition').select('id', { count: 'exact', head: true }).eq('statut', 'publiee'),
-    supabase
-      .from('mobilisation')
-      .select('id', { count: 'exact', head: true })
-      .eq('statut', 'publiee')
-      .gte('date_debut', new Date().toISOString()),
-    supabase.from('cagnotte').select('id', { count: 'exact', head: true }).eq('statut', 'publiee'),
-    supabase.from('campagne').select('id', { count: 'exact', head: true }).eq('statut', 'publiee'),
-  ]);
+  const [petitions, mobilisations, cagnottes, campagnes, estAdmin, titre, intro] =
+    await Promise.all([
+      supabase
+        .from('petition')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publiee'),
+      supabase
+        .from('mobilisation')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publiee')
+        .gte('date_debut', new Date().toISOString()),
+      supabase
+        .from('cagnotte')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publiee'),
+      supabase
+        .from('campagne')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publiee'),
+      estAdminCourant(),
+      lireContenuEditorial('mobiliser.titre', { valeurMd: FALLBACK_TITRE }),
+      lireContenuEditorial('mobiliser.intro', { valeurMd: FALLBACK_INTRO }),
+    ]);
 
   const cartes: Carte[] = [
     {
@@ -80,10 +100,24 @@ export default async function PageMobiliser() {
     <Container taille="lg" className="py-12">
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
-        <Heading niveau={1}>Mobiliser</Heading>
-        <p className="mt-3 max-w-2xl text-text-2">
-          Les outils de mobilisation du mouvement : interpeller, manifester, financer, regrouper.
-        </p>
+        <TexteEditableAdmin
+          cle="mobiliser.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre de la page mobiliser"
+        >
+          {(t) => <Heading niveau={1}>{t}</Heading>}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="mobiliser.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro de la page mobiliser"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">

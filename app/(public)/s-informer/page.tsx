@@ -1,10 +1,17 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compter } from '@/lib/pluriel';
 import { getSupabaseServer } from '@/lib/supabase';
 import { CheckCircle, FileText, Newspaper, Radio, Search, Users, Video, Vote } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACK_TITRE = 'S’informer';
+const FALLBACK_INTRO =
+  'Articles, brèves, podcasts, vidéos, sondages, journal-affiche imprimable, salles de décision, réseau social du mouvement. Tout ce qui circule à l’intérieur de Maintenant! et qui s’adresse au plus grand nombre.';
 
 export const metadata: Metadata = {
   title: 'S’informer',
@@ -32,20 +39,24 @@ interface CarteSousEspace {
 export default async function PageSInformer() {
   const supabase = await getSupabaseServer();
 
-  // Compteurs en parallèle pour ne pas allonger le TTFB.
-  const [mediasPub, journalPub, sondagesOuv, sallesDecider, postsReseau] = await Promise.all([
-    supabase.from('media').select('id', { count: 'exact', head: true }).eq('statut', 'publie'),
-    supabase
-      .from('journal_affiche')
-      .select('id', { count: 'exact', head: true })
-      .eq('statut', 'publie'),
-    supabase.from('sondage').select('id', { count: 'exact', head: true }).eq('statut', 'ouvert'),
-    supabase.from('salle_decider').select('id', { count: 'exact', head: true }),
-    supabase
-      .from('post_reseau')
-      .select('id', { count: 'exact', head: true })
-      .eq('statut', 'publie'),
-  ]);
+  // Compteurs + textes editoriaux + estAdmin en parallèle pour ne pas allonger le TTFB.
+  const [mediasPub, journalPub, sondagesOuv, sallesDecider, postsReseau, estAdmin, titre, intro] =
+    await Promise.all([
+      supabase.from('media').select('id', { count: 'exact', head: true }).eq('statut', 'publie'),
+      supabase
+        .from('journal_affiche')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publie'),
+      supabase.from('sondage').select('id', { count: 'exact', head: true }).eq('statut', 'ouvert'),
+      supabase.from('salle_decider').select('id', { count: 'exact', head: true }),
+      supabase
+        .from('post_reseau')
+        .select('id', { count: 'exact', head: true })
+        .eq('statut', 'publie'),
+      estAdminCourant(),
+      lireContenuEditorial('s-informer.titre', { valeurMd: FALLBACK_TITRE }),
+      lireContenuEditorial('s-informer.intro', { valeurMd: FALLBACK_INTRO }),
+    ]);
 
   const sousEspaces: CarteSousEspace[] = [
     {
@@ -120,12 +131,24 @@ export default async function PageSInformer() {
     <Container taille="lg" className="py-12">
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
-        <Heading niveau={1}>S’informer</Heading>
-        <p className="mt-3 max-w-2xl text-text-2">
-          Articles, brèves, podcasts, vidéos, sondages, journal-affiche imprimable, salles de
-          décision, réseau social du mouvement. Tout ce qui circule à l’intérieur de Maintenant! et
-          qui s’adresse au plus grand nombre.
-        </p>
+        <TexteEditableAdmin
+          cle="s-informer.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre de la page s-informer"
+        >
+          {(t) => <Heading niveau={1}>{t}</Heading>}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="s-informer.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro de la page s-informer"
+          multilignes
+          longueurMax={800}
+        >
+          {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
           <Link
             href="/recherche"
