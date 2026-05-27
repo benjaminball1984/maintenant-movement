@@ -432,8 +432,10 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 normalisation/URL/password aléatoire)
-**Dernier chantier terminé** : V2.4.88 (`lib/generer-password.ts` + 13 tests) — sur `main` (tip `5696000`). 899 tests verts. 3 générateurs via `crypto.getRandomValues` : password, code numérique, token URL-safe anti-confusion.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 timestamp + index unifié helpers)
+**Dernier chantier terminé** : V2.4.90 (`lib/helpers-purs.ts` index unifié) — sur `main` (tip `c3837f1`). Point d'export unique pour les 38 helpers purs accumulés V2.4.28-V2.4.89, organisés en 11 sections (identité, formatage, sécurité, texte, collections, géo, couleur, URL, CSV, business, timestamp, log).
+**Dernier chantier terminé (antérieur)** : V2.4.89 (`lib/timestamp.ts` + 13 tests) — sur `main` (tip `b419129`). 912 tests verts (cap 900 franchi). `isoEnSecondes`/`secondesEnIso`/`maintenantEnSecondes`/`estTimestampValide` (détecte le piège classique ms-au-lieu-de-s).
+**Dernier chantier terminé (antérieur)** : V2.4.88 (`lib/generer-password.ts` + 13 tests) — sur `main` (tip `5696000`). 899 tests verts. 3 générateurs via `crypto.getRandomValues` : password, code numérique, token URL-safe anti-confusion.
 **Dernier chantier terminé (antérieur)** : V2.4.87 (`lib/validation-url.ts` + 15 tests) — sur `main` (tip `03f1c39`). `estUrlValide` (refuse javascript:/data:/file:), allowlist domaines, `parserUrl`.
 **Dernier chantier terminé (antérieur)** : V2.4.86 (`lib/normaliser-recherche.ts` + 15 tests) — sur `main` (tip `c0a5899`). `normaliserRecherche`, `contientTexte` (match permissif accent+casse), `comparerPermissif` (tri).
 **Dernier chantier terminé (antérieur)** : V2.4.85 (composant `Skeleton` UI) — sur `main` (tip `f7e672a`). 3 variantes (`Skeleton`, `SkeletonText`, `SkeletonCarte`), animate-pulse, aria-busy.
