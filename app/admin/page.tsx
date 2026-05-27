@@ -1,6 +1,9 @@
-import { Card, Heading } from '@/components/ui';
+import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { chargerCompteursFileModeration } from '@/lib/admin/file-moderation';
 import { chargerStatsAdmin } from '@/lib/admin/stats';
+import { CheckCircle, Flag } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = { title: 'Console — Vue d’ensemble' };
 
@@ -21,7 +24,11 @@ const FORMAT_EUR = new Intl.NumberFormat('fr-FR', {
  * pages éditoriales viendront en polish.
  */
 export default async function PageAdmin() {
-  const stats = await chargerStatsAdmin();
+  const [stats, fileModeration] = await Promise.all([
+    chargerStatsAdmin(),
+    chargerCompteursFileModeration(),
+  ]);
+  const totalEnAttente = Object.values(fileModeration).reduce((a, b) => a + b, 0);
 
   return (
     <>
@@ -30,6 +37,71 @@ export default async function PageAdmin() {
         <p className="mt-1 text-sm text-text-3">
           Stats globales (rafraîchies à chaque chargement). Filtrage par commune à venir en polish.
         </p>
+      </header>
+
+      {totalEnAttente > 0 ? (
+        <Alert variant="warning" titre="Modération à faire" className="mb-6">
+          <p>
+            <strong>{FORMAT_NB.format(totalEnAttente)}</strong> élément
+            {totalEnAttente > 1 ? 's' : ''} en attente d'action.{' '}
+            <Link href="/admin/moderation" className="underline">
+              Ouvrir la file de modération →
+            </Link>
+          </p>
+        </Alert>
+      ) : (
+        <Alert variant="success" titre="Modération à jour" className="mb-6">
+          <CheckCircle size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
+          Aucune action de modération en attente.{' '}
+          <Link href="/admin/moderation" className="underline">
+            Voir la file →
+          </Link>
+        </Alert>
+      )}
+
+      <header className="mb-3">
+        <Heading niveau={2} apparenceComme={3}>
+          <Flag size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
+          File de modération
+        </Heading>
+      </header>
+      <section className="mb-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <CarteAttente
+          href="/admin/moderation/petitions"
+          libelle="Pétitions"
+          nb={fileModeration.petitionsEnModeration}
+        />
+        <CarteAttente
+          href="/admin/moderation/campagnes"
+          libelle="Campagnes"
+          nb={fileModeration.campagnesEnModeration}
+        />
+        <CarteAttente
+          href="/admin/moderation/cagnottes"
+          libelle="Cagnottes"
+          nb={fileModeration.cagnottesSuspendues}
+        />
+        <CarteAttente
+          href="/admin/moderation/media"
+          libelle="Médias"
+          nb={fileModeration.mediasEnAttente}
+        />
+        <CarteAttente
+          href="/admin/moderation/sondages"
+          libelle="Sondages"
+          nb={fileModeration.sondagesEnModeration}
+        />
+        <CarteAttente
+          href="/admin/moderation/reservations"
+          libelle="Réservations litige"
+          nb={fileModeration.reservationsEnLitige}
+        />
+      </section>
+
+      <header className="mb-3">
+        <Heading niveau={2} apparenceComme={3}>
+          Stats globales
+        </Heading>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -105,5 +177,21 @@ function Carte({ titre, valeur }: { titre: string; valeur: string }) {
       <p className="text-xs font-bold uppercase tracking-cap text-text-3">{titre}</p>
       <p className="font-display text-2xl text-text-1">{valeur}</p>
     </Card>
+  );
+}
+
+function CarteAttente({ href, libelle, nb }: { href: string; libelle: string; nb: number }) {
+  return (
+    <Link href={href} className="block">
+      <Card
+        variant={nb > 0 ? 'ombre' : 'plat'}
+        className="flex items-center justify-between gap-2 hover:bg-surface-2"
+      >
+        <p className={nb > 0 ? 'font-bold text-text-1' : 'text-text-2'}>{libelle}</p>
+        <Badge variant={nb >= 5 ? 'danger' : nb > 0 ? 'warning' : 'default'}>
+          {FORMAT_NB.format(nb)}
+        </Badge>
+      </Card>
+    </Link>
   );
 }
