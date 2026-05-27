@@ -108,9 +108,32 @@ export interface TransactionSortante {
   confirmeLe: string | null;
 }
 
+export interface TransactionEntrante {
+  id: string;
+  caisseId: string;
+  receptacleId: string | null;
+  sourceType:
+    | 'don'
+    | 'adhesion'
+    | 'cagnotte'
+    | 'cotisation_solidaire'
+    | 'autre'
+    | 'regularisation_manuelle';
+  sourceId: string | null;
+  montant: number;
+  canal: CanalCaisse;
+  statut: 'initiee' | 'confirmee' | 'remboursee' | 'annulee';
+  motif: string | null;
+  payeurPersonneId: string | null;
+  payeurExterneNom: string | null;
+  payeurExterneEmail: string | null;
+  recueLe: string;
+}
+
 export interface CaisseDetail {
   caisse: Caisse;
   receptacles: Receptacle[];
+  entrees: TransactionEntrante[];
   transactions: TransactionSortante[];
 }
 
@@ -137,6 +160,14 @@ export async function chargerCaissePourDetail(caisseId: string): Promise<CaisseD
 
   if (caisseRes.data === null) return null;
 
+  // Charge aussi les entrées (V2.3.28).
+  const { data: entreesData } = await supabase
+    .from('transaction_entrante')
+    .select('*')
+    .eq('caisse_id', caisseId)
+    .order('recue_le', { ascending: false })
+    .limit(200);
+
   return {
     caisse: ligneEnCaisse(caisseRes.data),
     receptacles: (receptaclesRes.data ?? []).map((r) => ({
@@ -148,6 +179,27 @@ export async function chargerCaissePourDetail(caisseId: string): Promise<CaisseD
       valideDu: r.valide_du,
       valideAu: r.valide_au,
       createdAt: r.created_at,
+    })),
+    entrees: (entreesData ?? []).map((e) => ({
+      id: e.id,
+      caisseId: e.caisse_id,
+      receptacleId: e.receptacle_id,
+      sourceType: e.source_type as
+        | 'don'
+        | 'adhesion'
+        | 'cagnotte'
+        | 'cotisation_solidaire'
+        | 'autre'
+        | 'regularisation_manuelle',
+      sourceId: e.source_id,
+      montant: Number(e.montant),
+      canal: e.canal as CanalCaisse,
+      statut: e.statut as 'initiee' | 'confirmee' | 'remboursee' | 'annulee',
+      motif: e.motif,
+      payeurPersonneId: e.payeur_personne_id,
+      payeurExterneNom: e.payeur_externe_nom,
+      payeurExterneEmail: e.payeur_externe_email,
+      recueLe: e.recue_le,
     })),
     transactions: (transactionsRes.data ?? []).map((t) => ({
       id: t.id,

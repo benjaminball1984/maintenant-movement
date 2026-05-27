@@ -5,7 +5,7 @@ import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
 } from '@/lib/reseau/identite';
-import { FileText, Inbox, Wallet } from 'lucide-react';
+import { ArrowDownToLine, FileText, Inbox, Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -48,13 +48,16 @@ export default async function PageDetailCaisse({
   const detail = await chargerCaissePourDetail(caisseId);
   if (detail === null) notFound();
 
-  const { caisse, receptacles, transactions } = detail;
+  const { caisse, receptacles, entrees, transactions } = detail;
   const solde = await calculerSoldeCaisse(caisseId);
 
   const idsPersonnes = new Set<string>();
   for (const t of transactions) {
     if (t.beneficiairePersonneId !== null) idsPersonnes.add(t.beneficiairePersonneId);
     idsPersonnes.add(t.initiePersonneId);
+  }
+  for (const e of entrees) {
+    if (e.payeurPersonneId !== null) idsPersonnes.add(e.payeurPersonneId);
   }
   const identitesParId = await chargerIdentitesAffichables([...idsPersonnes]);
 
@@ -159,6 +162,51 @@ export default async function PageDetailCaisse({
 
       <section className="mt-8">
         <Heading niveau={2}>
+          <ArrowDownToLine size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
+          Entrées ({entrees.length})
+        </Heading>
+        <p className="mt-1 text-sm text-text-3">
+          Versements reçus dans cette caisse (dons, adhésions, cotisations). 200 derniers.
+        </p>
+        {entrees.length === 0 ? (
+          <p className="mt-4 text-sm text-text-2">Aucune entrée pour le moment.</p>
+        ) : (
+          <ul className="mt-4 grid gap-2">
+            {entrees.map((e) => (
+              <li key={e.id}>
+                <Card variant="ombre" className="grid gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={LIBELLE_STATUT_ENTREE[e.statut].variant}>
+                        {LIBELLE_STATUT_ENTREE[e.statut].libelle}
+                      </Badge>
+                      <Badge variant="default">{LIBELLE_SOURCE[e.sourceType]}</Badge>
+                      <Badge variant="info">{e.canal === 'euro' ? '€' : '99c'}</Badge>
+                    </div>
+                    <span className="font-display font-bold text-lg text-text-1">
+                      {formaterMontant(e.montant, e.canal)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-2">
+                    <strong>Payeur :</strong>{' '}
+                    {e.payeurPersonneId !== null
+                      ? nomAffichageRespectantVisibilite(identitesParId.get(e.payeurPersonneId))
+                      : (e.payeurExterneNom ??
+                        (e.payeurExterneEmail !== null ? e.payeurExterneEmail : 'Anonyme'))}
+                  </p>
+                  {e.motif !== null ? <p className="text-sm text-text-3">{e.motif}</p> : null}
+                  <p className="text-text-3 text-xs">
+                    Reçue le {FORMATEUR_DATE.format(new Date(e.recueLe))}
+                  </p>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <Heading niveau={2}>
           <Wallet size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
           Transactions sortantes ({transactions.length})
         </Heading>
@@ -247,6 +295,22 @@ const LIBELLE_STATUT_TX = {
   confirmee: 'Confirmée',
   annulee: 'Annulée',
   litige: 'Litige',
+} as const;
+
+const LIBELLE_STATUT_ENTREE = {
+  initiee: { libelle: 'Initiée', variant: 'warning' as const },
+  confirmee: { libelle: 'Confirmée', variant: 'success' as const },
+  remboursee: { libelle: 'Remboursée', variant: 'default' as const },
+  annulee: { libelle: 'Annulée', variant: 'default' as const },
+} as const;
+
+const LIBELLE_SOURCE = {
+  don: 'Don',
+  adhesion: 'Adhésion',
+  cagnotte: 'Cagnotte',
+  cotisation_solidaire: 'Cotisation',
+  autre: 'Autre',
+  regularisation_manuelle: 'Régularisation',
 } as const;
 
 const STATUT_TX_VARIANT = {
