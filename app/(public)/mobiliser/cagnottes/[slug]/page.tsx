@@ -1,8 +1,12 @@
+import { archiverCagnotteAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
@@ -42,7 +46,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 export default async function PageCagnotteDetail({ params, searchParams }: PageDetailProps) {
   const { slug } = await params;
   const { annule, succes } = await searchParams;
-  const cagnotte = await cagnotteParSlug(slug);
+  const [cagnotte, estAdmin] = await Promise.all([cagnotteParSlug(slug), estAdminCourant()]);
   if (cagnotte === null) {
     notFound();
   }
@@ -198,6 +202,31 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
           ) : null}
         </footer>
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          {cagnotte.statut !== 'cloturee' ? (
+            <BoutonArchiverEntite
+              id={cagnotte.id}
+              action={archiverCagnotteAction}
+              verbe="Clôturer la cagnotte"
+              description="Statut → 'cloturee'. La cagnotte disparaît de la liste publique mais reste en base avec ses dons."
+              labelRaison="Raison de la clôture (optionnelle)"
+            />
+          ) : null}
+          <BoutonSupprimerEntite
+            table="cagnotte"
+            id={cagnotte.id}
+            redirigerVers="/mobiliser/cagnottes"
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }

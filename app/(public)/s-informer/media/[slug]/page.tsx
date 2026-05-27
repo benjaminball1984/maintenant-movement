@@ -1,5 +1,9 @@
+import { retirerMediaAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { formaterTempsLecture } from '@/lib/temps-lecture';
@@ -49,6 +53,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 }
 
 export default async function PageDetailMedia({ params }: PageDetailProps) {
+  const estAdmin = await estAdminCourant();
   const { slug } = await params;
   const media = await mediaParSlug(slug);
   if (media === null) notFound();
@@ -142,6 +147,25 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
           </footer>
         ) : null}
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          <BoutonArchiverEntite
+            id={media.id}
+            action={retirerMediaAction}
+            verbe="Retirer le média"
+            description="Statut → 'retire'. Le média disparaît de la liste publique."
+            labelRaison="Raison du retrait (optionnelle)"
+          />
+          <BoutonSupprimerEntite table="media" id={media.id} redirigerVers="/s-informer/media" />
+        </section>
+      ) : null}
     </Container>
   );
 }

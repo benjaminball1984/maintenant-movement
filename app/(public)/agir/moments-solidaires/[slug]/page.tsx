@@ -1,7 +1,11 @@
 import { participerMoment } from '@/app/(public)/agir/moments-solidaires/actions';
+import { annulerMomentAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonParticiperMoment } from '@/components/moments/BoutonParticiperMoment';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { TYPES_MOMENTS, gabaritFlyerPortAPorte } from '@/lib/moments/config';
 import { listerTupperwaresDuMoment, momentSolidaireParSlug } from '@/lib/moments/requetes';
@@ -47,6 +51,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 }
 
 export default async function PageDetailMoment({ params }: PageDetailProps) {
+  const estAdmin = await estAdminCourant();
   const { slug } = await params;
   const moment = await momentSolidaireParSlug(slug);
   if (moment === null) notFound();
@@ -238,6 +243,30 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
           </section>
         ) : null}
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          {moment.statut !== 'retire' ? (
+            <BoutonArchiverEntite
+              id={moment.id}
+              action={annulerMomentAction}
+              verbe="Retirer le moment"
+              description="Statut → 'retire'. Le moment disparaît de la liste publique."
+            />
+          ) : null}
+          <BoutonSupprimerEntite
+            table="moment_solidaire"
+            id={moment.id}
+            redirigerVers="/agir/moments-solidaires"
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }

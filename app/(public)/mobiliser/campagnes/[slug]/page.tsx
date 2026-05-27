@@ -1,7 +1,11 @@
+import { archiverCampagneAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
 import { compterMembresEspace, formaterMembres } from '@/lib/compter-membres';
@@ -57,6 +61,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
  * sondage) s'affichent avec un état « bientôt disponible ».
  */
 export default async function PageCampagneDetail({ params }: PageDetailProps) {
+  const estAdmin = await estAdminCourant();
   const { slug } = await params;
   const campagne = await campagneParSlug(slug);
 
@@ -193,6 +198,31 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
           />
         ) : null}
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          {campagne.statut !== 'archivee' ? (
+            <BoutonArchiverEntite
+              id={campagne.id}
+              action={archiverCampagneAction}
+              verbe="Archiver la campagne"
+              description="Statut → 'archivee'. La campagne disparaît de la liste publique."
+              labelRaison="Raison de l'archivage (optionnelle)"
+            />
+          ) : null}
+          <BoutonSupprimerEntite
+            table="campagne"
+            id={campagne.id}
+            redirigerVers="/mobiliser/campagnes"
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }

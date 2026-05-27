@@ -1,6 +1,10 @@
+import { retirerMobilisationAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -44,7 +48,10 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
  */
 export default async function PageMobilisationDetail({ params }: PageDetailProps) {
   const { slug } = await params;
-  const mobilisation = await mobilisationParSlug(slug);
+  const [mobilisation, estAdmin] = await Promise.all([
+    mobilisationParSlug(slug),
+    estAdminCourant(),
+  ]);
 
   if (mobilisation === null) {
     notFound();
@@ -159,6 +166,31 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
           ) : null}
         </footer>
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          {mobilisation.statut !== 'retiree' ? (
+            <BoutonArchiverEntite
+              id={mobilisation.id}
+              action={retirerMobilisationAction}
+              verbe="Retirer la mobilisation"
+              description="Statut → 'retiree'. Disparaît de la liste publique. Participants conservés."
+              labelRaison="Raison du retrait (optionnelle)"
+            />
+          ) : null}
+          <BoutonSupprimerEntite
+            table="mobilisation"
+            id={mobilisation.id}
+            redirigerVers="/mobiliser/mobilisations"
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }

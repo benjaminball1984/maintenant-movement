@@ -1,7 +1,11 @@
 import { voterSondage } from '@/app/(public)/s-informer/sondages/actions';
+import { fermerSondageAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
+import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { aVotePersonne, sondageParSlugAvecResultats } from '@/lib/sondages/requetes';
@@ -31,7 +35,10 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 
 export default async function PageDetailSondage({ params }: PageDetailProps) {
   const { slug } = await params;
-  const sondage = await sondageParSlugAvecResultats(slug);
+  const [sondage, estAdmin] = await Promise.all([
+    sondageParSlugAvecResultats(slug),
+    estAdminCourant(),
+  ]);
   if (sondage === null) notFound();
 
   const session = await getSession();
@@ -130,6 +137,30 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
           </ul>
         </section>
       </article>
+
+      {estAdmin ? (
+        <section
+          aria-label="Actions admin"
+          className="mt-12 grid gap-3 border-t border-border pt-8"
+        >
+          <Heading niveau={2} apparenceComme={4}>
+            Actions admin
+          </Heading>
+          {sondage.statut !== 'ferme' && sondage.statut !== 'archive' ? (
+            <BoutonArchiverEntite
+              id={sondage.id}
+              action={fermerSondageAction}
+              verbe="Fermer le sondage"
+              description="Statut → 'ferme'. Les résultats restent visibles, plus aucun vote possible."
+            />
+          ) : null}
+          <BoutonSupprimerEntite
+            table="sondage"
+            id={sondage.id}
+            redirigerVers="/s-informer/sondages"
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }
