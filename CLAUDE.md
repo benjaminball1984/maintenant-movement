@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 helpers identité : âge + code postal + UUID)
-**Dernier chantier terminé** : V2.4.64 (`lib/uuid.ts` + 12 tests) — sur `main` (tip `fbc5d4a`). 650 tests verts. `estUuidValide` (v1-v5, case insensible) + `normaliserUuid`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 capitalisation + exports CSV + pagination branchée)
+**Dernier chantier terminé** : V2.4.67 (branchement `Pagination` sur admin personnes) — sur `main` (tip `641a62a`). Premier vrai usage du composant : `listerPersonnesAdminPagine` retourne `{lignes, total}`, PAR_PAGE=50, count exact, second appel ciblé si page>1.
+**Dernier chantier terminé (antérieur)** : V2.4.66 (exports CSV moments + médias + sondages) — sur `main` (tip `c8e94ef`). 3 routes admin, BOM UTF-8, filename horodaté.
+**Dernier chantier terminé (antérieur)** : V2.4.65 (`lib/capitalisation.ts` + 15 tests) — sur `main` (tip `4a2e813`). 665 tests verts. 3 helpers : `capitaliser`, `titreCase` (Title Case avec séparateurs unicode), `decapitaliser`.
+**Dernier chantier terminé (antérieur)** : V2.4.64 (`lib/uuid.ts` + 12 tests) — sur `main` (tip `fbc5d4a`). 650 tests verts. `estUuidValide` (v1-v5, case insensible) + `normaliserUuid`.
 **Dernier chantier terminé (antérieur)** : V2.4.63 (`lib/code-postal-fr.ts` + 14 tests) — sur `main` (tip `ebe82a2`). `estCodePostalFrValide` + `extraireDepartementFr` (métropole 2 chiffres, DROM 97x/98x 3 chiffres).
 **Dernier chantier terminé (antérieur)** : V2.4.62 (`lib/age.ts` + 12 tests) — sur `main` (tip `2c5d7f9`). `calculerAge` (tient compte mois/jour) + `estMajeur`.
 **Dernier chantier terminé (antérieur)** : V2.4.61 (`lib/telephone-fr.ts` + 19 tests) — sur `main` (tip `4aca486`). 612 tests verts. 3 helpers : `estTelephoneFrValide`, `normaliserTelephoneFr`, `formaterTelephoneFr`.
