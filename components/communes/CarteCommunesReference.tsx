@@ -40,17 +40,17 @@ export function CarteCommunesReference() {
         version: 8,
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
-          // CARTO Voyager : tiles raster libres, CORS-OK, design doux et
-          // adapté aux superpositions de points. Tile.openstreetmap.org
-          // bloque les requêtes depuis les sites tiers sans User-Agent
-          // identifié — pas adapté à un site public moderne.
+          // CARTO Voyager via le CDN officiel actuel (basemaps.cartocdn.com).
+          // L'ancien CDN Fastly (cartodb-basemaps-*.global.ssl.fastly.net)
+          // est déprécié et retourne 404. Sub-domains a/b/c/d en round-robin.
+          // Design doux adapté aux superpositions de points.
           carto: {
             type: 'raster',
             tiles: [
-              'https://cartodb-basemaps-a.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
-              'https://cartodb-basemaps-b.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
-              'https://cartodb-basemaps-c.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
-              'https://cartodb-basemaps-d.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
+              'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+              'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+              'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+              'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
             ],
             tileSize: 256,
             attribution:
