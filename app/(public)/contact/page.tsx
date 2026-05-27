@@ -1,23 +1,34 @@
-import { PageEditorialeStub } from '@/components/home/PageEditorialeStub';
-import { Alert } from '@/components/ui';
+import { PageEditorialeCMS } from '@/components/contenu/PageEditorialeCMS';
+import { LOREM_MOYEN } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Contact',
 };
 
+const FALLBACK = `Pour joindre l'équipe Maintenant!.
+
+## Adresses email
+
+- Contact général : contact@maintenant-le-mouvement.org
+- Adhésion : adhesion@maintenant-le-mouvement.org
+- Presse : presse@maintenant-le-mouvement.org
+- Délégué·e à la protection des données : dpd@maintenant-le-mouvement.org
+
+## Adresse postale
+
+[À compléter]
+
+${LOREM_MOYEN}
+`;
+
 export default function PageContact() {
   return (
-    <PageEditorialeStub
+    <PageEditorialeCMS
       surtitre="Nous joindre"
-      titre="Contact"
-      placeholder={
-        <Alert variant="info" titre="[TEXTE À FAIRE — page contact]">
-          Contenu attendu : adresses email officielles (contact général, presse, adhésion, dpd@…),
-          adresse postale, formulaire de contact avec Turnstile. À poser au chantier 2.2 dès que les
-          emails du domaine maintenant-le-mouvement.org sont actifs.
-        </Alert>
-      }
+      titreParDefaut="Contact"
+      cle="page.contact"
+      loremFallback={FALLBACK}
     />
   );
 }

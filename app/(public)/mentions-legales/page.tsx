@@ -1,24 +1,38 @@
-import { PageEditorialeStub } from '@/components/home/PageEditorialeStub';
-import { Alert } from '@/components/ui';
+import { PageEditorialeCMS } from '@/components/contenu/PageEditorialeCMS';
+import { LOREM_LONG } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Mentions légales',
 };
 
+const FALLBACK = `## Éditeur
+
+Association Maintenant!
+[Adresse postale à compléter]
+RNA : [numéro à compléter]
+Directeur·rice de publication : [nom à compléter, en collégial]
+Contact : contact@maintenant-le-mouvement.org
+
+## Hébergement
+
+Site hébergé par Cloudflare Pages (San Francisco, CA, USA — données proxy en EU).
+Base de données : Supabase, région Francfort (Allemagne).
+
+## Données personnelles
+
+Cf. notre [politique de confidentialité](/confidentialite).
+
+${LOREM_LONG}
+`;
+
 export default function PageMentionsLegales() {
   return (
-    <PageEditorialeStub
+    <PageEditorialeCMS
       surtitre="Légal"
-      titre="Mentions légales"
-      placeholder={
-        <Alert variant="info" titre="[TEXTE À FAIRE — mentions légales]">
-          Contenu attendu : éditeur (association Maintenant!), adresse, numéro RNA, directeur·rice
-          de publication, hébergeur (Cloudflare Pages + Supabase Francfort), contact. À rédiger par
-          Lilou/Ben au chantier 2.2 dès que les données associatives (adresse, RNA, DPD) sont
-          fournies.
-        </Alert>
-      }
+      titreParDefaut="Mentions légales"
+      cle="page.mentions-legales"
+      loremFallback={FALLBACK}
     />
   );
 }

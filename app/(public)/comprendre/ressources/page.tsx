@@ -1,23 +1,39 @@
-import { PageEditorialeStub } from '@/components/home/PageEditorialeStub';
-import { Alert } from '@/components/ui';
+import { PageEditorialeCMS } from '@/components/contenu/PageEditorialeCMS';
+import { LOREM_LONG } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Ressources',
+  description: 'Doctrine, textes de référence, kits militants, bibliographie politique.',
 };
+
+const FALLBACK = `Ressources pour s'organiser, comprendre, agir.
+
+## Doctrine et textes fondateurs
+
+${LOREM_LONG}
+
+## Kits militants
+
+- Modèle de procès-verbal d'assemblée
+- Kit porte-à-porte
+- Charte modération
+- Guide cofondateurice commune libre
+
+${LOREM_LONG}
+
+## Bibliographie politique
+
+${LOREM_LONG}
+`;
 
 export default function PageRessources() {
   return (
-    <PageEditorialeStub
+    <PageEditorialeCMS
       surtitre="Comprendre"
-      titre="Ressources"
-      placeholder={
-        <Alert variant="info" titre="[TEXTE À FAIRE — page Ressources]">
-          Contenu attendu : liens vers la doctrine complète, les textes de référence, les outils
-          pour s'organiser (modèles de PV, kits porte-à-porte, charte modération, etc.),
-          bibliographie politique. À rédiger par Lilou/Ben au chantier 2.2.
-        </Alert>
-      }
+      titreParDefaut="Ressources"
+      cle="page.comprendre.ressources"
+      loremFallback={FALLBACK}
     />
   );
 }
