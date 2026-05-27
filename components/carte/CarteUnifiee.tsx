@@ -38,6 +38,8 @@ const COULEUR_PAR_TYPE: Record<TypePoint, string> = {
   boutique_marche: '#a855f7',
   minimarche: '#d946ef',
   moment_solidaire: '#ef4444',
+  sondage: '#0891b2',
+  groupe_entraide: '#14b8a6',
 };
 
 const LIBELLE_PAR_TYPE: Record<TypePoint, string> = {
@@ -51,6 +53,8 @@ const LIBELLE_PAR_TYPE: Record<TypePoint, string> = {
   boutique_marche: 'Boutiques éphémères',
   minimarche: 'Minimarchés',
   moment_solidaire: 'Moments solidaires',
+  sondage: 'Sondages locaux',
+  groupe_entraide: 'Groupes d’entraide',
 };
 
 const TOUS_LES_TYPES: TypePoint[] = [
@@ -64,6 +68,8 @@ const TOUS_LES_TYPES: TypePoint[] = [
   'boutique_marche',
   'minimarche',
   'moment_solidaire',
+  'sondage',
+  'groupe_entraide',
 ];
 
 /**

@@ -31,7 +31,9 @@ export type TypePoint =
   | 'produit_marche'
   | 'boutique_marche'
   | 'minimarche'
-  | 'moment_solidaire';
+  | 'moment_solidaire'
+  | 'sondage'
+  | 'groupe_entraide';
 
 export interface PointCarte {
   id: string;
@@ -69,6 +71,8 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
     { data: boutiques },
     { data: minimarches },
     { data: moments },
+    { data: sondages },
+    { data: groupes },
   ] = await Promise.all([
     supabase
       .from('mobilisation')
@@ -118,6 +122,20 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
       .select('id, titre, slug, latitude, longitude, lieu, commence_le, type')
       .in('statut', ['annonce', 'en_cours'])
       .is('parent_id', null)
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .limit(500),
+    supabase
+      .from('sondage')
+      .select('id, titre, slug, latitude, longitude, question, ferme_le')
+      .eq('statut', 'ouvert')
+      .not('latitude', 'is', null)
+      .not('longitude', 'is', null)
+      .limit(300),
+    supabase
+      .from('groupe_entraide_local')
+      .select('id, nom, slug, latitude, longitude, zone_geographique')
+      .eq('statut', 'publie')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .limit(500),
@@ -227,5 +245,65 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
     });
   }
 
+  for (const s of sondages ?? []) {
+    if (s.latitude === null || s.longitude === null) continue;
+    points.push({
+      id: s.id,
+      type: 'sondage',
+      titre: s.titre,
+      slug: s.slug,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      sous_titre: s.question.slice(0, 80),
+      href: `/s-informer/sondages/${s.slug}`,
+    });
+  }
+
+  for (const g of groupes ?? []) {
+    if (g.latitude === null || g.longitude === null) continue;
+    points.push({
+      id: g.id,
+      type: 'groupe_entraide',
+      titre: g.nom,
+      slug: g.slug,
+      latitude: g.latitude,
+      longitude: g.longitude,
+      sous_titre: g.zone_geographique,
+      href: `/s-entraider/groupes-locaux/${g.slug}`,
+    });
+  }
+
+  return points;
+}
+
+/**
+ * Variante : ne charge QUE les hébergements solidaires. Pour la carte
+ * spécialisée `/cartes/hebergements`.
+ */
+export async function chargerPointsHebergement(): Promise<PointCarte[]> {
+  const supabase = await getSupabaseServer();
+  const { data: offres } = await supabase
+    .from('offre_entraide')
+    .select('id, titre, slug, latitude, longitude, lieu, type')
+    .eq('type', 'hebergement')
+    .eq('statut', 'publiee')
+    .not('latitude', 'is', null)
+    .not('longitude', 'is', null)
+    .limit(2000);
+
+  const points: PointCarte[] = [];
+  for (const o of offres ?? []) {
+    if (o.latitude === null || o.longitude === null) continue;
+    points.push({
+      id: o.id,
+      type: 'entraide_hebergement',
+      titre: o.titre,
+      slug: o.slug,
+      latitude: o.latitude,
+      longitude: o.longitude,
+      sous_titre: o.lieu,
+      href: `/s-entraider/offre/${o.slug}`,
+    });
+  }
   return points;
 }
