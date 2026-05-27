@@ -1,5 +1,8 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   LIBELLE_MODE,
   LIBELLE_STATUT,
@@ -10,6 +13,32 @@ import {
 import { CalendarRange, CheckCircle, Clock, Globe, Lock, Users, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACKS = {
+  intro:
+    'Infrastructure technique de la décision en réunion. Salles dédiées par espace, ordres du jour, 3 modes de décision hiérarchisés.',
+  mode1Label: 'Mode 1',
+  mode1Titre: 'Consensus',
+  mode1Description: 'Accord plein de toutes les personnes présentes.',
+  mode2Label: 'Mode 2',
+  mode2Titre: "Levée d'objections",
+  mode2Description: "Décision validée si aucune objection bloquante n'est levée.",
+  mode3Label: 'Mode 3',
+  mode3Titre: 'Jugement majoritaire',
+  mode3Description: 'Méthode Balinski-Laraki. 7 mentions, médiane retenue.',
+  sectionProchaines: 'Prochaines réunions',
+  sectionSalles: 'Salles de décision',
+  emptySallesTitre: 'Aucune salle pour le moment',
+  emptySallesCorps:
+    'Les salles seront créées au fur et à mesure que les espaces (communes, fédérations, GT) ouvriront leurs assemblées. Les admins nationaux peuvent en créer depuis la console.',
+  sectionRecentes: 'Décisions récentes',
+  sectionRecentesSousTitre: 'Dernières réunions terminées avec procès-verbal publié.',
+  liveKitTitre: 'LiveKit pas encore branché',
+  liveKitAmorce:
+    "L'infrastructure visio (LiveKit self-hosted ou Cloud) sera connectée dans un chantier dédié. En attendant, les réunions sont annoncées ici, les PV publiés, et la visio se fait sur une plateforme externe au choix de chaque collectif. Cf.",
+  liveKitLien: 'gouvernance',
+  agendaLien: "Voir toutes les prochaines réunions dans l'agenda",
+};
 
 export const metadata: Metadata = {
   title: 'Décider',
@@ -59,10 +88,54 @@ const FORMATEUR_REUNION = new Intl.DateTimeFormat('fr-FR', {
 });
 
 export default async function PageDecider() {
-  const [salles, prochaines, recentes] = await Promise.all([
+  const [
+    salles,
+    prochaines,
+    recentes,
+    estAdmin,
+    intro,
+    sectionProchaines,
+    sectionSalles,
+    emptySallesTitre,
+    emptySallesCorps,
+    sectionRecentes,
+    sectionRecentesSousTitre,
+    liveKitTitre,
+    liveKitAmorce,
+    liveKitLien,
+    agendaLien,
+  ] = await Promise.all([
     listerSallesDecider(),
     listerProchainesReunionsToutesSalles(10),
     listerDernieresReunionsAvecPV(6),
+    estAdminCourant(),
+    lireContenuEditorial('s-informer.decider.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('s-informer.decider.section_prochaines', {
+      valeurMd: FALLBACKS.sectionProchaines,
+    }),
+    lireContenuEditorial('s-informer.decider.section_salles', {
+      valeurMd: FALLBACKS.sectionSalles,
+    }),
+    lireContenuEditorial('s-informer.decider.empty_salles_titre', {
+      valeurMd: FALLBACKS.emptySallesTitre,
+    }),
+    lireContenuEditorial('s-informer.decider.empty_salles_corps', {
+      valeurMd: FALLBACKS.emptySallesCorps,
+    }),
+    lireContenuEditorial('s-informer.decider.section_recentes', {
+      valeurMd: FALLBACKS.sectionRecentes,
+    }),
+    lireContenuEditorial('s-informer.decider.section_recentes_sous_titre', {
+      valeurMd: FALLBACKS.sectionRecentesSousTitre,
+    }),
+    lireContenuEditorial('s-informer.decider.livekit_titre', {
+      valeurMd: FALLBACKS.liveKitTitre,
+    }),
+    lireContenuEditorial('s-informer.decider.livekit_amorce', {
+      valeurMd: FALLBACKS.liveKitAmorce,
+    }),
+    lireContenuEditorial('s-informer.decider.livekit_lien', { valeurMd: FALLBACKS.liveKitLien }),
+    lireContenuEditorial('s-informer.decider.agenda_lien', { valeurMd: FALLBACKS.agendaLien }),
   ]);
 
   return (
@@ -71,10 +144,16 @@ export default async function PageDecider() {
         <header>
           <p className="text-xs font-bold uppercase tracking-cap text-text-3">S'informer</p>
           <Heading niveau={1}>Décider</Heading>
-          <p className="mt-3 max-w-2xl text-text-2">
-            Infrastructure technique de la décision en réunion. Salles dédiées par espace, ordres du
-            jour, 3 modes de décision hiérarchisés.
-          </p>
+          <TexteEditableAdmin
+            cle="s-informer.decider.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro page decider"
+            multilignes
+            longueurMax={400}
+          >
+            {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </header>
         <BoutonAdminEditer href="/admin/national">Admin</BoutonAdminEditer>
       </div>
@@ -105,7 +184,19 @@ export default async function PageDecider() {
         <section className="mt-12">
           <Heading niveau={2} apparenceComme={3}>
             <Clock size={20} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
-            Prochaines réunions ({prochaines.length})
+            <TexteEditableAdmin
+              cle="s-informer.decider.section_prochaines"
+              valeurInitiale={sectionProchaines.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section prochaines reunions (le compteur s'ajoute apres)"
+              longueurMax={60}
+            >
+              {(t) => (
+                <>
+                  {t} ({prochaines.length})
+                </>
+              )}
+            </TexteEditableAdmin>
           </Heading>
           <ul className="mt-4 grid gap-2">
             {prochaines.map((r) => (
@@ -139,13 +230,47 @@ export default async function PageDecider() {
       <section className="mt-12">
         <Heading niveau={2} apparenceComme={3}>
           <Video size={20} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
-          Salles de décision ({salles.length})
+          <TexteEditableAdmin
+            cle="s-informer.decider.section_salles"
+            valeurInitiale={sectionSalles.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section salles de decision"
+            longueurMax={60}
+          >
+            {(t) => (
+              <>
+                {t} ({salles.length})
+              </>
+            )}
+          </TexteEditableAdmin>
         </Heading>
 
         {salles.length === 0 ? (
-          <Alert variant="info" titre="Aucune salle pour le moment" className="mt-4">
-            Les salles seront créées au fur et à mesure que les espaces (communes, fédérations, GT)
-            ouvriront leurs assemblées. Les admins nationaux peuvent en créer depuis la console.
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="s-informer.decider.empty_salles_titre"
+                valeurInitiale={emptySallesTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre empty state salles decider"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+            className="mt-4"
+          >
+            <TexteEditableAdmin
+              cle="s-informer.decider.empty_salles_corps"
+              valeurInitiale={emptySallesCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps empty state salles decider"
+              multilignes
+              longueurMax={400}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -179,11 +304,29 @@ export default async function PageDecider() {
         <section className="mt-12">
           <Heading niveau={2} apparenceComme={3}>
             <CheckCircle size={20} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
-            Décisions récentes ({recentes.length})
+            <TexteEditableAdmin
+              cle="s-informer.decider.section_recentes"
+              valeurInitiale={sectionRecentes.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section decisions recentes"
+              longueurMax={60}
+            >
+              {(t) => (
+                <>
+                  {t} ({recentes.length})
+                </>
+              )}
+            </TexteEditableAdmin>
           </Heading>
-          <p className="mt-2 text-sm text-text-3">
-            Dernières réunions terminées avec procès-verbal publié.
-          </p>
+          <TexteEditableAdmin
+            cle="s-informer.decider.section_recentes_sous_titre"
+            valeurInitiale={sectionRecentesSousTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="sous-titre section decisions recentes"
+            longueurMax={200}
+          >
+            {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+          </TexteEditableAdmin>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {recentes.map((r) => (
               <li key={r.id}>
@@ -208,21 +351,62 @@ export default async function PageDecider() {
         </section>
       ) : null}
 
-      <Alert variant="info" titre="LiveKit pas encore branché" className="mt-12">
-        L'infrastructure visio (LiveKit self-hosted ou Cloud) sera connectée dans un chantier dédié.
-        En attendant, les réunions sont annoncées ici, les PV publiés, et la visio se fait sur une
-        plateforme externe au choix de chaque collectif. Cf.{' '}
-        <Link href="/comprendre/assemblee-confederale" className="text-brand hover:underline">
-          gouvernance
-        </Link>
+      <Alert
+        variant="info"
+        titre={
+          <TexteEditableAdmin
+            cle="s-informer.decider.livekit_titre"
+            valeurInitiale={liveKitTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre alerte LiveKit"
+            longueurMax={60}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
+        }
+        className="mt-12"
+      >
+        <TexteEditableAdmin
+          cle="s-informer.decider.livekit_amorce"
+          valeurInitiale={liveKitAmorce.valeurMd}
+          estAdmin={estAdmin}
+          libelle="amorce alerte LiveKit (avant le lien gouvernance)"
+          multilignes
+          longueurMax={500}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
+        <TexteEditableAdmin
+          cle="s-informer.decider.livekit_lien"
+          valeurInitiale={liveKitLien.valeurMd}
+          estAdmin={estAdmin}
+          libelle="libelle lien gouvernance"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/comprendre/assemblee-confederale" className="text-brand hover:underline">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
         .
       </Alert>
 
       <section className="mt-8 flex items-center gap-2 text-sm text-text-3">
         <CalendarRange size={14} aria-hidden="true" />
-        <Link href="/agenda" className="hover:underline">
-          Voir toutes les prochaines réunions dans l'agenda
-        </Link>
+        <TexteEditableAdmin
+          cle="s-informer.decider.agenda_lien"
+          valeurInitiale={agendaLien.valeurMd}
+          estAdmin={estAdmin}
+          libelle="libelle lien vers l'agenda en bas"
+          longueurMax={100}
+        >
+          {(t) => (
+            <Link href="/agenda" className="hover:underline">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </section>
     </Container>
   );
