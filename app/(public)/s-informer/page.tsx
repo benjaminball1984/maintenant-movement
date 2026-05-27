@@ -13,6 +13,18 @@ const FALLBACK_TITRE = 'S’informer';
 const FALLBACK_INTRO =
   'Articles, brèves, podcasts, vidéos, sondages, journal-affiche imprimable, salles de décision, réseau social du mouvement. Tout ce qui circule à l’intérieur de Maintenant! et qui s’adresse au plus grand nombre.';
 
+// Microcopy editable admin : preheader, chips CTA, et Alert «  pas encore
+// connecte ?  ». Decoupage de l'Alert : titre, amorce avant le lien, libelle
+// du lien, fin apres le lien. Le lien lui-meme reste en dur (URL fixe).
+const FALLBACK_PREHEADER = 'Espace';
+const FALLBACK_CTA_RECHERCHE = 'Recherche globale';
+const FALLBACK_CTA_AGENDA = 'Agenda agrégé';
+const FALLBACK_ALERT_TITRE = 'Pas encore connecté·e ?';
+const FALLBACK_ALERT_AMORCE =
+  'Tu peux lire les contenus publics sans compte. Pour publier, soutenir, voter ou rejoindre une salle Décider,';
+const FALLBACK_ALERT_LIEN_LABEL = 'crée un compte';
+const FALLBACK_ALERT_FIN = '(gratuit, 1 minute).';
+
 // Cf. /mobiliser, /agir : titres = vocabulaire fixe, descriptions = editable.
 const CARTES_DESCRIPTIONS: Record<string, string> = {
   media: 'Édito, tribune, articles, brèves, dessins, podcasts, vidéos, lives, newsletter.',
@@ -84,6 +96,20 @@ export default async function PageSInformer() {
       }),
     ),
   ]);
+
+  // Microcopy editable, lecture en parallele.
+  const [preheader, ctaRecherche, ctaAgenda, alertTitre, alertAmorce, alertLienLabel, alertFin] =
+    await Promise.all([
+      lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
+      lireContenuEditorial('s-informer.cta.recherche', { valeurMd: FALLBACK_CTA_RECHERCHE }),
+      lireContenuEditorial('s-informer.cta.agenda', { valeurMd: FALLBACK_CTA_AGENDA }),
+      lireContenuEditorial('s-informer.alert.titre', { valeurMd: FALLBACK_ALERT_TITRE }),
+      lireContenuEditorial('s-informer.alert.amorce', { valeurMd: FALLBACK_ALERT_AMORCE }),
+      lireContenuEditorial('s-informer.alert.lien_label', {
+        valeurMd: FALLBACK_ALERT_LIEN_LABEL,
+      }),
+      lireContenuEditorial('s-informer.alert.fin', { valeurMd: FALLBACK_ALERT_FIN }),
+    ]);
 
   const descriptionParSlug = new Map<string, string>(
     slugsDescriptions.map((slug, i) => [slug, descriptionsLues[i]?.valeurMd ?? '']),
@@ -157,7 +183,15 @@ export default async function PageSInformer() {
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
+        <TexteEditableAdmin
+          cle="hub.preheader.espace"
+          valeurInitiale={preheader.valeurMd}
+          estAdmin={estAdmin}
+          libelle="preheader 'Espace' des pages hub (cle partagee)"
+          longueurMax={30}
+        >
+          {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+        </TexteEditableAdmin>
         <TexteEditableAdmin
           cle="s-informer.titre"
           valeurInitiale={titre.valeurMd}
@@ -177,19 +211,39 @@ export default async function PageSInformer() {
           {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
         </TexteEditableAdmin>
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
-          <Link
-            href="/recherche"
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-text-2 hover:bg-surface-2"
+          <TexteEditableAdmin
+            cle="s-informer.cta.recherche"
+            valeurInitiale={ctaRecherche.valeurMd}
+            estAdmin={estAdmin}
+            libelle="libelle du chip CTA Recherche"
+            longueurMax={60}
           >
-            <Search size={14} aria-hidden="true" />
-            Recherche globale
-          </Link>
-          <Link
-            href="/agenda"
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-text-2 hover:bg-surface-2"
+            {(t) => (
+              <Link
+                href="/recherche"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-text-2 hover:bg-surface-2"
+              >
+                <Search size={14} aria-hidden="true" />
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
+          <TexteEditableAdmin
+            cle="s-informer.cta.agenda"
+            valeurInitiale={ctaAgenda.valeurMd}
+            estAdmin={estAdmin}
+            libelle="libelle du chip CTA Agenda"
+            longueurMax={60}
           >
-            Agenda agrégé
-          </Link>
+            {(t) => (
+              <Link
+                href="/agenda"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-text-2 hover:bg-surface-2"
+              >
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
         </div>
       </header>
 
@@ -227,13 +281,53 @@ export default async function PageSInformer() {
         })}
       </section>
 
-      <Alert variant="info" titre="Pas encore connecté·e ?" className="mt-8">
-        Tu peux lire les contenus publics sans compte. Pour publier, soutenir, voter ou rejoindre
-        une salle Décider,{' '}
-        <Link href="/inscription" className="underline">
-          crée un compte
-        </Link>{' '}
-        (gratuit, 1 minute).
+      <Alert
+        variant="info"
+        titre={
+          <TexteEditableAdmin
+            cle="s-informer.alert.titre"
+            valeurInitiale={alertTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre de l'Alert bas de page s-informer"
+            longueurMax={80}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
+        }
+        className="mt-8"
+      >
+        <TexteEditableAdmin
+          cle="s-informer.alert.amorce"
+          valeurInitiale={alertAmorce.valeurMd}
+          estAdmin={estAdmin}
+          libelle="amorce avant le lien dans l'Alert s-informer"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>{' '}
+        <TexteEditableAdmin
+          cle="s-informer.alert.lien_label"
+          valeurInitiale={alertLienLabel.valeurMd}
+          estAdmin={estAdmin}
+          libelle="libelle du lien dans l'Alert s-informer"
+          longueurMax={50}
+        >
+          {(t) => (
+            <Link href="/inscription" className="underline">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>{' '}
+        <TexteEditableAdmin
+          cle="s-informer.alert.fin"
+          valeurInitiale={alertFin.valeurMd}
+          estAdmin={estAdmin}
+          libelle="fin apres le lien dans l'Alert s-informer"
+          longueurMax={200}
+        >
+          {(t) => <>{t}</>}
+        </TexteEditableAdmin>
       </Alert>
     </Container>
   );

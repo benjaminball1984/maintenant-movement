@@ -12,6 +12,7 @@ import Link from 'next/link';
 const FALLBACK_TITRE = 'Mobiliser';
 const FALLBACK_INTRO =
   'Les outils de mobilisation du mouvement : interpeller, manifester, financer, regrouper.';
+const FALLBACK_PREHEADER = 'Espace';
 
 // Description de chaque carte de sous-espace. Les titres (`Pétitions`,
 // `Mobilisations`, etc.) sont du vocabulaire fixe (`03_VOCABULAIRE.md`) :
@@ -56,6 +57,7 @@ export default async function PageMobiliser() {
     estAdmin,
     titre,
     intro,
+    preheader,
     ...descriptionsLues
   ] = await Promise.all([
     supabase.from('petition').select('id', { count: 'exact', head: true }).eq('statut', 'publiee'),
@@ -69,6 +71,7 @@ export default async function PageMobiliser() {
     estAdminCourant(),
     lireContenuEditorial('mobiliser.titre', { valeurMd: FALLBACK_TITRE }),
     lireContenuEditorial('mobiliser.intro', { valeurMd: FALLBACK_INTRO }),
+    lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
     ...slugsDescriptions.map((slug) =>
       lireContenuEditorial(`mobiliser.carte.${slug}.description`, {
         valeurMd: CARTES_DESCRIPTIONS[slug] ?? '',
@@ -120,7 +123,15 @@ export default async function PageMobiliser() {
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
+        <TexteEditableAdmin
+          cle="hub.preheader.espace"
+          valeurInitiale={preheader.valeurMd}
+          estAdmin={estAdmin}
+          libelle="preheader 'Espace' des pages hub (cle partagee)"
+          longueurMax={30}
+        >
+          {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+        </TexteEditableAdmin>
         <TexteEditableAdmin
           cle="mobiliser.titre"
           valeurInitiale={titre.valeurMd}

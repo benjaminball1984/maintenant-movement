@@ -12,6 +12,7 @@ import Link from 'next/link';
 const FALLBACK_TITRE = 'Agir';
 const FALLBACK_INTRO =
   'Passer à l’action concrète : adhérer, activer ou rejoindre une commune libre, participer à un moment solidaire près de chez toi, ou agir autrement.';
+const FALLBACK_PREHEADER = 'Espace';
 
 // Cf. /mobiliser : titres = vocabulaire fixe, descriptions = editorial editable.
 const CARTES_DESCRIPTIONS: Record<string, string> = {
@@ -48,27 +49,36 @@ export default async function PageAgir() {
 
   const slugsDescriptions = Object.keys(CARTES_DESCRIPTIONS);
 
-  const [communesLibres, momentsAVenir, federations, estAdmin, titre, intro, ...descriptionsLues] =
-    await Promise.all([
-      supabase
-        .from('commune')
-        .select('id', { count: 'exact', head: true })
-        .neq('statut_creation', 'pre_creee'),
-      supabase
-        .from('moment_solidaire')
-        .select('id', { count: 'exact', head: true })
-        .in('statut', ['annonce', 'en_cours'])
-        .gte('commence_le', new Date().toISOString()),
-      supabase.from('federation').select('id', { count: 'exact', head: true }),
-      estAdminCourant(),
-      lireContenuEditorial('agir.titre', { valeurMd: FALLBACK_TITRE }),
-      lireContenuEditorial('agir.intro', { valeurMd: FALLBACK_INTRO }),
-      ...slugsDescriptions.map((slug) =>
-        lireContenuEditorial(`agir.carte.${slug}.description`, {
-          valeurMd: CARTES_DESCRIPTIONS[slug] ?? '',
-        }),
-      ),
-    ]);
+  const [
+    communesLibres,
+    momentsAVenir,
+    federations,
+    estAdmin,
+    titre,
+    intro,
+    preheader,
+    ...descriptionsLues
+  ] = await Promise.all([
+    supabase
+      .from('commune')
+      .select('id', { count: 'exact', head: true })
+      .neq('statut_creation', 'pre_creee'),
+    supabase
+      .from('moment_solidaire')
+      .select('id', { count: 'exact', head: true })
+      .in('statut', ['annonce', 'en_cours'])
+      .gte('commence_le', new Date().toISOString()),
+    supabase.from('federation').select('id', { count: 'exact', head: true }),
+    estAdminCourant(),
+    lireContenuEditorial('agir.titre', { valeurMd: FALLBACK_TITRE }),
+    lireContenuEditorial('agir.intro', { valeurMd: FALLBACK_INTRO }),
+    lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
+    ...slugsDescriptions.map((slug) =>
+      lireContenuEditorial(`agir.carte.${slug}.description`, {
+        valeurMd: CARTES_DESCRIPTIONS[slug] ?? '',
+      }),
+    ),
+  ]);
 
   const descriptionParSlug = new Map<string, string>(
     slugsDescriptions.map((slug, i) => [slug, descriptionsLues[i]?.valeurMd ?? '']),
@@ -118,7 +128,15 @@ export default async function PageAgir() {
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-cap text-text-3">Espace</p>
+        <TexteEditableAdmin
+          cle="hub.preheader.espace"
+          valeurInitiale={preheader.valeurMd}
+          estAdmin={estAdmin}
+          libelle="preheader 'Espace' des pages hub (cle partagee)"
+          longueurMax={30}
+        >
+          {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+        </TexteEditableAdmin>
         <TexteEditableAdmin
           cle="agir.titre"
           valeurInitiale={titre.valeurMd}
