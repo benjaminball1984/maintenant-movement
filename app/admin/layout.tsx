@@ -112,6 +112,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                     { href: '/admin/national/sondages', libelle: 'Sondages' },
                     { href: '/admin/national/moments', libelle: 'Moments solidaires' },
                     { href: '/admin/national/medias', libelle: 'Médias' },
+                    { href: '/admin/national/campagnes', libelle: 'Campagnes' },
                     { href: '/admin/national/droits', libelle: 'Gestion des droits' },
                     { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
                     { href: '/admin/national/audit', libelle: 'Audit journal D8' },
