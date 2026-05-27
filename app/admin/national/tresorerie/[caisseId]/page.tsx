@@ -1,3 +1,4 @@
+import { FormulaireInitierReversement } from '@/components/admin/tresorerie/FormulaireInitierReversement';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
 import { calculerSoldeCaisse } from '@/lib/caisse-solde';
@@ -203,6 +204,25 @@ export default async function PageDetailCaisse({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mt-8">
+        <Heading niveau={2}>
+          <Wallet size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
+          Initier un reversement
+        </Heading>
+        <div className="mt-4">
+          <FormulaireInitierReversement
+            caisseId={caisse.id}
+            receptaclesActifs={receptacles
+              .filter((r) => r.valideAu === null)
+              .map((r) => ({
+                id: r.id,
+                canal: r.canal,
+                identifiantReceptacle: r.identifiantReceptacle,
+              }))}
+          />
+        </div>
       </section>
 
       <section className="mt-8">
