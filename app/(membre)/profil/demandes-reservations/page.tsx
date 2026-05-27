@@ -13,6 +13,7 @@ import {
   listerJournauxReservations,
   listerReservationsRecuesParProprietaire,
 } from '@/lib/reservation';
+import { STATUTS_FILTRES_RESERVATION, estFiltreStatutValide } from '@/lib/reservation-filtres';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare, User } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -31,24 +32,6 @@ export const metadata: Metadata = {
  * (pas demandeuse). Permet d'accepter / refuser / marquer réalisée
  * selon la machine à états D8.
  */
-const STATUTS_FILTRES: ReadonlyArray<{ slug: 'tous' | StatutReservation; libelle: string }> = [
-  { slug: 'tous', libelle: 'Tous' },
-  { slug: 'proposee', libelle: 'En attente' },
-  { slug: 'acceptee', libelle: 'Acceptées' },
-  { slug: 'refusee', libelle: 'Refusées' },
-  { slug: 'realisee', libelle: 'Réalisées' },
-  { slug: 'confirmee', libelle: 'Confirmées' },
-  { slug: 'annulee', libelle: 'Annulées' },
-  { slug: 'litige', libelle: 'En litige' },
-];
-
-function estFiltreValide(s: string | string[] | undefined): s is StatutReservation {
-  return (
-    typeof s === 'string' &&
-    ['proposee', 'acceptee', 'refusee', 'realisee', 'confirmee', 'annulee', 'litige'].includes(s)
-  );
-}
-
 export default async function PageDemandesReservations({
   searchParams,
 }: {
@@ -56,7 +39,9 @@ export default async function PageDemandesReservations({
 }) {
   const session = await getSessionOuRediriger('/profil/demandes-reservations');
   const { statut: statutBrut } = await searchParams;
-  const filtreActif: StatutReservation | null = estFiltreValide(statutBrut) ? statutBrut : null;
+  const filtreActif: StatutReservation | null = estFiltreStatutValide(statutBrut)
+    ? statutBrut
+    : null;
 
   const toutes = await listerReservationsRecuesParProprietaire(session.userId);
   const reservations =
@@ -93,7 +78,7 @@ export default async function PageDemandesReservations({
           aria-label="Filtrer par statut"
           className="mt-6 flex flex-wrap gap-2 border-border border-b pb-3"
         >
-          {STATUTS_FILTRES.map((f) => {
+          {STATUTS_FILTRES_RESERVATION.map((f) => {
             const n =
               f.slug === 'tous' ? toutes.length : (compteurs.get(f.slug as StatutReservation) ?? 0);
             const estActif = (filtreActif === null && f.slug === 'tous') || filtreActif === f.slug;

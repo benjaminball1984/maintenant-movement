@@ -7,10 +7,12 @@ import { getSessionOuRediriger } from '@/lib/auth/session';
 import { type IdentiteAffichee, chargerIdentitesAffichables } from '@/lib/reseau/identite';
 import {
   type EntreeJournalReservation,
+  type StatutReservation,
   listerJournauxReservations,
   listerReservationsDuDemandeur,
   transitionAutorisee,
 } from '@/lib/reservation';
+import { STATUTS_FILTRES_RESERVATION, estFiltreStatutValide } from '@/lib/reservation-filtres';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -37,9 +39,21 @@ export const metadata: Metadata = {
  * la jointure côté offre, donc soit on filtre par `offre_id IN (mes
  * offres)`, soit on agrège différemment.
  */
-export default async function PageMesReservations() {
+export default async function PageMesReservations({
+  searchParams,
+}: {
+  searchParams: Promise<{ statut?: string }>;
+}) {
   const session = await getSessionOuRediriger('/profil/reservations');
-  const reservations = await listerReservationsDuDemandeur(session.userId);
+  const { statut: statutBrut } = await searchParams;
+  const filtreActif: StatutReservation | null = estFiltreStatutValide(statutBrut)
+    ? statutBrut
+    : null;
+
+  const toutes = await listerReservationsDuDemandeur(session.userId);
+  const reservations =
+    filtreActif === null ? toutes : toutes.filter((r) => r.statut === filtreActif);
+
   const [titresParId, journauxParId] = await Promise.all([
     chargerTitresOffres(reservations),
     listerJournauxReservations(reservations.map((r) => r.id)),
@@ -53,24 +67,59 @@ export default async function PageMesReservations() {
   }
   const identitesParId = await chargerIdentitesAffichables([...idsAuteurs]);
 
+  const compteurs = new Map<StatutReservation, number>();
+  for (const r of toutes) compteurs.set(r.statut, (compteurs.get(r.statut) ?? 0) + 1);
+
   return (
     <Container taille="md" className="py-12">
       <Heading niveau={1}>Mes réservations</Heading>
       <p className="mt-2 text-text-2">
         Les demandes que tu as envoyées pour du covoiturage, hébergement, prêt, service SEL ou
         location mutualisée. Les propriétaires d’offres voient leurs demandes reçues depuis leur
-        propre tableau de bord (à venir).
+        propre tableau de bord.
       </p>
+
+      {toutes.length > 0 ? (
+        <nav
+          aria-label="Filtrer par statut"
+          className="mt-6 flex flex-wrap gap-2 border-border border-b pb-3"
+        >
+          {STATUTS_FILTRES_RESERVATION.map((f) => {
+            const n =
+              f.slug === 'tous' ? toutes.length : (compteurs.get(f.slug as StatutReservation) ?? 0);
+            const estActif = (filtreActif === null && f.slug === 'tous') || filtreActif === f.slug;
+            return (
+              <Link
+                key={f.slug}
+                href={
+                  f.slug === 'tous'
+                    ? '/profil/reservations'
+                    : `/profil/reservations?statut=${f.slug}`
+                }
+                className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                  estActif
+                    ? 'border-brand bg-brand text-bg'
+                    : 'border-border bg-surface text-text-2 hover:bg-surface-2'
+                }`}
+                aria-current={estActif ? 'page' : undefined}
+              >
+                {f.libelle} ({n})
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
 
       {reservations.length === 0 ? (
         <Card variant="ombre" className="mt-8">
           <p className="text-text-2">
-            Aucune réservation pour le moment. Quand tu demanderas une offre d’entraide, elle
-            apparaîtra ici avec son statut et le message envoyé.
+            {toutes.length === 0
+              ? 'Aucune réservation pour le moment. Quand tu demanderas une offre d’entraide, elle apparaîtra ici avec son statut et le message envoyé.'
+              : 'Aucune réservation pour ce filtre. Choisis « Tous » pour voir l’ensemble.'}
           </p>
         </Card>
       ) : (
-        <ul className="mt-8 flex flex-col gap-4">
+        <ul className="mt-6 flex flex-col gap-4">
           {reservations.map((reservation) => (
             <li key={reservation.id}>
               <CarteReservation
