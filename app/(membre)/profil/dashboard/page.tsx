@@ -1,5 +1,8 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { chargerDashboardMembre } from '@/lib/dashboard-membre';
 import { formaterRelativePassee } from '@/lib/mobilisations/dates';
 import {
@@ -22,6 +25,55 @@ export const metadata: Metadata = {
   title: 'Vue d’ensemble',
 };
 
+const FALLBACKS = {
+  salutation: 'Bonjour',
+  salutationFallback: 'à toi',
+  badgeSuppression: 'Compte en attente de suppression',
+  badgeAdherent: 'Adhérent·e',
+  badgeSympathisant: 'Sympathisant·e',
+  alertSuppressionTitre: 'Suppression programmée',
+  alertSuppressionAmorce:
+    'Ton compte sera définitivement anonymisé 30 jours après ta demande. Tu peux annuler à tout moment depuis l’onglet',
+  alertSuppressionLien: 'Confidentialité',
+  adhesionCardLabel: 'Adhésion en cours',
+  adhesionEuros: '12 € (Stripe)',
+  adhesionT99cp: '12 T99CP',
+  adhesionGratuite: 'Gratuite',
+  adhesionDu: 'Du',
+  adhesionAu: 'au',
+  alertPasAdherentTitre: 'Pas encore adhérent·e ?',
+  alertPasAdherentAmorce: 'Rejoins le mouvement :',
+  alertPasAdherentLien: 'adhérer (gratuit, 12 € ou 12 T99CP)',
+  sectionCompteurs: 'En un coup d’œil',
+  compteurNotifications: 'Notifications non lues',
+  compteurMessages: 'Messages non lus',
+  compteurReservations: 'Réservations en attente',
+  compteurDemandes: 'Demandes reçues',
+  compteurGroupes: 'Mes groupes',
+  compteurPetitions: 'Pétitions signées',
+  compteurContributionsE: 'Contributions €',
+  compteurContributionsTotal: 'Total contributions',
+  compteurReunions: 'Réunions à venir',
+  sectionActivites: 'Activités récentes',
+  activitesEmpty:
+    'Aucune activité récente. Quand tu signeras une pétition, feras un don ou publieras dans le réseau, ça apparaîtra ici.',
+  activiteSignature: 'Pétition signée',
+  activiteDon: 'Contribution',
+  activiteReservationCreee: 'Réservation créée',
+  activiteReservationRecue: 'Réservation reçue',
+  activitePost: 'Publication',
+  activiteAdhesion: 'Adhésion',
+  sectionIdentite: 'Mon identité',
+  identiteLabelNom: 'Nom',
+  identiteLabelEmail: 'Email',
+  identiteLabelCodePostal: 'Code postal',
+  identiteLabelStatutEmail: 'Statut email',
+  identiteFallbackVide: '—',
+  identiteVerifie: '✅ Vérifié',
+  identiteAVerifier: '⚠️ À vérifier',
+  sectionRaccourcis: 'Raccourcis',
+};
+
 const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'EUR',
@@ -35,48 +87,177 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
   minute: '2-digit',
 });
 
-const LIBELLE_ACTIVITE = {
-  signature_petition: 'Pétition signée',
-  don: 'Contribution',
-  reservation_creee: 'Réservation créée',
-  reservation_recue: 'Réservation reçue',
-  post_reseau: 'Publication',
-  adhesion: 'Adhésion',
-} as const;
+/**
+ * Definition des raccourcis : ordre + slug stable + fallback titre + description.
+ * Slug sert de cle CMS, ne change pas si admin renomme le titre.
+ */
+const RACCOURCIS = [
+  {
+    slug: 'informations',
+    href: '/profil/informations',
+    titre: 'Mes informations',
+    description: 'Nom, prénom, pronom, coordonnées, photo, bio.',
+  },
+  {
+    slug: 'mes_groupes',
+    href: '/profil/mes-groupes',
+    titre: 'Mes groupes',
+    description: 'Communes, fédérations, GT, campagnes, groupes d’entraide.',
+  },
+  {
+    slug: 'reservations',
+    href: '/profil/reservations',
+    titre: 'Mes réservations',
+    description: 'Demandes que tu as envoyées.',
+  },
+  {
+    slug: 'demandes_reservations',
+    href: '/profil/demandes-reservations',
+    titre: 'Demandes reçues',
+    description: 'Demandes sur tes offres.',
+  },
+  {
+    slug: 'contributions',
+    href: '/profil/contributions',
+    titre: 'Mes contributions',
+    description: 'Signatures, dons, adhésions.',
+  },
+  {
+    slug: 'notifications',
+    href: '/profil/notifications',
+    titre: 'Préférences notifs',
+    description: 'Cloche, push, mails.',
+  },
+  {
+    slug: 'confidentialite',
+    href: '/profil/confidentialite',
+    titre: 'Confidentialité',
+    description: 'Visibilité, export ZIP, 2FA.',
+  },
+  {
+    slug: 'communes',
+    href: '/profil/communes',
+    titre: 'Mes communes',
+    description: 'Appartenances actives.',
+  },
+  {
+    slug: 'reseau',
+    href: '/s-informer/reseau',
+    titre: 'Réseau social',
+    description: 'Flux, messages, profil public.',
+  },
+  {
+    slug: 'decider',
+    href: '/profil/decider',
+    titre: 'Mes réunions Décider',
+    description: 'Prochaines réunions et dernières décisions visibles.',
+  },
+  {
+    slug: 'mes_creations',
+    href: '/profil/mes-creations',
+    titre: 'Mes créations',
+    description: 'Tout ce que tu as créé : pétitions, cagnottes, articles…',
+  },
+] as const;
 
 /**
  * Dashboard membre profond (V2.4.5).
  *
- * Vue d'ensemble de l'activité personnelle : compteurs, adhésion en
- * cours, activités récentes, raccourcis vers les onglets et espaces.
+ * Vue d'ensemble de l'activite personnelle : compteurs, adhesion en
+ * cours, activites recentes, raccourcis vers les onglets et espaces.
+ *
+ * Tous les libelles editables admin via le CMS (cles `profil.dashboard.*`).
  */
 export default async function PageDashboard() {
   const { personne, email } = await getPersonneOuRediriger('/profil/dashboard');
-  const data = await chargerDashboardMembre(personne.id);
+
+  const [data, estAdmin, ...lectures] = await Promise.all([
+    chargerDashboardMembre(personne.id),
+    estAdminCourant(),
+    // Lecture systematique de toutes les cles CMS du dashboard.
+    ...Object.entries(FALLBACKS).map(([cle, fb]) =>
+      lireContenuEditorial(`profil.dashboard.${cle}`, { valeurMd: fb }),
+    ),
+    // 11 raccourcis × 2 (titre + description) = 22 cles supplementaires.
+    ...RACCOURCIS.flatMap((r) => [
+      lireContenuEditorial(`profil.dashboard.raccourci.${r.slug}.titre`, {
+        valeurMd: r.titre,
+      }),
+      lireContenuEditorial(`profil.dashboard.raccourci.${r.slug}.description`, {
+        valeurMd: r.description,
+      }),
+    ]),
+  ]);
+
+  // Reconstitue l'index des libelles depuis le tableau `lectures` selon
+  // l'ordre d'insertion dans le Promise.all ci-dessus.
+  const fallbackKeys = Object.keys(FALLBACKS);
+  const cms = Object.fromEntries(
+    fallbackKeys.map((cle, i) => [
+      cle,
+      lectures[i]?.valeurMd ?? (FALLBACKS as Record<string, string>)[cle],
+    ]),
+  ) as Record<keyof typeof FALLBACKS, string>;
+  const raccourcisOffset = fallbackKeys.length;
+  const raccourcisAvecCms = RACCOURCIS.map((r, i) => ({
+    ...r,
+    titreCms: lectures[raccourcisOffset + i * 2]?.valeurMd ?? r.titre,
+    descriptionCms: lectures[raccourcisOffset + i * 2 + 1]?.valeurMd ?? r.description,
+  }));
+
+  // Helper pour wrap simple text en TexteEditableAdmin (reduit la verbosite ci-dessous).
+  const E = (cleCourte: keyof typeof FALLBACKS, longueurMax = 100, multilignes = false) =>
+    ({
+      cle: `profil.dashboard.${cleCourte}`,
+      valeurInitiale: cms[cleCourte],
+      estAdmin,
+      libelle: `dashboard.${cleCourte}`,
+      longueurMax,
+      multilignes,
+    }) as const;
 
   return (
     <article className="grid gap-8">
       <header className="flex flex-wrap items-center gap-3">
         <Heading niveau={1}>
-          Bonjour {personne.prenom ?? 'à toi'}
+          <TexteEditableAdmin {...E('salutation', 40)}>{(t) => <>{t}</>}</TexteEditableAdmin>{' '}
+          {personne.prenom ?? cms.salutationFallback}
           <span className="ml-2 inline-block">👋</span>
         </Heading>
         {personne.statut === 'pending_deletion' ? (
-          <Badge variant="warning">Compte en attente de suppression</Badge>
+          <TexteEditableAdmin {...E('badgeSuppression', 60)}>
+            {(t) => <Badge variant="warning">{t}</Badge>}
+          </TexteEditableAdmin>
         ) : data.adhesionActive !== null ? (
-          <Badge variant="success">Adhérent·e</Badge>
+          <TexteEditableAdmin {...E('badgeAdherent', 40)}>
+            {(t) => <Badge variant="success">{t}</Badge>}
+          </TexteEditableAdmin>
         ) : (
-          <Badge variant="default">Sympathisant·e</Badge>
+          <TexteEditableAdmin {...E('badgeSympathisant', 40)}>
+            {(t) => <Badge variant="default">{t}</Badge>}
+          </TexteEditableAdmin>
         )}
       </header>
 
       {personne.statut === 'pending_deletion' ? (
-        <Alert variant="warning" titre="Suppression programmée">
-          Ton compte sera définitivement anonymisé 30 jours après ta demande. Tu peux annuler à tout
-          moment depuis l’onglet{' '}
-          <Link href="/profil/confidentialite" className="underline">
-            Confidentialité
-          </Link>
+        <Alert
+          variant="warning"
+          titre={
+            <TexteEditableAdmin {...E('alertSuppressionTitre', 60)}>
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          <TexteEditableAdmin {...E('alertSuppressionAmorce', 300, true)}>
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>{' '}
+          <TexteEditableAdmin {...E('alertSuppressionLien', 40)}>
+            {(t) => (
+              <Link href="/profil/confidentialite" className="underline">
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
           .
         </Alert>
       ) : null}
@@ -85,92 +266,119 @@ export default async function PageDashboard() {
         <Card variant="ombre" className="border-success border-l-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="font-bold text-text-3 text-xs uppercase tracking-cap">
-                Adhésion en cours
-              </p>
+              <TexteEditableAdmin {...E('adhesionCardLabel', 40)}>
+                {(t) => <p className="font-bold text-text-3 text-xs uppercase tracking-cap">{t}</p>}
+              </TexteEditableAdmin>
               <p className="mt-1 font-display font-bold text-lg text-text-1">
-                {data.adhesionActive.chemin === 'euros'
-                  ? '12 € (Stripe)'
-                  : data.adhesionActive.chemin === 't99cp'
-                    ? '12 T99CP'
-                    : 'Gratuite'}
+                {data.adhesionActive.chemin === 'euros' ? (
+                  <TexteEditableAdmin {...E('adhesionEuros', 40)}>
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                ) : data.adhesionActive.chemin === 't99cp' ? (
+                  <TexteEditableAdmin {...E('adhesionT99cp', 40)}>
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                ) : (
+                  <TexteEditableAdmin {...E('adhesionGratuite', 40)}>
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                )}
               </p>
             </div>
             <div className="text-right text-text-3 text-xs">
-              Du {FORMATEUR_DATE.format(new Date(data.adhesionActive.debuteLe))} au{' '}
+              <TexteEditableAdmin {...E('adhesionDu', 20)}>{(t) => <>{t}</>}</TexteEditableAdmin>{' '}
+              {FORMATEUR_DATE.format(new Date(data.adhesionActive.debuteLe))}{' '}
+              <TexteEditableAdmin {...E('adhesionAu', 20)}>{(t) => <>{t}</>}</TexteEditableAdmin>{' '}
               {FORMATEUR_DATE.format(new Date(data.adhesionActive.expireLe))}
             </div>
           </div>
         </Card>
       ) : (
-        <Alert variant="info" titre="Pas encore adhérent·e ?">
-          Rejoins le mouvement :{' '}
-          <Link href="/agir/adherer" className="text-brand hover:underline">
-            adhérer (gratuit, 12 € ou 12 T99CP)
-          </Link>
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin {...E('alertPasAdherentTitre', 60)}>
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          <TexteEditableAdmin {...E('alertPasAdherentAmorce', 60)}>
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>{' '}
+          <TexteEditableAdmin {...E('alertPasAdherentLien', 80)}>
+            {(t) => (
+              <Link href="/agir/adherer" className="text-brand hover:underline">
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
           .
         </Alert>
       )}
 
       <section aria-label="Mes compteurs">
-        <Heading niveau={2} apparenceComme={3} className="mb-3">
-          En un coup d’œil
-        </Heading>
+        <TexteEditableAdmin {...E('sectionCompteurs', 40)}>
+          {(t) => (
+            <Heading niveau={2} apparenceComme={3} className="mb-3">
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <CarteCompteur
             href="/profil/notifications-recues"
             icone={Bell}
-            libelle="Notifications non lues"
+            libelle={cms.compteurNotifications}
             valeur={data.nbNotificationsNonLues}
             variant={data.nbNotificationsNonLues > 0 ? 'danger' : 'default'}
           />
           <CarteCompteur
             href="/s-informer/reseau/messages"
             icone={MessageCircle}
-            libelle="Messages non lus"
+            libelle={cms.compteurMessages}
             valeur={data.nbMessagesNonLus}
             variant={data.nbMessagesNonLus > 0 ? 'warning' : 'default'}
           />
           <CarteCompteur
             href="/profil/reservations"
             icone={Inbox}
-            libelle="Réservations en attente"
+            libelle={cms.compteurReservations}
             valeur={data.nbReservationsEnAttente}
           />
           <CarteCompteur
             href="/profil/demandes-reservations"
             icone={CalendarCheck}
-            libelle="Demandes reçues"
+            libelle={cms.compteurDemandes}
             valeur={data.nbReservationsDemandees}
           />
           <CarteCompteur
             href="/profil/mes-groupes"
             icone={Users}
-            libelle="Mes groupes"
+            libelle={cms.compteurGroupes}
             valeur={data.nbGroupes}
           />
           <CarteCompteur
             href="/profil/contributions"
             icone={ScrollText}
-            libelle="Pétitions signées"
+            libelle={cms.compteurPetitions}
             valeur={data.nbSignatures}
           />
           <CarteCompteur
             href="/profil/contributions"
             icone={HandCoins}
-            libelle="Contributions €"
+            libelle={cms.compteurContributionsE}
             valeurTexte={FORMATEUR_EURO.format(data.totalEurosContribues)}
           />
           <CarteCompteur
             href="/profil/contributions"
             icone={Receipt}
-            libelle="Total contributions"
+            libelle={cms.compteurContributionsTotal}
             valeur={data.nbContributions}
           />
           <CarteCompteur
             href="/profil/decider"
             icone={Video}
-            libelle="Réunions à venir"
+            libelle={cms.compteurReunions}
             valeur={data.nbReunionsAVenir}
             variant={data.nbReunionsAVenir > 0 ? 'warning' : 'default'}
           />
@@ -180,47 +388,66 @@ export default async function PageDashboard() {
       <section aria-label="Activités récentes">
         <Heading niveau={2} apparenceComme={3} className="mb-3">
           <Sparkles size={20} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
-          Activités récentes
+          <TexteEditableAdmin {...E('sectionActivites', 40)}>{(t) => <>{t}</>}</TexteEditableAdmin>
         </Heading>
         {data.activitesRecentes.length === 0 ? (
-          <p className="text-text-3 text-sm">
-            Aucune activité récente. Quand tu signeras une pétition, feras un don ou publieras dans
-            le réseau, ça apparaîtra ici.
-          </p>
+          <TexteEditableAdmin {...E('activitesEmpty', 300, true)}>
+            {(t) => <p className="text-text-3 text-sm">{t}</p>}
+          </TexteEditableAdmin>
         ) : (
           <ul className="grid gap-2">
-            {data.activitesRecentes.map((a) => (
-              <li key={`${a.type}-${a.date}-${a.titre}`}>
-                <Link href={a.href} className="block hover:opacity-90">
-                  <Card variant="plat" className="grid gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="default">{LIBELLE_ACTIVITE[a.type]}</Badge>
-                      <span
-                        className="text-text-3 text-xs"
-                        title={FORMATEUR_DATE.format(new Date(a.date))}
-                      >
-                        {formaterRelativePassee(a.date)}
-                      </span>
-                    </div>
-                    <p className="font-medium text-sm text-text-1">{a.titre}</p>
-                    {a.sousTitre !== null ? (
-                      <p className="text-text-3 text-xs">{a.sousTitre}</p>
-                    ) : null}
-                  </Card>
-                </Link>
-              </li>
-            ))}
+            {data.activitesRecentes.map((a) => {
+              const libelleActivite =
+                a.type === 'signature_petition'
+                  ? cms.activiteSignature
+                  : a.type === 'don'
+                    ? cms.activiteDon
+                    : a.type === 'reservation_creee'
+                      ? cms.activiteReservationCreee
+                      : a.type === 'reservation_recue'
+                        ? cms.activiteReservationRecue
+                        : a.type === 'post_reseau'
+                          ? cms.activitePost
+                          : cms.activiteAdhesion;
+              return (
+                <li key={`${a.type}-${a.date}-${a.titre}`}>
+                  <Link href={a.href} className="block hover:opacity-90">
+                    <Card variant="plat" className="grid gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant="default">{libelleActivite}</Badge>
+                        <span
+                          className="text-text-3 text-xs"
+                          title={FORMATEUR_DATE.format(new Date(a.date))}
+                        >
+                          {formaterRelativePassee(a.date)}
+                        </span>
+                      </div>
+                      <p className="font-medium text-sm text-text-1">{a.titre}</p>
+                      {a.sousTitre !== null ? (
+                        <p className="text-text-3 text-xs">{a.sousTitre}</p>
+                      ) : null}
+                    </Card>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
 
       <section aria-label="Mon identité">
-        <Heading niveau={2} apparenceComme={3} className="mb-3">
-          Mon identité
-        </Heading>
+        <TexteEditableAdmin {...E('sectionIdentite', 40)}>
+          {(t) => (
+            <Heading niveau={2} apparenceComme={3} className="mb-3">
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
         <div className="grid gap-3 sm:grid-cols-2">
           <Card variant="ombre">
-            <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Nom</p>
+            <TexteEditableAdmin {...E('identiteLabelNom', 20)}>
+              {(t) => <p className="font-bold text-text-3 text-xs uppercase tracking-cap">{t}</p>}
+            </TexteEditableAdmin>
             <p className="mt-1 text-lg">
               {personne.prenom} {personne.nom}
               {personne.pronom !== null ? (
@@ -229,80 +456,47 @@ export default async function PageDashboard() {
             </p>
           </Card>
           <Card variant="ombre">
-            <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Email</p>
+            <TexteEditableAdmin {...E('identiteLabelEmail', 20)}>
+              {(t) => <p className="font-bold text-text-3 text-xs uppercase tracking-cap">{t}</p>}
+            </TexteEditableAdmin>
             <p className="mt-1 truncate text-lg">{email}</p>
           </Card>
           <Card variant="ombre">
-            <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Code postal</p>
-            <p className="mt-1 text-lg">{personne.code_postal ?? '—'}</p>
+            <TexteEditableAdmin {...E('identiteLabelCodePostal', 20)}>
+              {(t) => <p className="font-bold text-text-3 text-xs uppercase tracking-cap">{t}</p>}
+            </TexteEditableAdmin>
+            <p className="mt-1 text-lg">{personne.code_postal ?? cms.identiteFallbackVide}</p>
           </Card>
           <Card variant="ombre">
-            <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Statut email</p>
-            <p className="mt-1 text-lg">{personne.email_verifie ? '✅ Vérifié' : '⚠️ À vérifier'}</p>
+            <TexteEditableAdmin {...E('identiteLabelStatutEmail', 30)}>
+              {(t) => <p className="font-bold text-text-3 text-xs uppercase tracking-cap">{t}</p>}
+            </TexteEditableAdmin>
+            <p className="mt-1 text-lg">
+              {personne.email_verifie ? cms.identiteVerifie : cms.identiteAVerifier}
+            </p>
           </Card>
         </div>
       </section>
 
       <section aria-label="Raccourcis">
-        <Heading niveau={2} apparenceComme={3} className="mb-3">
-          Raccourcis
-        </Heading>
+        <TexteEditableAdmin {...E('sectionRaccourcis', 40)}>
+          {(t) => (
+            <Heading niveau={2} apparenceComme={3} className="mb-3">
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <RaccourciCard
-            href="/profil/informations"
-            titre="Mes informations"
-            description="Nom, prénom, pronom, coordonnées, photo, bio."
-          />
-          <RaccourciCard
-            href="/profil/mes-groupes"
-            titre="Mes groupes"
-            description="Communes, fédérations, GT, campagnes, groupes d’entraide."
-          />
-          <RaccourciCard
-            href="/profil/reservations"
-            titre="Mes réservations"
-            description="Demandes que tu as envoyées."
-          />
-          <RaccourciCard
-            href="/profil/demandes-reservations"
-            titre="Demandes reçues"
-            description="Demandes sur tes offres."
-          />
-          <RaccourciCard
-            href="/profil/contributions"
-            titre="Mes contributions"
-            description="Signatures, dons, adhésions."
-          />
-          <RaccourciCard
-            href="/profil/notifications"
-            titre="Préférences notifs"
-            description="Cloche, push, mails."
-          />
-          <RaccourciCard
-            href="/profil/confidentialite"
-            titre="Confidentialité"
-            description="Visibilité, export ZIP, 2FA."
-          />
-          <RaccourciCard
-            href="/profil/communes"
-            titre="Mes communes"
-            description="Appartenances actives."
-          />
-          <RaccourciCard
-            href="/s-informer/reseau"
-            titre="Réseau social"
-            description="Flux, messages, profil public."
-          />
-          <RaccourciCard
-            href="/profil/decider"
-            titre="Mes réunions Décider"
-            description="Prochaines réunions et dernières décisions visibles."
-          />
-          <RaccourciCard
-            href="/profil/mes-creations"
-            titre="Mes créations"
-            description="Tout ce que tu as créé : pétitions, cagnottes, articles…"
-          />
+          {raccourcisAvecCms.map((r) => (
+            <RaccourciCard
+              key={r.slug}
+              href={r.href}
+              slug={r.slug}
+              titre={r.titreCms}
+              description={r.descriptionCms}
+              estAdmin={estAdmin}
+            />
+          ))}
         </div>
       </section>
     </article>
@@ -347,18 +541,39 @@ function CarteCompteur({
 
 function RaccourciCard({
   href,
+  slug,
   titre,
   description,
+  estAdmin,
 }: {
   href: string;
+  slug: string;
   titre: string;
   description: string;
+  estAdmin: boolean;
 }) {
   return (
     <Link href={href} className="block">
       <Card variant="plat" className="h-full hover:border-border-dark hover:shadow-sm">
-        <p className="font-bold">{titre}</p>
-        <p className="mt-1 text-text-3 text-sm">{description}</p>
+        <TexteEditableAdmin
+          cle={`profil.dashboard.raccourci.${slug}.titre`}
+          valeurInitiale={titre}
+          estAdmin={estAdmin}
+          libelle={`titre du raccourci ${slug}`}
+          longueurMax={50}
+        >
+          {(t) => <p className="font-bold">{t}</p>}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle={`profil.dashboard.raccourci.${slug}.description`}
+          valeurInitiale={description}
+          estAdmin={estAdmin}
+          libelle={`description du raccourci ${slug}`}
+          multilignes
+          longueurMax={200}
+        >
+          {(t) => <p className="mt-1 text-text-3 text-sm">{t}</p>}
+        </TexteEditableAdmin>
       </Card>
     </Link>
   );

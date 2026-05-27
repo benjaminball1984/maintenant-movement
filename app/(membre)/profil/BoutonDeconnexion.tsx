@@ -5,10 +5,17 @@ import { Button } from '@/components/ui';
 import { useState } from 'react';
 
 /**
- * Bouton de déconnexion. Client Component pour gérer l'état pendant la
- * Server Action `seDeconnecter` (qui redirige vers `/`).
+ * Bouton de deconnexion. Client Component pour gerer l'etat pendant la
+ * Server Action `seDeconnecter` (qui redirige vers `/`). Les libelles
+ * sont passes en props par le layout parent qui les lit depuis le CMS.
  */
-export function BoutonDeconnexion() {
+export function BoutonDeconnexion({
+  libelle,
+  libelleEnCours,
+}: {
+  libelle: string;
+  libelleEnCours: string;
+}) {
   const [enCours, setEnCours] = useState(false);
 
   async function gererClic() {
@@ -19,7 +26,7 @@ export function BoutonDeconnexion() {
 
   return (
     <Button variant="ghost" taille="sm" onClick={gererClic} disabled={enCours}>
-      {enCours ? 'Déconnexion en cours...' : 'Se déconnecter'}
+      {enCours ? libelleEnCours : libelle}
     </Button>
   );
 }

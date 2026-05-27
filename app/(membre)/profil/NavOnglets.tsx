@@ -5,35 +5,23 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 /**
- * Onglets de navigation du profil. Une seule liste source de vérité,
- * cohérente avec la structure de dossiers (cf. 01_ARCHITECTURE.md §9).
+ * Onglets de navigation du profil. Une seule liste source de verite,
+ * coherente avec la structure de dossiers (cf. 01_ARCHITECTURE.md §9).
  *
  * Client Component parce qu'on lit `usePathname()` pour marquer l'onglet
- * actif visuellement et via `aria-current`.
+ * actif visuellement et via `aria-current`. Les libelles sont passes en
+ * props par le layout parent (Server Component) qui les lit depuis le CMS.
+ *
+ * Onglet « Wallet T99CP » retire au chantier V2.1.1 : §19 du cycle V2
+ * proscrit tout wallet integre cote plateforme. Le 99-coin se gere
+ * entierement a l'exterieur (redirection vers `the99coinproject.org`).
  */
-/**
- * Onglet « Wallet T99CP » retiré au chantier V2.1.1 : §19 du cycle V2
- * proscrit tout wallet intégré côté plateforme. Le 99-coin se gère
- * entièrement à l'extérieur (redirection vers la home `the99coinproject.org`).
- * Le solde T99CP de la personne sera réintroduit dans un chantier V2 dédié
- * en lecture seule, via l'adapter `lib/t99cp/`, dans l'onglet
- * « Contributions » ou un nouvel onglet « 99-coin ».
- */
-const ONGLETS = [
-  { slug: 'dashboard', libelle: 'Vue d’ensemble' },
-  { slug: 'informations', libelle: 'Informations' },
-  { slug: 'mes-groupes', libelle: 'Mes groupes' },
-  { slug: 'mes-creations', libelle: 'Mes créations' },
-  { slug: 'communes', libelle: 'Communes' },
-  { slug: 'contributions', libelle: 'Contributions' },
-  { slug: 'reservations', libelle: 'Mes réservations' },
-  { slug: 'demandes-reservations', libelle: 'Demandes reçues' },
-  { slug: 'notifications-recues', libelle: 'Notifications' },
-  { slug: 'notifications', libelle: 'Préférences notif' },
-  { slug: 'confidentialite', libelle: 'Confidentialité' },
-] as const;
+export interface OngletConfig {
+  slug: string;
+  libelle: string;
+}
 
-export function NavOnglets() {
+export function NavOnglets({ onglets }: { onglets: ReadonlyArray<OngletConfig> }) {
   const chemin = usePathname();
 
   return (
@@ -42,7 +30,7 @@ export function NavOnglets() {
       className="overflow-x-auto border-b border-border bg-surface"
     >
       <ul className="mx-auto flex max-w-5xl gap-1 px-4 sm:px-6 lg:px-8">
-        {ONGLETS.map((onglet) => {
+        {onglets.map((onglet) => {
           const href = `/profil/${onglet.slug}`;
           const estActif = chemin === href;
           return (
