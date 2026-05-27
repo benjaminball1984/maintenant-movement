@@ -108,6 +108,8 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                     { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
                     { href: '/admin/national/audit', libelle: 'Audit journal D8' },
                     { href: '/admin/national/contenus', libelle: 'Contenus éditoriaux' },
+                    { href: '/admin/national/decider', libelle: 'Décider (salles)' },
+                    { href: '/admin/national/journal', libelle: 'Journal-affiche' },
                   ].map((onglet) => (
                     <li key={onglet.href}>
                       <Link
