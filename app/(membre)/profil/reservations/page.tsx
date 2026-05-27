@@ -1,5 +1,6 @@
 import { BoutonAnnulerReservation } from '@/components/reservation/BoutonAnnulerReservation';
 import { BoutonConfirmerReservation } from '@/components/reservation/BoutonConfirmerReservation';
+import { BoutonSignalerLitigeReservation } from '@/components/reservation/BoutonSignalerLitigeReservation';
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
@@ -177,6 +178,12 @@ function CarteReservation({
 
       {transitionAutorisee(reservation.statut, 'confirmee') ? (
         <BoutonConfirmerReservation
+          reservationId={reservation.id}
+          cheminRevalidation="/profil/reservations"
+        />
+      ) : null}
+      {reservation.statut === 'realisee' && transitionAutorisee(reservation.statut, 'litige') ? (
+        <BoutonSignalerLitigeReservation
           reservationId={reservation.id}
           cheminRevalidation="/profil/reservations"
         />

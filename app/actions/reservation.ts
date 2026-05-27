@@ -303,6 +303,109 @@ export async function marquerReservationRealiseeAction(
 }
 
 // ============================================================
+// Signalement de litige par le demandeur (V2.3.16)
+// ============================================================
+
+export type ResultatLitige = { ok: true } | { ok: false; message: string };
+
+const MOTIF_LITIGE_MIN = 10;
+const MOTIF_LITIGE_MAX = 1000;
+
+/**
+ * Signale un litige côté demandeur sur une réservation marquée
+ * « réalisée » par le propriétaire. Transition D8 `realisee → litige`.
+ *
+ * Règles :
+ * - Seul le demandeur peut signaler (les admins passent par leurs
+ *   propres outils).
+ * - Transition autorisée par la machine à états D8 :
+ *   `acceptee → litige` (depuis V2.2.2 le code D8 l'autorise aussi
+ *   pendant l'exécution si la prestation est interrompue) ET
+ *   `realisee → litige`. Pour l'instant on n'expose que `realisee` côté
+ *   UI car c'est le cas d'usage le plus courant — la transition
+ *   `acceptee → litige` reste possible côté admin.
+ * - Motif obligatoire (10 à 1000 caractères) pour la modération à venir.
+ * - Action terminale : une fois en litige, la réservation est bloquée
+ *   jusqu'à arbitrage admin.
+ *
+ * À noter : pas encore de table `litige` dédiée. La machine à états D8
+ * pose juste le statut ; le journal D8bis (V2.3.15) garde la trace de
+ * la transition et du motif. La modération viendra dans un chantier
+ * dédié (intégrant `notification`, file modérateurs, etc.).
+ */
+export async function signalerLitigeReservationAction(options: {
+  reservationId: string;
+  motif: string;
+  cheminRevalidation?: string;
+}): Promise<ResultatLitige> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const motifNettoye = options.motif.trim();
+  if (motifNettoye.length < MOTIF_LITIGE_MIN) {
+    return {
+      ok: false,
+      message: `Le motif doit faire au moins ${MOTIF_LITIGE_MIN} caractères.`,
+    };
+  }
+  if (motifNettoye.length > MOTIF_LITIGE_MAX) {
+    return {
+      ok: false,
+      message: `Le motif est trop long (${MOTIF_LITIGE_MAX} caractères maximum).`,
+    };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: existant, error: erreurLecture } = await supabase
+    .from('reservation')
+    .select('id, demandeur_personne_id, statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+
+  if (erreurLecture !== null || existant === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  if (existant.demandeur_personne_id !== session.userId) {
+    return {
+      ok: false,
+      message: 'Tu n’as pas l’autorisation de signaler un litige sur cette réservation.',
+    };
+  }
+  const statutActuel = existant.statut as
+    | 'proposee'
+    | 'acceptee'
+    | 'refusee'
+    | 'realisee'
+    | 'confirmee'
+    | 'annulee'
+    | 'litige';
+  if (!transitionAutorisee(statutActuel, 'litige')) {
+    return {
+      ok: false,
+      message: `Une réservation au statut « ${statutActuel} » ne peut pas faire l’objet d’un litige.`,
+    };
+  }
+
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: 'litige',
+    motif: motifNettoye,
+    auteurId: session.userId,
+  });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message };
+  }
+
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
+}
+
+// ============================================================
 // Confirmation par le demandeur après réalisation (V2.3.14)
 // ============================================================
 
