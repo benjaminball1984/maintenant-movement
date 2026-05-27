@@ -2,7 +2,8 @@
 
 import { creerPost } from '@/app/(public)/s-informer/reseau/actions';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { Alert, Button, Label, Textarea } from '@/components/ui';
+import { ChampImageObjet } from '@/components/ui/ChampImageObjet';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -48,11 +49,12 @@ export function ComposerPost() {
         placeholder="Quoi de neuf dans le mouvement ?"
         maxLength={5000}
       />
-      <Input
-        type="url"
-        value={imageUrl}
-        onChange={(e) => setImageUrl(e.target.value)}
-        placeholder="Lien d’une image (optionnel)"
+      <ChampImageObjet
+        name="post-image"
+        libelle="Image (optionnel)"
+        prefixeChemin="reseau"
+        valeurInitiale={imageUrl}
+        onChange={(url) => setImageUrl(url ?? '')}
       />
       {erreur !== null ? <Alert variant="danger">{erreur}</Alert> : null}
       <CaptchaTurnstile onChange={setToken} />
