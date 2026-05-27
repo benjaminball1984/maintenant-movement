@@ -2,12 +2,36 @@
 
 import { ChampMotDePasse } from '@/components/formulaires/ChampMotDePasse';
 import { Alert, Button, Label } from '@/components/ui';
-import { type DonneesNouveauMotDePasse, nouveauMotDePasseSchema } from '@/lib/validations/auth';
+import {
+  MESSAGES_VALIDATION_AUTH_DEFAUT,
+  type MessagesValidationAuth,
+} from '@/lib/messages-validation';
+import {
+  type DonneesNouveauMotDePasse,
+  creerNouveauMotDePasseSchema,
+} from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { definirNouveauMotDePasse } from '../actions';
+
+/** Libelles surchargeables admin via CMS (V2.4.142). */
+export interface LibellesNouveauMotDePasse {
+  alertErreurTitre: string;
+  labelMotDePasse: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaChargement: string;
+}
+
+const LIBELLES_DEFAUT: LibellesNouveauMotDePasse = {
+  alertErreurTitre: 'Impossible de définir le mot de passe',
+  labelMotDePasse: 'Nouveau mot de passe',
+  ctaSubmit: 'Enregistrer le nouveau mot de passe',
+  ctaEnCours: 'Enregistrement...',
+  ctaChargement: 'Chargement…',
+};
 
 /**
  * Formulaire de definition du nouveau mot de passe.
@@ -15,7 +39,10 @@ import { definirNouveauMotDePasse } from '../actions';
  * Pas de Turnstile : on est deja authentifie par la session temporaire
  * issue du clic sur le lien email.
  */
-export function FormulaireNouveauMotDePasse() {
+export function FormulaireNouveauMotDePasse({
+  libelles = LIBELLES_DEFAUT,
+  messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
+}: { libelles?: LibellesNouveauMotDePasse; messages?: MessagesValidationAuth } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -29,7 +56,7 @@ export function FormulaireNouveauMotDePasse() {
     handleSubmit,
     formState: { errors },
   } = useForm<DonneesNouveauMotDePasse>({
-    resolver: zodResolver(nouveauMotDePasseSchema),
+    resolver: zodResolver(creerNouveauMotDePasseSchema(messages)),
   });
 
   async function onSubmit(donnees: DonneesNouveauMotDePasse) {
@@ -55,14 +82,14 @@ export function FormulaireNouveauMotDePasse() {
       aria-label="Nouveau mot de passe"
     >
       {erreurServeur !== null ? (
-        <Alert variant="danger" titre="Impossible de définir le mot de passe">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreurServeur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="reset-mdp" obligatoire>
-          Nouveau mot de passe
+          {libelles.labelMotDePasse}
         </Label>
         <ChampMotDePasse
           id="reset-mdp"
@@ -77,10 +104,10 @@ export function FormulaireNouveauMotDePasse() {
 
       <Button type="submit" disabled={envoiEnCours || !hydrate}>
         {envoiEnCours
-          ? 'Enregistrement...'
+          ? libelles.ctaEnCours
           : !hydrate
-            ? 'Chargement…'
-            : 'Enregistrer le nouveau mot de passe'}
+            ? libelles.ctaChargement
+            : libelles.ctaSubmit}
       </Button>
     </form>
   );
