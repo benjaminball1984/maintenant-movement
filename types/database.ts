@@ -64,6 +64,51 @@ export type Database = {
           },
         ];
       };
+      appartenance_campagne: {
+        Row: {
+          id: string;
+          personne_id: string;
+          campagne_id: string;
+          rejointe_le: string;
+          quittee_le: string | null;
+          est_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          personne_id: string;
+          campagne_id: string;
+          rejointe_le?: string;
+          quittee_le?: string | null;
+          est_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          personne_id?: string;
+          campagne_id?: string;
+          rejointe_le?: string;
+          quittee_le?: string | null;
+          est_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'appartenance_campagne_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'appartenance_campagne_campagne_id_fkey';
+            columns: ['campagne_id'];
+            isOneToOne: false;
+            referencedRelation: 'campagne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       appartenance_commune: {
         Row: {
           commune_id: string;

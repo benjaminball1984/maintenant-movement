@@ -35,6 +35,8 @@ export interface MesAppartenances {
   federations: AppartenanceGroupe[];
   confederations: AppartenanceGroupe[];
   gtThematiques: AppartenanceGroupe[];
+  campagnes: AppartenanceGroupe[];
+  groupesEntraide: AppartenanceGroupe[];
 }
 
 /**
@@ -46,7 +48,7 @@ export interface MesAppartenances {
 export async function listerMesAppartenances(personneId: string): Promise<MesAppartenances> {
   const supabase = await getSupabaseServer();
 
-  const [appCommunes, appGt] = await Promise.all([
+  const [appCommunes, appGt, appCampagnes, appGroupes] = await Promise.all([
     supabase
       .from('appartenance_commune')
       .select('commune_id, rejointe_le, commune:commune (id, nom, slug)')
@@ -59,6 +61,18 @@ export async function listerMesAppartenances(personneId: string): Promise<MesApp
       .eq('personne_id', personneId)
       .eq('est_active', true)
       .order('rejointe_le', { ascending: true }),
+    supabase
+      .from('appartenance_campagne')
+      .select('campagne_id, rejointe_le, campagne:campagne (id, titre, slug)')
+      .eq('personne_id', personneId)
+      .eq('est_active', true)
+      .order('rejointe_le', { ascending: true }),
+    supabase
+      .from('appartenance_groupe_entraide_local')
+      .select('groupe_id, rejoint_le, groupe_entraide_local:groupe_entraide_local (id, nom, slug)')
+      .eq('personne_id', personneId)
+      .eq('est_active', true)
+      .order('rejoint_le', { ascending: true }),
   ]);
 
   const communes: AppartenanceGroupe[] = (appCommunes.data ?? [])
@@ -89,6 +103,34 @@ export async function listerMesAppartenances(personneId: string): Promise<MesApp
       href: '',
       depuisLe: l.rejointe_le,
       typeLibelle: 'GT thématique',
+    }));
+
+  const campagnes: AppartenanceGroupe[] = (appCampagnes.data ?? [])
+    .filter(
+      (l): l is typeof l & { campagne: { id: string; titre: string; slug: string } } =>
+        l.campagne !== null && typeof l.campagne === 'object',
+    )
+    .map((l) => ({
+      id: l.campagne.id,
+      nom: l.campagne.titre,
+      slug: l.campagne.slug,
+      href: `/mobiliser/campagnes/${l.campagne.slug}`,
+      depuisLe: l.rejointe_le,
+      typeLibelle: 'Campagne',
+    }));
+
+  const groupesEntraide: AppartenanceGroupe[] = (appGroupes.data ?? [])
+    .filter(
+      (l): l is typeof l & { groupe_entraide_local: { id: string; nom: string; slug: string } } =>
+        l.groupe_entraide_local !== null && typeof l.groupe_entraide_local === 'object',
+    )
+    .map((l) => ({
+      id: l.groupe_entraide_local.id,
+      nom: l.groupe_entraide_local.nom,
+      slug: l.groupe_entraide_local.slug,
+      href: `/s-entraider/groupes-locaux/${l.groupe_entraide_local.slug}`,
+      depuisLe: l.rejoint_le,
+      typeLibelle: 'Groupe d’entraide',
     }));
 
   // Fédérations et confédérations : indirectes via les communes
@@ -154,7 +196,7 @@ export async function listerMesAppartenances(personneId: string): Promise<MesApp
     }
   }
 
-  return { communes, federations, confederations, gtThematiques };
+  return { communes, federations, confederations, gtThematiques, campagnes, groupesEntraide };
 }
 
 function dedupParId(liste: AppartenanceGroupe[]): AppartenanceGroupe[] {

@@ -1,7 +1,7 @@
 import { Card, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
 import { type AppartenanceGroupe, listerMesAppartenances } from '@/lib/mes-groupes';
-import { Building, Globe, Network, Users } from 'lucide-react';
+import { Building, Globe, HandHelping, Megaphone, Network, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -23,11 +23,16 @@ export const metadata: Metadata = {
  */
 export default async function PageMesGroupes() {
   const session = await getSessionOuRediriger('/profil/mes-groupes');
-  const { communes, federations, confederations, gtThematiques } = await listerMesAppartenances(
-    session.userId,
-  );
+  const { communes, federations, confederations, gtThematiques, campagnes, groupesEntraide } =
+    await listerMesAppartenances(session.userId);
 
-  const total = communes.length + federations.length + confederations.length + gtThematiques.length;
+  const total =
+    communes.length +
+    federations.length +
+    confederations.length +
+    gtThematiques.length +
+    campagnes.length +
+    groupesEntraide.length;
 
   return (
     <Container taille="md" className="py-12">
@@ -74,6 +79,18 @@ export default async function PageMesGroupes() {
             icone={<Users size={20} aria-hidden="true" />}
             appartenances={gtThematiques}
             vide="Pas encore membre d’un GT thématique."
+          />
+          <SectionAppartenance
+            titre="Campagnes"
+            icone={<Megaphone size={20} aria-hidden="true" />}
+            appartenances={campagnes}
+            vide="Pas encore membre d’une campagne."
+          />
+          <SectionAppartenance
+            titre="Groupes d’entraide locaux"
+            icone={<HandHelping size={20} aria-hidden="true" />}
+            appartenances={groupesEntraide}
+            vide="Pas encore membre d’un groupe d’entraide local."
           />
         </div>
       )}
