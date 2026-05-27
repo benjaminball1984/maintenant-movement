@@ -16,7 +16,12 @@ import { getSupabaseServer } from '@/lib/supabase';
  * composant filtre par date dans l'URL.
  */
 
-export type TypeEvenement = 'mobilisation' | 'moment_solidaire' | 'minimarche' | 'boutique_marche';
+export type TypeEvenement =
+  | 'mobilisation'
+  | 'moment_solidaire'
+  | 'minimarche'
+  | 'boutique_marche'
+  | 'sondage';
 
 export interface EvenementAgenda {
   id: string;
@@ -55,38 +60,51 @@ export async function chargerEvenementsAgenda(
   const supabase = await getSupabaseServer();
   const aujourdhui = new Date().toISOString();
 
-  const [{ data: mobilisations }, { data: moments }, { data: minimarches }, { data: boutiques }] =
-    await Promise.all([
-      supabase
-        .from('mobilisation')
-        .select('id, titre, slug, date_debut, date_fin, lieu')
-        .eq('statut', 'publiee')
-        .gte('date_debut', aujourdhui)
-        .order('date_debut', { ascending: true })
-        .limit(LIMITE_PAR_SOURCE),
-      supabase
-        .from('moment_solidaire')
-        .select('id, titre, slug, commence_le, termine_le, lieu, type')
-        .in('statut', ['annonce', 'en_cours'])
-        .gte('commence_le', aujourdhui)
-        .order('commence_le', { ascending: true })
-        .limit(LIMITE_PAR_SOURCE),
-      supabase
-        .from('minimarche_solidaire')
-        .select('id, titre, slug, commence_le, termine_le, lieu')
-        .in('statut', ['annonce', 'en_cours'])
-        .gte('commence_le', aujourdhui)
-        .order('commence_le', { ascending: true })
-        .limit(LIMITE_PAR_SOURCE),
-      supabase
-        .from('boutique_marche')
-        .select('id, nom, slug, ouverte_du, ouverte_au, lieu')
-        .eq('statut', 'ouverte')
-        .not('ouverte_du', 'is', null)
-        .gte('ouverte_du', aujourdhui)
-        .order('ouverte_du', { ascending: true })
-        .limit(LIMITE_PAR_SOURCE),
-    ]);
+  const [
+    { data: mobilisations },
+    { data: moments },
+    { data: minimarches },
+    { data: boutiques },
+    { data: sondages },
+  ] = await Promise.all([
+    supabase
+      .from('mobilisation')
+      .select('id, titre, slug, date_debut, date_fin, lieu')
+      .eq('statut', 'publiee')
+      .gte('date_debut', aujourdhui)
+      .order('date_debut', { ascending: true })
+      .limit(LIMITE_PAR_SOURCE),
+    supabase
+      .from('moment_solidaire')
+      .select('id, titre, slug, commence_le, termine_le, lieu, type')
+      .in('statut', ['annonce', 'en_cours'])
+      .gte('commence_le', aujourdhui)
+      .order('commence_le', { ascending: true })
+      .limit(LIMITE_PAR_SOURCE),
+    supabase
+      .from('minimarche_solidaire')
+      .select('id, titre, slug, commence_le, termine_le, lieu')
+      .in('statut', ['annonce', 'en_cours'])
+      .gte('commence_le', aujourdhui)
+      .order('commence_le', { ascending: true })
+      .limit(LIMITE_PAR_SOURCE),
+    supabase
+      .from('boutique_marche')
+      .select('id, nom, slug, ouverte_du, ouverte_au, lieu')
+      .eq('statut', 'ouverte')
+      .not('ouverte_du', 'is', null)
+      .gte('ouverte_du', aujourdhui)
+      .order('ouverte_du', { ascending: true })
+      .limit(LIMITE_PAR_SOURCE),
+    supabase
+      .from('sondage')
+      .select('id, titre, slug, ferme_le, question')
+      .eq('statut', 'ouvert')
+      .not('ferme_le', 'is', null)
+      .gte('ferme_le', aujourdhui)
+      .order('ferme_le', { ascending: true })
+      .limit(LIMITE_PAR_SOURCE),
+  ]);
 
   const evenements: EvenementAgenda[] = [];
 
@@ -140,6 +158,20 @@ export async function chargerEvenementsAgenda(
       lieu: b.lieu,
       departement: extraireDepartement(b.lieu),
       href: `/s-entraider/marche/boutiques/${b.slug}`,
+    });
+  }
+
+  for (const s of sondages ?? []) {
+    if (s.ferme_le === null) continue;
+    evenements.push({
+      id: s.id,
+      type: 'sondage',
+      titre: `Clôture sondage : ${s.titre}`,
+      commence_le: s.ferme_le,
+      termine_le: null,
+      lieu: null,
+      departement: null,
+      href: `/s-informer/sondages/${s.slug}`,
     });
   }
 

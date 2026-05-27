@@ -31,6 +31,7 @@ const LIBELLE_TYPE: Record<string, string> = {
   moment_solidaire: 'Moment solidaire',
   minimarche: 'Minimarché',
   boutique_marche: 'Boutique éphémère',
+  sondage: 'Sondage',
 };
 
 function estTypeValide(v: string | undefined): v is FiltreAgenda['type'] {
@@ -38,7 +39,8 @@ function estTypeValide(v: string | undefined): v is FiltreAgenda['type'] {
     v === 'mobilisation' ||
     v === 'moment_solidaire' ||
     v === 'minimarche' ||
-    v === 'boutique_marche'
+    v === 'boutique_marche' ||
+    v === 'sondage'
   );
 }
 
@@ -111,6 +113,7 @@ export default async function PageAgenda({ searchParams }: PageAgendaProps) {
             <option value="moment_solidaire">Moments solidaires</option>
             <option value="minimarche">Minimarchés</option>
             <option value="boutique_marche">Boutiques éphémères</option>
+            <option value="sondage">Clôtures de sondages</option>
           </select>
         </label>
         <div className="flex items-end">
