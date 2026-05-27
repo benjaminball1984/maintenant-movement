@@ -1,5 +1,9 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
+import {
+  chargerIdentitesAffichables,
+  nomAffichageRespectantVisibilite,
+} from '@/lib/reseau/identite';
 import { FileText, Inbox, Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -44,6 +48,13 @@ export default async function PageDetailCaisse({
   if (detail === null) notFound();
 
   const { caisse, receptacles, transactions } = detail;
+
+  const idsPersonnes = new Set<string>();
+  for (const t of transactions) {
+    if (t.beneficiairePersonneId !== null) idsPersonnes.add(t.beneficiairePersonneId);
+    idsPersonnes.add(t.initiePersonneId);
+  }
+  const identitesParId = await chargerIdentitesAffichables([...idsPersonnes]);
 
   return (
     <>
@@ -150,7 +161,9 @@ export default async function PageDetailCaisse({
                   <p className="text-sm text-text-2">
                     <strong>Bénéficiaire :</strong>{' '}
                     {t.beneficiairePersonneId !== null
-                      ? `Personne ${t.beneficiairePersonneId.slice(0, 8)}…`
+                      ? nomAffichageRespectantVisibilite(
+                          identitesParId.get(t.beneficiairePersonneId),
+                        )
                       : (t.beneficiaireExterneNom ?? '—')}
                     {t.beneficiaireExterneIbanOuWallet !== null
                       ? ` (${t.beneficiaireExterneIbanOuWallet})`
@@ -168,7 +181,8 @@ export default async function PageDetailCaisse({
                     </span>
                   </p>
                   <p className="text-text-3 text-xs">
-                    Initiée le {FORMATEUR_DATE.format(new Date(t.initieLe))}
+                    Initiée le {FORMATEUR_DATE.format(new Date(t.initieLe))} par{' '}
+                    {nomAffichageRespectantVisibilite(identitesParId.get(t.initiePersonneId))}
                     {t.confirmeLe !== null
                       ? ` · confirmée le ${FORMATEUR_DATE.format(new Date(t.confirmeLe))}`
                       : ''}
