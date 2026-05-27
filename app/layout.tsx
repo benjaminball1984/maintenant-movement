@@ -23,6 +23,11 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     type: 'website',
   },
+  alternates: {
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
+  },
 };
 
 /**
