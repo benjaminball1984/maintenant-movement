@@ -347,6 +347,13 @@ async function retirerContenu(
     return { ok: false, message: 'Droit de modération requis.' };
   }
 
+  // Charge l'auteurice avant de retirer (pour la notif).
+  const { data: contenuAvant } = await supabase
+    .from(table)
+    .select('auteurice_id')
+    .eq('id', donnees.cible_id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from(table)
     .update({
@@ -366,6 +373,23 @@ async function retirerContenu(
     cibleId: donnees.cible_id,
     nouvelEtat: { statut: 'retire', raison: donnees.raison },
   });
+
+  // V2.3.37 : notifie l'auteurice du contenu retiré.
+  if (contenuAvant !== null && typeof contenuAvant.auteurice_id === 'string') {
+    await poserNotification(
+      {
+        destinatairePersonneId: contenuAvant.auteurice_id,
+        type: 'moderation_me_concerne',
+        titre:
+          table === 'post_reseau' ? 'Ta publication a été retirée' : 'Ton commentaire a été retiré',
+        message: `Raison : ${donnees.raison}`,
+        href: '/s-informer/reseau',
+        cibleId: donnees.cible_id,
+        cibleTable: table,
+      },
+      session.userId,
+    );
+  }
 
   revalidatePath('/s-informer/reseau');
   revalidatePath(cheminRevalide);
