@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { poserNotification } from '@/lib/notification';
 import {
   type OffreTypeReservation,
   changerStatutReservation,
@@ -115,6 +116,19 @@ export async function creerReservationAction(
       destinataireId: createurId,
       messageAmorce,
     });
+    // V2.3.25 : cloche pour le propriétaire d'offre.
+    await poserNotification(
+      {
+        destinatairePersonneId: createurId,
+        type: 'reservation_demande_recue',
+        titre: 'Nouvelle demande de réservation',
+        message: `Sur ton offre : ${titreOffre}`,
+        href: '/profil/demandes-reservations',
+        cibleId: resultat.reservation.id,
+        cibleTable: 'reservation',
+      },
+      session.userId,
+    );
   }
 
   if (options.cheminRevalidation !== undefined) {
@@ -278,6 +292,42 @@ async function executerTransitionProprietaire(
     auteurId: session.userId,
   });
   if (!resultat.ok) return { ok: false, message: resultat.message };
+
+  // V2.3.25 : cloche pour le demandeur.
+  const supabase = await getSupabaseServer();
+  const { data: ligne } = await supabase
+    .from('reservation')
+    .select('demandeur_personne_id')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  const demandeurId = ligne?.demandeur_personne_id ?? null;
+  if (demandeurId !== null) {
+    const typeNotif =
+      cible === 'acceptee'
+        ? 'reservation_acceptee'
+        : cible === 'refusee'
+          ? 'reservation_refusee'
+          : 'reservation_realisee';
+    const titreNotif =
+      cible === 'acceptee'
+        ? 'Réservation acceptée'
+        : cible === 'refusee'
+          ? 'Réservation refusée'
+          : 'Réservation marquée comme réalisée';
+    await poserNotification(
+      {
+        destinatairePersonneId: demandeurId,
+        type: typeNotif,
+        titre: titreNotif,
+        message: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+        href: '/profil/reservations',
+        cibleId: options.reservationId,
+        cibleTable: 'reservation',
+      },
+      session.userId,
+    );
+  }
+
   if (options.cheminRevalidation !== undefined) {
     revalidatePath(options.cheminRevalidation);
   }
@@ -345,6 +395,29 @@ export async function signalerLitigeProprietaireAction(options: {
     auteurId: session.userId,
   });
   if (!resultat.ok) return { ok: false, message: resultat.message };
+
+  // V2.3.25 : cloche pour le demandeur (l'autre partie).
+  const supabase = await getSupabaseServer();
+  const { data: ligne } = await supabase
+    .from('reservation')
+    .select('demandeur_personne_id')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  if (ligne?.demandeur_personne_id !== undefined && ligne?.demandeur_personne_id !== null) {
+    await poserNotification(
+      {
+        destinatairePersonneId: ligne.demandeur_personne_id,
+        type: 'reservation_litige_signale',
+        titre: 'Litige signalé par le propriétaire',
+        message: motifNettoye,
+        href: '/profil/reservations',
+        cibleId: options.reservationId,
+        cibleTable: 'reservation',
+      },
+      session.userId,
+    );
+  }
+
   if (options.cheminRevalidation !== undefined) {
     revalidatePath(options.cheminRevalidation);
   }
@@ -434,6 +507,36 @@ export async function resoudreLitigeReservationAction(options: {
 
   if (!resultat.ok) {
     return { ok: false, message: resultat.message };
+  }
+
+  // V2.3.25 : cloche pour les deux parties (arbitrage admin).
+  const { data: ligne } = await supabase
+    .from('reservation')
+    .select('demandeur_personne_id, offre_type, offre_id')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  if (ligne !== null) {
+    const { createurId: proprietaireId } = await chargerContexteOffre(
+      ligne.offre_type as OffreTypeReservation,
+      ligne.offre_id,
+    );
+    const corps = `Arbitrage : ${options.decision === 'confirmee' ? 'prestation confirmée' : 'réservation annulée'}. Motif : ${motifNettoye}`;
+    for (const personneId of [ligne.demandeur_personne_id, proprietaireId]) {
+      if (personneId !== null) {
+        await poserNotification(
+          {
+            destinatairePersonneId: personneId,
+            type: 'reservation_litige_arbitre',
+            titre: 'Arbitrage de ton litige de réservation',
+            message: corps,
+            href: '/profil/reservations',
+            cibleId: options.reservationId,
+            cibleTable: 'reservation',
+          },
+          session.userId,
+        );
+      }
+    }
   }
 
   if (options.cheminRevalidation !== undefined) {
@@ -620,6 +723,33 @@ export async function confirmerReservationAction(options: {
     return { ok: false, message: resultat.message };
   }
 
+  // V2.3.25 : cloche pour le propriétaire d'offre.
+  const { data: r } = await supabase
+    .from('reservation')
+    .select('offre_type, offre_id')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  if (r !== null) {
+    const { createurId } = await chargerContexteOffre(
+      r.offre_type as OffreTypeReservation,
+      r.offre_id,
+    );
+    if (createurId !== null) {
+      await poserNotification(
+        {
+          destinatairePersonneId: createurId,
+          type: 'reservation_confirmee',
+          titre: 'Réservation confirmée par le demandeur',
+          message: 'Le cycle est clos avec succès.',
+          href: '/profil/demandes-reservations',
+          cibleId: options.reservationId,
+          cibleTable: 'reservation',
+        },
+        session.userId,
+      );
+    }
+  }
+
   if (options.cheminRevalidation !== undefined) {
     revalidatePath(options.cheminRevalidation);
   }
@@ -696,6 +826,33 @@ export async function annulerReservationAction(options: {
 
   if (!resultat.ok) {
     return { ok: false, message: resultat.message };
+  }
+
+  // V2.3.25 : cloche pour le propriétaire d'offre.
+  const { data: r } = await supabase
+    .from('reservation')
+    .select('offre_type, offre_id')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+  if (r !== null) {
+    const { createurId } = await chargerContexteOffre(
+      r.offre_type as OffreTypeReservation,
+      r.offre_id,
+    );
+    if (createurId !== null) {
+      await poserNotification(
+        {
+          destinatairePersonneId: createurId,
+          type: 'reservation_annulee',
+          titre: 'Réservation annulée par le demandeur',
+          message: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+          href: '/profil/demandes-reservations',
+          cibleId: options.reservationId,
+          cibleTable: 'reservation',
+        },
+        session.userId,
+      );
+    }
   }
 
   if (options.cheminRevalidation !== undefined) {

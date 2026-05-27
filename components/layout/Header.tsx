@@ -3,6 +3,7 @@ import { ESPACES } from '@/config/espaces';
 import { SITE } from '@/config/site';
 import { getSession } from '@/lib/auth/session';
 import Link from 'next/link';
+import { HeaderCloche } from './HeaderCloche';
 import { HeaderProfilMenu } from './HeaderProfilMenu';
 
 /**
@@ -52,7 +53,10 @@ export async function Header() {
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
           {session !== null ? (
-            <HeaderProfilMenu email={session.email} prenom={session.personne?.prenom ?? null} />
+            <>
+              <HeaderCloche personneId={session.userId} />
+              <HeaderProfilMenu email={session.email} prenom={session.personne?.prenom ?? null} />
+            </>
           ) : (
             <>
               <Link
