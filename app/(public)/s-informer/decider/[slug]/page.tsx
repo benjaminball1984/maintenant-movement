@@ -1,5 +1,6 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import {
   LIBELLE_MODE,
   LIBELLE_STATUT,
@@ -10,6 +11,7 @@ import { CalendarRange, FileText, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { FormulairePlanifierReunion } from './FormulairePlanifierReunion';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -41,9 +43,10 @@ export default async function PageSalleDecider({ params }: Props) {
   const salle = await chargerSalleParSlug(slug);
   if (salle === null) notFound();
 
-  const [aVenir, passees] = await Promise.all([
+  const [aVenir, passees, estAdmin] = await Promise.all([
     listerReunionsSalle(salle.id, { aVenir: true, limite: 10 }),
     listerReunionsSalle(salle.id, { aVenir: false, limite: 20 }),
+    estAdminCourant(),
   ]);
   // Sépare passées : statut terminee/annulee
   const reunionsPassees = passees.filter((r) => r.statut === 'terminee' || r.statut === 'annulee');
@@ -67,6 +70,8 @@ export default async function PageSalleDecider({ params }: Props) {
         <Badge variant="default">{salle.typeVisibilite}</Badge>
       </div>
       {salle.description !== null ? <p className="mt-4 text-text-2">{salle.description}</p> : null}
+
+      {estAdmin ? <FormulairePlanifierReunion salleId={salle.id} /> : null}
 
       <section className="mt-8">
         <Heading niveau={2} apparenceComme={3}>
