@@ -1,6 +1,10 @@
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { CartePetition } from '@/components/petitions/CartePetition';
 import { Alert, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { listerPetitionsPubliees } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -10,6 +14,18 @@ export const metadata: Metadata = {
   title: 'Pétitions',
   description:
     'Pétitions citoyennes en cours sur Maintenant!. Signer en quelques secondes, créer la tienne en quelques minutes.',
+};
+
+const FALLBACKS = {
+  intro:
+    'Toutes les pétitions citoyennes en cours sur Maintenant!. Chaque pétition est modérée avant publication. Signe en quelques secondes, ou lance la tienne.',
+  ctaConnecte: 'Lancer une pétition',
+  ctaDeconnecte: 'Connecte-toi pour lancer une pétition',
+  emptyTitre: 'Aucune pétition active pour le moment',
+  emptyCorps:
+    "La première pétition publiée apparaîtra ici. Tu peux être à l'origine de cette première.",
+  footer:
+    "Les pétitions sont modérées **a priori**, avant publication, par l'équipe de Maintenant!. Le délai habituel de modération est de 24 à 48 heures.",
 };
 
 /**
@@ -25,7 +41,29 @@ export const metadata: Metadata = {
  *   message explicatif + CTA création.
  */
 export default async function PagePetitions() {
-  const [petitions, session] = await Promise.all([listerPetitionsPubliees(), getSession()]);
+  const [
+    petitions,
+    session,
+    estAdmin,
+    intro,
+    ctaConnecte,
+    ctaDeconnecte,
+    emptyTitre,
+    emptyCorps,
+    footer,
+  ] = await Promise.all([
+    listerPetitionsPubliees(),
+    getSession(),
+    estAdminCourant(),
+    lireContenuEditorial('mobiliser.petitions.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('mobiliser.petitions.cta_connecte', { valeurMd: FALLBACKS.ctaConnecte }),
+    lireContenuEditorial('mobiliser.petitions.cta_deconnecte', {
+      valeurMd: FALLBACKS.ctaDeconnecte,
+    }),
+    lireContenuEditorial('mobiliser.petitions.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
+    lireContenuEditorial('mobiliser.petitions.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
+    lireContenuEditorial('mobiliser.petitions.footer', { valeurMd: FALLBACKS.footer }),
+  ]);
   const personneConnectee = session !== null;
 
   return (
@@ -40,25 +78,67 @@ export default async function PagePetitions() {
           <Heading niveau={1} className="mt-1">
             Pétitions
           </Heading>
-          <p className="mt-3 max-w-2xl text-text-2">
-            Toutes les pétitions citoyennes en cours sur Maintenant!. Chaque pétition est modérée
-            avant publication. Signe en quelques secondes, ou lance la tienne.
-          </p>
+          <TexteEditableAdmin
+            cle="mobiliser.petitions.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro de la liste petitions"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </div>
-        <Link
-          href="/mobiliser/petitions/nouvelle"
-          className={cn(
-            'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
-            'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
-          )}
+        <TexteEditableAdmin
+          cle={
+            personneConnectee
+              ? 'mobiliser.petitions.cta_connecte'
+              : 'mobiliser.petitions.cta_deconnecte'
+          }
+          valeurInitiale={personneConnectee ? ctaConnecte.valeurMd : ctaDeconnecte.valeurMd}
+          estAdmin={estAdmin}
+          libelle={`CTA principal liste petitions (${personneConnectee ? 'connecte' : 'deconnecte'})`}
+          longueurMax={60}
         >
-          {personneConnectee ? 'Lancer une pétition' : 'Connecte-toi pour lancer une pétition'}
-        </Link>
+          {(t) => (
+            <Link
+              href="/mobiliser/petitions/nouvelle"
+              className={cn(
+                'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
+                'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+              )}
+            >
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </header>
 
       {petitions.length === 0 ? (
-        <Alert variant="info" titre="Aucune pétition active pour le moment">
-          La première pétition publiée apparaîtra ici. Tu peux être à l'origine de cette première.
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="mobiliser.petitions.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty state petitions"
+              longueurMax={80}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          <TexteEditableAdmin
+            cle="mobiliser.petitions.empty_corps"
+            valeurInitiale={emptyCorps.valeurMd}
+            estAdmin={estAdmin}
+            libelle="corps empty state petitions"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Alert>
       ) : (
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -71,10 +151,16 @@ export default async function PagePetitions() {
       )}
 
       <footer className="mt-12 border-t border-border pt-6 text-sm text-text-3">
-        <p>
-          Les pétitions sont modérées <strong>a priori</strong>, avant publication, par l'équipe de
-          Maintenant!. Le délai habituel de modération est de 24 à 48 heures.
-        </p>
+        <TexteEditableAdmin
+          cle="mobiliser.petitions.footer"
+          valeurInitiale={footer.valeurMd}
+          estAdmin={estAdmin}
+          libelle="note bas de page liste petitions (Markdown leger : **gras**)"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => <MarkdownLeger texte={t} />}
+        </TexteEditableAdmin>
       </footer>
     </Container>
   );

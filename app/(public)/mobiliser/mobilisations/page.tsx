@@ -1,6 +1,10 @@
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { CarteMobilisation } from '@/components/mobilisations/CarteMobilisation';
 import { Alert, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   listerMobilisationsAVenir,
   listerMobilisationsPassees,
@@ -8,6 +12,20 @@ import {
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACKS = {
+  intro:
+    'Rassemblements, assemblées, actions de rue. Géolocalisé. Un clic suffit pour dire « je participe » — anonyme par défaut.',
+  ctaCarte: 'Voir sur la carte',
+  ctaConnecte: 'Créer une mobilisation',
+  ctaDeconnecte: 'Connecte-toi pour créer',
+  sectionAVenir: 'À venir',
+  sectionPassees: 'Passées récentes',
+  emptyAVenirTitre: 'Aucune mobilisation à venir',
+  emptyAVenirCorps: 'La prochaine mobilisation à venir apparaîtra ici. Tu peux lancer la tienne.',
+  footer:
+    "Les mobilisations sont modérées **a posteriori** : elles sont publiées immédiatement et l'équipe Maintenant! peut les retirer en cas de problème (propos haineux, lieu mensonger, etc.).",
+};
 
 export const metadata: Metadata = {
   title: 'Mobilisations',
@@ -29,10 +47,46 @@ export const metadata: Metadata = {
  * apparaissent immédiatement après création (cf. spec §5C et §11).
  */
 export default async function PageMobilisations() {
-  const [aVenir, passees, session] = await Promise.all([
+  const [
+    aVenir,
+    passees,
+    session,
+    estAdmin,
+    intro,
+    ctaCarte,
+    ctaConnecte,
+    ctaDeconnecte,
+    sectionAVenir,
+    sectionPassees,
+    emptyAVenirTitre,
+    emptyAVenirCorps,
+    footer,
+  ] = await Promise.all([
     listerMobilisationsAVenir(),
     listerMobilisationsPassees(),
     getSession(),
+    estAdminCourant(),
+    lireContenuEditorial('mobiliser.mobilisations.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('mobiliser.mobilisations.cta_carte', { valeurMd: FALLBACKS.ctaCarte }),
+    lireContenuEditorial('mobiliser.mobilisations.cta_connecte', {
+      valeurMd: FALLBACKS.ctaConnecte,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.cta_deconnecte', {
+      valeurMd: FALLBACKS.ctaDeconnecte,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.section_a_venir', {
+      valeurMd: FALLBACKS.sectionAVenir,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.section_passees', {
+      valeurMd: FALLBACKS.sectionPassees,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.empty_a_venir_titre', {
+      valeurMd: FALLBACKS.emptyAVenirTitre,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.empty_a_venir_corps', {
+      valeurMd: FALLBACKS.emptyAVenirCorps,
+    }),
+    lireContenuEditorial('mobiliser.mobilisations.footer', { valeurMd: FALLBACKS.footer }),
   ]);
   const personneConnectee = session !== null;
 
@@ -48,40 +102,102 @@ export default async function PageMobilisations() {
           <Heading niveau={1} className="mt-1">
             Mobilisations
           </Heading>
-          <p className="mt-3 max-w-2xl text-text-2">
-            Rassemblements, assemblées, actions de rue. Géolocalisé. Un clic suffit pour dire « je
-            participe » — anonyme par défaut.
-          </p>
+          <TexteEditableAdmin
+            cle="mobiliser.mobilisations.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro de la liste mobilisations"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </div>
         <div className="flex gap-3">
-          <Link
-            href="/carte"
-            className={cn(
-              'inline-flex h-11 items-center justify-center rounded-md border border-brand bg-transparent px-5',
-              'font-body text-sm font-bold text-brand transition hover:bg-brand-light',
-            )}
+          <TexteEditableAdmin
+            cle="mobiliser.mobilisations.cta_carte"
+            valeurInitiale={ctaCarte.valeurMd}
+            estAdmin={estAdmin}
+            libelle="CTA Voir sur la carte"
+            longueurMax={40}
           >
-            Voir sur la carte
-          </Link>
-          <Link
-            href="/mobiliser/mobilisations/nouvelle"
-            className={cn(
-              'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
-              'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+            {(t) => (
+              <Link
+                href="/carte"
+                className={cn(
+                  'inline-flex h-11 items-center justify-center rounded-md border border-brand bg-transparent px-5',
+                  'font-body text-sm font-bold text-brand transition hover:bg-brand-light',
+                )}
+              >
+                {t}
+              </Link>
             )}
+          </TexteEditableAdmin>
+          <TexteEditableAdmin
+            cle={
+              personneConnectee
+                ? 'mobiliser.mobilisations.cta_connecte'
+                : 'mobiliser.mobilisations.cta_deconnecte'
+            }
+            valeurInitiale={personneConnectee ? ctaConnecte.valeurMd : ctaDeconnecte.valeurMd}
+            estAdmin={estAdmin}
+            libelle={`CTA principal liste mobilisations (${personneConnectee ? 'connecte' : 'deconnecte'})`}
+            longueurMax={60}
           >
-            {personneConnectee ? 'Créer une mobilisation' : 'Connecte-toi pour créer'}
-          </Link>
+            {(t) => (
+              <Link
+                href="/mobiliser/mobilisations/nouvelle"
+                className={cn(
+                  'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
+                  'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+                )}
+              >
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
         </div>
       </header>
 
       <section aria-labelledby="titre-a-venir" className="mb-12">
-        <Heading niveau={2} apparenceComme={3} className="mb-4" id="titre-a-venir">
-          À venir
-        </Heading>
+        <TexteEditableAdmin
+          cle="mobiliser.mobilisations.section_a_venir"
+          valeurInitiale={sectionAVenir.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre section A venir"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Heading niveau={2} apparenceComme={3} className="mb-4" id="titre-a-venir">
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
         {aVenir.length === 0 ? (
-          <Alert variant="info" titre="Aucune mobilisation à venir">
-            La prochaine mobilisation à venir apparaîtra ici. Tu peux lancer la tienne.
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="mobiliser.mobilisations.empty_a_venir_titre"
+                valeurInitiale={emptyAVenirTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre empty state A venir"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="mobiliser.mobilisations.empty_a_venir_corps"
+              valeurInitiale={emptyAVenirCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps empty state A venir"
+              multilignes
+              longueurMax={200}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : (
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -96,9 +212,19 @@ export default async function PageMobilisations() {
 
       {passees.length > 0 ? (
         <section aria-labelledby="titre-passees">
-          <Heading niveau={2} apparenceComme={4} className="mb-4" id="titre-passees">
-            Passées récentes
-          </Heading>
+          <TexteEditableAdmin
+            cle="mobiliser.mobilisations.section_passees"
+            valeurInitiale={sectionPassees.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Passees recentes"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4} className="mb-4" id="titre-passees">
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {passees.map((mobilisation) => (
               <li key={mobilisation.id}>
@@ -110,11 +236,16 @@ export default async function PageMobilisations() {
       ) : null}
 
       <footer className="mt-12 border-t border-border pt-6 text-sm text-text-3">
-        <p>
-          Les mobilisations sont modérées <strong>a posteriori</strong> : elles sont publiées
-          immédiatement et l'équipe Maintenant! peut les retirer en cas de problème (propos haineux,
-          lieu mensonger, etc.).
-        </p>
+        <TexteEditableAdmin
+          cle="mobiliser.mobilisations.footer"
+          valeurInitiale={footer.valeurMd}
+          estAdmin={estAdmin}
+          libelle="note bas de page liste mobilisations (Markdown leger)"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => <MarkdownLeger texte={t} />}
+        </TexteEditableAdmin>
       </footer>
     </Container>
   );

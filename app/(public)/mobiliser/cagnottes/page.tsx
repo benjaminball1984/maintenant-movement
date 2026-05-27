@@ -1,11 +1,26 @@
 import { CarteCagnotte } from '@/components/cagnottes/CarteCagnotte';
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { listerCagnottesPubliees } from '@/lib/cagnottes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { cn } from '@/lib/utils';
 import type { TypeCagnotte } from '@/types/database';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FALLBACKS = {
+  intro:
+    'Don en euros (frais 5 % absorbés par la donatrice, paiement sécurisé Stripe) ou en 99-coin (frais 0 %). 3 types : ouvertes, caisses de lutte, cotisations.',
+  ctaConnecte: 'Créer une cagnotte',
+  ctaDeconnecte: 'Connecte-toi pour créer',
+  emptyTitre: 'Aucune cagnotte publiée',
+  emptyToutes: 'La première cagnotte apparaîtra ici.',
+  footer:
+    "Modération **a posteriori** avec blocage en cas de comportement louche (lieu mensonger, projet non conforme, plainte). Les paiements sont sécurisés par Stripe. Les cagnottes « cotisations » sont créées par l'équipe nationale.",
+};
 
 export const metadata: Metadata = {
   title: 'Cagnottes solidaires',
@@ -39,7 +54,29 @@ export default async function PageCagnottes({ searchParams }: PageCagnottesProps
   const { type } = await searchParams;
   const filtre = estTypeValide(type) ? type : undefined;
 
-  const [cagnottes, session] = await Promise.all([listerCagnottesPubliees(filtre), getSession()]);
+  const [
+    cagnottes,
+    session,
+    estAdmin,
+    intro,
+    ctaConnecte,
+    ctaDeconnecte,
+    emptyTitre,
+    emptyToutes,
+    footer,
+  ] = await Promise.all([
+    listerCagnottesPubliees(filtre),
+    getSession(),
+    estAdminCourant(),
+    lireContenuEditorial('mobiliser.cagnottes.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('mobiliser.cagnottes.cta_connecte', { valeurMd: FALLBACKS.ctaConnecte }),
+    lireContenuEditorial('mobiliser.cagnottes.cta_deconnecte', {
+      valeurMd: FALLBACKS.ctaDeconnecte,
+    }),
+    lireContenuEditorial('mobiliser.cagnottes.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
+    lireContenuEditorial('mobiliser.cagnottes.empty_toutes', { valeurMd: FALLBACKS.emptyToutes }),
+    lireContenuEditorial('mobiliser.cagnottes.footer', { valeurMd: FALLBACKS.footer }),
+  ]);
   const personneConnectee = session !== null;
 
   const ongletActif = filtre ?? 'toutes';
@@ -56,20 +93,40 @@ export default async function PageCagnottes({ searchParams }: PageCagnottesProps
           <Heading niveau={1} className="mt-1">
             Cagnottes solidaires
           </Heading>
-          <p className="mt-3 max-w-2xl text-text-2">
-            Don en euros (frais 5 % absorbés par la donatrice, paiement sécurisé Stripe) ou en
-            99-coin (frais 0 %). 3 types : ouvertes, caisses de lutte, cotisations.
-          </p>
+          <TexteEditableAdmin
+            cle="mobiliser.cagnottes.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro de la liste cagnottes"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </div>
-        <Link
-          href="/mobiliser/cagnottes/nouvelle"
-          className={cn(
-            'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
-            'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
-          )}
+        <TexteEditableAdmin
+          cle={
+            personneConnectee
+              ? 'mobiliser.cagnottes.cta_connecte'
+              : 'mobiliser.cagnottes.cta_deconnecte'
+          }
+          valeurInitiale={personneConnectee ? ctaConnecte.valeurMd : ctaDeconnecte.valeurMd}
+          estAdmin={estAdmin}
+          libelle={`CTA principal liste cagnottes (${personneConnectee ? 'connecte' : 'deconnecte'})`}
+          longueurMax={60}
         >
-          {personneConnectee ? 'Créer une cagnotte' : 'Connecte-toi pour créer'}
-        </Link>
+          {(t) => (
+            <Link
+              href="/mobiliser/cagnottes/nouvelle"
+              className={cn(
+                'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
+                'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+              )}
+            >
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </header>
 
       <nav
@@ -93,10 +150,33 @@ export default async function PageCagnottes({ searchParams }: PageCagnottesProps
       </nav>
 
       {cagnottes.length === 0 ? (
-        <Alert variant="info" titre="Aucune cagnotte publiée">
-          {filtre === undefined
-            ? 'La première cagnotte apparaîtra ici.'
-            : `Aucune cagnotte de type « ${filtre} » pour le moment.`}
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="mobiliser.cagnottes.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty state cagnottes"
+              longueurMax={60}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+        >
+          {filtre === undefined ? (
+            <TexteEditableAdmin
+              cle="mobiliser.cagnottes.empty_toutes"
+              valeurInitiale={emptyToutes.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps empty state cagnottes (toutes)"
+              longueurMax={200}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          ) : (
+            `Aucune cagnotte de type « ${filtre} » pour le moment.`
+          )}
         </Alert>
       ) : (
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -109,11 +189,16 @@ export default async function PageCagnottes({ searchParams }: PageCagnottesProps
       )}
 
       <footer className="mt-12 border-t border-border pt-6 text-sm text-text-3">
-        <p>
-          Modération <strong>a posteriori</strong> avec blocage en cas de comportement louche (lieu
-          mensonger, projet non conforme, plainte). Les paiements sont sécurisés par Stripe. Les
-          cagnottes « cotisations » sont créées par l'équipe nationale.
-        </p>
+        <TexteEditableAdmin
+          cle="mobiliser.cagnottes.footer"
+          valeurInitiale={footer.valeurMd}
+          estAdmin={estAdmin}
+          libelle="note bas de page liste cagnottes (Markdown leger)"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => <MarkdownLeger texte={t} />}
+        </TexteEditableAdmin>
       </footer>
     </Container>
   );
