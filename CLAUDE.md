@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 capitalisation + exports CSV + pagination branchée)
-**Dernier chantier terminé** : V2.4.67 (branchement `Pagination` sur admin personnes) — sur `main` (tip `641a62a`). Premier vrai usage du composant : `listerPersonnesAdminPagine` retourne `{lignes, total}`, PAR_PAGE=50, count exact, second appel ciblé si page>1.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 pagination communes + IBAN + couleur hex)
+**Dernier chantier terminé** : V2.4.70 (`lib/couleur-hex.ts` + 25 tests) — sur `main` (tip `3a95160`). 704 tests verts. 5 helpers : `estHexValide`, `normaliserHex`, `hexEnRgb`, `luminanceRelative` (WCAG), `contrastTexte` (seuil 0.179).
+**Dernier chantier terminé (antérieur)** : V2.4.69 (`lib/iban.ts` + 14 tests) — sur `main` (tip `da35468`). ISO 13616 mod 97, longueurs par pays (12 pays), `normaliserIban`/`estIbanValide`/`formaterIban`.
+**Dernier chantier terminé (antérieur)** : V2.4.68 (Pagination sur admin communes — 35 011 lignes) — sur `main` (tip `84e6299`). 2ᵉ usage Pagination, PAR_PAGE=50, vraiment utile sur le référentiel des communes.
+**Dernier chantier terminé (antérieur)** : V2.4.67 (branchement `Pagination` sur admin personnes) — sur `main` (tip `641a62a`). Premier vrai usage du composant : `listerPersonnesAdminPagine` retourne `{lignes, total}`, PAR_PAGE=50, count exact, second appel ciblé si page>1.
 **Dernier chantier terminé (antérieur)** : V2.4.66 (exports CSV moments + médias + sondages) — sur `main` (tip `c8e94ef`). 3 routes admin, BOM UTF-8, filename horodaté.
 **Dernier chantier terminé (antérieur)** : V2.4.65 (`lib/capitalisation.ts` + 15 tests) — sur `main` (tip `4a2e813`). 665 tests verts. 3 helpers : `capitaliser`, `titreCase` (Title Case avec séparateurs unicode), `decapitaliser`.
 **Dernier chantier terminé (antérieur)** : V2.4.64 (`lib/uuid.ts` + 12 tests) — sur `main` (tip `fbc5d4a`). 650 tests verts. `estUuidValide` (v1-v5, case insensible) + `normaliserUuid`.
