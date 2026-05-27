@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 admin medias + pagination + validation slug)
-**Dernier chantier terminé** : V2.4.56 (`estSlugValide` + 8 tests) — sur `main` (tip `ea7afea`). 581 tests verts. Validation idempotente des slugs en paramètre.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 admin campagnes + composant Pagination + helpers URL)
+**Dernier chantier terminé** : V2.4.59 (`lib/url.ts` + 12 tests) — sur `main` (tip `99a16ea`). 593 tests verts. 4 helpers : `urlAbsolue`, `lienPartageMailto`, `lienPartageMastodon`, `extraireDomaine`.
+**Dernier chantier terminé (antérieur)** : V2.4.58 (composant `Pagination` UI réutilisable) — sur `main` (tip `a82ffc6`). Server Component branché sur `lib/pagination.ts`, fenêtre + ellipses, préserve les params de recherche, exporté depuis `components/ui`.
+**Dernier chantier terminé (antérieur)** : V2.4.57 (admin campagnes `/admin/national/campagnes`) — sur `main` (tip `f88cc9e`). Filtres statut, raison de rejet visible.
+**Dernier chantier terminé (antérieur)** : V2.4.56 (`estSlugValide` + 8 tests) — sur `main` (tip `ea7afea`). 581 tests verts. Validation idempotente des slugs en paramètre.
 **Dernier chantier terminé (antérieur)** : V2.4.55 (`lib/pagination.ts` + 13 tests) — sur `main` (tip `2c9391f`). `paginer({page, parPage, total})` + `lirePageDepuisParams`, 1-indexé côté UI, traduit en range Supabase 0-indexé.
 **Dernier chantier terminé (antérieur)** : V2.4.54 (admin médias `/admin/national/medias`) — sur `main` (tip `9345164`). Double filtre statut+type (9 types), vignette 96px, badge provenance externe.
 **Dernier chantier terminé (antérieur)** : V2.4.53 (`lib/distance-gps.ts` + 10 tests, haversine) — sur `main` (tip `d13b115`). 560 tests verts. `distanceMetres` / `distanceKmArrondie` / `formaterDistance`. Utile pour cartes « près de moi ».
