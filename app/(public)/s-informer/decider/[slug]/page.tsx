@@ -1,6 +1,8 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   LIBELLE_MODE,
   LIBELLE_STATUT,
@@ -12,6 +14,18 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FormulairePlanifierReunion } from './FormulairePlanifierReunion';
+
+const FALLBACKS = {
+  retour: '← Toutes les salles',
+  sectionAVenir: 'Réunions à venir',
+  alertVideTitre: 'Aucune réunion planifiée',
+  alertVideCorps:
+    'Reviens bientôt — les réunions sont annoncées au moins 15 jours avant (cf. gouvernance assemblée confédérale).',
+  sectionPassees: 'Réunions passées',
+  passeesVide: 'Aucune réunion passée à afficher.',
+  pvDisponible: 'PV disponible — cliquer pour lire.',
+  pvAbsent: 'PV pas encore publié.',
+};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -43,10 +57,38 @@ export default async function PageSalleDecider({ params }: Props) {
   const salle = await chargerSalleParSlug(slug);
   if (salle === null) notFound();
 
-  const [aVenir, passees, estAdmin] = await Promise.all([
+  const [
+    aVenir,
+    passees,
+    estAdmin,
+    retour,
+    sectionAVenir,
+    alertVideTitre,
+    alertVideCorps,
+    sectionPassees,
+    passeesVide,
+    pvDisponible,
+    pvAbsent,
+  ] = await Promise.all([
     listerReunionsSalle(salle.id, { aVenir: true, limite: 10 }),
     listerReunionsSalle(salle.id, { aVenir: false, limite: 20 }),
     estAdminCourant(),
+    lireContenuEditorial('decider.salle.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('decider.salle.section_a_venir', {
+      valeurMd: FALLBACKS.sectionAVenir,
+    }),
+    lireContenuEditorial('decider.salle.alert_vide_titre', {
+      valeurMd: FALLBACKS.alertVideTitre,
+    }),
+    lireContenuEditorial('decider.salle.alert_vide_corps', {
+      valeurMd: FALLBACKS.alertVideCorps,
+    }),
+    lireContenuEditorial('decider.salle.section_passees', {
+      valeurMd: FALLBACKS.sectionPassees,
+    }),
+    lireContenuEditorial('decider.salle.passees_vide', { valeurMd: FALLBACKS.passeesVide }),
+    lireContenuEditorial('decider.salle.pv_disponible', { valeurMd: FALLBACKS.pvDisponible }),
+    lireContenuEditorial('decider.salle.pv_absent', { valeurMd: FALLBACKS.pvAbsent }),
   ]);
   // Sépare passées : statut terminee/annulee
   const reunionsPassees = passees.filter((r) => r.statut === 'terminee' || r.statut === 'annulee');
@@ -54,9 +96,19 @@ export default async function PageSalleDecider({ params }: Props) {
   return (
     <Container taille="md" className="py-12">
       <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/s-informer/decider" className="hover:text-brand">
-          ← Toutes les salles
-        </Link>
+        <TexteEditableAdmin
+          cle="decider.salle.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste salles"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/s-informer/decider" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <Heading niveau={1}>
@@ -76,12 +128,46 @@ export default async function PageSalleDecider({ params }: Props) {
       <section className="mt-8">
         <Heading niveau={2} apparenceComme={3}>
           <CalendarRange size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
-          Réunions à venir ({aVenir.length})
+          <TexteEditableAdmin
+            cle="decider.salle.section_a_venir"
+            valeurInitiale={sectionAVenir.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section reunions a venir"
+            longueurMax={40}
+          >
+            {(t) => (
+              <>
+                {t} ({aVenir.length})
+              </>
+            )}
+          </TexteEditableAdmin>
         </Heading>
         {aVenir.length === 0 ? (
-          <Alert variant="info" titre="Aucune réunion planifiée" className="mt-3">
-            Reviens bientôt — les réunions sont annoncées au moins 15 jours avant (cf. gouvernance
-            assemblée confédérale).
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="decider.salle.alert_vide_titre"
+                valeurInitiale={alertVideTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte aucune reunion planifiee"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+            className="mt-3"
+          >
+            <TexteEditableAdmin
+              cle="decider.salle.alert_vide_corps"
+              valeurInitiale={alertVideCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte aucune reunion planifiee"
+              multilignes
+              longueurMax={400}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : (
           <ul className="mt-3 grid gap-2">
@@ -112,10 +198,30 @@ export default async function PageSalleDecider({ params }: Props) {
       <section className="mt-12">
         <Heading niveau={2} apparenceComme={3}>
           <FileText size={18} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
-          Réunions passées ({reunionsPassees.length})
+          <TexteEditableAdmin
+            cle="decider.salle.section_passees"
+            valeurInitiale={sectionPassees.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section reunions passees"
+            longueurMax={40}
+          >
+            {(t) => (
+              <>
+                {t} ({reunionsPassees.length})
+              </>
+            )}
+          </TexteEditableAdmin>
         </Heading>
         {reunionsPassees.length === 0 ? (
-          <p className="mt-3 text-sm text-text-3">Aucune réunion passée à afficher.</p>
+          <TexteEditableAdmin
+            cle="decider.salle.passees_vide"
+            valeurInitiale={passeesVide.valeurMd}
+            estAdmin={estAdmin}
+            libelle="message empty reunions passees"
+            longueurMax={100}
+          >
+            {(t) => <p className="mt-3 text-sm text-text-3">{t}</p>}
+          </TexteEditableAdmin>
         ) : (
           <ul className="mt-3 grid gap-2">
             {reunionsPassees.map((r) => (
@@ -135,9 +241,25 @@ export default async function PageSalleDecider({ params }: Props) {
                     </div>
                     <h3 className="font-bold text-text-1">{r.titre}</h3>
                     {r.pvMd !== null && r.pvMd !== '' ? (
-                      <p className="text-text-2 text-sm">PV disponible — cliquer pour lire.</p>
+                      <TexteEditableAdmin
+                        cle="decider.salle.pv_disponible"
+                        valeurInitiale={pvDisponible.valeurMd}
+                        estAdmin={estAdmin}
+                        libelle="indication PV disponible"
+                        longueurMax={100}
+                      >
+                        {(t) => <p className="text-text-2 text-sm">{t}</p>}
+                      </TexteEditableAdmin>
                     ) : (
-                      <p className="text-text-3 text-xs">PV pas encore publié.</p>
+                      <TexteEditableAdmin
+                        cle="decider.salle.pv_absent"
+                        valeurInitiale={pvAbsent.valeurMd}
+                        estAdmin={estAdmin}
+                        libelle="indication PV pas encore publie"
+                        longueurMax={100}
+                      >
+                        {(t) => <p className="text-text-3 text-xs">{t}</p>}
+                      </TexteEditableAdmin>
                     )}
                   </Card>
                 </Link>

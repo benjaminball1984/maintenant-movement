@@ -1,13 +1,22 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FormulaireMajEdition } from './FormulaireMajEdition';
+
+const FALLBACKS = {
+  retour: '← Tous les numéros',
+  publieLePrefix: 'Publié le',
+  contenuVide: 'Contenu non encore rédigé.',
+  adminSection: 'Administration (réservé admins)',
+};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -46,15 +55,34 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
  */
 export default async function PageEditionJournal({ params }: Props) {
   const { slug } = await params;
-  const [e, estAdmin] = await Promise.all([chargerEdition(slug), estAdminCourant()]);
+  const [e, estAdmin, retour, publieLePrefix, contenuVide, adminSection] = await Promise.all([
+    chargerEdition(slug),
+    estAdminCourant(),
+    lireContenuEditorial('journal.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('journal.fiche.publie_le_prefix', {
+      valeurMd: FALLBACKS.publieLePrefix,
+    }),
+    lireContenuEditorial('journal.fiche.contenu_vide', { valeurMd: FALLBACKS.contenuVide }),
+    lireContenuEditorial('journal.fiche.admin_section', { valeurMd: FALLBACKS.adminSection }),
+  ]);
   if (e === null) notFound();
 
   return (
     <Container taille="md" className="py-12">
       <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/s-informer/journal" className="hover:text-brand">
-          ← Tous les numéros
-        </Link>
+        <TexteEditableAdmin
+          cle="journal.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste journal"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/s-informer/journal" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <Heading niveau={1}>{e.titre}</Heading>
@@ -66,7 +94,16 @@ export default async function PageEditionJournal({ params }: Props) {
         <Badge variant="info">{e.format}</Badge>
         {e.publie_le !== null ? (
           <span className="text-text-3 text-xs">
-            Publié le {FORMATEUR.format(new Date(e.publie_le))}
+            <TexteEditableAdmin
+              cle="journal.fiche.publie_le_prefix"
+              valeurInitiale={publieLePrefix.valeurMd}
+              estAdmin={estAdmin}
+              libelle="prefixe 'Publie le' (la date s'ajoute apres)"
+              longueurMax={30}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
+            {FORMATEUR.format(new Date(e.publie_le))}
           </span>
         ) : null}
       </div>
@@ -88,7 +125,15 @@ export default async function PageEditionJournal({ params }: Props) {
 
       <article className="prose-maintenant mt-8 font-body text-text-1">
         {e.contenu_md === '' ? (
-          <p className="text-text-3 italic">Contenu non encore rédigé.</p>
+          <TexteEditableAdmin
+            cle="journal.fiche.contenu_vide"
+            valeurInitiale={contenuVide.valeurMd}
+            estAdmin={estAdmin}
+            libelle="message contenu vide"
+            longueurMax={100}
+          >
+            {(t) => <p className="text-text-3 italic">{t}</p>}
+          </TexteEditableAdmin>
         ) : (
           <MarkdownLeger texte={e.contenu_md} />
         )}
@@ -96,9 +141,19 @@ export default async function PageEditionJournal({ params }: Props) {
 
       {estAdmin ? (
         <section className="mt-12">
-          <Heading niveau={2} apparenceComme={3}>
-            Administration (réservé admins)
-          </Heading>
+          <TexteEditableAdmin
+            cle="journal.fiche.admin_section"
+            valeurInitiale={adminSection.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section administration"
+            longueurMax={80}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <FormulaireMajEdition
             id={e.id}
             titreInitial={e.titre}

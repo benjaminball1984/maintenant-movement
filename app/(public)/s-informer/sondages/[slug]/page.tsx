@@ -3,15 +3,30 @@ import { fermerSondageAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { aVotePersonne, sondageParSlugAvecResultats } from '@/lib/sondages/requetes';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← Sondages',
+  alertConnecteTitre: 'Vote connecté obligatoire',
+  alertConnecteLien: 'Connecte-toi',
+  alertConnecteFin: 'pour voter (cf. doctrine §4D).',
+  alertVoteTitre: 'Vote enregistré',
+  alertVoteCorps: 'Tu as déjà voté pour ce sondage. Merci. Les résultats sont visibles ci-dessous.',
+  sectionResultats: 'Résultats',
+  voteLabel: 'vote',
+  seuilAtteint: '· seuil 300 atteint, pondération par quotas applicable.',
+  adminSectionTitre: 'Actions admin',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -35,21 +50,67 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 
 export default async function PageDetailSondage({ params }: PageDetailProps) {
   const { slug } = await params;
-  const [sondage, estAdmin] = await Promise.all([
+  const [
+    sondage,
+    estAdmin,
+    retour,
+    alertConnecteTitre,
+    alertConnecteLien,
+    alertConnecteFin,
+    alertVoteTitre,
+    alertVoteCorps,
+    sectionResultats,
+    voteLabel,
+    adminSectionTitre,
+  ] = await Promise.all([
     sondageParSlugAvecResultats(slug),
     estAdminCourant(),
+    lireContenuEditorial('sondages.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('sondages.fiche.alert_connecte_titre', {
+      valeurMd: FALLBACKS.alertConnecteTitre,
+    }),
+    lireContenuEditorial('sondages.fiche.alert_connecte_lien', {
+      valeurMd: FALLBACKS.alertConnecteLien,
+    }),
+    lireContenuEditorial('sondages.fiche.alert_connecte_fin', {
+      valeurMd: FALLBACKS.alertConnecteFin,
+    }),
+    lireContenuEditorial('sondages.fiche.alert_vote_titre', {
+      valeurMd: FALLBACKS.alertVoteTitre,
+    }),
+    lireContenuEditorial('sondages.fiche.alert_vote_corps', {
+      valeurMd: FALLBACKS.alertVoteCorps,
+    }),
+    lireContenuEditorial('sondages.fiche.section_resultats', {
+      valeurMd: FALLBACKS.sectionResultats,
+    }),
+    lireContenuEditorial('sondages.fiche.vote_label', { valeurMd: FALLBACKS.voteLabel }),
+    lireContenuEditorial('sondages.fiche.admin_section_titre', {
+      valeurMd: FALLBACKS.adminSectionTitre,
+    }),
   ]);
   if (sondage === null) notFound();
 
   const session = await getSession();
   const dejaVote = session !== null ? await aVotePersonne(sondage.id, session.userId) : false;
+  const pluriel = sondage.total_votes > 1 ? 's' : '';
 
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/s-informer/sondages" className="hover:text-brand">
-          ← Sondages
-        </Link>
+        <TexteEditableAdmin
+          cle="sondages.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste sondages"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/s-informer/sondages" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-6">
@@ -72,14 +133,45 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
         </header>
 
         {session === null ? (
-          <Alert variant="info" titre="Vote connecté obligatoire">
-            <Link
-              href={`/connexion?prochaine=/s-informer/sondages/${sondage.slug}`}
-              className="underline"
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="sondages.fiche.alert_connecte_titre"
+                valeurInitiale={alertConnecteTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte vote connecte"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="sondages.fiche.alert_connecte_lien"
+              valeurInitiale={alertConnecteLien.valeurMd}
+              estAdmin={estAdmin}
+              libelle="libelle lien Connecte-toi"
+              longueurMax={40}
             >
-              Connecte-toi
-            </Link>{' '}
-            pour voter (cf. doctrine §4D).
+              {(t) => (
+                <Link
+                  href={`/connexion?prochaine=/s-informer/sondages/${sondage.slug}`}
+                  className="underline"
+                >
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>{' '}
+            <TexteEditableAdmin
+              cle="sondages.fiche.alert_connecte_fin"
+              valeurInitiale={alertConnecteFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="fin alerte vote connecte"
+              longueurMax={100}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : dejaVote || sondage.statut !== 'ouvert' ? null : (
           <Card variant="eleve">
@@ -93,17 +185,63 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
         )}
 
         {dejaVote ? (
-          <Alert variant="success" titre="Vote enregistré">
-            Tu as déjà voté pour ce sondage. Merci. Les résultats sont visibles ci-dessous.
+          <Alert
+            variant="success"
+            titre={
+              <TexteEditableAdmin
+                cle="sondages.fiche.alert_vote_titre"
+                valeurInitiale={alertVoteTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte vote enregistre"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="sondages.fiche.alert_vote_corps"
+              valeurInitiale={alertVoteCorps.valeurMd}
+              estAdmin={estAdmin}
+              libelle="corps alerte vote enregistre"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
         <section className="grid gap-3">
-          <Heading niveau={2} apparenceComme={3}>
-            Résultats
-          </Heading>
+          <TexteEditableAdmin
+            cle="sondages.fiche.section_resultats"
+            valeurInitiale={sectionResultats.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section resultats"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <p className="text-sm text-text-3">
-            {sondage.total_votes} vote{sondage.total_votes > 1 ? 's' : ''}
+            {sondage.total_votes}{' '}
+            <TexteEditableAdmin
+              cle="sondages.fiche.vote_label"
+              valeurInitiale={voteLabel.valeurMd}
+              estAdmin={estAdmin}
+              libelle="label 'vote' (singulier, 's' ajoute automatiquement)"
+              longueurMax={20}
+            >
+              {(t) => (
+                <>
+                  {t}
+                  {pluriel}
+                </>
+              )}
+            </TexteEditableAdmin>
             {sondage.pondere_disponible
               ? ' · seuil 300 atteint, pondération par quotas applicable.'
               : sondage.mode === 'pondere'
@@ -143,9 +281,19 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
           aria-label="Actions admin"
           className="mt-12 grid gap-3 border-t border-border pt-8"
         >
-          <Heading niveau={2} apparenceComme={4}>
-            Actions admin
-          </Heading>
+          <TexteEditableAdmin
+            cle="sondages.fiche.admin_section_titre"
+            valeurInitiale={adminSectionTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section actions admin sondage"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           {sondage.statut !== 'ferme' && sondage.statut !== 'archive' ? (
             <BoutonArchiverEntite
               id={sondage.id}

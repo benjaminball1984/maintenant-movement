@@ -2,8 +2,10 @@ import { retirerMediaAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { formaterTempsLecture } from '@/lib/temps-lecture';
@@ -12,6 +14,16 @@ import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← Média Maintenant',
+  redactionFallback: 'Rédaction',
+  alertExternePrefix: 'Brève reprise de',
+  alertExterneAmorce:
+    "Cette brève provient d'une source externe et n'engage pas la rédaction de Maintenant!. Source originale :",
+  alertExterneFallback: 'non précisée',
+  adminSectionTitre: 'Actions admin',
+};
 
 const LIBELLE_TYPE: Record<TypeMedia, string> = {
   edito: 'Édito',
@@ -53,18 +65,55 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 }
 
 export default async function PageDetailMedia({ params }: PageDetailProps) {
-  const estAdmin = await estAdminCourant();
   const { slug } = await params;
-  const media = await mediaParSlug(slug);
+  const [
+    estAdmin,
+    media,
+    retour,
+    redactionFallback,
+    alertExternePrefix,
+    alertExterneAmorce,
+    alertExterneFallback,
+    adminSectionTitre,
+  ] = await Promise.all([
+    estAdminCourant(),
+    mediaParSlug(slug),
+    lireContenuEditorial('media.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('media.fiche.redaction_fallback', {
+      valeurMd: FALLBACKS.redactionFallback,
+    }),
+    lireContenuEditorial('media.fiche.alert_externe_prefix', {
+      valeurMd: FALLBACKS.alertExternePrefix,
+    }),
+    lireContenuEditorial('media.fiche.alert_externe_amorce', {
+      valeurMd: FALLBACKS.alertExterneAmorce,
+    }),
+    lireContenuEditorial('media.fiche.alert_externe_fallback', {
+      valeurMd: FALLBACKS.alertExterneFallback,
+    }),
+    lireContenuEditorial('media.fiche.admin_section_titre', {
+      valeurMd: FALLBACKS.adminSectionTitre,
+    }),
+  ]);
   if (media === null) notFound();
   if (media.statut !== 'publie') notFound();
 
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/s-informer/media" className="hover:text-brand">
-          ← Média Maintenant
-        </Link>
+        <TexteEditableAdmin
+          cle="media.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste media"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/s-informer/media" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-6">
@@ -81,16 +130,40 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
           <p className="text-sm text-text-3">
             {[media.auteurice_prenom, media.auteurice_nom]
               .filter((s) => s !== null && s.trim() !== '')
-              .join(' ') || 'Rédaction'}
+              .join(' ') || redactionFallback.valeurMd}
             {media.publie_le !== null ? ` · ${FORMATEUR.format(new Date(media.publie_le))}` : ''}
             {media.corps.trim() !== '' ? ` · ${formaterTempsLecture(media.corps)}` : ''}
           </p>
         </header>
 
         {media.provenance_externe !== null ? (
-          <Alert variant="info" titre={`Brève reprise de ${media.provenance_externe}`}>
-            Cette brève provient d'une source externe et n'engage pas la rédaction de Maintenant!.
-            Source originale :{' '}
+          <Alert
+            variant="info"
+            titre={
+              <>
+                <TexteEditableAdmin
+                  cle="media.fiche.alert_externe_prefix"
+                  valeurInitiale={alertExternePrefix.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="prefixe alerte source externe (avant nom)"
+                  longueurMax={40}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>{' '}
+                {media.provenance_externe}
+              </>
+            }
+          >
+            <TexteEditableAdmin
+              cle="media.fiche.alert_externe_amorce"
+              valeurInitiale={alertExterneAmorce.valeurMd}
+              estAdmin={estAdmin}
+              libelle="amorce alerte source externe"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
             {media.source_url !== null ? (
               <a
                 href={media.source_url}
@@ -101,7 +174,15 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
                 {media.source_url} <ExternalLink size={12} className="inline" />
               </a>
             ) : (
-              'non précisée'
+              <TexteEditableAdmin
+                cle="media.fiche.alert_externe_fallback"
+                valeurInitiale={alertExterneFallback.valeurMd}
+                estAdmin={estAdmin}
+                libelle="fallback si pas d'URL source"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
             )}
           </Alert>
         ) : null}
@@ -153,9 +234,19 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
           aria-label="Actions admin"
           className="mt-12 grid gap-3 border-t border-border pt-8"
         >
-          <Heading niveau={2} apparenceComme={4}>
-            Actions admin
-          </Heading>
+          <TexteEditableAdmin
+            cle="media.fiche.admin_section_titre"
+            valeurInitiale={adminSectionTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section actions admin media"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <BoutonArchiverEntite
             id={media.id}
             action={retirerMediaAction}
