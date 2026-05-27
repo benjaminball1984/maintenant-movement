@@ -1,4 +1,4 @@
-import { slugifier, slugifierAvecSuffixeTemps } from '@/lib/slug';
+import { estSlugValide, slugifier, slugifierAvecSuffixeTemps } from '@/lib/slug';
 import { describe, expect, it } from 'vitest';
 
 describe('slugifier', () => {
@@ -30,6 +30,54 @@ describe('slugifier', () => {
 
   it('gère les chiffres', () => {
     expect(slugifier('Numéro 42 — réunion')).toBe('numero-42-reunion');
+  });
+});
+
+describe('estSlugValide', () => {
+  it('accepte un slug simple', () => {
+    expect(estSlugValide('mon-titre')).toBe(true);
+    expect(estSlugValide('a')).toBe(true);
+    expect(estSlugValide('un-deux-trois-quatre')).toBe(true);
+  });
+
+  it('refuse une chaîne vide ou trop longue', () => {
+    expect(estSlugValide('')).toBe(false);
+    expect(estSlugValide('a'.repeat(81))).toBe(false);
+  });
+
+  it('refuse les majuscules et accents', () => {
+    expect(estSlugValide('MonTitre')).toBe(false);
+    expect(estSlugValide('été')).toBe(false);
+  });
+
+  it('refuse les espaces, ponctuations, _', () => {
+    expect(estSlugValide('mon titre')).toBe(false);
+    expect(estSlugValide('mon_titre')).toBe(false);
+    expect(estSlugValide('mon.titre')).toBe(false);
+  });
+
+  it('refuse tirets multiples consécutifs', () => {
+    expect(estSlugValide('mon--titre')).toBe(false);
+  });
+
+  it('refuse tiret en début ou fin', () => {
+    expect(estSlugValide('-mon-titre')).toBe(false);
+    expect(estSlugValide('mon-titre-')).toBe(false);
+  });
+
+  it('accepte chiffres', () => {
+    expect(estSlugValide('edition-2026-05')).toBe(true);
+    expect(estSlugValide('42')).toBe(true);
+  });
+
+  it('le résultat de slugifier est toujours valide', () => {
+    const test = (s: string) => {
+      const slug = slugifier(s);
+      if (slug !== '') expect(estSlugValide(slug)).toBe(true);
+    };
+    test('Bonjour le monde !');
+    test('Édition spéciale n°1');
+    test('Une décision : à prendre');
   });
 });
 

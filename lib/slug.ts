@@ -36,3 +36,22 @@ export function slugifierAvecSuffixeTemps(texte: string, maxLongueur = 80): stri
   const suffixe = Date.now().toString(36).slice(-4);
   return `${base}-${suffixe}`;
 }
+
+/**
+ * Valide qu'une chaîne est déjà un slug bien formé (V2.4.56).
+ *
+ * Règles :
+ * - 1 à 80 caractères
+ * - uniquement [a-z0-9-]
+ * - pas de tirets multiples consécutifs
+ * - pas de tiret en début ou fin
+ *
+ * Utile pour valider les slugs reçus en entrée (params URL, formulaires)
+ * sans avoir à les regénérer.
+ */
+export function estSlugValide(slug: string): boolean {
+  if (slug.length < 1 || slug.length > 80) return false;
+  if (slug.startsWith('-') || slug.endsWith('-')) return false;
+  if (slug.includes('--')) return false;
+  return /^[a-z0-9-]+$/.test(slug);
+}
