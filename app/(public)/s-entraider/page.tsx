@@ -11,18 +11,18 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page d'accueil de l'espace S'entraider (chantier 4.1 v1).
+ * Page d'accueil de l'espace S'entraider.
  *
- * Pour 4.1, on affiche les 4 sous-espaces couverts + un placeholder pour
- * SEL (4.2) et Marché solidaire (4.3) avec leur chantier de référence.
+ * V2.4 (refonte) : SEL et Marché solidaire sont désormais livrés, on
+ * les ajoute en cartes à part entière en plus des sous-espaces config.
  */
 export default function PageSEntraider() {
   return (
     <>
       <Heading niveau={1}>S'entraider</Heading>
       <p className="mt-3 max-w-2xl text-text-2">
-        L'entraide concrète et économique entre les gens. 4 sous-espaces actifs (hébergement,
-        transport, prêt d'objets, alimentation), 2 à venir (SEL, marché solidaire).
+        L'entraide concrète et économique entre les gens : hébergement, transport, prêt d'objets,
+        alimentation, SEL (système d'échange local), marché solidaire, groupes d'entraide locaux.
       </p>
 
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -40,12 +40,56 @@ export default function PageSEntraider() {
             </Link>
           </li>
         ))}
+        <li>
+          <Link
+            href="/s-entraider/sel"
+            className={cn(
+              'block rounded-lg border border-border bg-surface p-4 transition',
+              'hover:border-brand hover:bg-surface-2',
+            )}
+          >
+            <p className="font-bold text-text-1">SEL — Système d'échange local</p>
+            <p className="mt-1 text-sm text-text-3">
+              Échange de services entre membres. 1 T99CP = 1 € = 1 minute. Volontariat et services
+              proposés/cherchés.
+            </p>
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/s-entraider/marche"
+            className={cn(
+              'block rounded-lg border border-border bg-surface p-4 transition',
+              'hover:border-brand hover:bg-surface-2',
+            )}
+          >
+            <p className="font-bold text-text-1">Marché solidaire</p>
+            <p className="mt-1 text-sm text-text-3">
+              Produits, boutiques éphémères, mini-marchés physiques. Vente ou don gratuit. T99CP / €
+              / G1 / MNLC.
+            </p>
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/s-entraider/groupes-locaux"
+            className={cn(
+              'block rounded-lg border border-border bg-surface p-4 transition',
+              'hover:border-brand hover:bg-surface-2',
+            )}
+          >
+            <p className="font-bold text-text-1">Groupes d'entraide locaux</p>
+            <p className="mt-1 text-sm text-text-3">
+              Groupes locaux qui activent leurs propres outils (prêt, marché, SEL) sur leur
+              territoire.
+            </p>
+          </Link>
+        </li>
       </ul>
 
-      <Alert variant="info" titre="À venir" className="mt-8">
-        <strong>SEL (4.2)</strong> : système d'échange local, 1 99-coin = 1 € = 1 minute.
-        <br />
-        <strong>Marché solidaire (4.3)</strong> : Bon Coin/Vinted-like, vente ou don gratuit.
+      <Alert variant="info" titre="Tout est gratuit et libre" className="mt-8">
+        Les outils d'entraide sont accessibles à toute personne authentifiée, adhérente ou non. La
+        modération a posteriori est assurée par l'équipe de modération.
       </Alert>
     </>
   );
