@@ -18,7 +18,7 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer className="border-t border-border bg-surface-2">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
           <p className="font-display text-lg font-bold text-text-1">{SITE.nom}</p>
           <p className="mt-2 text-sm text-text-2">{SITE.descriptionCourte}</p>
@@ -37,6 +37,25 @@ export function Footer() {
           </Link>
           <Link href="/contact" className="text-text-2 hover:text-brand">
             Contact
+          </Link>
+        </nav>
+
+        <nav aria-label="Explorer le site" className="grid gap-2 text-sm">
+          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Explorer</p>
+          <Link href="/recherche" className="text-text-2 hover:text-brand">
+            Recherche globale
+          </Link>
+          <Link href="/agenda" className="text-text-2 hover:text-brand">
+            Agenda (tous les événements)
+          </Link>
+          <Link href="/cartes" className="text-text-2 hover:text-brand">
+            Cartes
+          </Link>
+          <Link href="/s-informer/decider" className="text-text-2 hover:text-brand">
+            Décider (réunions)
+          </Link>
+          <Link href="/s-informer/journal" className="text-text-2 hover:text-brand">
+            Maintenant Médias
           </Link>
         </nav>
 
