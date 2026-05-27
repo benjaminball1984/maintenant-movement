@@ -5,6 +5,7 @@ import {
   marquerReservationRealiseeAction,
   refuserReservationAction,
 } from '@/app/actions/reservation';
+import { BoutonSignalerLitigeProprietaire } from '@/components/reservation/BoutonSignalerLitigeProprietaire';
 import { Button } from '@/components/ui';
 import type { StatutReservation } from '@/lib/reservation';
 import { Check, CheckCheck, X } from 'lucide-react';
@@ -136,6 +137,10 @@ export function BoutonsProprietaireReservation({
           <CheckCheck size={14} aria-hidden="true" />
           {enCours === 'realiser' ? 'Marquage…' : 'Marquer comme réalisée'}
         </Button>
+        <BoutonSignalerLitigeProprietaire
+          reservationId={reservationId}
+          cheminRevalidation={cheminRevalidation}
+        />
         {erreur !== null && (
           <p role="alert" className="text-danger text-sm">
             {erreur}

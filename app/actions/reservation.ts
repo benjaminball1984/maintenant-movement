@@ -302,6 +302,55 @@ export async function marquerReservationRealiseeAction(
   return executerTransitionProprietaire(options, 'realisee');
 }
 
+/**
+ * Signalement de litige côté propriétaire (V2.3.21, symétrique de
+ * V2.3.16). Transition D8 `acceptee → litige` quand la prestation a
+ * démarré mais qu'un problème grave bloque sa réalisation (demandeur
+ * absent, comportement inapproprié, dégradation matérielle pour un prêt,
+ * etc.).
+ *
+ * Motif obligatoire (10 à 1000 caractères) pour la modération.
+ */
+export async function signalerLitigeProprietaireAction(options: {
+  reservationId: string;
+  motif: string;
+  cheminRevalidation?: string;
+}): Promise<ResultatActionProprietaire> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const motifNettoye = options.motif.trim();
+  if (motifNettoye.length < 10) {
+    return { ok: false, message: 'Le motif doit faire au moins 10 caractères.' };
+  }
+  if (motifNettoye.length > 1000) {
+    return { ok: false, message: 'Le motif est trop long (1000 caractères maximum).' };
+  }
+
+  const verif = await chargerReservationCommeProprietaire(options.reservationId, session.userId);
+  if (!verif.ok) return verif;
+  if (!transitionAutorisee(verif.statut, 'litige')) {
+    return {
+      ok: false,
+      message: `Une réservation au statut « ${verif.statut} » ne peut pas faire l’objet d’un litige côté propriétaire (uniquement depuis « acceptée »).`,
+    };
+  }
+
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: 'litige',
+    motif: motifNettoye,
+    auteurId: session.userId,
+  });
+  if (!resultat.ok) return { ok: false, message: resultat.message };
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
+}
+
 // ============================================================
 // Résolution de litige par un·e admin (V2.3.17)
 // ============================================================
