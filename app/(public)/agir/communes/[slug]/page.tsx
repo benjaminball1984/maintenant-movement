@@ -3,6 +3,7 @@ import {
   quitterCommune,
   rejoindreCommune,
 } from '@/app/(public)/agir/communes/actions';
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCommune';
 import { ListeMembres } from '@/components/communes/ListeMembres';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
@@ -79,10 +80,13 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Badge variant={estLibre ? 'accent' : 'brand'}>
               {estLibre ? 'Commune libre' : 'Commune'}
             </Badge>
+            <BoutonAdminEditer href={`/admin/national?onglet=communes&id=${commune.id}`}>
+              Admin
+            </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{commune.nom}</Heading>
           {commune.description_courte !== null && commune.description_courte.trim() !== '' ? (

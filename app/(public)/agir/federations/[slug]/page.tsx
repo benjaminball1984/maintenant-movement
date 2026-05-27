@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
@@ -55,7 +56,12 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
         </Link>
       </p>
       <header className="grid gap-3">
-        <Badge variant="brand">{LIBELLE_TYPE[federation.type] ?? federation.type}</Badge>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Badge variant="brand">{LIBELLE_TYPE[federation.type] ?? federation.type}</Badge>
+          <BoutonAdminEditer href={`/admin/national?onglet=federations&id=${federation.id}`}>
+            Admin
+          </BoutonAdminEditer>
+        </div>
         <Heading niveau={1}>{federation.nom}</Heading>
         {federation.description_courte !== null && federation.description_courte.trim() !== '' ? (
           <p className="text-text-2">{federation.description_courte}</p>

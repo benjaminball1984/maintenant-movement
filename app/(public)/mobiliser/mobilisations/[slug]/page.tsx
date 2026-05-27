@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
@@ -64,9 +65,14 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
         <header className="grid gap-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-bold uppercase tracking-cap text-text-3">Mobilisation</p>
-            <p className="text-xs font-bold uppercase tracking-cap text-brand">
-              {formaterRelativeAVenir(mobilisation.date_debut)}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold uppercase tracking-cap text-brand">
+                {formaterRelativeAVenir(mobilisation.date_debut)}
+              </p>
+              <BoutonAdminEditer href={`/admin/moderation/mobilisations?id=${mobilisation.id}`}>
+                Admin
+              </BoutonAdminEditer>
+            </div>
           </div>
           <Heading niveau={1}>{mobilisation.titre}</Heading>
 

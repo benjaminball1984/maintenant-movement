@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
@@ -60,12 +61,17 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
 
       <article className="grid gap-8">
         <header className="grid gap-4">
-          <div className="flex items-center gap-2">
-            <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
-              {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
-            </Badge>
-            {cagnotte.statut === 'suspendue' ? <Badge variant="warning">Suspendue</Badge> : null}
-            {cagnotte.statut === 'cloturee' ? <Badge variant="default">Clôturée</Badge> : null}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
+                {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
+              </Badge>
+              {cagnotte.statut === 'suspendue' ? <Badge variant="warning">Suspendue</Badge> : null}
+              {cagnotte.statut === 'cloturee' ? <Badge variant="default">Clôturée</Badge> : null}
+            </div>
+            <BoutonAdminEditer href={`/admin/moderation/cagnottes?id=${cagnotte.id}`}>
+              Admin
+            </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{cagnotte.titre}</Heading>
 

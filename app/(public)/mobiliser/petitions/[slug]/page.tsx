@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Alert, Card, Container, Heading } from '@/components/ui';
@@ -72,9 +73,12 @@ export default async function PagePetition({ params }: PagePetitionProps) {
 
       <article className="grid gap-8">
         <header className="grid gap-4">
-          <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-            Pétition à <strong className="text-text-2">{petition.destinataire}</strong>
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-cap text-text-3">
+              Pétition à <strong className="text-text-2">{petition.destinataire}</strong>
+            </p>
+            <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>Admin</BoutonAdminEditer>
+          </div>
           <Heading niveau={1}>{petition.titre}</Heading>
 
           {petition.image_url !== null ? (

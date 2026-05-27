@@ -1,4 +1,5 @@
 import { participerMoment } from '@/app/(public)/agir/moments-solidaires/actions';
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonParticiperMoment } from '@/components/moments/BoutonParticiperMoment';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
@@ -74,11 +75,18 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-3">
-          <div className="flex items-center gap-2">
-            <Badge variant={moment.type === 'porte_a_porte' ? 'brand' : 'accent'}>
-              {config.libelle}
-            </Badge>
-            {moment.statut !== 'annonce' ? <Badge variant="default">{moment.statut}</Badge> : null}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={moment.type === 'porte_a_porte' ? 'brand' : 'accent'}>
+                {config.libelle}
+              </Badge>
+              {moment.statut !== 'annonce' ? (
+                <Badge variant="default">{moment.statut}</Badge>
+              ) : null}
+            </div>
+            <BoutonAdminEditer href={`/admin/moderation/moments?id=${moment.id}`}>
+              Admin
+            </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{moment.titre}</Heading>
         </header>

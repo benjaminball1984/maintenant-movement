@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -62,9 +63,14 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-3">
-          <Badge variant={media.type === 'edito' ? 'brand' : 'default'}>
-            {LIBELLE_TYPE[media.type]}
-          </Badge>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <Badge variant={media.type === 'edito' ? 'brand' : 'default'}>
+              {LIBELLE_TYPE[media.type]}
+            </Badge>
+            <BoutonAdminEditer href={`/admin/moderation/media?id=${media.id}`}>
+              Admin
+            </BoutonAdminEditer>
+          </div>
           <Heading niveau={1}>{media.titre}</Heading>
           <p className="text-sm text-text-3">
             {[media.auteurice_prenom, media.auteurice_nom]

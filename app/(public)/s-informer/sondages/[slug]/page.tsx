@@ -1,4 +1,5 @@
 import { voterSondage } from '@/app/(public)/s-informer/sondages/actions';
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
@@ -46,11 +47,18 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
 
       <article className="grid gap-6">
         <header className="grid gap-3">
-          <div className="flex items-center gap-2">
-            <Badge variant={sondage.mode === 'pondere' ? 'accent' : 'brand'}>
-              {sondage.mode === 'pondere' ? 'Pondéré' : 'Classique'}
-            </Badge>
-            {sondage.statut !== 'ouvert' ? <Badge variant="default">{sondage.statut}</Badge> : null}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={sondage.mode === 'pondere' ? 'accent' : 'brand'}>
+                {sondage.mode === 'pondere' ? 'Pondéré' : 'Classique'}
+              </Badge>
+              {sondage.statut !== 'ouvert' ? (
+                <Badge variant="default">{sondage.statut}</Badge>
+              ) : null}
+            </div>
+            <BoutonAdminEditer href={`/admin/moderation/sondages?id=${sondage.id}`}>
+              Admin
+            </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{sondage.titre}</Heading>
           <p className="text-text-2">{sondage.question}</p>

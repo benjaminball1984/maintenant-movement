@@ -1,3 +1,4 @@
+import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
@@ -78,7 +79,12 @@ export default async function PageDetailGroupeEntraide({ params }: PageDetailPro
         </div>
 
         <div className="flex flex-col gap-3">
-          {groupe.statut === 'en_moderation' && <Badge variant="warning">En modération</Badge>}
+          <div className="flex items-start justify-between gap-2">
+            {groupe.statut === 'en_moderation' && <Badge variant="warning">En modération</Badge>}
+            <BoutonAdminEditer href={`/admin/moderation/groupes-locaux?id=${groupe.id}`}>
+              Admin
+            </BoutonAdminEditer>
+          </div>
           <Heading niveau={1}>{groupe.nom}</Heading>
           <div className="flex items-center gap-2 text-sm text-text-3">
             <MapPin size={16} aria-hidden="true" />
