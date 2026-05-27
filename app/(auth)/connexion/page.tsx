@@ -59,9 +59,14 @@ export default async function PageConnexion({
     mdpCtaSubmit,
     mdpCtaEnCours,
     mdpCtaChargement,
+    mdpLabelEmail,
+    mdpLabelMotDePasse,
+    mdpAlertErreurTitre,
     magicCtaSubmit,
     magicCtaEnCours,
     magicCtaChargement,
+    magicLabelEmail,
+    magicAlertErreurTitre,
   ] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('connexion.titre', { valeurMd: FALLBACKS.titre }),
@@ -82,11 +87,20 @@ export default async function PageConnexion({
     lireContenuEditorial('connexion.mdp.cta_submit', { valeurMd: 'Se connecter' }),
     lireContenuEditorial('connexion.mdp.cta_en_cours', { valeurMd: 'Connexion en cours...' }),
     lireContenuEditorial('connexion.mdp.cta_chargement', { valeurMd: 'Chargement…' }),
+    lireContenuEditorial('connexion.mdp.label_email', { valeurMd: 'Email' }),
+    lireContenuEditorial('connexion.mdp.label_mot_de_passe', { valeurMd: 'Mot de passe' }),
+    lireContenuEditorial('connexion.mdp.alert_erreur_titre', {
+      valeurMd: 'Connexion impossible',
+    }),
     lireContenuEditorial('connexion.magic.cta_submit', {
       valeurMd: 'Recevoir un lien par email',
     }),
     lireContenuEditorial('connexion.magic.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
     lireContenuEditorial('connexion.magic.cta_chargement', { valeurMd: 'Chargement…' }),
+    lireContenuEditorial('connexion.magic.label_email', { valeurMd: 'Email' }),
+    lireContenuEditorial('connexion.magic.alert_erreur_titre', {
+      valeurMd: 'Envoi impossible',
+    }),
   ]);
 
   return (
@@ -163,6 +177,9 @@ export default async function PageConnexion({
             ctaSubmit: mdpCtaSubmit.valeurMd,
             ctaEnCours: mdpCtaEnCours.valeurMd,
             ctaChargement: mdpCtaChargement.valeurMd,
+            labelEmail: mdpLabelEmail.valeurMd,
+            labelMotDePasse: mdpLabelMotDePasse.valeurMd,
+            alertErreurTitre: mdpAlertErreurTitre.valeurMd,
           }}
         />
         <p className="mt-3 text-sm">
@@ -214,6 +231,8 @@ export default async function PageConnexion({
             ctaSubmit: magicCtaSubmit.valeurMd,
             ctaEnCours: magicCtaEnCours.valeurMd,
             ctaChargement: magicCtaChargement.valeurMd,
+            labelEmail: magicLabelEmail.valeurMd,
+            alertErreurTitre: magicAlertErreurTitre.valeurMd,
           }}
         />
       </Card>

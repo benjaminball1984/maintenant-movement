@@ -1,0 +1,221 @@
+Crée la branche fix/ci-playwright-multi-browser depuis main et applique les 3 changements suivants pour fixer le workflow CI (Playwright n'installe que Chromium mais la config déclare aussi Firefox + WebKit qui crashent, et aucune env Supabase n'est passée aux jobs donc Header crashe en E2E).
+
+=== 1) Remplace ENTIÈREMENT playwright.config.ts par : ===
+
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Configuration Playwright pour les tests end-to-end.
+ *
+ * Stratégie multi-format (chantier 12.3 polish) :
+ *   - 5 viewports Chromium : mobile portrait/paysage, tablette
+ *     portrait/paysage, desktop. Tous les tests tournent sur chaque
+ *     viewport pour vérifier qu'aucune mise en page ne casse.
+ *   - 2 navigateurs supplémentaires (Firefox, WebKit) sur viewport
+ *     desktop : sanity cross-browser, activés uniquement quand la
+ *     variable `PLAYWRIGHT_FULL=1` est définie. Évite de tenter de
+ *     lancer des binaires non installés (cas CI de push, qui installe
+ *     `chromium` seul). Le workflow programmé `ci-cross-browser.yml`
+ *     positionne `PLAYWRIGHT_FULL=1` et installe les 3 navigateurs.
+ *
+ * Pour ne lancer qu'un seul viewport :
+ *   npm run test:e2e -- --project=mobile-portrait
+ *
+ * Pour inclure Firefox + WebKit en local :
+ *   PLAYWRIGHT_FULL=1 npm run test:e2e
+ *
+ * Le `webServer` lance `npm run dev` automatiquement avant les tests.
+ */
+const PORT = 3000;
+const BASE_URL = `http://localhost:${PORT}`;
+
+const VIEWPORT_MOBILE_PORTRAIT = { width: 375, height: 667 };
+const VIEWPORT_MOBILE_PAYSAGE = { width: 667, height: 375 };
+const VIEWPORT_TABLETTE_PORTRAIT = { width: 768, height: 1024 };
+const VIEWPORT_TABLETTE_PAYSAGE = { width: 1024, height: 768 };
+const VIEWPORT_DESKTOP = { width: 1440, height: 900 };
+
+const PROJETS_CHROMIUM = [
+  {
+    name: 'mobile-portrait',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PORTRAIT },
+  },
+  {
+    name: 'mobile-paysage',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PAYSAGE },
+  },
+  {
+    name: 'tablette-portrait',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PORTRAIT },
+  },
+  {
+    name: 'tablette-paysage',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PAYSAGE },
+  },
+  {
+    name: 'desktop',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_DESKTOP },
+  },
+];
+
+const PROJETS_CROSS_BROWSER = [
+  {
+    name: 'desktop-firefox',
+    use: { ...devices['Desktop Firefox'], viewport: VIEWPORT_DESKTOP },
+  },
+  {
+    name: 'desktop-webkit',
+    use: { ...devices['Desktop Safari'], viewport: VIEWPORT_DESKTOP },
+  },
+];
+
+// Firefox + WebKit ne sont inclus que sur opt-in explicite (PLAYWRIGHT_FULL=1).
+// Cf. workflow `.github/workflows/ci-cross-browser.yml` (programmé mensuel).
+const projets =
+  process.env.PLAYWRIGHT_FULL === '1'
+    ? [...PROJETS_CHROMIUM, ...PROJETS_CROSS_BROWSER]
+    : PROJETS_CHROMIUM;
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: false,
+  forbidOnly: Boolean(process.env.CI),
+  retries: process.env.CI !== undefined ? 2 : 0,
+  workers: process.env.CI !== undefined ? 1 : undefined,
+  reporter: process.env.CI !== undefined ? 'github' : 'html',
+  outputDir: './test-results',
+  use: {
+    baseURL: BASE_URL,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    locale: 'fr-FR',
+  },
+  projects: projets,
+  webServer: {
+    command: 'npm run dev',
+    url: BASE_URL,
+    reuseExistingServer: process.env.CI === undefined,
+    timeout: 120 * 1000,
+  },
+});
+
+=== 2) Dans .github/workflows/ci.yml, remplace le bloc test-e2e par : ===
+
+  test-e2e:
+    name: Tests E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    # Le site fonctionne en mocks (CLAUDE.md §6). Aucune spec E2E ne tape
+    # la vraie BDD : des placeholders syntaxiquement valides suffisent à
+    # franchir les getters `lib/supabase/env.ts` (lecture paresseuse) et
+    # à éviter un 500 sur la première navigation. Si une spec a besoin
+    # d'une vraie instance, passer en B2 : secrets GitHub `SUPABASE_*`.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://localhost.supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      EMAIL_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      T99CP_NETWORK: mock
+      LIVEKIT_PROVIDER: mock
+      TURNSTILE_PROVIDER: mock
+      NEXT_PUBLIC_TURNSTILE_PROVIDER: mock
+      IMAGE_STORAGE_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # Chromium seul : `playwright.config.ts` filtre Firefox/WebKit
+      # tant que PLAYWRIGHT_FULL n'est pas positionné. Le workflow
+      # `ci-cross-browser.yml` (mensuel) installe tous les navigateurs.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+=== 3) Crée .github/workflows/ci-cross-browser.yml avec ce contenu : ===
+
+# Workflow E2E full cross-browser (Chromium + Firefox + WebKit).
+#
+# Le workflow `ci.yml` ne lance que les 5 viewports Chromium à chaque push,
+# pour rester rapide et éviter d'installer Firefox + WebKit sur chaque run.
+# Celui-ci tourne une fois par mois (et à la demande via workflow_dispatch)
+# avec `PLAYWRIGHT_FULL=1`, qui active dans `playwright.config.ts` les deux
+# projets `desktop-firefox` et `desktop-webkit`.
+#
+# Si un régression cross-browser apparaît : `workflow_dispatch` sur la
+# branche de fix, observer l'artefact `playwright-report-cross-browser`.
+name: CI cross-browser (mensuel)
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cross-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-e2e-full:
+    name: Tests E2E full cross-browser
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_FULL: '1'
+      NEXT_PUBLIC_SUPABASE_URL: https://localhost.supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      EMAIL_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      T99CP_NETWORK: mock
+      LIVEKIT_PROVIDER: mock
+      TURNSTILE_PROVIDER: mock
+      NEXT_PUBLIC_TURNSTILE_PROVIDER: mock
+      IMAGE_STORAGE_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-cross-browser
+          path: playwright-report/
+          retention-days: 30
+
+=== Ensuite : ===
+
+Vérifie que `npm run lint`, `npm run typecheck` et `npm test` passent. Puis commit avec ce message exact :
+
+fix - phase 0 - chantier 0.1 - CI Playwright multi-navigateurs et vars Supabase
+
+Fix A : la CI installe Chromium seul mais playwright.config.ts declare
+desktop-firefox et desktop-webkit, qui echouent au lancement faute de
+binaire. On filtre ces deux projets sauf si PLAYWRIGHT_FULL=1.
+
+Fix B : aucune env Supabase n'etait passee aux jobs. getSupabaseServer
+(Header sur toutes les pages publiques) throw au premier appel et les
+E2E retournent 500. On expose des placeholders mocks au job test-e2e.
+
+Ajout du workflow ci-cross-browser.yml (programme mensuel + manuel) qui
+positionne PLAYWRIGHT_FULL=1 et installe les 3 navigateurs pour la
+sanity cross-browser hors push.
+
+Puis push la branche et ouvre une PR draft vers main.

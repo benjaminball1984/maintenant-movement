@@ -9,17 +9,21 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { envoyerMagicLink } from '../actions';
 
-/** Libelles surchargeables admin via CMS (V2.4.135). */
+/** Libelles surchargeables admin via CMS (V2.4.135 + V2.4.137). */
 export interface LibellesMagicLink {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaChargement: string;
+  labelEmail: string;
+  alertErreurTitre: string;
 }
 
 const LIBELLES_DEFAUT: LibellesMagicLink = {
   ctaSubmit: 'Recevoir un lien par email',
   ctaEnCours: 'Envoi en cours...',
   ctaChargement: 'Chargement…',
+  labelEmail: 'Email',
+  alertErreurTitre: 'Envoi impossible',
 };
 
 /**
@@ -70,14 +74,14 @@ export function FormulaireMagicLink({
       aria-label="Connexion par lien magique"
     >
       {erreurServeur !== null ? (
-        <Alert variant="danger" titre="Envoi impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreurServeur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="cnx-magic-email" obligatoire>
-          Email
+          {libelles.labelEmail}
         </Label>
         <Input
           id="cnx-magic-email"

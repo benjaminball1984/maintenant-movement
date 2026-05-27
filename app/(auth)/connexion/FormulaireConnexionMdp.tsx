@@ -10,17 +10,23 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { connecterAvecMotDePasse } from '../actions';
 
-/** Libelles surchargeables admin via CMS (V2.4.135). */
+/** Libelles surchargeables admin via CMS (V2.4.135 + V2.4.137). */
 export interface LibellesConnexionMdp {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaChargement: string;
+  labelEmail: string;
+  labelMotDePasse: string;
+  alertErreurTitre: string;
 }
 
 const LIBELLES_DEFAUT: LibellesConnexionMdp = {
   ctaSubmit: 'Se connecter',
   ctaEnCours: 'Connexion en cours...',
   ctaChargement: 'Chargement…',
+  labelEmail: 'Email',
+  labelMotDePasse: 'Mot de passe',
+  alertErreurTitre: 'Connexion impossible',
 };
 
 /**
@@ -70,14 +76,14 @@ export function FormulaireConnexionMdp({
       aria-label="Connexion par mot de passe"
     >
       {erreurServeur !== null ? (
-        <Alert variant="danger" titre="Connexion impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreurServeur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="cnx-mdp-email" obligatoire>
-          Email
+          {libelles.labelEmail}
         </Label>
         <Input
           id="cnx-mdp-email"
@@ -92,7 +98,7 @@ export function FormulaireConnexionMdp({
       </div>
       <div>
         <Label htmlFor="cnx-mdp-passe" obligatoire>
-          Mot de passe
+          {libelles.labelMotDePasse}
         </Label>
         <ChampMotDePasse
           id="cnx-mdp-passe"
