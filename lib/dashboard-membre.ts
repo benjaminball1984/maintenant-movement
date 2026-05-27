@@ -21,6 +21,7 @@ export interface DashboardMembre {
   nbGroupes: number;
   nbNotificationsNonLues: number;
   nbMessagesNonLus: number;
+  nbReunionsAVenir: number;
 
   // Adhésion
   adhesionActive: {
@@ -68,6 +69,7 @@ export async function chargerDashboardMembre(personneId: string): Promise<Dashbo
     derniersDons,
     dernieresSignatures,
     derniersPosts,
+    prochainesReunions,
   ] = await Promise.all([
     supabase
       .from('signature_petition')
@@ -149,6 +151,11 @@ export async function chargerDashboardMembre(personneId: string): Promise<Dashbo
       .eq('statut', 'publie')
       .order('created_at', { ascending: false })
       .limit(3),
+    supabase
+      .from('reunion_decider')
+      .select('id', { count: 'exact', head: true })
+      .in('statut', ['planifiee', 'en_cours'])
+      .gte('debut_le', new Date().toISOString()),
   ]);
 
   let totalEurosCent = 0;
@@ -219,6 +226,7 @@ export async function chargerDashboardMembre(personneId: string): Promise<Dashbo
     nbGroupes,
     nbNotificationsNonLues: notifsNonLues.count ?? 0,
     nbMessagesNonLus: messagesNonLus.count ?? 0,
+    nbReunionsAVenir: prochainesReunions.count ?? 0,
     adhesionActive:
       adhesion === null
         ? null

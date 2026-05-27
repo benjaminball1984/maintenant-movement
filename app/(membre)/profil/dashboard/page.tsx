@@ -12,6 +12,7 @@ import {
   ScrollText,
   Sparkles,
   Users,
+  Video,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -164,6 +165,13 @@ export default async function PageDashboard() {
             icone={Receipt}
             libelle="Total contributions"
             valeur={data.nbContributions}
+          />
+          <CarteCompteur
+            href="/profil/decider"
+            icone={Video}
+            libelle="Réunions à venir"
+            valeur={data.nbReunionsAVenir}
+            variant={data.nbReunionsAVenir > 0 ? 'warning' : 'default'}
           />
         </div>
       </section>
