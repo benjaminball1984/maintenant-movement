@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 durée + force-password + Skeleton UI)
-**Dernier chantier terminé** : V2.4.85 (composant `Skeleton` UI) — sur `main` (tip `f7e672a`). 3 variantes (`Skeleton`, `SkeletonText`, `SkeletonCarte`), animate-pulse, aria-busy.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 normalisation/URL/password aléatoire)
+**Dernier chantier terminé** : V2.4.88 (`lib/generer-password.ts` + 13 tests) — sur `main` (tip `5696000`). 899 tests verts. 3 générateurs via `crypto.getRandomValues` : password, code numérique, token URL-safe anti-confusion.
+**Dernier chantier terminé (antérieur)** : V2.4.87 (`lib/validation-url.ts` + 15 tests) — sur `main` (tip `03f1c39`). `estUrlValide` (refuse javascript:/data:/file:), allowlist domaines, `parserUrl`.
+**Dernier chantier terminé (antérieur)** : V2.4.86 (`lib/normaliser-recherche.ts` + 15 tests) — sur `main` (tip `c0a5899`). `normaliserRecherche`, `contientTexte` (match permissif accent+casse), `comparerPermissif` (tri).
+**Dernier chantier terminé (antérieur)** : V2.4.85 (composant `Skeleton` UI) — sur `main` (tip `f7e672a`). 3 variantes (`Skeleton`, `SkeletonText`, `SkeletonCarte`), animate-pulse, aria-busy.
 **Dernier chantier terminé (antérieur)** : V2.4.84 (`lib/force-password.ts` + 13 tests) — sur `main` (tip `1e0b095`). 6 critères → score 0-6, 5 niveaux, suggestions FR. UX uniquement (sécurité = double opt-in).
 **Dernier chantier terminé (antérieur)** : V2.4.83 (`lib/duree.ts` + 15 tests) — sur `main` (tip `226ffed`). `formaterDureeCompacte` 2 unités max, `formaterDureeLongue` pluralisée.
 **Dernier chantier terminé (antérieur)** : V2.4.82 (`lib/log-erreur.ts` + 14 tests) — sur `main` (tip `0b7dcf8`). 828 tests verts. Logger centralisé, format structuré, échec silencieux pour ne pas casser l'appelant.
