@@ -2,7 +2,7 @@
 
 import { getSession } from '@/lib/auth/session';
 import { obtenirOuCreerCaisseGlobale, poserEntreeCaisse } from '@/lib/caisse-flux';
-import { getEmailService } from '@/lib/email';
+import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getT99CPService } from '@/lib/t99cp';
@@ -299,7 +299,6 @@ export async function envoyerRelancesAdhesion(
     return { ok: false, message: `Lecture impossible : ${error?.message ?? ''}` };
   }
 
-  const email = getEmailService();
   let envoyees = 0;
   for (const adhesion of adhesions) {
     const { data: personne } = await supabase
@@ -309,11 +308,9 @@ export async function envoyerRelancesAdhesion(
       .maybeSingle();
     if (personne === null || personne.email === null) continue;
 
-    await email.envoyerTransactionnel({
-      destinataire: personne.email,
-      sujet: 'Ton adhésion à Maintenant! arrive à échéance',
-      html: gabaritRelance(personne.prenom),
-      texte: textRelance(personne.prenom),
+    // V2.4.133 : template editable admin via CMS (email.adhesion_relance.*).
+    await envoyerEmailTemplee('adhesion_relance', personne.email, {
+      prenom: personne.prenom ?? '',
     });
 
     await supabase
@@ -327,25 +324,12 @@ export async function envoyerRelancesAdhesion(
 }
 
 // ============================================================
-// Gabarits du mail de relance (microcopy fonctionnelle, pas fond
-// politique : 1 phrase factuelle + 1 lien). Ton sobre, pas
-// d'argumentaire (cf. spec §7A « doctrine ouverte, pas d'argumentaire
-// pesant »).
+// Note V2.4.133 : les anciens helpers `gabaritRelance` et `textRelance`
+// (qui generaient le HTML et le texte inline) ont ete retires. Le
+// template d'email de relance est maintenant defini dans
+// `lib/email-templates.ts` (TEMPLATES_DEFAUT['adhesion_relance']) et est
+// editable admin via CMS (cles `email.adhesion_relance.{sujet,html,texte}`).
 // ============================================================
-
-function gabaritRelance(prenom: string | null): string {
-  const salut = prenom !== null && prenom.trim() !== '' ? `Bonjour ${prenom},` : 'Bonjour,';
-  return `<p>${salut}</p>
-<p>Ton adhésion à Maintenant! arrive à échéance. Pour la renouveler, c'est par ici :</p>
-<p><a href="https://maintenant-le-mouvement.org/agir/adherer">Renouveler mon adhésion</a></p>
-<p>3 chemins, comme toujours : gratuit, 12 €, ou 12 99-coin. Sans pression.</p>
-<p>L'équipe Maintenant!</p>`;
-}
-
-function textRelance(prenom: string | null): string {
-  const salut = prenom !== null && prenom.trim() !== '' ? `Bonjour ${prenom},` : 'Bonjour,';
-  return `${salut}\n\nTon adhésion à Maintenant! arrive à échéance.\n\nPour la renouveler : https://maintenant-le-mouvement.org/agir/adherer\n\n3 chemins : gratuit, 12 €, ou 12 99-coin. Sans pression.\n\nL'équipe Maintenant!`;
-}
 
 // ============================================================
 // Helpers

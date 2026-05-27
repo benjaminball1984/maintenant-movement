@@ -1,7 +1,7 @@
 'use server';
 
 import { getPersonneOuRediriger } from '@/lib/auth/session';
-import { getEmailService } from '@/lib/email';
+import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { getSupabaseServer } from '@/lib/supabase';
 import {
   type DonneesDemanderSuppression,
@@ -158,22 +158,9 @@ export async function demanderExportZip(): Promise<ResultatAction> {
   const { userId, email } = await getPersonneOuRediriger('/profil/confidentialite');
 
   // Mail de confirmation. En mock, ça se loggue dans `var/emails/`.
+  // V2.4.133 : template editable admin via CMS (email.rgpd_export_demande.*).
   try {
-    await getEmailService().envoyerTransactionnel({
-      destinataire: email,
-      sujet: 'Demande d’export de tes données enregistrée',
-      html: `<p>Bonjour,</p>
-<p>Ta demande d’export des données associées à ton compte (${userId}) est bien enregistrée.</p>
-<p>Tu recevras un mail séparé avec le lien de téléchargement sous 24h.</p>
-<p>L’équipe Maintenant!</p>`,
-      texte: `Bonjour,
-
-Ta demande d’export des données associées à ton compte (${userId}) est bien enregistrée.
-
-Tu recevras un mail séparé avec le lien de téléchargement sous 24h.
-
-L’équipe Maintenant!`,
-    });
+    await envoyerEmailTemplee('rgpd_export_demande', email, { user_id: userId });
   } catch (erreur) {
     // L'envoi de mail ne doit pas faire échouer la demande : l'export
     // s'enregistre quand même (côté infra async, chantier dédié).
@@ -215,15 +202,9 @@ export async function demanderSuppression(donneesBrutes: unknown): Promise<Resul
     return { ok: false, message: `Demande impossible : ${error.message}` };
   }
 
+  // V2.4.133 : template editable admin via CMS (email.rgpd_suppression_demande.*).
   try {
-    await getEmailService().envoyerTransactionnel({
-      destinataire: email,
-      sujet: 'Suppression de ton compte programmée dans 30 jours',
-      html: `<p>Bonjour,</p>
-<p>Ta demande de suppression est enregistrée. Ton compte sera définitivement anonymisé dans 30 jours.</p>
-<p>Tu peux annuler à tout moment d’ici là en te reconnectant et en cliquant « Annuler la suppression » depuis ton profil.</p>
-<p>L’équipe Maintenant!</p>`,
-    });
+    await envoyerEmailTemplee('rgpd_suppression_demande', email, {});
   } catch (erreur) {
     console.warn('[demanderSuppression] envoi mail échoué :', erreur);
   }
