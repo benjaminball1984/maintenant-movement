@@ -1,12 +1,21 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { federationParSlug } from '@/lib/communes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← Fédérations',
+  communeLabel: 'commune',
+  rattacheeLabel: 'rattachée',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -35,25 +44,38 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 
 export default async function PageDetailFederation({ params }: PageDetailProps) {
   const { slug } = await params;
-  const federation = await federationParSlug(slug);
+  const [federation, session, estAdmin, retour, communeLabel, rattacheeLabel] = await Promise.all([
+    federationParSlug(slug),
+    getSession(),
+    estAdminCourant(),
+    lireContenuEditorial('federations.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('federations.fiche.commune_label', {
+      valeurMd: FALLBACKS.communeLabel,
+    }),
+    lireContenuEditorial('federations.fiche.rattachee_label', {
+      valeurMd: FALLBACKS.rattacheeLabel,
+    }),
+  ]);
   if (federation === null) notFound();
 
-  // Note V2.3.8 : la table `appartenance_federation` lie une COMMUNE à une
-  // fédération, pas une personne. Une personne est « membre » d'une
-  // fédération si elle est membre d'au moins une commune rattachée. Le
-  // helper SQL `est_membre_espace('federation', ...)` posé en V2.2.1
-  // lisait directement `appartenance_federation.personne_id` — qui
-  // n'existe pas. À corriger dans un chantier dédié avec migration. En
-  // attendant, on affiche le fil aux comptes authentifiés (la RLS sera
-  // toujours plus restrictive que l'UI une fois le helper corrigé).
-  const session = await getSession();
+  const pluriel = federation.nombre_communes > 1 ? 's' : '';
 
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/agir/federations" className="hover:text-brand">
-          ← Fédérations
-        </Link>
+        <TexteEditableAdmin
+          cle="federations.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste federations"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/agir/federations" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
       <header className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -69,9 +91,36 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
       </header>
       <Card variant="ombre" className="mt-6">
         <p className="text-sm text-text-2">
-          <strong>{federation.nombre_communes}</strong> commune
-          {federation.nombre_communes > 1 ? 's' : ''} rattachée
-          {federation.nombre_communes > 1 ? 's' : ''}.
+          <strong>{federation.nombre_communes}</strong>{' '}
+          <TexteEditableAdmin
+            cle="federations.fiche.commune_label"
+            valeurInitiale={communeLabel.valeurMd}
+            estAdmin={estAdmin}
+            libelle="label commune (singulier, le 's' s'ajoute automatiquement au pluriel)"
+            longueurMax={30}
+          >
+            {(t) => (
+              <>
+                {t}
+                {pluriel}
+              </>
+            )}
+          </TexteEditableAdmin>{' '}
+          <TexteEditableAdmin
+            cle="federations.fiche.rattachee_label"
+            valeurInitiale={rattacheeLabel.valeurMd}
+            estAdmin={estAdmin}
+            libelle="label rattachee (singulier, le 's' s'ajoute automatiquement au pluriel)"
+            longueurMax={30}
+          >
+            {(t) => (
+              <>
+                {t}
+                {pluriel}
+              </>
+            )}
+          </TexteEditableAdmin>
+          .
         </p>
       </Card>
 

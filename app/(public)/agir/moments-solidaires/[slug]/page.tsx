@@ -3,10 +3,12 @@ import { annulerMomentAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiperMoment } from '@/components/moments/BoutonParticiperMoment';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { TYPES_MOMENTS, gabaritFlyerPortAPorte } from '@/lib/moments/config';
 import { listerTupperwaresDuMoment, momentSolidaireParSlug } from '@/lib/moments/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -14,6 +16,29 @@ import { CalendarRange, MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← Moments solidaires',
+  labelQuand: 'Quand',
+  labelJusquau: "Jusqu'au",
+  labelOu: 'Où',
+  labelParticipants: 'Participant·es',
+  sectionDescription: 'Description',
+  sectionRdvAmorce: 'Les',
+  sectionRdvFin: 'RDV de ce cycle',
+  flyerTitre: 'Flyer généré (sans écriture inclusive — accessibilité tactique §7C)',
+  flyerNote:
+    "Microcopie volontairement non-inclusive pour l'usage flyer (cf. doctrine §7C). Le reste du site reste inclusif.",
+  sectionParticiper: 'Participer',
+  alertNonConnecteAmorce: 'Tu peux participer sans laisser tes coordonnées, ou',
+  alertNonConnecteLien: 'te connecter',
+  alertNonConnecteFin: 'pour suivre tes engagements.',
+  trackerTitre: 'Tracker Tupperwares (organisateurice uniquement)',
+  trackerEmptyTitre: 'Aucun Tupperware emporté',
+  trackerEmptyCorps:
+    "Le tracker note les Tupperwares emportés par les participant·es au repas solidaire pour la boucle d'engagement (cf. doctrine §7C).",
+  adminSectionTitre: 'Actions admin',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -51,12 +76,75 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 }
 
 export default async function PageDetailMoment({ params }: PageDetailProps) {
-  const estAdmin = await estAdminCourant();
   const { slug } = await params;
-  const moment = await momentSolidaireParSlug(slug);
+  const [
+    estAdmin,
+    moment,
+    session,
+    retour,
+    labelQuand,
+    labelJusquau,
+    labelOu,
+    labelParticipants,
+    sectionDescription,
+    sectionRdvAmorce,
+    sectionRdvFin,
+    flyerTitre,
+    flyerNote,
+    sectionParticiper,
+    alertNonConnecteAmorce,
+    alertNonConnecteLien,
+    alertNonConnecteFin,
+    trackerTitre,
+    trackerEmptyTitre,
+    trackerEmptyCorps,
+    adminSectionTitre,
+  ] = await Promise.all([
+    estAdminCourant(),
+    momentSolidaireParSlug(slug),
+    getSession(),
+    lireContenuEditorial('moments.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('moments.fiche.label_quand', { valeurMd: FALLBACKS.labelQuand }),
+    lireContenuEditorial('moments.fiche.label_jusquau', { valeurMd: FALLBACKS.labelJusquau }),
+    lireContenuEditorial('moments.fiche.label_ou', { valeurMd: FALLBACKS.labelOu }),
+    lireContenuEditorial('moments.fiche.label_participants', {
+      valeurMd: FALLBACKS.labelParticipants,
+    }),
+    lireContenuEditorial('moments.fiche.section_description', {
+      valeurMd: FALLBACKS.sectionDescription,
+    }),
+    lireContenuEditorial('moments.fiche.section_rdv_amorce', {
+      valeurMd: FALLBACKS.sectionRdvAmorce,
+    }),
+    lireContenuEditorial('moments.fiche.section_rdv_fin', { valeurMd: FALLBACKS.sectionRdvFin }),
+    lireContenuEditorial('moments.fiche.flyer_titre', { valeurMd: FALLBACKS.flyerTitre }),
+    lireContenuEditorial('moments.fiche.flyer_note', { valeurMd: FALLBACKS.flyerNote }),
+    lireContenuEditorial('moments.fiche.section_participer', {
+      valeurMd: FALLBACKS.sectionParticiper,
+    }),
+    lireContenuEditorial('moments.fiche.alert_non_connecte_amorce', {
+      valeurMd: FALLBACKS.alertNonConnecteAmorce,
+    }),
+    lireContenuEditorial('moments.fiche.alert_non_connecte_lien', {
+      valeurMd: FALLBACKS.alertNonConnecteLien,
+    }),
+    lireContenuEditorial('moments.fiche.alert_non_connecte_fin', {
+      valeurMd: FALLBACKS.alertNonConnecteFin,
+    }),
+    lireContenuEditorial('moments.fiche.tracker_titre', { valeurMd: FALLBACKS.trackerTitre }),
+    lireContenuEditorial('moments.fiche.tracker_empty_titre', {
+      valeurMd: FALLBACKS.trackerEmptyTitre,
+    }),
+    lireContenuEditorial('moments.fiche.tracker_empty_corps', {
+      valeurMd: FALLBACKS.trackerEmptyCorps,
+    }),
+    lireContenuEditorial('moments.fiche.admin_section_titre', {
+      valeurMd: FALLBACKS.adminSectionTitre,
+    }),
+  ]);
+
   if (moment === null) notFound();
 
-  const session = await getSession();
   const estOrganisateurice = session?.userId === moment.createurice_id;
   const tupperwares = estOrganisateurice ? await listerTupperwaresDuMoment(moment.id) : [];
   const config = TYPES_MOMENTS[moment.type];
@@ -73,9 +161,19 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/agir/moments-solidaires" className="hover:text-brand">
-          ← Moments solidaires
-        </Link>
+        <TexteEditableAdmin
+          cle="moments.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste moments"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/agir/moments-solidaires" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-6">
@@ -100,11 +198,28 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
           <div className="flex items-start gap-3">
             <CalendarRange size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Quand</p>
+              <TexteEditableAdmin
+                cle="moments.fiche.label_quand"
+                valeurInitiale={labelQuand.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Quand"
+                longueurMax={20}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">{FORMATEUR_LONG.format(new Date(moment.commence_le))}</p>
               {moment.termine_le !== null ? (
                 <p className="text-sm text-text-3">
-                  Jusqu'au {FORMATEUR_LONG.format(new Date(moment.termine_le))}
+                  <TexteEditableAdmin
+                    cle="moments.fiche.label_jusquau"
+                    valeurInitiale={labelJusquau.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="prefixe 'Jusqu'au'"
+                    longueurMax={20}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>{' '}
+                  {FORMATEUR_LONG.format(new Date(moment.termine_le))}
                 </p>
               ) : null}
             </div>
@@ -112,14 +227,30 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
           <div className="flex items-start gap-3">
             <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Où</p>
+              <TexteEditableAdmin
+                cle="moments.fiche.label_ou"
+                valeurInitiale={labelOu.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Ou"
+                longueurMax={20}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">{moment.lieu}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Participant·es</p>
+              <TexteEditableAdmin
+                cle="moments.fiche.label_participants"
+                valeurInitiale={labelParticipants.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Participant·es"
+                longueurMax={30}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">
                 {moment.nombre_participants}
                 {moment.capacite_max !== null ? ` / ${moment.capacite_max}` : ''}
@@ -129,9 +260,19 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
         </Card>
 
         <section className="grid gap-3">
-          <Heading niveau={2} apparenceComme={3}>
-            Description
-          </Heading>
+          <TexteEditableAdmin
+            cle="moments.fiche.section_description"
+            valeurInitiale={sectionDescription.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section description"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={3}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
             {moment.description}
           </div>
@@ -140,7 +281,25 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
         {moment.enfants.length > 0 ? (
           <section className="grid gap-3">
             <Heading niveau={2} apparenceComme={3}>
-              Les {moment.enfants.length} RDV de ce cycle
+              <TexteEditableAdmin
+                cle="moments.fiche.section_rdv_amorce"
+                valeurInitiale={sectionRdvAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce titre RDV (avant le compteur)"
+                longueurMax={20}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
+              {moment.enfants.length}{' '}
+              <TexteEditableAdmin
+                cle="moments.fiche.section_rdv_fin"
+                valeurInitiale={sectionRdvFin.valeurMd}
+                estAdmin={estAdmin}
+                libelle="fin titre RDV (apres le compteur)"
+                longueurMax={50}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
             </Heading>
             <ul className="grid gap-3">
               {moment.enfants.map((enfant) => (
@@ -167,48 +326,145 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
 
         {flyer !== null ? (
           <Card variant="ombre" className="grid gap-2 bg-surface-2">
-            <Heading niveau={2} apparenceComme={4}>
-              Flyer généré (sans écriture inclusive — accessibilité tactique §7C)
-            </Heading>
+            <TexteEditableAdmin
+              cle="moments.fiche.flyer_titre"
+              valeurInitiale={flyerTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section flyer genere"
+              longueurMax={100}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={4}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
             <pre className="whitespace-pre-wrap font-mono text-xs text-text-2">{flyer}</pre>
-            <p className="text-xs text-text-3">
-              Microcopie volontairement non-inclusive pour l'usage flyer (cf. doctrine §7C). Le
-              reste du site reste inclusif.
-            </p>
+            <TexteEditableAdmin
+              cle="moments.fiche.flyer_note"
+              valeurInitiale={flyerNote.valeurMd}
+              estAdmin={estAdmin}
+              libelle="note bas du flyer"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <p className="text-xs text-text-3">{t}</p>}
+            </TexteEditableAdmin>
           </Card>
         ) : null}
 
         {session !== null && !estOrganisateurice && moment.statut === 'annonce' ? (
           <Card variant="eleve" className="grid gap-3">
-            <Heading niveau={2} apparenceComme={4}>
-              Participer
-            </Heading>
+            <TexteEditableAdmin
+              cle="moments.fiche.section_participer"
+              valeurInitiale={sectionParticiper.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section Participer (connecte)"
+              longueurMax={30}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={4}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
             <BoutonParticiperMoment momentId={moment.id} participerMoment={participerMoment} />
           </Card>
         ) : null}
 
         {session === null ? (
-          <Alert variant="info" titre="Participer">
-            Tu peux participer sans laisser tes coordonnées, ou{' '}
-            <Link
-              href={`/connexion?prochaine=/agir/moments-solidaires/${moment.slug}`}
-              className="underline"
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="moments.fiche.section_participer"
+                valeurInitiale={sectionParticiper.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte Participer (non connecte) - cle partagee avec section connectee"
+                longueurMax={30}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="moments.fiche.alert_non_connecte_amorce"
+              valeurInitiale={alertNonConnecteAmorce.valeurMd}
+              estAdmin={estAdmin}
+              libelle="amorce alerte (avant le lien)"
+              multilignes
+              longueurMax={200}
             >
-              te connecter
-            </Link>{' '}
-            pour suivre tes engagements.
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
+            <TexteEditableAdmin
+              cle="moments.fiche.alert_non_connecte_lien"
+              valeurInitiale={alertNonConnecteLien.valeurMd}
+              estAdmin={estAdmin}
+              libelle="libelle du lien (te connecter)"
+              longueurMax={40}
+            >
+              {(t) => (
+                <Link
+                  href={`/connexion?prochaine=/agir/moments-solidaires/${moment.slug}`}
+                  className="underline"
+                >
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>{' '}
+            <TexteEditableAdmin
+              cle="moments.fiche.alert_non_connecte_fin"
+              valeurInitiale={alertNonConnecteFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="fin alerte (apres le lien)"
+              longueurMax={100}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : null}
 
         {estOrganisateurice ? (
           <section className="grid gap-3">
-            <Heading niveau={2} apparenceComme={3}>
-              Tracker Tupperwares (organisateurice uniquement)
-            </Heading>
+            <TexteEditableAdmin
+              cle="moments.fiche.tracker_titre"
+              valeurInitiale={trackerTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section tracker Tupperwares"
+              longueurMax={80}
+            >
+              {(t) => (
+                <Heading niveau={2} apparenceComme={3}>
+                  {t}
+                </Heading>
+              )}
+            </TexteEditableAdmin>
             {tupperwares.length === 0 ? (
-              <Alert variant="info" titre="Aucun Tupperware emporté">
-                Le tracker note les Tupperwares emportés par les participant·es au repas solidaire
-                pour la boucle d'engagement (cf. doctrine §7C).
+              <Alert
+                variant="info"
+                titre={
+                  <TexteEditableAdmin
+                    cle="moments.fiche.tracker_empty_titre"
+                    valeurInitiale={trackerEmptyTitre.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="titre alerte tracker vide"
+                    longueurMax={60}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                }
+              >
+                <TexteEditableAdmin
+                  cle="moments.fiche.tracker_empty_corps"
+                  valeurInitiale={trackerEmptyCorps.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="corps alerte tracker vide"
+                  multilignes
+                  longueurMax={300}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
               </Alert>
             ) : (
               <ul className="grid gap-2">
@@ -249,9 +505,19 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
           aria-label="Actions admin"
           className="mt-12 grid gap-3 border-t border-border pt-8"
         >
-          <Heading niveau={2} apparenceComme={4}>
-            Actions admin
-          </Heading>
+          <TexteEditableAdmin
+            cle="moments.fiche.admin_section_titre"
+            valeurInitiale={adminSectionTitre.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section actions admin"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Heading niveau={2} apparenceComme={4}>
+                {t}
+              </Heading>
+            )}
+          </TexteEditableAdmin>
           {moment.statut !== 'retire' ? (
             <BoutonArchiverEntite
               id={moment.id}

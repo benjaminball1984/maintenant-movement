@@ -6,17 +6,34 @@ import {
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCommune';
 import { ListeMembres } from '@/components/communes/ListeMembres';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { type MembreCommune, listerMembresCommune } from '@/lib/communes/membres';
 import { communeParSlug } from '@/lib/communes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const FALLBACKS = {
+  retour: '← Communes',
+  badgeLibre: 'Commune libre',
+  badgeStandard: 'Commune',
+  labelCodePostal: 'Code postal',
+  labelAdherents: 'Adhérent·es',
+  alertNonConnecteTitre: 'Connecte-toi pour rejoindre',
+  alertNonConnecteLien: 'Connexion',
+  alertNonConnecteFin: 'pour rejoindre cette commune ou la quitter.',
+  sectionMembres: 'Membres',
+  membresHint:
+    'Visible uniquement par les membres de cette commune. Clique sur un nom pour voir le profil, ou envoie un message.',
+};
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -41,7 +58,45 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
 
 export default async function PageDetailCommune({ params }: PageDetailProps) {
   const { slug } = await params;
-  const commune = await communeParSlug(slug);
+  const [
+    commune,
+    estAdmin,
+    retour,
+    badgeLibre,
+    badgeStandard,
+    labelCodePostal,
+    labelAdherents,
+    alertNonConnecteTitre,
+    alertNonConnecteLien,
+    alertNonConnecteFin,
+    sectionMembres,
+    membresHint,
+  ] = await Promise.all([
+    communeParSlug(slug),
+    estAdminCourant(),
+    lireContenuEditorial('communes.fiche.retour', { valeurMd: FALLBACKS.retour }),
+    lireContenuEditorial('communes.fiche.badge_libre', { valeurMd: FALLBACKS.badgeLibre }),
+    lireContenuEditorial('communes.fiche.badge_standard', { valeurMd: FALLBACKS.badgeStandard }),
+    lireContenuEditorial('communes.fiche.label_code_postal', {
+      valeurMd: FALLBACKS.labelCodePostal,
+    }),
+    lireContenuEditorial('communes.fiche.label_adherents', {
+      valeurMd: FALLBACKS.labelAdherents,
+    }),
+    lireContenuEditorial('communes.fiche.alert_non_connecte_titre', {
+      valeurMd: FALLBACKS.alertNonConnecteTitre,
+    }),
+    lireContenuEditorial('communes.fiche.alert_non_connecte_lien', {
+      valeurMd: FALLBACKS.alertNonConnecteLien,
+    }),
+    lireContenuEditorial('communes.fiche.alert_non_connecte_fin', {
+      valeurMd: FALLBACKS.alertNonConnecteFin,
+    }),
+    lireContenuEditorial('communes.fiche.section_membres', {
+      valeurMd: FALLBACKS.sectionMembres,
+    }),
+    lireContenuEditorial('communes.fiche.membres_hint', { valeurMd: FALLBACKS.membresHint }),
+  ]);
   if (commune === null) notFound();
 
   const session = await getSession();
@@ -73,17 +128,45 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
-        <Link href="/agir/communes" className="hover:text-brand">
-          ← Communes
-        </Link>
+        <TexteEditableAdmin
+          cle="communes.fiche.retour"
+          valeurInitiale={retour.valeurMd}
+          estAdmin={estAdmin}
+          libelle="lien retour vers liste communes"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Link href="/agir/communes" className="hover:text-brand">
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </p>
 
       <article className="grid gap-6">
         <header className="grid gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <Badge variant={estLibre ? 'accent' : 'brand'}>
-              {estLibre ? 'Commune libre' : 'Commune'}
-            </Badge>
+            {estLibre ? (
+              <TexteEditableAdmin
+                cle="communes.fiche.badge_libre"
+                valeurInitiale={badgeLibre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Commune libre"
+                longueurMax={30}
+              >
+                {(t) => <Badge variant="accent">{t}</Badge>}
+              </TexteEditableAdmin>
+            ) : (
+              <TexteEditableAdmin
+                cle="communes.fiche.badge_standard"
+                valeurInitiale={badgeStandard.valeurMd}
+                estAdmin={estAdmin}
+                libelle="badge Commune standard"
+                longueurMax={30}
+              >
+                {(t) => <Badge variant="brand">{t}</Badge>}
+              </TexteEditableAdmin>
+            )}
             <BoutonAdminEditer href={`/admin/national?onglet=communes&id=${commune.id}`}>
               Admin
             </BoutonAdminEditer>
@@ -99,7 +182,17 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             <div className="flex items-start gap-3">
               <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
               <div>
-                <p className="text-xs font-bold uppercase tracking-cap text-text-3">Code postal</p>
+                <TexteEditableAdmin
+                  cle="communes.fiche.label_code_postal"
+                  valeurInitiale={labelCodePostal.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="label Code postal"
+                  longueurMax={30}
+                >
+                  {(t) => (
+                    <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>
+                  )}
+                </TexteEditableAdmin>
                 <p className="text-text-1">{commune.code_postal_principal}</p>
               </div>
             </div>
@@ -107,21 +200,60 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
           <div className="flex items-start gap-3">
             <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-cap text-text-3">Adhérent·es</p>
+              <TexteEditableAdmin
+                cle="communes.fiche.label_adherents"
+                valeurInitiale={labelAdherents.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label Adherent·es"
+                longueurMax={30}
+              >
+                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+              </TexteEditableAdmin>
               <p className="text-text-1">{commune.nombre_adherents}</p>
             </div>
           </div>
         </Card>
 
         {session === null ? (
-          <Alert variant="info" titre="Connecte-toi pour rejoindre">
-            <Link
-              href={`/connexion?prochaine=/agir/communes/${commune.slug}`}
-              className="underline"
+          <Alert
+            variant="info"
+            titre={
+              <TexteEditableAdmin
+                cle="communes.fiche.alert_non_connecte_titre"
+                valeurInitiale={alertNonConnecteTitre.valeurMd}
+                estAdmin={estAdmin}
+                libelle="titre alerte non connecte"
+                longueurMax={60}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>
+            }
+          >
+            <TexteEditableAdmin
+              cle="communes.fiche.alert_non_connecte_lien"
+              valeurInitiale={alertNonConnecteLien.valeurMd}
+              estAdmin={estAdmin}
+              libelle="libelle lien Connexion"
+              longueurMax={40}
             >
-              Connexion
-            </Link>{' '}
-            pour rejoindre cette commune ou la quitter.
+              {(t) => (
+                <Link
+                  href={`/connexion?prochaine=/agir/communes/${commune.slug}`}
+                  className="underline"
+                >
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>{' '}
+            <TexteEditableAdmin
+              cle="communes.fiche.alert_non_connecte_fin"
+              valeurInitiale={alertNonConnecteFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="fin alerte non connecte (apres le lien)"
+              longueurMax={150}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Alert>
         ) : (
           <BoutonRejoindreCommune
@@ -135,13 +267,29 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
 
         {session !== null && dejaMembre && membres.length > 0 ? (
           <section className="grid gap-3">
-            <Heading niveau={2} className="text-lg">
-              Membres ({membres.length})
-            </Heading>
-            <p className="text-sm text-text-3">
-              Visible uniquement par les membres de cette commune. Clique sur un nom pour voir le
-              profil, ou envoie un message.
-            </p>
+            <TexteEditableAdmin
+              cle="communes.fiche.section_membres"
+              valeurInitiale={sectionMembres.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre section Membres (le compteur s'ajoute apres)"
+              longueurMax={30}
+            >
+              {(t) => (
+                <Heading niveau={2} className="text-lg">
+                  {t} ({membres.length})
+                </Heading>
+              )}
+            </TexteEditableAdmin>
+            <TexteEditableAdmin
+              cle="communes.fiche.membres_hint"
+              valeurInitiale={membresHint.valeurMd}
+              estAdmin={estAdmin}
+              libelle="hint section Membres"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <p className="text-sm text-text-3">{t}</p>}
+            </TexteEditableAdmin>
             <ListeMembres membres={membres} moiId={session.userId} />
           </section>
         ) : null}
