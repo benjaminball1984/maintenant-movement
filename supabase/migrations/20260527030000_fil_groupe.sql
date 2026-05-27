@@ -107,6 +107,13 @@ create trigger fil_groupe_message_updated_at_trigger
 -- Centralise la vérification d'appartenance pour les policies RLS.
 -- Utilisée par fil_groupe_message et utilisable par d'autres entités
 -- transversales V2 ultérieures.
+--
+-- VERSION CORRIGÉE (intégrée directement depuis la migration de fix
+-- `20260527080000_est_membre_espace_fix.sql` après détection en review
+-- du bug : `appartenance_federation` lie une COMMUNE à une fédération,
+-- pas une personne directement, donc `personne_id` n'existe pas
+-- dessus). La migration de fix reste idempotente (CREATE OR REPLACE) :
+-- elle ré-applique le même corps, sans incidence.
 create or replace function public.est_membre_espace(
   espace_type_a_verifier text,
   espace_id_a_verifier uuid
@@ -127,23 +134,34 @@ as $$
       )
     when 'federation' then
       exists (
-        select 1 from public.appartenance_federation
-        where personne_id = auth.uid()
-          and federation_id = espace_id_a_verifier
-          and est_active = true
+        select 1
+        from public.appartenance_commune ac
+        join public.appartenance_federation af
+          on af.commune_id = ac.commune_id
+         and af.est_active = true
+        where ac.personne_id = auth.uid()
+          and ac.est_active = true
+          and af.federation_id = espace_id_a_verifier
       )
     when 'confederation' then
       exists (
-        select 1 from public.appartenance_confederation
-        where personne_id = auth.uid()
-          and confederation_id = espace_id_a_verifier
-          and est_active = true
+        select 1
+        from public.appartenance_commune ac
+        join public.appartenance_federation af
+          on af.commune_id = ac.commune_id
+         and af.est_active = true
+        join public.appartenance_confederation aconf
+          on aconf.federation_id = af.federation_id
+         and aconf.est_active = true
+        where ac.personne_id = auth.uid()
+          and ac.est_active = true
+          and aconf.confederation_id = espace_id_a_verifier
       )
     when 'gt_thematique' then
       exists (
         select 1 from public.appartenance_gt
         where personne_id = auth.uid()
-          and gt_id = espace_id_a_verifier
+          and gt_thematique_id = espace_id_a_verifier
           and est_active = true
       )
     -- Pour campagne et groupe_entraide_local : pas d'appartenance dédiée
@@ -156,7 +174,7 @@ as $$
 $$;
 
 comment on function public.est_membre_espace(text, uuid) is
-  'Vérifie si la personne connectée est membre d''un espace. Centralise les checks par espace_type.';
+  'Vérifie si la personne connectée est membre d''un espace. Centralise les checks par espace_type. V2.3.8 : jointures transitives pour federation/confederation, gt_thematique_id (et non gt_id).';
 
 -- ============================================================
 -- RLS

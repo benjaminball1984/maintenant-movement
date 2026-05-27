@@ -160,6 +160,11 @@ create trigger groupe_entraide_local_updated_at_trigger
 -- Posé en V2.2.1 avec un fallback `auth.uid() is not null` pour
 -- groupe_entraide_local (en l'absence de table d'appartenance). On
 -- remplace par la lecture de la table créée ci-dessus.
+--
+-- VERSION CORRIGÉE (intégrée directement depuis la migration de fix
+-- `20260527080000_est_membre_espace_fix.sql` après détection en review
+-- du bug fédération/confédération + gt_thematique_id). La migration
+-- de fix reste idempotente (CREATE OR REPLACE).
 create or replace function public.est_membre_espace(
   espace_type_a_verifier text,
   espace_id_a_verifier uuid
@@ -180,23 +185,34 @@ as $$
       )
     when 'federation' then
       exists (
-        select 1 from public.appartenance_federation
-        where personne_id = auth.uid()
-          and federation_id = espace_id_a_verifier
-          and est_active = true
+        select 1
+        from public.appartenance_commune ac
+        join public.appartenance_federation af
+          on af.commune_id = ac.commune_id
+         and af.est_active = true
+        where ac.personne_id = auth.uid()
+          and ac.est_active = true
+          and af.federation_id = espace_id_a_verifier
       )
     when 'confederation' then
       exists (
-        select 1 from public.appartenance_confederation
-        where personne_id = auth.uid()
-          and confederation_id = espace_id_a_verifier
-          and est_active = true
+        select 1
+        from public.appartenance_commune ac
+        join public.appartenance_federation af
+          on af.commune_id = ac.commune_id
+         and af.est_active = true
+        join public.appartenance_confederation aconf
+          on aconf.federation_id = af.federation_id
+         and aconf.est_active = true
+        where ac.personne_id = auth.uid()
+          and ac.est_active = true
+          and aconf.confederation_id = espace_id_a_verifier
       )
     when 'gt_thematique' then
       exists (
         select 1 from public.appartenance_gt
         where personne_id = auth.uid()
-          and gt_id = espace_id_a_verifier
+          and gt_thematique_id = espace_id_a_verifier
           and est_active = true
       )
     -- Désormais branché sur la vraie table (V2.3.2) :
