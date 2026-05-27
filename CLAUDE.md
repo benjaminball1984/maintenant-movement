@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 outillage admin : exports CSV complets + SEO + helpers purs)
-**Dernier chantier terminé** : V2.4.41 (`lib/pluriel.ts` + 12 tests) — sur `main` (tip `654dc4e`). 498 tests verts. Helpers `accorder` et `compter` pour remplacer `${n > 1 ? 's' : ''}` répété partout.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 syndication : RSS, helpers purs, T99CP)
+**Dernier chantier terminé** : V2.4.44 (`lib/format-t99cp.ts` + 10 tests) — sur `main` (tip `03a6d54`). 518 tests verts. Extraction du formaterT99CP avec BigInt pour préservation précision, suffixe configurable.
+**Dernier chantier terminé (antérieur)** : V2.4.43 (`lib/texte-apercu.ts` + 10 tests) — sur `main` (tip `a979dd8`). 3 helpers : `tronquerCaracteres` (respect mots), `tronquerMots`, alias `apercu`.
+**Dernier chantier terminé (antérieur)** : V2.4.42 (RSS feed `/feed.xml` + auto-discovery) — sur `main` (tip `8cb29ed`). 30 articles, format RSS 2.0 + Atom-compatible, cache CDN 15min, `<link rel="alternate" type="application/rss+xml">` dans le `<head>` du site.
+**Dernier chantier terminé (antérieur)** : V2.4.41 (`lib/pluriel.ts` + 12 tests) — sur `main` (tip `654dc4e`). 498 tests verts. Helpers `accorder` et `compter` pour remplacer `${n > 1 ? 's' : ''}` répété partout.
 **Dernier chantier terminé (antérieur)** : V2.4.40 (sitemap.xml dynamique + robots.txt) — sur `main` (tip `c3e17b7`). 35 pages statiques + URLs publiées agrégées en parallèle, lastmod = updated_at, cache CDN 1h ; robots.txt cache 24h.
 **Dernier chantier terminé (antérieur)** : V2.4.39 (exports CSV cagnottes + mobilisations) — sur `main` (tip `ac95df1`). Cagnottes avec montants agrégés via `cagnotte_compteur`.
 **Dernier chantier terminé (antérieur)** : V2.4.38 (export CSV pétitions) — sur `main` (tip `11a6bbf`). 8 colonnes avec `nombre_signatures` via jointure sur `petition_compteur`.
