@@ -2,6 +2,7 @@
 
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
+import { poserNotification } from '@/lib/notification';
 import { type CommentaireAffiche, listerCommentaires } from '@/lib/reseau/requetes';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -164,6 +165,32 @@ export async function basculerSoutien(
     .from('reaction_reseau')
     .insert({ post_id: postId, personne_id: session.userId });
   if (error !== null) return { ok: false, message: `Action impossible : ${error.message}` };
+
+  // V2.3.30 : notification cloche au·à la créateurice du post.
+  try {
+    const { data: post } = await supabase
+      .from('post_reseau')
+      .select('auteurice_id')
+      .eq('id', postId)
+      .maybeSingle();
+    if (post !== null) {
+      await poserNotification(
+        {
+          destinatairePersonneId: post.auteurice_id,
+          type: 'reseau_post_soutenu',
+          titre: 'Nouveau soutien',
+          message: 'Quelqu’un a soutenu ta publication.',
+          href: '/s-informer/reseau',
+          cibleId: postId,
+          cibleTable: 'post_reseau',
+        },
+        session.userId,
+      );
+    }
+  } catch (erreur) {
+    console.warn('[soutenir] notification ignorée :', erreur);
+  }
+
   revalidatePath('/s-informer/reseau');
   return { ok: true, soutenu: true };
 }
@@ -244,18 +271,18 @@ export async function envoyerMessage(donneesBrutes: unknown): Promise<ResultatAc
     return { ok: false, message: `Envoi impossible : ${error.message}` };
   }
 
-  // Notification cloche best-effort (canal primaire = messagerie, cf. spec §10).
-  try {
-    await supabase.from('notification').insert({
-      destinataire_id: donnees.destinataire_id,
-      type: 'dm',
+  // V2.3.30 : notification cloche typée (canal 1 du CDC §7).
+  await poserNotification(
+    {
+      destinatairePersonneId: donnees.destinataire_id,
+      type: 'reseau_message_recu',
       titre: 'Nouveau message',
       message: donnees.texte.slice(0, 140),
       href: '/s-informer/reseau/messages',
-    });
-  } catch (erreur) {
-    console.warn('[envoyerMessage] notification ignorée :', erreur);
-  }
+      cibleTable: 'message_reseau',
+    },
+    session.userId,
+  );
 
   revalidatePath('/s-informer/reseau/messages');
   return { ok: true };
@@ -365,14 +392,20 @@ async function notifierAuteuricePost(
       .select('auteurice_id')
       .eq('id', postId)
       .maybeSingle();
-    if (post === null || post.auteurice_id === commentateurId) return;
-    await supabase.from('notification').insert({
-      destinataire_id: post.auteurice_id,
-      type: 'autre',
-      titre: 'Nouveau commentaire',
-      message: 'Quelqu’un a commenté ta publication.',
-      href: '/s-informer/reseau',
-    });
+    if (post === null) return;
+    // V2.3.30 : type spécifique au lieu de 'autre'.
+    await poserNotification(
+      {
+        destinatairePersonneId: post.auteurice_id,
+        type: 'reseau_post_commente',
+        titre: 'Nouveau commentaire',
+        message: 'Quelqu’un a commenté ta publication.',
+        href: '/s-informer/reseau',
+        cibleId: postId,
+        cibleTable: 'post_reseau',
+      },
+      commentateurId,
+    );
   } catch (erreur) {
     console.warn('[commenter] notification ignorée :', erreur);
   }
