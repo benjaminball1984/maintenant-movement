@@ -166,6 +166,65 @@ export async function listerReservationsDuDemandeur(
   return data.map(ligneEnReservation);
 }
 
+/**
+ * Liste les réservations REÇUES sur les offres dont la personne est
+ * créatrice (cycle V2 V2.3.13). FK polymorphe gérée applicativement :
+ * on charge en parallèle les ids des offres possédées (3 requêtes),
+ * puis les `reservation` correspondantes (jusqu'à 3 requêtes), et on
+ * concatène côté TS avec un tri décroissant par date.
+ */
+export async function listerReservationsRecuesParProprietaire(
+  proprietairePersonneId: string,
+): Promise<Reservation[]> {
+  const supabase = await getSupabaseServer();
+
+  const [offresEntraide, servicesSel, locationsMutu] = await Promise.all([
+    supabase.from('offre_entraide').select('id').eq('createurice_id', proprietairePersonneId),
+    supabase.from('service_sel').select('id').eq('createurice_id', proprietairePersonneId),
+    supabase
+      .from('location_mutualisee')
+      .select('id')
+      .eq('organisateur_personne_id', proprietairePersonneId),
+  ]);
+
+  const idsEntraide = (offresEntraide.data ?? []).map((o) => o.id);
+  const idsSel = (servicesSel.data ?? []).map((s) => s.id);
+  const idsLoc = (locationsMutu.data ?? []).map((l) => l.id);
+
+  if (idsEntraide.length === 0 && idsSel.length === 0 && idsLoc.length === 0) {
+    return [];
+  }
+
+  const reservations: Reservation[] = [];
+  if (idsEntraide.length > 0) {
+    const { data } = await supabase
+      .from('reservation')
+      .select('*')
+      .in('offre_type', ['transport_covoiturage', 'hebergement', 'pret'])
+      .in('offre_id', idsEntraide);
+    for (const l of data ?? []) reservations.push(ligneEnReservation(l));
+  }
+  if (idsSel.length > 0) {
+    const { data } = await supabase
+      .from('reservation')
+      .select('*')
+      .eq('offre_type', 'service_sel')
+      .in('offre_id', idsSel);
+    for (const l of data ?? []) reservations.push(ligneEnReservation(l));
+  }
+  if (idsLoc.length > 0) {
+    const { data } = await supabase
+      .from('reservation')
+      .select('*')
+      .eq('offre_type', 'location_mutualisee')
+      .in('offre_id', idsLoc);
+    for (const l of data ?? []) reservations.push(ligneEnReservation(l));
+  }
+
+  reservations.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return reservations;
+}
+
 function ligneEnReservation(ligne: {
   id: string;
   offre_type: string;

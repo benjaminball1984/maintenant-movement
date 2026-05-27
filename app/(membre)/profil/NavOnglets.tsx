@@ -24,7 +24,8 @@ const ONGLETS = [
   { slug: 'informations', libelle: 'Informations' },
   { slug: 'communes', libelle: 'Communes' },
   { slug: 'contributions', libelle: 'Contributions' },
-  { slug: 'reservations', libelle: 'Réservations' },
+  { slug: 'reservations', libelle: 'Mes réservations' },
+  { slug: 'demandes-reservations', libelle: 'Demandes reçues' },
   { slug: 'notifications', libelle: 'Notifications' },
   { slug: 'confidentialite', libelle: 'Confidentialité' },
 ] as const;

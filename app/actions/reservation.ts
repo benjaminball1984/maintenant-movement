@@ -200,6 +200,108 @@ async function chargerContexteOffre(
 }
 
 // ============================================================
+// Actions côté propriétaire d'offre (V2.3.13)
+// ============================================================
+
+export type ResultatActionProprietaire = { ok: true } | { ok: false; message: string };
+
+/**
+ * Helper interne : vérifie que la personne connectée est bien
+ * propriétaire de l'offre référencée par la réservation. Retourne le
+ * statut actuel pour la suite de la logique.
+ */
+async function chargerReservationCommeProprietaire(
+  reservationId: string,
+  sessionUserId: string,
+): Promise<
+  | {
+      ok: true;
+      statut: 'proposee' | 'acceptee' | 'refusee' | 'realisee' | 'confirmee' | 'annulee' | 'litige';
+    }
+  | { ok: false; message: string }
+> {
+  const supabase = await getSupabaseServer();
+  const { data: reservation } = await supabase
+    .from('reservation')
+    .select('id, offre_type, offre_id, statut')
+    .eq('id', reservationId)
+    .maybeSingle();
+  if (reservation === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  const { createurId } = await chargerContexteOffre(
+    reservation.offre_type as OffreTypeReservation,
+    reservation.offre_id,
+  );
+  if (createurId !== sessionUserId) {
+    return { ok: false, message: 'Tu n’es pas propriétaire de cette offre.' };
+  }
+  return {
+    ok: true,
+    statut: reservation.statut as
+      | 'proposee'
+      | 'acceptee'
+      | 'refusee'
+      | 'realisee'
+      | 'confirmee'
+      | 'annulee'
+      | 'litige',
+  };
+}
+
+interface OptionsActionProprietaire {
+  reservationId: string;
+  motif?: string;
+  cheminRevalidation?: string;
+}
+
+async function executerTransitionProprietaire(
+  options: OptionsActionProprietaire,
+  cible: 'acceptee' | 'refusee' | 'realisee',
+): Promise<ResultatActionProprietaire> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+  const verif = await chargerReservationCommeProprietaire(options.reservationId, session.userId);
+  if (!verif.ok) return verif;
+  if (!transitionAutorisee(verif.statut, cible)) {
+    return {
+      ok: false,
+      message: `Transition « ${verif.statut} → ${cible} » non autorisée par la machine à états D8.`,
+    };
+  }
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: cible,
+    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+  });
+  if (!resultat.ok) return { ok: false, message: resultat.message };
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
+}
+
+export async function accepterReservationAction(
+  options: OptionsActionProprietaire,
+): Promise<ResultatActionProprietaire> {
+  return executerTransitionProprietaire(options, 'acceptee');
+}
+
+export async function refuserReservationAction(
+  options: OptionsActionProprietaire,
+): Promise<ResultatActionProprietaire> {
+  return executerTransitionProprietaire(options, 'refusee');
+}
+
+export async function marquerReservationRealiseeAction(
+  options: OptionsActionProprietaire,
+): Promise<ResultatActionProprietaire> {
+  return executerTransitionProprietaire(options, 'realisee');
+}
+
+// ============================================================
 // Annulation d'une réservation par le demandeur (V2.3.11)
 // ============================================================
 
