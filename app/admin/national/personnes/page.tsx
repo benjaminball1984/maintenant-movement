@@ -53,7 +53,14 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
         Personnes
       </Heading>
       <p className="mt-2 text-sm text-text-3">
-        Lecture seule. Recherche par email / prénom / nom. Limite 100 résultats par page.
+        Lecture seule. Recherche par email / prénom / nom. Limite 100 résultats par page.{' '}
+        <a
+          href="/admin/national/personnes/export.csv"
+          className="text-brand hover:underline"
+          download
+        >
+          Export CSV (5000 max) ↓
+        </a>
       </p>
 
       <form
