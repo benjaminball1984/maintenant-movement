@@ -38,15 +38,27 @@ export function CarteCommunesReference() {
       container: conteneurRef.current,
       style: {
         version: 8,
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
-          osm: {
+          // CARTO Voyager : tiles raster libres, CORS-OK, design doux et
+          // adapté aux superpositions de points. Tile.openstreetmap.org
+          // bloque les requêtes depuis les sites tiers sans User-Agent
+          // identifié — pas adapté à un site public moderne.
+          carto: {
             type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tiles: [
+              'https://cartodb-basemaps-a.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
+              'https://cartodb-basemaps-b.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
+              'https://cartodb-basemaps-c.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
+              'https://cartodb-basemaps-d.global.ssl.fastly.net/voyager/{z}/{x}/{y}.png',
+            ],
             tileSize: 256,
-            attribution: '© OpenStreetMap',
+            attribution:
+              '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+            maxzoom: 19,
           },
         },
-        layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+        layers: [{ id: 'carto', type: 'raster', source: 'carto' }],
       },
       center: CENTRE_FRANCE,
       zoom: ZOOM_INITIAL,
@@ -67,7 +79,9 @@ export function CarteCommunesReference() {
         clusterMaxZoom: 12,
       });
 
-      // Clusters : cercle dont la taille et la couleur croissent avec le nombre.
+      // Clusters : cercle plus discret + nombre affiché à l'intérieur.
+      // Tailles réduites (12/16/22 vs 16/22/30 avant) + transparence douce.
+      // Couleurs : dégradé violet → magenta de la palette brand.
       carte.addLayer({
         id: 'clusters',
         type: 'circle',
@@ -77,30 +91,49 @@ export function CarteCommunesReference() {
           'circle-color': [
             'step',
             ['get', 'point_count'],
-            '#9333ea',
+            '#a78bfa', // violet clair (< 100)
             100,
-            '#7c3aed',
+            '#8b5cf6', // violet (100-999)
             1000,
-            '#6d28d9',
+            '#7c3aed', // violet foncé (>= 1000)
           ],
-          'circle-radius': ['step', ['get', 'point_count'], 16, 100, 22, 1000, 30],
-          'circle-opacity': 0.85,
-          'circle-stroke-width': 2,
+          'circle-radius': ['step', ['get', 'point_count'], 12, 100, 16, 1000, 22],
+          'circle-opacity': 0.78,
+          'circle-stroke-width': 1.5,
           'circle-stroke-color': '#ffffff',
+          'circle-stroke-opacity': 0.95,
         },
       });
 
-      // Communes isolées : petit point cliquable.
+      // Label : nombre de communes au centre du cluster, blanc, gras.
+      carte.addLayer({
+        id: 'clusters-count',
+        type: 'symbol',
+        source: 'communes',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': ['get', 'point_count_abbreviated'],
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-size': ['step', ['get', 'point_count'], 11, 100, 12, 1000, 13],
+          'text-allow-overlap': true,
+        },
+        paint: {
+          'text-color': '#ffffff',
+        },
+      });
+
+      // Communes isolées : petit point cliquable plus discret.
       carte.addLayer({
         id: 'commune-point',
         type: 'circle',
         source: 'communes',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': '#9333ea',
-          'circle-radius': 6,
-          'circle-stroke-width': 1.5,
+          'circle-color': '#a78bfa',
+          'circle-radius': 4,
+          'circle-stroke-width': 1,
           'circle-stroke-color': '#ffffff',
+          'circle-opacity': 0.85,
         },
       });
 
