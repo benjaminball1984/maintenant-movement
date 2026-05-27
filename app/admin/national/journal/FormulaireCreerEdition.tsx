@@ -2,6 +2,7 @@
 
 import { creerEditionJournalAction } from '@/app/actions/journal';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
+import { ChampImageObjet } from '@/components/ui/ChampImageObjet';
 import { useState } from 'react';
 
 /**
@@ -115,16 +116,13 @@ export function FormulaireCreerEdition({ numeroSuggere }: { numeroSuggere: numbe
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="ed-img">Image de couverture (URL)</Label>
-        <Input
-          id="ed-img"
-          type="url"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://…"
-        />
-      </div>
+      <ChampImageObjet
+        name="ed-img"
+        libelle="Image de couverture (optionnelle)"
+        prefixeChemin="journal-affiche"
+        valeurInitiale={imageUrl}
+        onChange={(url) => setImageUrl(url ?? '')}
+      />
 
       <div>
         <Label htmlFor="ed-contenu">Contenu (Markdown)</Label>
