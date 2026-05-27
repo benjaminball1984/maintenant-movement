@@ -9,11 +9,17 @@ import {
 } from '@/lib/reseau/identite';
 import {
   type EntreeJournalReservation,
+  type OffreTypeReservation,
   type StatutReservation,
   listerJournauxReservations,
   listerReservationsRecuesParProprietaire,
 } from '@/lib/reservation';
-import { STATUTS_FILTRES_RESERVATION, estFiltreStatutValide } from '@/lib/reservation-filtres';
+import {
+  STATUTS_FILTRES_RESERVATION,
+  TYPES_FILTRES_OFFRE,
+  estFiltreStatutValide,
+  estFiltreTypeValide,
+} from '@/lib/reservation-filtres';
 import { chargerTitresOffres } from '@/lib/reservation-titres';
 import { CalendarRange, MessageSquare, User } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -35,17 +41,23 @@ export const metadata: Metadata = {
 export default async function PageDemandesReservations({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string }>;
+  searchParams: Promise<{ statut?: string; type?: string }>;
 }) {
   const session = await getSessionOuRediriger('/profil/demandes-reservations');
-  const { statut: statutBrut } = await searchParams;
+  const { statut: statutBrut, type: typeBrut } = await searchParams;
   const filtreActif: StatutReservation | null = estFiltreStatutValide(statutBrut)
     ? statutBrut
     : null;
+  const filtreTypeActif: OffreTypeReservation | null = estFiltreTypeValide(typeBrut)
+    ? typeBrut
+    : null;
 
   const toutes = await listerReservationsRecuesParProprietaire(session.userId);
-  const reservations =
-    filtreActif === null ? toutes : toutes.filter((r) => r.statut === filtreActif);
+  const reservations = toutes.filter(
+    (r) =>
+      (filtreActif === null || r.statut === filtreActif) &&
+      (filtreTypeActif === null || r.offreType === filtreTypeActif),
+  );
 
   const [titresParId, journauxParId] = await Promise.all([
     chargerTitresOffres(reservations),
@@ -64,6 +76,18 @@ export default async function PageDemandesReservations({
   const compteurs = new Map<StatutReservation, number>();
   for (const r of toutes) compteurs.set(r.statut, (compteurs.get(r.statut) ?? 0) + 1);
 
+  const compteursTypes = new Map<OffreTypeReservation, number>();
+  for (const r of toutes)
+    compteursTypes.set(r.offreType, (compteursTypes.get(r.offreType) ?? 0) + 1);
+
+  function urlFiltre(statut: string | null, type: string | null): string {
+    const params = new URLSearchParams();
+    if (statut !== null && statut !== 'tous') params.set('statut', statut);
+    if (type !== null && type !== 'tous') params.set('type', type);
+    const qs = params.toString();
+    return qs === '' ? '/profil/demandes-reservations' : `/profil/demandes-reservations?${qs}`;
+  }
+
   return (
     <Container taille="md" className="py-12">
       <Heading niveau={1}>Demandes de réservation reçues</Heading>
@@ -74,34 +98,57 @@ export default async function PageDemandesReservations({
       </p>
 
       {toutes.length > 0 ? (
-        <nav
-          aria-label="Filtrer par statut"
-          className="mt-6 flex flex-wrap gap-2 border-border border-b pb-3"
-        >
-          {STATUTS_FILTRES_RESERVATION.map((f) => {
-            const n =
-              f.slug === 'tous' ? toutes.length : (compteurs.get(f.slug as StatutReservation) ?? 0);
-            const estActif = (filtreActif === null && f.slug === 'tous') || filtreActif === f.slug;
-            return (
-              <Link
-                key={f.slug}
-                href={
-                  f.slug === 'tous'
-                    ? '/profil/demandes-reservations'
-                    : `/profil/demandes-reservations?statut=${f.slug}`
-                }
-                className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                  estActif
-                    ? 'border-brand bg-brand text-bg'
-                    : 'border-border bg-surface text-text-2 hover:bg-surface-2'
-                }`}
-                aria-current={estActif ? 'page' : undefined}
-              >
-                {f.libelle} ({n})
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="mt-6 flex flex-col gap-3 border-border border-b pb-3">
+          <nav aria-label="Filtrer par statut" className="flex flex-wrap gap-2">
+            {STATUTS_FILTRES_RESERVATION.map((f) => {
+              const n =
+                f.slug === 'tous'
+                  ? toutes.length
+                  : (compteurs.get(f.slug as StatutReservation) ?? 0);
+              const estActif =
+                (filtreActif === null && f.slug === 'tous') || filtreActif === f.slug;
+              return (
+                <Link
+                  key={f.slug}
+                  href={urlFiltre(f.slug, filtreTypeActif)}
+                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                    estActif
+                      ? 'border-brand bg-brand text-bg'
+                      : 'border-border bg-surface text-text-2 hover:bg-surface-2'
+                  }`}
+                  aria-current={estActif ? 'page' : undefined}
+                >
+                  {f.libelle} ({n})
+                </Link>
+              );
+            })}
+          </nav>
+          <nav aria-label="Filtrer par type d'offre" className="flex flex-wrap gap-2">
+            {TYPES_FILTRES_OFFRE.map((f) => {
+              const n =
+                f.slug === 'tous'
+                  ? toutes.length
+                  : (compteursTypes.get(f.slug as OffreTypeReservation) ?? 0);
+              if (n === 0 && f.slug !== 'tous') return null;
+              const estActif =
+                (filtreTypeActif === null && f.slug === 'tous') || filtreTypeActif === f.slug;
+              return (
+                <Link
+                  key={f.slug}
+                  href={urlFiltre(filtreActif, f.slug)}
+                  className={`rounded-md border px-2 py-1 text-xs transition-colors ${
+                    estActif
+                      ? 'border-brand bg-brand text-bg'
+                      : 'border-border bg-surface text-text-3 hover:bg-surface-2'
+                  }`}
+                  aria-current={estActif ? 'page' : undefined}
+                >
+                  {f.libelle} ({n})
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       ) : null}
 
       {reservations.length === 0 ? (
