@@ -303,6 +303,97 @@ export async function marquerReservationRealiseeAction(
 }
 
 // ============================================================
+// Résolution de litige par un·e admin (V2.3.17)
+// ============================================================
+
+export type ResultatResolutionLitige = { ok: true } | { ok: false; message: string };
+
+const MOTIF_RESOLUTION_MIN = 10;
+const MOTIF_RESOLUTION_MAX = 2000;
+
+/**
+ * Résout un litige côté admin : la réservation passe de `litige` à
+ * `confirmee` (en faveur du propriétaire) ou `annulee` (en faveur du
+ * demandeur). Action réservée aux admins.
+ *
+ * Contournement explicite de `transitionAutorisee` : la machine à états
+ * D8 V2.2.2 considère `litige` comme terminal pour les acteurs
+ * ordinaires. L'admin a le privilège documenté de débloquer. Le journal
+ * D8bis (V2.3.15) garde la trace (statut_avant = `litige`, auteur_id =
+ * admin) ce qui rend l'arbitrage observable des deux côtés.
+ *
+ * Motif obligatoire (10 à 2000 caractères) : c'est la décision admin
+ * communiquée aux deux parties. À distinguer du motif initial du
+ * signalement (V2.3.16) qui reste dans le journal.
+ */
+export async function resoudreLitigeReservationAction(options: {
+  reservationId: string;
+  decision: 'confirmee' | 'annulee';
+  motif: string;
+  cheminRevalidation?: string;
+}): Promise<ResultatResolutionLitige> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Connexion requise.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    return { ok: false, message: 'Action réservée aux admins.' };
+  }
+
+  const motifNettoye = options.motif.trim();
+  if (motifNettoye.length < MOTIF_RESOLUTION_MIN) {
+    return {
+      ok: false,
+      message: `Le motif d’arbitrage doit faire au moins ${MOTIF_RESOLUTION_MIN} caractères.`,
+    };
+  }
+  if (motifNettoye.length > MOTIF_RESOLUTION_MAX) {
+    return {
+      ok: false,
+      message: `Le motif d’arbitrage est trop long (${MOTIF_RESOLUTION_MAX} caractères maximum).`,
+    };
+  }
+
+  const { data: existant } = await supabase
+    .from('reservation')
+    .select('id, statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+
+  if (existant === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  if (existant.statut !== 'litige') {
+    return {
+      ok: false,
+      message: `Seules les réservations en statut « litige » peuvent être arbitrées (actuellement : ${existant.statut}).`,
+    };
+  }
+
+  // Contournement explicite : on n'appelle pas `transitionAutorisee` ici
+  // (l'admin a le privilège de débloquer un statut terminal). Le journal
+  // D8bis trace la transition `litige → cible` avec auteur_id admin.
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: options.decision,
+    motif: motifNettoye,
+    auteurId: session.userId,
+  });
+
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message };
+  }
+
+  if (options.cheminRevalidation !== undefined) {
+    revalidatePath(options.cheminRevalidation);
+  }
+  return { ok: true };
+}
+
+// ============================================================
 // Signalement de litige par le demandeur (V2.3.16)
 // ============================================================
 

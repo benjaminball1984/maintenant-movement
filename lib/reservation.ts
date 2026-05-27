@@ -288,6 +288,22 @@ export async function listerReservationsParOffre(
   return data.map(ligneEnReservation);
 }
 
+/**
+ * Liste les réservations en statut `litige` pour la modération admin
+ * (cycle V2 V2.3.17). RLS : seuls admins / modérateurs autres-moyens
+ * lisent toutes les réservations ; pour les autres, retour vide.
+ */
+export async function listerReservationsEnLitige(): Promise<Reservation[]> {
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase
+    .from('reservation')
+    .select('*')
+    .eq('statut', 'litige')
+    .order('updated_at', { ascending: true });
+  if (error !== null || data === null) return [];
+  return data.map(ligneEnReservation);
+}
+
 export async function listerReservationsDuDemandeur(
   demandeurPersonneId: string,
 ): Promise<Reservation[]> {

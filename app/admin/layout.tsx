@@ -70,6 +70,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 { href: '/admin/moderation/sondages', libelle: 'Sondages' },
                 { href: '/admin/moderation/reseau', libelle: 'Réseau social' },
                 { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
+                { href: '/admin/moderation/reservations', libelle: 'Réservations en litige' },
               ].map((onglet) => (
                 <li key={onglet.href}>
                   <Link
