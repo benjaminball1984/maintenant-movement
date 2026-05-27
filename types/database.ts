@@ -64,6 +64,38 @@ export type Database = {
           },
         ];
       };
+      contenu_editorial: {
+        Row: {
+          cle: string;
+          valeur_md: string;
+          titre: string | null;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          cle: string;
+          valeur_md?: string;
+          titre?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          cle?: string;
+          valeur_md?: string;
+          titre?: string | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'contenu_editorial_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       appartenance_campagne: {
         Row: {
           id: string;
