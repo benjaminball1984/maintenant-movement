@@ -1,4 +1,8 @@
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { listerGroupesEntraide } from '@/lib/groupe-entraide-local';
 import { getImageObjet } from '@/lib/images';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -6,6 +10,15 @@ import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+
+const FALLBACKS = {
+  intro:
+    'Quartier, immeuble, AMAP, voisinage : trouve un groupe près de chez toi, ou crée le tien. Prêt d’objets, marché solidaire, hébergement, covoiturage, services — tout ce qu’on partage entre voisin·es.',
+  ctaCreer: 'Créer un groupe',
+  empty: 'Aucun groupe publié pour le moment. Tu peux être la première personne à en créer un.',
+  porteEntreeNote:
+    'Les groupes d’entraide locaux sont une **porte d’entrée non-politique** dans Maintenant! : on vient pour une perceuse, on s’entraide, on s’ouvre peut-être un jour à d’autres outils. Pas de pression militante.',
+};
 
 /**
  * Page liste des groupes d'entraide locaux (cycle V2 V2.3.2).
@@ -27,32 +40,63 @@ export const metadata: Metadata = metadataPourPartage({
 });
 
 export default async function PageListeGroupesEntraide() {
-  const groupes = await listerGroupesEntraide({ limite: 50 });
+  const [groupes, estAdmin, intro, ctaCreer, empty, porteEntreeNote] = await Promise.all([
+    listerGroupesEntraide({ limite: 50 }),
+    estAdminCourant(),
+    lireContenuEditorial('s-entraider.groupes_locaux.intro', { valeurMd: FALLBACKS.intro }),
+    lireContenuEditorial('s-entraider.groupes_locaux.cta_creer', { valeurMd: FALLBACKS.ctaCreer }),
+    lireContenuEditorial('s-entraider.groupes_locaux.empty', { valeurMd: FALLBACKS.empty }),
+    lireContenuEditorial('s-entraider.groupes_locaux.porte_entree_note', {
+      valeurMd: FALLBACKS.porteEntreeNote,
+    }),
+  ]);
 
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <Heading niveau={1}>Groupes d’entraide locaux</Heading>
-          <p className="mt-2 max-w-2xl text-text-2">
-            Quartier, immeuble, AMAP, voisinage : trouve un groupe près de chez toi, ou crée le
-            tien. Prêt d’objets, marché solidaire, hébergement, covoiturage, services — tout ce
-            qu’on partage entre voisin·es.
-          </p>
+          <TexteEditableAdmin
+            cle="s-entraider.groupes_locaux.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro page groupes entraide locaux"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => <p className="mt-2 max-w-2xl text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </div>
-        <Link
-          href="/s-entraider/groupes-locaux/nouveau"
-          className="inline-flex h-11 items-center rounded-md bg-grad px-4 font-bold text-sm text-white shadow-brand transition hover:brightness-110"
+        <TexteEditableAdmin
+          cle="s-entraider.groupes_locaux.cta_creer"
+          valeurInitiale={ctaCreer.valeurMd}
+          estAdmin={estAdmin}
+          libelle="CTA Creer un groupe"
+          longueurMax={50}
         >
-          Créer un groupe
-        </Link>
+          {(t) => (
+            <Link
+              href="/s-entraider/groupes-locaux/nouveau"
+              className="inline-flex h-11 items-center rounded-md bg-grad px-4 font-bold text-sm text-white shadow-brand transition hover:brightness-110"
+            >
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
       </header>
 
       {groupes.length === 0 ? (
         <Card variant="ombre">
-          <p className="text-text-2">
-            Aucun groupe publié pour le moment. Tu peux être la première personne à en créer un.
-          </p>
+          <TexteEditableAdmin
+            cle="s-entraider.groupes_locaux.empty"
+            valeurInitiale={empty.valeurMd}
+            estAdmin={estAdmin}
+            libelle="empty state groupes locaux"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <p className="text-text-2">{t}</p>}
+          </TexteEditableAdmin>
         </Card>
       ) : (
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -102,12 +146,23 @@ export default async function PageListeGroupesEntraide() {
         </ul>
       )}
 
-      <p className="mt-12 max-w-3xl border-border border-t pt-6 text-sm text-text-3">
+      <div className="mt-12 max-w-3xl border-border border-t pt-6 text-sm text-text-3">
         <Users size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
-        Les groupes d’entraide locaux sont une <strong>porte d’entrée non-politique</strong> dans
-        Maintenant! : on vient pour une perceuse, on s’entraide, on s’ouvre peut-être un jour à
-        d’autres outils. Pas de pression militante.
-      </p>
+        <TexteEditableAdmin
+          cle="s-entraider.groupes_locaux.porte_entree_note"
+          valeurInitiale={porteEntreeNote.valeurMd}
+          estAdmin={estAdmin}
+          libelle="note porte d'entree (Markdown leger : **gras**)"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => (
+            <span className="inline">
+              <MarkdownLeger texte={t} />
+            </span>
+          )}
+        </TexteEditableAdmin>
+      </div>
     </Container>
   );
 }
