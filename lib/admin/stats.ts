@@ -24,6 +24,18 @@ export interface StatsAdmin {
   sondagesOuverts: number;
   communesPreCreees: number;
   mandatsAssemblee: number;
+  // V2.3.42 : indicateurs V2 ajoutés.
+  caissesOuvertes: number;
+  totalEurosCaisses: number;
+  totalCoin99Caisses: number;
+  transactionsSortantesInitiees: number;
+  transactionsSortantesConfirmees: number;
+  reservationsTotal: number;
+  reservationsEnAttente: number;
+  reservationsEnLitige: number;
+  membresCampagnes: number;
+  membresGTs: number;
+  membresGroupesEntraide: number;
 }
 
 export async function chargerStatsAdmin(): Promise<StatsAdmin> {
@@ -105,5 +117,103 @@ export async function chargerStatsAdmin(): Promise<StatsAdmin> {
     sondagesOuverts: sondages.count ?? 0,
     communesPreCreees: communes.count ?? 0,
     mandatsAssemblee: mandats.count ?? 0,
+    ...(await chargerStatsV2(supabase)),
+  };
+}
+
+/**
+ * Indicateurs V2.3.42 (caisses, transactions, réservations, appartenances).
+ * Bloc séparé pour faciliter la lecture et l'évolution future.
+ */
+async function chargerStatsV2(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+): Promise<
+  Pick<
+    StatsAdmin,
+    | 'caissesOuvertes'
+    | 'totalEurosCaisses'
+    | 'totalCoin99Caisses'
+    | 'transactionsSortantesInitiees'
+    | 'transactionsSortantesConfirmees'
+    | 'reservationsTotal'
+    | 'reservationsEnAttente'
+    | 'reservationsEnLitige'
+    | 'membresCampagnes'
+    | 'membresGTs'
+    | 'membresGroupesEntraide'
+  >
+> {
+  const [
+    caisses,
+    entrees,
+    sorties,
+    txInit,
+    txConf,
+    resTotal,
+    resAttente,
+    resLitige,
+    membresCamp,
+    membresGT,
+    membresGroupe,
+  ] = await Promise.all([
+    supabase.from('caisse').select('id', { count: 'exact', head: true }).eq('statut', 'ouverte'),
+    supabase.from('transaction_entrante').select('montant, canal').eq('statut', 'confirmee'),
+    supabase.from('transaction_sortante').select('montant, canal').eq('statut', 'confirmee'),
+    supabase
+      .from('transaction_sortante')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'initiee'),
+    supabase
+      .from('transaction_sortante')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'confirmee'),
+    supabase.from('reservation').select('id', { count: 'exact', head: true }),
+    supabase
+      .from('reservation')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'proposee'),
+    supabase
+      .from('reservation')
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'litige'),
+    supabase
+      .from('appartenance_campagne')
+      .select('id', { count: 'exact', head: true })
+      .eq('est_active', true),
+    supabase
+      .from('appartenance_gt')
+      .select('id', { count: 'exact', head: true })
+      .eq('est_active', true),
+    supabase
+      .from('appartenance_groupe_entraide_local')
+      .select('id', { count: 'exact', head: true })
+      .eq('est_active', true),
+  ]);
+
+  let entreesEuro = 0;
+  let entreesCoin99 = 0;
+  for (const e of entrees.data ?? []) {
+    if (e.canal === 'euro') entreesEuro += Number(e.montant);
+    else entreesCoin99 += Number(e.montant);
+  }
+  let sortiesEuro = 0;
+  let sortiesCoin99 = 0;
+  for (const s of sorties.data ?? []) {
+    if (s.canal === 'euro') sortiesEuro += Number(s.montant);
+    else sortiesCoin99 += Number(s.montant);
+  }
+
+  return {
+    caissesOuvertes: caisses.count ?? 0,
+    totalEurosCaisses: entreesEuro - sortiesEuro,
+    totalCoin99Caisses: entreesCoin99 - sortiesCoin99,
+    transactionsSortantesInitiees: txInit.count ?? 0,
+    transactionsSortantesConfirmees: txConf.count ?? 0,
+    reservationsTotal: resTotal.count ?? 0,
+    reservationsEnAttente: resAttente.count ?? 0,
+    reservationsEnLitige: resLitige.count ?? 0,
+    membresCampagnes: membresCamp.count ?? 0,
+    membresGTs: membresGT.count ?? 0,
+    membresGroupesEntraide: membresGroupe.count ?? 0,
   };
 }

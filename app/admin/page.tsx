@@ -58,6 +58,43 @@ export default async function PageAdmin() {
         <Carte titre="Communes pré-créées" valeur={FORMAT_NB.format(stats.communesPreCreees)} />
         <Carte titre="Mandats assemblée actifs" valeur={FORMAT_NB.format(stats.mandatsAssemblee)} />
       </section>
+
+      <header className="mt-8 mb-4">
+        <Heading niveau={2} apparenceComme={3}>
+          Indicateurs V2 (trésorerie + réservations + appartenances)
+        </Heading>
+      </header>
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Carte titre="Caisses ouvertes" valeur={FORMAT_NB.format(stats.caissesOuvertes)} />
+        <Carte titre="Solde € caisses" valeur={FORMAT_EUR.format(stats.totalEurosCaisses)} />
+        <Carte
+          titre="Solde 99-coin caisses"
+          valeur={`${FORMAT_NB.format(stats.totalCoin99Caisses)} u.`}
+        />
+        <Carte
+          titre="Reversements initiés"
+          valeur={FORMAT_NB.format(stats.transactionsSortantesInitiees)}
+        />
+        <Carte
+          titre="Reversements confirmés"
+          valeur={FORMAT_NB.format(stats.transactionsSortantesConfirmees)}
+        />
+        <Carte titre="Réservations total" valeur={FORMAT_NB.format(stats.reservationsTotal)} />
+        <Carte
+          titre="Réservations en attente"
+          valeur={FORMAT_NB.format(stats.reservationsEnAttente)}
+        />
+        <Carte
+          titre="Réservations en litige"
+          valeur={FORMAT_NB.format(stats.reservationsEnLitige)}
+        />
+        <Carte titre="Membres campagnes" valeur={FORMAT_NB.format(stats.membresCampagnes)} />
+        <Carte titre="Membres GT" valeur={FORMAT_NB.format(stats.membresGTs)} />
+        <Carte
+          titre="Membres groupes entraide"
+          valeur={FORMAT_NB.format(stats.membresGroupesEntraide)}
+        />
+      </section>
     </>
   );
 }
