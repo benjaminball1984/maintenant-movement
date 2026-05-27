@@ -1,6 +1,7 @@
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ESPACES } from '@/config/espaces';
 import { SITE } from '@/config/site';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
@@ -25,6 +26,7 @@ import { HeaderProfilMenu } from './HeaderProfilMenu';
  */
 export async function Header() {
   const session = await getSession();
+  const estAdmin = session !== null ? await estAdminCourant() : false;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
@@ -63,7 +65,11 @@ export async function Header() {
           {session !== null ? (
             <>
               <HeaderCloche personneId={session.userId} />
-              <HeaderProfilMenu email={session.email} prenom={session.personne?.prenom ?? null} />
+              <HeaderProfilMenu
+                email={session.email}
+                prenom={session.personne?.prenom ?? null}
+                estAdmin={estAdmin}
+              />
             </>
           ) : (
             <>

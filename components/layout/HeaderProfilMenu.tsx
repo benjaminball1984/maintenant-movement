@@ -2,13 +2,15 @@
 
 import { seDeconnecter } from '@/app/(auth)/actions';
 import { cn } from '@/lib/utils';
-import { ChevronDown, LogOut, User } from 'lucide-react';
+import { ChevronDown, LogOut, Shield, User } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 interface HeaderProfilMenuProps {
   email: string;
   prenom: string | null;
+  /** Si true, ajoute un lien « Console admin » dans le dropdown. */
+  estAdmin?: boolean;
 }
 
 /**
@@ -20,7 +22,7 @@ interface HeaderProfilMenuProps {
  * Ferme automatiquement sur clic extérieur ou touche Échap.
  * Accessibilité : `aria-haspopup`, `aria-expanded`, focus visible.
  */
-export function HeaderProfilMenu({ email, prenom }: HeaderProfilMenuProps) {
+export function HeaderProfilMenu({ email, prenom, estAdmin = false }: HeaderProfilMenuProps) {
   const [ouvert, setOuvert] = useState(false);
   const [deconnexionEnCours, setDeconnexionEnCours] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,17 @@ export function HeaderProfilMenu({ email, prenom }: HeaderProfilMenuProps) {
             <User size={14} strokeWidth={1.75} />
             Mon profil
           </Link>
+          {estAdmin ? (
+            <Link
+              href="/admin"
+              role="menuitem"
+              className="flex items-center gap-2 border-t border-border px-3 py-2 text-sm font-bold text-brand hover:bg-surface-2"
+              onClick={() => setOuvert(false)}
+            >
+              <Shield size={14} strokeWidth={1.75} />
+              Console admin
+            </Link>
+          ) : null}
           <button
             type="button"
             role="menuitem"
