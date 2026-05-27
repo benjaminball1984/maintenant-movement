@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 chunk/pourcentage/SIRET)
-**Dernier chantier terminé** : V2.4.76 (`lib/siret.ts` + 15 tests, Luhn) — sur `main` (tip `51861ef`). 779 tests verts. SIREN/SIRET INSEE officiels + format groupes.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 group-by/avatar/sha256)
+**Dernier chantier terminé** : V2.4.79 (`lib/sha256.ts` Web Crypto + 10 tests) — sur `main` (tip `cf310a6`). 807 tests verts. SHA-256 natif Node 16+/Edge, vecteurs officiels.
+**Dernier chantier terminé (antérieur)** : V2.4.78 (`lib/avatar-couleur.ts` + 10 tests) — sur `main` (tip `10109a1`). `avatarHsl` déterministe via FNV-1a + `initialesPourAvatar` (2 chars max).
+**Dernier chantier terminé (antérieur)** : V2.4.77 (`lib/group-by.ts` + 10 tests) — sur `main` (tip `81fda8a`). `groupBy`, `groupByObjet`, `countBy`, génériques typés.
+**Dernier chantier terminé (antérieur)** : V2.4.76 (`lib/siret.ts` + 15 tests, Luhn) — sur `main` (tip `51861ef`). 779 tests verts. SIREN/SIRET INSEE officiels + format groupes.
 **Dernier chantier terminé (antérieur)** : V2.4.75 (`lib/pourcentage.ts` + 14 tests) — sur `main` (tip `278cf65`). 4 helpers : `pourcentage` (safe), `Arrondi`, `Clampe` (0-100 pour CSS), `formaterPourcentage`.
 **Dernier chantier terminé (antérieur)** : V2.4.74 (`lib/chunk.ts` + 11 tests) — sur `main` (tip `bf3fa04`). Découpage en batch pour `in (...)` Supabase / envois mail / écritures, plus `nbChunks`.
 **Dernier chantier terminé (antérieur)** : V2.4.73 (`lib/hash.ts` FNV-1a + 10 tests) — sur `main` (tip `a28a0e1`). 739 tests verts. Hash non-crypto 32 bits pour cache-busting / ETag, vecteurs officiels validés.
