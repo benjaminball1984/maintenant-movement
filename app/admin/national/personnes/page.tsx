@@ -1,4 +1,4 @@
-import { Alert, Badge, Card, Heading, Pagination } from '@/components/ui';
+import { Alert, Avatar, Badge, Card, Heading, Pagination } from '@/components/ui';
 import { type OptionsListePersonnes, listerPersonnesAdminPagine } from '@/lib/admin/personnes';
 import { lirePageDepuisParams, paginer } from '@/lib/pagination';
 import { compter } from '@/lib/pluriel';
@@ -135,7 +135,8 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
               '(sans nom)';
             return (
               <li key={p.id}>
-                <Card variant="ombre" className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <Card variant="ombre" className="grid gap-2 sm:grid-cols-[auto_1fr_auto]">
+                  <Avatar id={p.id} nomComplet={nomAffiche} taille="md" />
                   <div>
                     <p className="font-bold text-text-1">{nomAffiche}</p>
                     <p className="text-text-3 text-xs">

@@ -7,6 +7,7 @@
  * Tout nouveau composant ajouté à `components/ui/` doit être réexporté ici.
  */
 export { Alert, type AlertProps, type VariantAlert } from './Alert';
+export { Avatar, type AvatarProps, type TailleAvatar } from './Avatar';
 export { Badge, type BadgeProps, type VariantBadge } from './Badge';
 export { Button, type ButtonProps, type TailleBouton, type VariantBouton } from './Button';
 export { Card, type CardProps, type VariantCard } from './Card';
