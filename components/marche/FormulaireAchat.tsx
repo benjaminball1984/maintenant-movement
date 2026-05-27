@@ -13,6 +13,31 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.150). */
+export interface LibellesAchat {
+  alertErreurTitre: string;
+  legendeMonnaie: string;
+  optionEurAide: string;
+  optionT99CPAide: string;
+  labelTxHash: string;
+  placeholderTxHash: string;
+  hintTxHash: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesAchat = {
+  alertErreurTitre: 'Achat impossible',
+  legendeMonnaie: 'Choisis la monnaie de paiement',
+  optionEurAide: 'Stripe Checkout. Frais plateforme 5 %.',
+  optionT99CPAide: 'Wallet T99CP. Frais 0 %.',
+  labelTxHash: 'Hash de transaction T99CP (optionnel en mock)',
+  placeholderTxHash: '0x... (64 hex)',
+  hintTxHash: 'En mock, laisser vide : un hash factice sera généré. En prod, le wallet le fournit.',
+  ctaSubmit: 'Confirmer l’achat',
+  ctaEnCours: 'Traitement...',
+};
+
 interface FormulaireAchatProps {
   produitId: string;
   prixEurosCentimes: number;
@@ -20,6 +45,7 @@ interface FormulaireAchatProps {
   acheterProduit: (
     donnees: unknown,
   ) => Promise<{ ok: true; urlRedirection?: string } | { ok: false; message: string }>;
+  libelles?: LibellesAchat;
   messages?: MessagesValidationMarche;
 }
 
@@ -36,6 +62,7 @@ export function FormulaireAchat({
   prixEurosCentimes,
   prixT99CPUnites,
   acheterProduit,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireAchatProps) {
   const router = useRouter();
@@ -94,14 +121,14 @@ export function FormulaireAchat({
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       <input type="hidden" {...register('produit_id')} />
       {erreur !== null ? (
-        <Alert variant="danger" titre="Achat impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <fieldset>
         <legend className="mb-2 font-body text-sm font-medium text-text-2">
-          Choisis la monnaie de paiement
+          {libelles.legendeMonnaie}
         </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {aPrixEur ? (
@@ -114,7 +141,7 @@ export function FormulaireAchat({
               />
               <div>
                 <p className="font-bold text-text-1">{formaterEuros(prixEurosCentimes)}</p>
-                <p className="text-xs text-text-3">Stripe Checkout. Frais plateforme 5 %.</p>
+                <p className="text-xs text-text-3">{libelles.optionEurAide}</p>
               </div>
             </label>
           ) : null}
@@ -128,7 +155,7 @@ export function FormulaireAchat({
               />
               <div>
                 <p className="font-bold text-text-1">{formaterT99CP(prixT99CPUnites)}</p>
-                <p className="text-xs text-text-3">Wallet T99CP. Frais 0 %.</p>
+                <p className="text-xs text-text-3">{libelles.optionT99CPAide}</p>
               </div>
             </label>
           ) : null}
@@ -140,24 +167,22 @@ export function FormulaireAchat({
 
       {monnaie === 'T99CP' ? (
         <div>
-          <Label htmlFor="achat-txhash">Hash de transaction T99CP (optionnel en mock)</Label>
+          <Label htmlFor="achat-txhash">{libelles.labelTxHash}</Label>
           <input
             id="achat-txhash"
             type="text"
-            placeholder="0x... (64 hex)"
+            placeholder={libelles.placeholderTxHash}
             className="w-full rounded-sm border border-border bg-surface p-2 font-mono text-xs"
             {...register('tx_hash')}
           />
-          <p className="mt-1 text-xs text-text-3">
-            En mock, laisser vide : un hash factice sera généré. En prod, le wallet le fournit.
-          </p>
+          <p className="mt-1 text-xs text-text-3">{libelles.hintTxHash}</p>
         </div>
       ) : null}
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Traitement...' : 'Confirmer l’achat'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );
