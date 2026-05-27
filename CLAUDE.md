@@ -432,8 +432,10 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (nuit, suite VAGUE 3 finitions — 10 chantiers consécutifs V2.3.13→V2.3.22)
-**Dernier chantier terminé** : V2.3.22 (page « Mes groupes » côté profil) — sur `main` (tip `7abd237`). 4 axes couverts (communes, fédérations indirect via commune, confédérations indirect via fédération, GT thématiques direct). Voir `docs/manifests/v2-3-22-mes-groupes.md`.
+**Dernière mise à jour** : 2026-05-27 (nuit, suite VAGUE 3 finitions — 12 chantiers consécutifs V2.3.13→V2.3.24)
+**Dernier chantier terminé** : V2.3.24 (filtres par statut sur dashboard demandeur + factorisation `lib/reservation-filtres.ts`) — sur `main` (tip `d8c524f`). Voir `docs/manifests/v2-3-24-filtres-statut-demandeur.md`.
+**Dernier chantier terminé (antérieur)** : V2.3.23 (filtres par statut sur dashboard propriétaire `/profil/demandes-reservations?statut=X`) — barre de 8 chips ronds avec compteurs, filtre côté TS. Voir `docs/manifests/v2-3-23-filtres-statut-dashboard-proprietaire.md`.
+**Dernier chantier terminé (antérieur)** : V2.3.22 (page « Mes groupes » côté profil) — sur `main` (tip `7abd237`). 4 axes couverts (communes, fédérations indirect via commune, confédérations indirect via fédération, GT thématiques direct). Voir `docs/manifests/v2-3-22-mes-groupes.md`.
 **Dernier chantier terminé (antérieur)** : V2.3.21 (bouton « Signaler un litige » côté propriétaire, transition D8 `acceptee → litige`) — symétrie avec V2.3.16. Voir `docs/manifests/v2-3-21-signaler-litige-proprietaire.md`.
 **Dernier chantier terminé (antérieur)** : V2.3.20 (identités caisse + tests helper) — branche `nomAffichageRespectantVisibilite` dans la page de détail caisse + 7 tests Vitest sur le helper pur (413 tests verts maintenant). Voir `docs/manifests/v2-3-20-identites-caisse-tests-identite.md`.
 **Dernier chantier terminé (antérieur)** : V2.3.19 (helper `nomAffichageRespectantVisibilite`) — module `lib/reseau/identite.ts` réutilisant la RPC V1 `personne_affichage(cible)` SECURITY DEFINER. Branché dans `HistoriqueTransitions`, `/profil/demandes-reservations`, `/profil/reservations`, `/admin/moderation/reservations`. Voir `docs/manifests/v2-3-19-nom-affichage-visibilite.md`.
