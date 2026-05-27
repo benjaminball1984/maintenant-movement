@@ -109,6 +109,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                     { href: '/admin/national/communes', libelle: 'Communes' },
                     { href: '/admin/national/federations', libelle: 'Fédérations' },
                     { href: '/admin/national/groupes-entraide', libelle: 'Groupes d’entraide' },
+                    { href: '/admin/national/sondages', libelle: 'Sondages' },
                     { href: '/admin/national/droits', libelle: 'Gestion des droits' },
                     { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
                     { href: '/admin/national/audit', libelle: 'Audit journal D8' },
