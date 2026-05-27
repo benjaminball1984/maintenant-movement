@@ -22,6 +22,7 @@ import { usePathname } from 'next/navigation';
 const ONGLETS = [
   { slug: 'dashboard', libelle: 'Vue d’ensemble' },
   { slug: 'informations', libelle: 'Informations' },
+  { slug: 'mes-groupes', libelle: 'Mes groupes' },
   { slug: 'communes', libelle: 'Communes' },
   { slug: 'contributions', libelle: 'Contributions' },
   { slug: 'reservations', libelle: 'Mes réservations' },
