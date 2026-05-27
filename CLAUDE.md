@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 bibliothèque helpers + admin sondages)
-**Dernier chantier terminé** : V2.4.50 (`lib/email-valide.ts` + 13 tests) — sur `main` (tip `4b26879`). 550 tests verts. Validation pragmatique + normalisation (trim+lowercase).
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 helpers + admin moments + RSS journal)
+**Dernier chantier terminé** : V2.4.53 (`lib/distance-gps.ts` + 10 tests, haversine) — sur `main` (tip `d13b115`). 560 tests verts. `distanceMetres` / `distanceKmArrondie` / `formaterDistance`. Utile pour cartes « près de moi ».
+**Dernier chantier terminé (antérieur)** : V2.4.52 (RSS feed `/feed-journal.xml` journal-affiche) — sur `main` (tip `9fb68f3`). Distinct du flux principal, cache 1h.
+**Dernier chantier terminé (antérieur)** : V2.4.51 (admin moments solidaires `/admin/national/moments`) — sur `main` (tip `fe6eca5`). Double filtre statut (6) + type (8), tri date décroissante.
+**Dernier chantier terminé (antérieur)** : V2.4.50 (`lib/email-valide.ts` + 13 tests) — sur `main` (tip `4b26879`). 550 tests verts. Validation pragmatique + normalisation (trim+lowercase).
 **Dernier chantier terminé (antérieur)** : V2.4.49 (`lib/temps-lecture.ts` + 11 tests + branchement) — sur `main` (tip `be9f190`). 200 mots/min, min 1 min, ligne d'attribution média gagne « · X min de lecture ».
 **Dernier chantier terminé (antérieur)** : V2.4.48 (admin sondages `/admin/national/sondages`) — sur `main` (tip `29015d2`). Double filtre statut + mode, recherche titre/question, nb d'options.
 **Dernier chantier terminé (antérieur)** : V2.4.47 (`lib/format-date.ts` + 7 tests) — sur `main` (tip `349a285`). 525 tests verts. 4 helpers centralisés : `formaterDateCourte`, `formaterDateLongue`, `formaterDateHeure`, `formaterDateIso`.
