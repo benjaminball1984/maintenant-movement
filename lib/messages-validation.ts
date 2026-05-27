@@ -153,6 +153,58 @@ export const MESSAGES_VALIDATION_ADHESION_DEFAUT: MessagesValidationAdhesion = {
 };
 
 // ============================================================
+// Cagnotte (creation + dons + moderation)
+// ============================================================
+
+export interface MessagesValidationCagnotte {
+  titreMin: string;
+  titreMax: string;
+  texteMin: string;
+  texteMax: string;
+  imageUrl: string;
+  objectifEntier: string;
+  objectifMin: string;
+  objectifMax: string;
+  walletFormat: string;
+  turnstileRequis: string;
+  cagnotteUuid: string;
+  montantEntier: string;
+  montantMin: string;
+  montantMax: string;
+  codePostalFormat: string;
+  emailFormat: string;
+  t99cpMontantFormat: string;
+  t99cpMontantPositif: string;
+  t99cpMontantMax: string;
+  txHashFormat: string;
+  suspensionRaisonMin: string;
+}
+
+export const MESSAGES_VALIDATION_CAGNOTTE_DEFAUT: MessagesValidationCagnotte = {
+  titreMin: 'Le titre doit comporter au moins 5 caractères.',
+  titreMax: 'Le titre doit faire 200 caractères maximum.',
+  texteMin: 'Le texte doit comporter au moins 100 caractères.',
+  texteMax: 'Le texte doit faire 5000 caractères maximum.',
+  imageUrl: "URL d'image invalide.",
+  objectifEntier: 'L’objectif doit être un nombre entier (en euros).',
+  objectifMin: 'L’objectif ne peut pas être négatif.',
+  objectifMax: 'L’objectif maximum est 1 000 000 €.',
+  walletFormat: 'Adresse wallet invalide (format 0x + 40 hex attendus).',
+  turnstileRequis: 'Vérification anti-bot requise.',
+  cagnotteUuid: 'Identifiant de cagnotte invalide.',
+  montantEntier: 'Le montant doit être un nombre entier de centimes.',
+  montantMin: 'Le don minimum est 1 € (100 centimes).',
+  montantMax: 'Le don maximum est 1 000 000 € en une transaction.',
+  codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
+  emailFormat: "Le format de l'email semble incorrect.",
+  t99cpMontantFormat: 'Montant T99CP invalide.',
+  t99cpMontantPositif: 'Le montant doit être strictement positif.',
+  t99cpMontantMax: 'Montant T99CP déraisonnable.',
+  txHashFormat: 'tx_hash invalide (format 0x + 64 hex attendus).',
+  suspensionRaisonMin: 'La raison de suspension doit faire au moins 10 caractères.',
+};
+
+// ============================================================
 // Lecture des messages depuis le CMS
 // ============================================================
 
@@ -177,6 +229,28 @@ export async function lireMessagesValidationAuth(): Promise<MessagesValidationAu
     resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_AUTH_DEFAUT[cle];
   });
   return resultat as unknown as MessagesValidationAuth;
+}
+
+/**
+ * Lit les messages de validation cagnotte depuis le CMS et fusionne avec
+ * les defauts. Cles CMS : `validation.cagnotte.<nomDuMessage>`.
+ */
+export async function lireMessagesValidationCagnotte(): Promise<MessagesValidationCagnotte> {
+  const cles = Object.keys(MESSAGES_VALIDATION_CAGNOTTE_DEFAUT) as Array<
+    keyof MessagesValidationCagnotte
+  >;
+  const lectures = await Promise.all(
+    cles.map((cle) =>
+      lireContenuEditorial(`validation.cagnotte.${cle}`, {
+        valeurMd: MESSAGES_VALIDATION_CAGNOTTE_DEFAUT[cle],
+      }),
+    ),
+  );
+  const resultat: Record<string, string> = {};
+  cles.forEach((cle, i) => {
+    resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_CAGNOTTE_DEFAUT[cle];
+  });
+  return resultat as unknown as MessagesValidationCagnotte;
 }
 
 /**

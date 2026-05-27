@@ -1,16 +1,56 @@
 'use client';
 
 import { Alert, Button, Label, Textarea } from '@/components/ui';
-import { type DonneesSuspendreCagnotte, suspendreCagnotteSchema } from '@/lib/validations/cagnotte';
+import {
+  MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+  type MessagesValidationCagnotte,
+} from '@/lib/messages-validation';
+import {
+  type DonneesSuspendreCagnotte,
+  creerSuspendreCagnotteSchema,
+} from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+/** Libelles surchargeables admin via CMS (V2.4.145). */
+export interface LibellesModerationCagnotte {
+  alertConfirmeTitre: string;
+  alertConfirmeSuspendue: string;
+  alertConfirmeRetablie: string;
+  alertErreurTitre: string;
+  ctaRetablir: string;
+  ctaRetablirEnCours: string;
+  ctaOuvrirSuspendre: string;
+  labelRaison: string;
+  placeholderRaison: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaAnnuler: string;
+}
+
+const LIBELLES_DEFAUT: LibellesModerationCagnotte = {
+  alertConfirmeTitre: 'Décision enregistrée',
+  alertConfirmeSuspendue: 'La cagnotte est suspendue ; les dons sont bloqués.',
+  alertConfirmeRetablie: 'La cagnotte est rétablie ; les dons sont à nouveau possibles.',
+  alertErreurTitre: 'Action impossible',
+  ctaRetablir: 'Rétablir la cagnotte',
+  ctaRetablirEnCours: 'Envoi...',
+  ctaOuvrirSuspendre: 'Suspendre cette cagnotte',
+  labelRaison: 'Raison de la suspension',
+  placeholderRaison: 'Au moins 10 caractères, visibles publiquement.',
+  ctaSubmit: 'Confirmer la suspension',
+  ctaEnCours: 'Envoi...',
+  ctaAnnuler: 'Annuler',
+};
 
 interface FormulaireModerationCagnotteProps {
   cagnotteId: string;
   estSuspendue: boolean;
   suspendreCagnotte: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   retablirCagnotte: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesModerationCagnotte;
+  messages?: MessagesValidationCagnotte;
 }
 
 /**
@@ -25,6 +65,8 @@ export function FormulaireModerationCagnotte({
   estSuspendue,
   suspendreCagnotte,
   retablirCagnotte,
+  libelles = LIBELLES_DEFAUT,
+  messages = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
 }: FormulaireModerationCagnotteProps) {
   const [ouvert, setOuvert] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -36,7 +78,7 @@ export function FormulaireModerationCagnotte({
     handleSubmit,
     formState: { errors },
   } = useForm<DonneesSuspendreCagnotte>({
-    resolver: zodResolver(suspendreCagnotteSchema),
+    resolver: zodResolver(creerSuspendreCagnotteSchema(messages)),
     defaultValues: { cagnotte_id: cagnotteId, raison_suspension: '' },
   });
 
@@ -69,10 +111,10 @@ export function FormulaireModerationCagnotte({
 
   if (confirme !== null) {
     return (
-      <Alert variant="info" titre="Décision enregistrée">
+      <Alert variant="info" titre={libelles.alertConfirmeTitre}>
         {confirme === 'suspendue'
-          ? 'La cagnotte est suspendue ; les dons sont bloqués.'
-          : 'La cagnotte est rétablie ; les dons sont à nouveau possibles.'}
+          ? libelles.alertConfirmeSuspendue
+          : libelles.alertConfirmeRetablie}
       </Alert>
     );
   }
@@ -80,29 +122,29 @@ export function FormulaireModerationCagnotte({
   return (
     <div className="grid gap-3 border-t border-border pt-4">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Action impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       {estSuspendue ? (
         <Button onClick={onRetablir} disabled={envoiEnCours}>
-          {envoiEnCours ? 'Envoi...' : 'Rétablir la cagnotte'}
+          {envoiEnCours ? libelles.ctaRetablirEnCours : libelles.ctaRetablir}
         </Button>
       ) : !ouvert ? (
         <Button variant="ghost" onClick={() => setOuvert(true)}>
-          Suspendre cette cagnotte
+          {libelles.ctaOuvrirSuspendre}
         </Button>
       ) : (
         <form noValidate onSubmit={handleSubmit(onSuspendre)} className="grid gap-3">
           <div>
             <Label htmlFor={`raison-cag-${cagnotteId}`} obligatoire>
-              Raison de la suspension
+              {libelles.labelRaison}
             </Label>
             <Textarea
               id={`raison-cag-${cagnotteId}`}
               rows={3}
-              placeholder="Au moins 10 caractères, visibles publiquement."
+              placeholder={libelles.placeholderRaison}
               {...register('raison_suspension')}
             />
             {errors.raison_suspension !== undefined ? (
@@ -111,7 +153,7 @@ export function FormulaireModerationCagnotte({
           </div>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={envoiEnCours}>
-              {envoiEnCours ? 'Envoi...' : 'Confirmer la suspension'}
+              {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
             </Button>
             <Button
               type="button"
@@ -119,7 +161,7 @@ export function FormulaireModerationCagnotte({
               onClick={() => setOuvert(false)}
               disabled={envoiEnCours}
             >
-              Annuler
+              {libelles.ctaAnnuler}
             </Button>
           </div>
         </form>

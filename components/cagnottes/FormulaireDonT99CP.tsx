@@ -2,16 +2,59 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { type DonneesFaireDonT99CP, faireDonT99CPSchema } from '@/lib/validations/cagnotte';
+import {
+  MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+  type MessagesValidationCagnotte,
+} from '@/lib/messages-validation';
+import { type DonneesFaireDonT99CP, creerFaireDonT99CPSchema } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+/** Libelles surchargeables admin via CMS (V2.4.145). */
+export interface LibellesDonT99CP {
+  alertSuccesTitre: string;
+  alertSuccesMessage: string;
+  alertErreurTitre: string;
+  alertEtape1Titre: string;
+  alertEtape1Avant: string;
+  alertEtape1Apres: string;
+  labelMontant: string;
+  labelTxHash: string;
+  placeholderTxHash: string;
+  labelPrenom: string;
+  labelNom: string;
+  labelEmail: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesDonT99CP = {
+  alertSuccesTitre: 'Merci pour ton don en 99-coin',
+  alertSuccesMessage:
+    'Ta transaction est enregistrée et abonde la cagnotte. Frais 0 % (politique T99CP).',
+  alertErreurTitre: 'Don impossible',
+  alertEtape1Titre: 'Étape 1 : envoie depuis ton wallet',
+  alertEtape1Avant: "Envoie la somme en T99CP depuis ton wallet vers l'adresse de la porteuse :",
+  alertEtape1Apres:
+    'Frais 0 % (côté Maintenant!). Une fois la transaction confirmée, recopie ci-dessous le tx_hash retourné par ton wallet.',
+  labelMontant: 'Montant envoyé (en 99-coin entiers)',
+  labelTxHash: 'tx_hash de la transaction',
+  placeholderTxHash: '0x...',
+  labelPrenom: 'Prénom (optionnel)',
+  labelNom: 'Nom (optionnel)',
+  labelEmail: 'Email (optionnel)',
+  ctaSubmit: 'Enregistrer le don T99CP',
+  ctaEnCours: 'Enregistrement...',
+};
 
 interface FormulaireDonT99CPProps {
   cagnotteId: string;
   /** Adresse wallet du porteur (affichée à recopier dans le wallet de la donatrice). */
   walletPorteur: string;
   faireDonT99CP: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesDonT99CP;
+  messages?: MessagesValidationCagnotte;
 }
 
 /**
@@ -31,6 +74,8 @@ export function FormulaireDonT99CP({
   cagnotteId,
   walletPorteur,
   faireDonT99CP,
+  libelles = LIBELLES_DEFAUT,
+  messages = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
 }: FormulaireDonT99CPProps) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -42,7 +87,7 @@ export function FormulaireDonT99CP({
     setValue,
     formState: { errors },
   } = useForm<DonneesFaireDonT99CP>({
-    resolver: zodResolver(faireDonT99CPSchema),
+    resolver: zodResolver(creerFaireDonT99CPSchema(messages)),
     defaultValues: {
       cagnotte_id: cagnotteId,
       montant_unites: '1',
@@ -71,8 +116,8 @@ export function FormulaireDonT99CP({
 
   if (confirme) {
     return (
-      <Alert variant="success" titre="Merci pour ton don en 99-coin">
-        Ta transaction est enregistrée et abonde la cagnotte. Frais 0 % (politique T99CP).
+      <Alert variant="success" titre={libelles.alertSuccesTitre}>
+        {libelles.alertSuccesMessage}
       </Alert>
     );
   }
@@ -80,25 +125,24 @@ export function FormulaireDonT99CP({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Don impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
-      <Alert variant="info" titre="Étape 1 : envoie depuis ton wallet">
-        Envoie la somme en T99CP depuis ton wallet vers l'adresse de la porteuse :
+      <Alert variant="info" titre={libelles.alertEtape1Titre}>
+        {libelles.alertEtape1Avant}
         <code className="ml-1 inline-block break-all rounded-sm bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
           {walletPorteur}
         </code>
-        . Frais 0 % (côté Maintenant!). Une fois la transaction confirmée, recopie ci-dessous le
-        tx_hash retourné par ton wallet.
+        . {libelles.alertEtape1Apres}
       </Alert>
 
       <input type="hidden" {...register('cagnotte_id')} />
 
       <div>
         <Label htmlFor="t99-montant" obligatoire>
-          Montant envoyé (en 99-coin entiers)
+          {libelles.labelMontant}
         </Label>
         <Input
           id="t99-montant"
@@ -115,11 +159,11 @@ export function FormulaireDonT99CP({
 
       <div>
         <Label htmlFor="t99-tx" obligatoire>
-          tx_hash de la transaction
+          {libelles.labelTxHash}
         </Label>
         <Input
           id="t99-tx"
-          placeholder="0x..."
+          placeholder={libelles.placeholderTxHash}
           className="font-mono text-xs"
           {...register('tx_hash')}
         />
@@ -130,24 +174,24 @@ export function FormulaireDonT99CP({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="t99-prenom">Prénom (optionnel)</Label>
+          <Label htmlFor="t99-prenom">{libelles.labelPrenom}</Label>
           <Input id="t99-prenom" {...register('prenom')} />
         </div>
         <div>
-          <Label htmlFor="t99-nom">Nom (optionnel)</Label>
+          <Label htmlFor="t99-nom">{libelles.labelNom}</Label>
           <Input id="t99-nom" {...register('nom')} />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="t99-email">Email (optionnel)</Label>
+        <Label htmlFor="t99-email">{libelles.labelEmail}</Label>
         <Input id="t99-email" type="email" {...register('email')} />
       </div>
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Enregistrement...' : 'Enregistrer le don T99CP'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+  type MessagesValidationCagnotte,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
 
 /**
  * Validations Zod du sous-espace Cagnottes (chantier 3.3).
@@ -19,42 +22,31 @@ import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
  * La RLS l'enforce déjà ; le schéma ne distingue pas, la Server Action
  * filtre côté serveur si besoin.
  */
-export const creerCagnotteSchema = z
-  .object({
-    titre: z
-      .string()
-      .trim()
-      .min(5, 'Le titre doit comporter au moins 5 caractères.')
-      .max(200, 'Le titre doit faire 200 caractères maximum.'),
-    texte: z
-      .string()
-      .trim()
-      .min(100, 'Le texte doit comporter au moins 100 caractères.')
-      .max(5000, 'Le texte doit faire 5000 caractères maximum.'),
-    type: z.enum(['ouverte', 'lutte', 'cotisation']),
-    image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    /**
-     * Objectif en euros (entier, 0 à 1 000 000). 0 = pas d'objectif chiffré.
-     */
-    objectif_euros: z
-      .number()
-      .int('L’objectif doit être un nombre entier (en euros).')
-      .min(0, 'L’objectif ne peut pas être négatif.')
-      .max(1_000_000, 'L’objectif maximum est 1 000 000 €.'),
-    /**
-     * Adresse wallet T99CP (optionnelle). Si vide, don T99CP désactivé.
-     * Format : adresse Ethereum 0x... (40 hex). Validation côté chaîne
-     * faite par MockT99CPService / PolygonT99CPService.
-     */
-    wallet_t99cp: z
-      .string()
-      .trim()
-      .regex(/^0x[a-fA-F0-9]{40}$/, 'Adresse wallet invalide (format 0x + 40 hex attendus).')
-      .optional()
-      .or(z.literal('')),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerCagnotteFactory(
+  messages: MessagesValidationCagnotte = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+) {
+  return z
+    .object({
+      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+      texte: z.string().trim().min(100, messages.texteMin).max(5000, messages.texteMax),
+      type: z.enum(['ouverte', 'lutte', 'cotisation']),
+      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      objectif_euros: z
+        .number()
+        .int(messages.objectifEntier)
+        .min(0, messages.objectifMin)
+        .max(1_000_000, messages.objectifMax),
+      wallet_t99cp: z
+        .string()
+        .trim()
+        .regex(/^0x[a-fA-F0-9]{40}$/, messages.walletFormat)
+        .optional()
+        .or(z.literal('')),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const creerCagnotteSchema = creerCagnotteFactory();
 
 export type DonneesCreerCagnotte = z.infer<typeof creerCagnotteSchema>;
 
@@ -68,29 +60,39 @@ export type DonneesCreerCagnotte = z.infer<typeof creerCagnotteSchema>;
  * `montant_centimes` est le **montant total débité** ; les frais (5 %) sont
  * déduits par la Server Action avant insertion (cf. `calculerFraisEuros`).
  */
-export const faireDonEurosSchema = z
-  .object({
-    cagnotte_id: z.string().uuid('Identifiant de cagnotte invalide.'),
-    montant_centimes: z
-      .number()
-      .int('Le montant doit être un nombre entier de centimes.')
-      .min(100, 'Le don minimum est 1 € (100 centimes).')
-      .max(1_000_000_00, 'Le don maximum est 1 000 000 € en une transaction.'),
-    prenom: z.string().trim().max(100).optional().or(z.literal('')),
-    nom: z.string().trim().max(100).optional().or(z.literal('')),
-    email: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .email("Le format de l'email semble incorrect.")
-      .optional()
-      .or(z.literal('')),
-    code_postal: codePostalFrancaisSchema.optional().or(z.literal('')),
-    accepte_newsletter: z.boolean(),
-    accepte_contact_createurice: z.boolean(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerFaireDonEurosSchema(
+  messages: MessagesValidationCagnotte = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+) {
+  return z
+    .object({
+      cagnotte_id: z.string().uuid(messages.cagnotteUuid),
+      montant_centimes: z
+        .number()
+        .int(messages.montantEntier)
+        .min(100, messages.montantMin)
+        .max(1_000_000_00, messages.montantMax),
+      prenom: z.string().trim().max(100).optional().or(z.literal('')),
+      nom: z.string().trim().max(100).optional().or(z.literal('')),
+      email: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .email(messages.emailFormat)
+        .optional()
+        .or(z.literal('')),
+      code_postal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat)
+        .optional()
+        .or(z.literal('')),
+      accepte_newsletter: z.boolean(),
+      accepte_contact_createurice: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const faireDonEurosSchema = creerFaireDonEurosSchema();
 
 export type DonneesFaireDonEuros = z.infer<typeof faireDonEurosSchema>;
 
@@ -98,37 +100,45 @@ export type DonneesFaireDonEuros = z.infer<typeof faireDonEurosSchema>;
  * Don en T99CP. Frais 0. Le tx_hash est fourni par le front (après
  * signature de la transaction wallet) ou simulé en mode mock.
  */
-export const faireDonT99CPSchema = z
-  .object({
-    cagnotte_id: z.string().uuid(),
-    /**
-     * Montant en plus petite unité T99CP (équivalent wei). Sérialisé en
-     * string parce que JavaScript Number ne représente pas fidèlement
-     * un bigint > 2^53.
-     */
-    montant_unites: z
-      .string()
-      .regex(/^\d+$/, 'Montant T99CP invalide.')
-      .refine((v) => BigInt(v) > 0n, 'Le montant doit être strictement positif.')
-      .refine((v) => BigInt(v) <= 10n ** 27n, 'Montant T99CP déraisonnable.'),
-    tx_hash: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{64}$/, 'tx_hash invalide (format 0x + 64 hex attendus).'),
-    prenom: z.string().trim().max(100).optional().or(z.literal('')),
-    nom: z.string().trim().max(100).optional().or(z.literal('')),
-    email: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .email("Le format de l'email semble incorrect.")
-      .optional()
-      .or(z.literal('')),
-    code_postal: codePostalFrancaisSchema.optional().or(z.literal('')),
-    accepte_newsletter: z.boolean(),
-    accepte_contact_createurice: z.boolean(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerFaireDonT99CPSchema(
+  messages: MessagesValidationCagnotte = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+) {
+  return z
+    .object({
+      cagnotte_id: z.string().uuid(),
+      /**
+       * Montant en plus petite unité T99CP (équivalent wei). Sérialisé en
+       * string parce que JavaScript Number ne représente pas fidèlement
+       * un bigint > 2^53.
+       */
+      montant_unites: z
+        .string()
+        .regex(/^\d+$/, messages.t99cpMontantFormat)
+        .refine((v) => BigInt(v) > 0n, messages.t99cpMontantPositif)
+        .refine((v) => BigInt(v) <= 10n ** 27n, messages.t99cpMontantMax),
+      tx_hash: z.string().regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat),
+      prenom: z.string().trim().max(100).optional().or(z.literal('')),
+      nom: z.string().trim().max(100).optional().or(z.literal('')),
+      email: z
+        .string()
+        .trim()
+        .toLowerCase()
+        .email(messages.emailFormat)
+        .optional()
+        .or(z.literal('')),
+      code_postal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat)
+        .optional()
+        .or(z.literal('')),
+      accepte_newsletter: z.boolean(),
+      accepte_contact_createurice: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const faireDonT99CPSchema = creerFaireDonT99CPSchema();
 
 export type DonneesFaireDonT99CP = z.infer<typeof faireDonT99CPSchema>;
 
@@ -136,16 +146,17 @@ export type DonneesFaireDonT99CP = z.infer<typeof faireDonT99CPSchema>;
 // Modération a posteriori : suspendre / rétablir / clôturer
 // ============================================================
 
-export const suspendreCagnotteSchema = z
-  .object({
-    cagnotte_id: z.string().uuid(),
-    raison_suspension: z
-      .string()
-      .trim()
-      .min(10, 'La raison de suspension doit faire au moins 10 caractères.')
-      .max(500),
-  })
-  .strict();
+export function creerSuspendreCagnotteSchema(
+  messages: MessagesValidationCagnotte = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+) {
+  return z
+    .object({
+      cagnotte_id: z.string().uuid(),
+      raison_suspension: z.string().trim().min(10, messages.suspensionRaisonMin).max(500),
+    })
+    .strict();
+}
+export const suspendreCagnotteSchema = creerSuspendreCagnotteSchema();
 
 export type DonneesSuspendreCagnotte = z.infer<typeof suspendreCagnotteSchema>;
 
