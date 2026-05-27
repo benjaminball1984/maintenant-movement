@@ -17,6 +17,13 @@ export interface OptionsListeCommunes {
   statut?: 'tous' | 'libre' | 'pre_creee';
   departement?: string;
   limite?: number;
+  /** Offset 0-indexé (pour pagination). Par défaut 0. */
+  debutIdx?: number;
+}
+
+export interface ResultatListeCommunes {
+  lignes: LigneCommuneAdmin[];
+  total: number;
 }
 
 /**
@@ -32,14 +39,27 @@ export interface OptionsListeCommunes {
 export async function listerCommunesAdmin(
   options: OptionsListeCommunes = {},
 ): Promise<LigneCommuneAdmin[]> {
+  const r = await listerCommunesAdminPagine(options);
+  return r.lignes;
+}
+
+/**
+ * Variante paginée : retourne aussi le total exact (pour Pagination UI).
+ */
+export async function listerCommunesAdminPagine(
+  options: OptionsListeCommunes = {},
+): Promise<ResultatListeCommunes> {
   const supabase = await getSupabaseServer();
+  const debut = options.debutIdx ?? 0;
+  const taille = options.limite ?? 100;
   let query = supabase
     .from('commune')
     .select(
       'id, slug, nom, code_insee, code_postal_principal, departement, region, statut_creation, created_at',
+      { count: 'exact' },
     )
     .order('nom', { ascending: true })
-    .limit(options.limite ?? 100);
+    .range(debut, debut + taille - 1);
 
   if (options.statut === 'libre') {
     query = query.neq('statut_creation', 'pre_creee');
@@ -58,8 +78,8 @@ export async function listerCommunesAdmin(
     );
   }
 
-  const { data } = await query;
-  return (data ?? []).map((c) => ({
+  const { data, count } = await query;
+  const lignes = (data ?? []).map((c) => ({
     id: c.id,
     slug: c.slug,
     nom: c.nom,
@@ -70,6 +90,7 @@ export async function listerCommunesAdmin(
     statutCreation: c.statut_creation,
     createdAt: c.created_at,
   }));
+  return { lignes, total: count ?? 0 };
 }
 
 export async function compterCommunes(): Promise<{

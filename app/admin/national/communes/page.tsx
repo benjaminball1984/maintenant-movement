@@ -1,9 +1,11 @@
-import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { Alert, Badge, Card, Heading, Pagination } from '@/components/ui';
 import {
   type OptionsListeCommunes,
   compterCommunes,
-  listerCommunesAdmin,
+  listerCommunesAdminPagine,
 } from '@/lib/admin/communes';
+import { lirePageDepuisParams, paginer } from '@/lib/pagination';
+import { compter } from '@/lib/pluriel';
 import { ExternalLink, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -24,8 +26,10 @@ const STATUTS: Array<{
 ];
 
 interface Props {
-  searchParams: Promise<{ q?: string; statut?: string; dep?: string }>;
+  searchParams: Promise<{ q?: string; statut?: string; dep?: string; page?: string }>;
 }
+
+const PAR_PAGE = 50;
 
 /**
  * Page `/admin/national/communes` (V2.4.33).
@@ -43,14 +47,30 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
     | 'pre_creee';
   const departement = sp.dep?.trim() ?? '';
 
-  const [communes, compteurs] = await Promise.all([
-    listerCommunesAdmin({
-      motCle: motCle === '' ? undefined : motCle,
-      statut: statutFiltre,
-      departement: departement === '' ? undefined : departement,
-    }),
+  const pageDemandee = lirePageDepuisParams(sp);
+  const filtres = {
+    motCle: motCle === '' ? undefined : motCle,
+    statut: statutFiltre,
+    departement: departement === '' ? undefined : departement,
+  };
+  const [premier, compteurs] = await Promise.all([
+    listerCommunesAdminPagine({ ...filtres, limite: PAR_PAGE, debutIdx: 0 }),
     compterCommunes(),
   ]);
+  const pagination = paginer({
+    page: pageDemandee,
+    parPage: PAR_PAGE,
+    total: premier.total,
+  });
+  const resultat =
+    pagination.page === 1
+      ? premier
+      : await listerCommunesAdminPagine({
+          ...filtres,
+          limite: PAR_PAGE,
+          debutIdx: pagination.debutIdx,
+        });
+  const communes = resultat.lignes;
 
   return (
     <>
@@ -127,7 +147,7 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
       </form>
 
       <p className="mt-4 text-text-3 text-xs">
-        {communes.length} résultat{communes.length > 1 ? 's' : ''} (limite 100 par page)
+        {compter(premier.total, 'résultat')} · page {pagination.page} sur {pagination.nbPages}
       </p>
 
       {communes.length === 0 ? (
@@ -163,6 +183,13 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
           ))}
         </ul>
       )}
+
+      <Pagination
+        page={pagination.page}
+        nbPages={pagination.nbPages}
+        href="/admin/national/communes"
+        paramsAPreserver={{ q: motCle, statut: statutFiltre, dep: departement }}
+      />
     </>
   );
 }
