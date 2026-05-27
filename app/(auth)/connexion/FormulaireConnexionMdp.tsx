@@ -10,10 +10,25 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { connecterAvecMotDePasse } from '../actions';
 
+/** Libelles surchargeables admin via CMS (V2.4.135). */
+export interface LibellesConnexionMdp {
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaChargement: string;
+}
+
+const LIBELLES_DEFAUT: LibellesConnexionMdp = {
+  ctaSubmit: 'Se connecter',
+  ctaEnCours: 'Connexion en cours...',
+  ctaChargement: 'Chargement…',
+};
+
 /**
  * Connexion par email + mot de passe (porte 1 sur 4).
  */
-export function FormulaireConnexionMdp() {
+export function FormulaireConnexionMdp({
+  libelles = LIBELLES_DEFAUT,
+}: { libelles?: LibellesConnexionMdp } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -93,7 +108,11 @@ export function FormulaireConnexionMdp() {
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours || !hydrate}>
-        {envoiEnCours ? 'Connexion en cours...' : !hydrate ? 'Chargement…' : 'Se connecter'}
+        {envoiEnCours
+          ? libelles.ctaEnCours
+          : !hydrate
+            ? libelles.ctaChargement
+            : libelles.ctaSubmit}
       </Button>
     </form>
   );

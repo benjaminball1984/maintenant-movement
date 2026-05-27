@@ -25,13 +25,17 @@ const FALLBACKS = {
  * `react-hook-form` (state + onSubmit).
  */
 export default async function PageInscription() {
-  const [estAdmin, titre, intro, bottomAmorce, bottomLien] = await Promise.all([
-    estAdminCourant(),
-    lireContenuEditorial('inscription.titre', { valeurMd: FALLBACKS.titre }),
-    lireContenuEditorial('inscription.intro', { valeurMd: FALLBACKS.intro }),
-    lireContenuEditorial('inscription.bottom.amorce', { valeurMd: FALLBACKS.bottomAmorce }),
-    lireContenuEditorial('inscription.bottom.lien', { valeurMd: FALLBACKS.bottomLien }),
-  ]);
+  const [estAdmin, titre, intro, bottomAmorce, bottomLien, ctaSubmit, ctaEnCours, ctaChargement] =
+    await Promise.all([
+      estAdminCourant(),
+      lireContenuEditorial('inscription.titre', { valeurMd: FALLBACKS.titre }),
+      lireContenuEditorial('inscription.intro', { valeurMd: FALLBACKS.intro }),
+      lireContenuEditorial('inscription.bottom.amorce', { valeurMd: FALLBACKS.bottomAmorce }),
+      lireContenuEditorial('inscription.bottom.lien', { valeurMd: FALLBACKS.bottomLien }),
+      lireContenuEditorial('inscription.cta_submit', { valeurMd: 'Créer mon compte' }),
+      lireContenuEditorial('inscription.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
+      lireContenuEditorial('inscription.cta_chargement', { valeurMd: 'Chargement…' }),
+    ]);
 
   return (
     <article className="grid gap-6">
@@ -57,7 +61,13 @@ export default async function PageInscription() {
         </TexteEditableAdmin>
       </header>
 
-      <FormulaireInscription />
+      <FormulaireInscription
+        libelles={{
+          ctaSubmit: ctaSubmit.valeurMd,
+          ctaEnCours: ctaEnCours.valeurMd,
+          ctaChargement: ctaChargement.valeurMd,
+        }}
+      />
 
       <p className="text-sm text-text-3">
         <TexteEditableAdmin

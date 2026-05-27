@@ -56,6 +56,12 @@ export default async function PageConnexion({
     sectionOauth,
     bottomAmorce,
     bottomLien,
+    mdpCtaSubmit,
+    mdpCtaEnCours,
+    mdpCtaChargement,
+    magicCtaSubmit,
+    magicCtaEnCours,
+    magicCtaChargement,
   ] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('connexion.titre', { valeurMd: FALLBACKS.titre }),
@@ -73,6 +79,14 @@ export default async function PageConnexion({
     lireContenuEditorial('connexion.section.oauth', { valeurMd: FALLBACKS.sectionOauth }),
     lireContenuEditorial('connexion.bottom.amorce', { valeurMd: FALLBACKS.bottomAmorce }),
     lireContenuEditorial('connexion.bottom.lien', { valeurMd: FALLBACKS.bottomLien }),
+    lireContenuEditorial('connexion.mdp.cta_submit', { valeurMd: 'Se connecter' }),
+    lireContenuEditorial('connexion.mdp.cta_en_cours', { valeurMd: 'Connexion en cours...' }),
+    lireContenuEditorial('connexion.mdp.cta_chargement', { valeurMd: 'Chargement…' }),
+    lireContenuEditorial('connexion.magic.cta_submit', {
+      valeurMd: 'Recevoir un lien par email',
+    }),
+    lireContenuEditorial('connexion.magic.cta_en_cours', { valeurMd: 'Envoi en cours...' }),
+    lireContenuEditorial('connexion.magic.cta_chargement', { valeurMd: 'Chargement…' }),
   ]);
 
   return (
@@ -144,7 +158,13 @@ export default async function PageConnexion({
             </Heading>
           )}
         </TexteEditableAdmin>
-        <FormulaireConnexionMdp />
+        <FormulaireConnexionMdp
+          libelles={{
+            ctaSubmit: mdpCtaSubmit.valeurMd,
+            ctaEnCours: mdpCtaEnCours.valeurMd,
+            ctaChargement: mdpCtaChargement.valeurMd,
+          }}
+        />
         <p className="mt-3 text-sm">
           <TexteEditableAdmin
             cle="connexion.mot_de_passe_oublie"
@@ -189,7 +209,13 @@ export default async function PageConnexion({
         >
           {(t) => <p className="mb-3 text-sm text-text-2">{t}</p>}
         </TexteEditableAdmin>
-        <FormulaireMagicLink />
+        <FormulaireMagicLink
+          libelles={{
+            ctaSubmit: magicCtaSubmit.valeurMd,
+            ctaEnCours: magicCtaEnCours.valeurMd,
+            ctaChargement: magicCtaChargement.valeurMd,
+          }}
+        />
       </Card>
 
       <Card variant="ombre">

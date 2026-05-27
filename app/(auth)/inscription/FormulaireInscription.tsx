@@ -12,6 +12,23 @@ import { useForm } from 'react-hook-form';
 import { inscrire } from '../actions';
 
 /**
+ * Libelles surchargeables admin via CMS, passes en props par le Server
+ * Component parent (/inscription/page.tsx en V2.4.135). Si un parent ne
+ * fournit pas `libelles`, on retombe sur les defauts hardcodes.
+ */
+export interface LibellesInscription {
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaChargement: string;
+}
+
+const LIBELLES_DEFAUT: LibellesInscription = {
+  ctaSubmit: 'Créer mon compte',
+  ctaEnCours: 'Envoi en cours...',
+  ctaChargement: 'Chargement…',
+};
+
+/**
  * Formulaire d'inscription : nom, prénom, pronom, email, code postal,
  * téléphone optionnel, date de naissance (15 ans min), mot de passe,
  * Turnstile, case CGU obligatoire.
@@ -19,7 +36,9 @@ import { inscrire } from '../actions';
  * Validation côté client par Zod + react-hook-form, puis revalidation
  * côté serveur dans la Server Action `inscrire`.
  */
-export function FormulaireInscription() {
+export function FormulaireInscription({
+  libelles = LIBELLES_DEFAUT,
+}: { libelles?: LibellesInscription } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   // Si Supabase signale que l'email est deja en base, on affiche en
@@ -256,7 +275,11 @@ export function FormulaireInscription() {
       ) : null}
 
       <Button type="submit" disabled={envoiEnCours || !hydrate}>
-        {envoiEnCours ? 'Envoi en cours...' : !hydrate ? 'Chargement…' : 'Créer mon compte'}
+        {envoiEnCours
+          ? libelles.ctaEnCours
+          : !hydrate
+            ? libelles.ctaChargement
+            : libelles.ctaSubmit}
       </Button>
     </form>
   );

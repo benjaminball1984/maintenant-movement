@@ -9,11 +9,26 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { envoyerMagicLink } from '../actions';
 
+/** Libelles surchargeables admin via CMS (V2.4.135). */
+export interface LibellesMagicLink {
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaChargement: string;
+}
+
+const LIBELLES_DEFAUT: LibellesMagicLink = {
+  ctaSubmit: 'Recevoir un lien par email',
+  ctaEnCours: 'Envoi en cours...',
+  ctaChargement: 'Chargement…',
+};
+
 /**
  * Connexion par lien magique : envoi d'un email avec lien à usage unique
  * (porte 2 sur 4). Pas de mot de passe à mémoriser.
  */
-export function FormulaireMagicLink() {
+export function FormulaireMagicLink({
+  libelles = LIBELLES_DEFAUT,
+}: { libelles?: LibellesMagicLink } = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -80,10 +95,10 @@ export function FormulaireMagicLink() {
 
       <Button variant="ghost" type="submit" disabled={envoiEnCours || !hydrate}>
         {envoiEnCours
-          ? 'Envoi en cours...'
+          ? libelles.ctaEnCours
           : !hydrate
-            ? 'Chargement…'
-            : 'Recevoir un lien par email'}
+            ? libelles.ctaChargement
+            : libelles.ctaSubmit}
       </Button>
     </form>
   );
