@@ -1,7 +1,10 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonsProprietaireReservation } from '@/components/reservation/BoutonsProprietaireReservation';
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   type IdentiteAffichee,
   chargerIdentitesAffichables,
@@ -88,14 +91,45 @@ export default async function PageDemandesReservations({
     return qs === '' ? '/profil/demandes-reservations' : `/profil/demandes-reservations?${qs}`;
   }
 
+  const [estAdmin, titre, intro, emptyAucune, emptyFiltre] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('profil.demandes_reservations.titre', {
+      valeurMd: 'Demandes de réservation reçues',
+    }),
+    lireContenuEditorial('profil.demandes_reservations.intro', {
+      valeurMd:
+        'Les demandes envoyées par d’autres membres sur tes offres (covoit, hébergement, prêt, SEL, location mutualisée). Tu peux accepter, refuser, ou marquer une demande comme réalisée après la rencontre.',
+    }),
+    lireContenuEditorial('profil.demandes_reservations.empty_aucune', {
+      valeurMd:
+        'Aucune demande pour le moment. Quand quelqu’un demandera à réserver l’une de tes offres, sa demande apparaîtra ici.',
+    }),
+    lireContenuEditorial('profil.demandes_reservations.empty_filtre', {
+      valeurMd: 'Aucune demande pour ce filtre. Choisis « Tous » pour voir l’ensemble.',
+    }),
+  ]);
+
   return (
     <Container taille="md" className="py-12">
-      <Heading niveau={1}>Demandes de réservation reçues</Heading>
-      <p className="mt-2 text-text-2">
-        Les demandes envoyées par d’autres membres sur tes offres (covoit, hébergement, prêt, SEL,
-        location mutualisée). Tu peux accepter, refuser, ou marquer une demande comme réalisée après
-        la rencontre.
-      </p>
+      <TexteEditableAdmin
+        cle="profil.demandes_reservations.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre page demandes reservations"
+        longueurMax={50}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="profil.demandes_reservations.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro page demandes reservations"
+        multilignes
+        longueurMax={400}
+      >
+        {(t) => <p className="mt-2 text-text-2">{t}</p>}
+      </TexteEditableAdmin>
 
       {toutes.length > 0 ? (
         <div className="mt-6 flex flex-col gap-3 border-border border-b pb-3">
@@ -153,11 +187,29 @@ export default async function PageDemandesReservations({
 
       {reservations.length === 0 ? (
         <Card variant="ombre" className="mt-8">
-          <p className="text-text-2">
-            {toutes.length === 0
-              ? 'Aucune demande pour le moment. Quand quelqu’un demandera à réserver l’une de tes offres, sa demande apparaîtra ici.'
-              : 'Aucune demande pour ce filtre. Choisis « Tous » pour voir l’ensemble.'}
-          </p>
+          {toutes.length === 0 ? (
+            <TexteEditableAdmin
+              cle="profil.demandes_reservations.empty_aucune"
+              valeurInitiale={emptyAucune.valeurMd}
+              estAdmin={estAdmin}
+              libelle="empty quand aucune demande"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <p className="text-text-2">{t}</p>}
+            </TexteEditableAdmin>
+          ) : (
+            <TexteEditableAdmin
+              cle="profil.demandes_reservations.empty_filtre"
+              valeurInitiale={emptyFiltre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="empty quand filtre vide"
+              multilignes
+              longueurMax={200}
+            >
+              {(t) => <p className="text-text-2">{t}</p>}
+            </TexteEditableAdmin>
+          )}
         </Card>
       ) : (
         <ul className="mt-6 flex flex-col gap-4">

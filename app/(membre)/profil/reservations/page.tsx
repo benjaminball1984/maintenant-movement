@@ -1,9 +1,12 @@
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonAnnulerReservation } from '@/components/reservation/BoutonAnnulerReservation';
 import { BoutonConfirmerReservation } from '@/components/reservation/BoutonConfirmerReservation';
 import { BoutonSignalerLitigeReservation } from '@/components/reservation/BoutonSignalerLitigeReservation';
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Badge, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { type IdentiteAffichee, chargerIdentitesAffichables } from '@/lib/reseau/identite';
 import {
   type EntreeJournalReservation,
@@ -94,14 +97,49 @@ export default async function PageMesReservations({
     return qs === '' ? '/profil/reservations' : `/profil/reservations?${qs}`;
   }
 
+  const [estAdmin, titre, intro, emptyAucune, emptyFiltre, demandeeLe, motifLabel, voirMessage] =
+    await Promise.all([
+      estAdminCourant(),
+      lireContenuEditorial('profil.reservations.titre', { valeurMd: 'Mes réservations' }),
+      lireContenuEditorial('profil.reservations.intro', {
+        valeurMd:
+          'Les demandes que tu as envoyées pour du covoiturage, hébergement, prêt, service SEL ou location mutualisée. Les propriétaires d’offres voient leurs demandes reçues depuis leur propre tableau de bord.',
+      }),
+      lireContenuEditorial('profil.reservations.empty_aucune', {
+        valeurMd:
+          'Aucune réservation pour le moment. Quand tu demanderas une offre d’entraide, elle apparaîtra ici avec son statut et le message envoyé.',
+      }),
+      lireContenuEditorial('profil.reservations.empty_filtre', {
+        valeurMd: 'Aucune réservation pour ce filtre. Choisis « Tous » pour voir l’ensemble.',
+      }),
+      lireContenuEditorial('profil.reservations.demandee_le', { valeurMd: 'Demandée le' }),
+      lireContenuEditorial('profil.reservations.motif_label', { valeurMd: 'Motif :' }),
+      lireContenuEditorial('profil.reservations.voir_message', {
+        valeurMd: 'Voir le message envoyé',
+      }),
+    ]);
+
   return (
     <Container taille="md" className="py-12">
-      <Heading niveau={1}>Mes réservations</Heading>
-      <p className="mt-2 text-text-2">
-        Les demandes que tu as envoyées pour du covoiturage, hébergement, prêt, service SEL ou
-        location mutualisée. Les propriétaires d’offres voient leurs demandes reçues depuis leur
-        propre tableau de bord.
-      </p>
+      <TexteEditableAdmin
+        cle="profil.reservations.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre page mes reservations"
+        longueurMax={40}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="profil.reservations.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro page mes reservations"
+        multilignes
+        longueurMax={400}
+      >
+        {(t) => <p className="mt-2 text-text-2">{t}</p>}
+      </TexteEditableAdmin>
 
       {toutes.length > 0 ? (
         <div className="mt-6 flex flex-col gap-3 border-border border-b pb-3">
@@ -159,11 +197,29 @@ export default async function PageMesReservations({
 
       {reservations.length === 0 ? (
         <Card variant="ombre" className="mt-8">
-          <p className="text-text-2">
-            {toutes.length === 0
-              ? 'Aucune réservation pour le moment. Quand tu demanderas une offre d’entraide, elle apparaîtra ici avec son statut et le message envoyé.'
-              : 'Aucune réservation pour ce filtre. Choisis « Tous » pour voir l’ensemble.'}
-          </p>
+          {toutes.length === 0 ? (
+            <TexteEditableAdmin
+              cle="profil.reservations.empty_aucune"
+              valeurInitiale={emptyAucune.valeurMd}
+              estAdmin={estAdmin}
+              libelle="empty state quand aucune reservation"
+              multilignes
+              longueurMax={300}
+            >
+              {(t) => <p className="text-text-2">{t}</p>}
+            </TexteEditableAdmin>
+          ) : (
+            <TexteEditableAdmin
+              cle="profil.reservations.empty_filtre"
+              valeurInitiale={emptyFiltre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="empty state quand filtre ne renvoie rien"
+              multilignes
+              longueurMax={200}
+            >
+              {(t) => <p className="text-text-2">{t}</p>}
+            </TexteEditableAdmin>
+          )}
         </Card>
       ) : (
         <ul className="mt-6 flex flex-col gap-4">
@@ -174,6 +230,9 @@ export default async function PageMesReservations({
                 titreOffre={titresParId.get(reservation.offreId) ?? null}
                 journal={journauxParId.get(reservation.id) ?? []}
                 identites={identitesParId}
+                demandeeLe={demandeeLe.valeurMd}
+                motifLabel={motifLabel.valeurMd}
+                voirMessage={voirMessage.valeurMd}
               />
             </li>
           ))}
@@ -226,11 +285,17 @@ function CarteReservation({
   titreOffre,
   journal,
   identites,
+  demandeeLe,
+  motifLabel,
+  voirMessage,
 }: {
   reservation: import('@/lib/reservation').Reservation;
   titreOffre: { titre: string; cheminPage: string | null } | null;
   journal: EntreeJournalReservation[];
   identites: Map<string, IdentiteAffichee>;
+  demandeeLe: string;
+  motifLabel: string;
+  voirMessage: string;
 }) {
   const variantStatut = VARIANT_STATUT[reservation.statut];
   const titreAffiche = titreOffre?.titre ?? '(offre non trouvée)';
@@ -243,7 +308,7 @@ function CarteReservation({
           <Badge variant={variantStatut}>{LIBELLE_STATUT[reservation.statut]}</Badge>
         </div>
         <span className="text-text-3 text-xs">
-          Demandée le {new Date(reservation.createdAt).toLocaleDateString('fr-FR')}
+          {demandeeLe} {new Date(reservation.createdAt).toLocaleDateString('fr-FR')}
         </span>
       </div>
 
@@ -270,14 +335,14 @@ function CarteReservation({
 
       {reservation.motifDecision !== null ? (
         <p className="text-sm text-text-3">
-          <strong>Motif :</strong> {reservation.motifDecision}
+          <strong>{motifLabel}</strong> {reservation.motifDecision}
         </p>
       ) : null}
 
       <details className="rounded-md border border-border bg-surface-2 p-3 text-sm">
         <summary className="cursor-pointer text-text-2">
           <MessageSquare size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
-          Voir le message envoyé
+          {voirMessage}
         </summary>
         <p className="mt-3 whitespace-pre-wrap text-text-1">{reservation.messageAmorce}</p>
       </details>

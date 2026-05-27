@@ -2,8 +2,11 @@ import {
   marquerNotificationLue,
   marquerToutesLues,
 } from '@/app/(membre)/profil/notifications/actions';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Button, Card, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { type Notification, listerNotifications } from '@/lib/notification';
 import { Bell, Check } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -29,7 +32,30 @@ export const metadata: Metadata = {
  */
 export default async function PageNotificationsRecues() {
   const session = await getSessionOuRediriger('/profil/notifications-recues');
-  const notifs = await listerNotifications(session.userId, 50);
+  const [notifs, estAdmin, titre, introAmorce, introLien, ctaToutMarquer, emptyTitre, emptyCorps] =
+    await Promise.all([
+      listerNotifications(session.userId, 50),
+      estAdminCourant(),
+      lireContenuEditorial('profil.notifications_recues.titre', {
+        valeurMd: 'Mes notifications',
+      }),
+      lireContenuEditorial('profil.notifications_recues.intro_amorce', {
+        valeurMd: 'Cloche in-app — 50 dernières notifications.',
+      }),
+      lireContenuEditorial('profil.notifications_recues.intro_lien', {
+        valeurMd: 'Gérer mes préférences (mail, push)',
+      }),
+      lireContenuEditorial('profil.notifications_recues.cta_tout_marquer', {
+        valeurMd: 'Tout marquer comme lu',
+      }),
+      lireContenuEditorial('profil.notifications_recues.empty_titre', {
+        valeurMd: 'Pas encore de notification',
+      }),
+      lireContenuEditorial('profil.notifications_recues.empty_corps', {
+        valeurMd:
+          'Quand quelque chose te concerne (réservation, modération, commentaire), une notification apparaît ici. Tu peux aussi consulter ta messagerie interne pour les DM.',
+      }),
+    ]);
   const nbNonLues = notifs.filter((n) => !n.lue).length;
 
   return (
@@ -38,13 +64,39 @@ export default async function PageNotificationsRecues() {
         <div>
           <Heading niveau={1}>
             <Bell size={22} className="-mt-1 mr-2 inline" aria-hidden="true" />
-            Mes notifications
+            <TexteEditableAdmin
+              cle="profil.notifications_recues.titre"
+              valeurInitiale={titre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre page notifications recues"
+              longueurMax={50}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
           </Heading>
           <p className="mt-2 text-text-2">
-            Cloche in-app — 50 dernières notifications.{' '}
-            <Link href="/profil/notifications" className="text-brand hover:underline">
-              Gérer mes préférences (mail, push)
-            </Link>
+            <TexteEditableAdmin
+              cle="profil.notifications_recues.intro_amorce"
+              valeurInitiale={introAmorce.valeurMd}
+              estAdmin={estAdmin}
+              libelle="amorce intro (avant le lien)"
+              longueurMax={150}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>{' '}
+            <TexteEditableAdmin
+              cle="profil.notifications_recues.intro_lien"
+              valeurInitiale={introLien.valeurMd}
+              estAdmin={estAdmin}
+              libelle="lien vers preferences"
+              longueurMax={60}
+            >
+              {(t) => (
+                <Link href="/profil/notifications" className="text-brand hover:underline">
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>
             .
           </p>
         </div>
@@ -57,16 +109,38 @@ export default async function PageNotificationsRecues() {
           >
             <Button type="submit" variant="ghost" taille="sm">
               <Check size={14} aria-hidden="true" />
-              Tout marquer comme lu ({nbNonLues})
+              {ctaToutMarquer.valeurMd} ({nbNonLues})
             </Button>
           </form>
         ) : null}
       </div>
 
       {notifs.length === 0 ? (
-        <Alert variant="info" titre="Pas encore de notification" className="mt-8">
-          Quand quelque chose te concerne (réservation, modération, commentaire), une notification
-          apparaît ici. Tu peux aussi consulter ta messagerie interne pour les DM.
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="profil.notifications_recues.empty_titre"
+              valeurInitiale={emptyTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre empty notifs"
+              longueurMax={60}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+          className="mt-8"
+        >
+          <TexteEditableAdmin
+            cle="profil.notifications_recues.empty_corps"
+            valeurInitiale={emptyCorps.valeurMd}
+            estAdmin={estAdmin}
+            libelle="corps empty notifs"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>
         </Alert>
       ) : (
         <ul className="mt-6 flex flex-col gap-2">
