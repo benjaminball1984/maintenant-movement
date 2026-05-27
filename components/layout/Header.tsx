@@ -2,6 +2,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ESPACES } from '@/config/espaces';
 import { SITE } from '@/config/site';
 import { getSession } from '@/lib/auth/session';
+import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { HeaderCloche } from './HeaderCloche';
 import { HeaderProfilMenu } from './HeaderProfilMenu';
@@ -51,6 +52,13 @@ export async function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <Link
+            href="/recherche"
+            aria-label="Recherche globale"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-text-2 hover:bg-surface-2 hover:text-text-1"
+          >
+            <Search size={18} aria-hidden="true" />
+          </Link>
           <ThemeToggle />
           {session !== null ? (
             <>
