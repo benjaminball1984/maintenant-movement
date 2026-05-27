@@ -3,10 +3,11 @@ import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import {
   LIBELLE_MODE,
   LIBELLE_STATUT,
+  listerDernieresReunionsAvecPV,
   listerProchainesReunionsToutesSalles,
   listerSallesDecider,
 } from '@/lib/decider';
-import { CalendarRange, Clock, Globe, Lock, Users, Video } from 'lucide-react';
+import { CalendarRange, CheckCircle, Clock, Globe, Lock, Users, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -58,9 +59,10 @@ const FORMATEUR_REUNION = new Intl.DateTimeFormat('fr-FR', {
 });
 
 export default async function PageDecider() {
-  const [salles, prochaines] = await Promise.all([
+  const [salles, prochaines, recentes] = await Promise.all([
     listerSallesDecider(),
     listerProchainesReunionsToutesSalles(10),
+    listerDernieresReunionsAvecPV(6),
   ]);
 
   return (
@@ -172,6 +174,39 @@ export default async function PageDecider() {
           </ul>
         )}
       </section>
+
+      {recentes.length > 0 ? (
+        <section className="mt-12">
+          <Heading niveau={2} apparenceComme={3}>
+            <CheckCircle size={20} className="-mt-0.5 mr-2 inline" aria-hidden="true" />
+            Décisions récentes ({recentes.length})
+          </Heading>
+          <p className="mt-2 text-sm text-text-3">
+            Dernières réunions terminées avec procès-verbal publié.
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+            {recentes.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/s-informer/decider/${r.salleSlug}/${r.id}`}
+                  className="block hover:opacity-90"
+                >
+                  <Card variant="plat" className="grid gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-text-3 text-xs">{r.salleNom}</span>
+                      <Badge variant="info">{LIBELLE_MODE[r.modeDecision]}</Badge>
+                    </div>
+                    <h3 className="font-bold text-text-1">{r.titre}</h3>
+                    <p className="text-text-3 text-xs">
+                      Terminée le {FORMATEUR_REUNION.format(new Date(r.debutLe))} · PV disponible
+                    </p>
+                  </Card>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <Alert variant="info" titre="LiveKit pas encore branché" className="mt-12">
         L'infrastructure visio (LiveKit self-hosted ou Cloud) sera connectée dans un chantier dédié.

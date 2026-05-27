@@ -165,6 +165,40 @@ export async function listerProchainesReunionsToutesSalles(
   });
 }
 
+/**
+ * Liste les dernières réunions terminées avec PV publié (V2.4.21).
+ * Sert à afficher les « Décisions récentes » sur la home Décider.
+ */
+export async function listerDernieresReunionsAvecPV(limite = 6): Promise<ReunionAvecSalle[]> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from('reunion_decider')
+    .select('*, salle:salle_decider(id, slug, nom)')
+    .eq('statut', 'terminee')
+    .not('pv_md', 'is', null)
+    .neq('pv_md', '')
+    .order('debut_le', { ascending: false })
+    .limit(limite);
+  return (data ?? []).map((r) => {
+    // biome-ignore lint/suspicious/noExplicitAny: jointure non typée précisément
+    const salle = (r as any).salle as { slug: string; nom: string } | null;
+    return {
+      id: r.id,
+      salleId: r.salle_id,
+      titre: r.titre,
+      ordreJourMd: r.ordre_jour_md,
+      debutLe: r.debut_le,
+      finLe: r.fin_le,
+      modeDecision: r.mode_decision as ModeDecision,
+      statut: r.statut as StatutReunion,
+      enregistree: r.enregistree,
+      pvMd: r.pv_md,
+      salleSlug: salle?.slug ?? '',
+      salleNom: salle?.nom ?? '',
+    };
+  });
+}
+
 export async function chargerReunionParId(id: string): Promise<ReunionDecider | null> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('reunion_decider').select('*').eq('id', id).maybeSingle();
