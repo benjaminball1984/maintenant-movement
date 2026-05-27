@@ -215,8 +215,8 @@ export function FormulaireCreationOffre({
         {envoiEnCours ? 'Publication...' : "Publier l'offre"}
       </Button>
       <p className="-mt-2 text-xs text-text-3">
-        Publication immédiate (modération a posteriori). Le contact passe par l'email du
-        créateur·ice tant que la messagerie interne n'est pas en ligne (chantier 7.5).
+        Publication immédiate (modération a posteriori). Le contact passe par la messagerie interne
+        du réseau social.
       </p>
     </form>
   );

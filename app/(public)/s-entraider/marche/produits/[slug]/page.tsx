@@ -134,9 +134,11 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
 
         {produit.mode === 'don' && produit.statut === 'disponible' && !estVendeureuse ? (
           <Alert variant="info" titre="Produit offert">
-            Ce produit est en don gratuit : entre en contact avec la personne directement. La
-            messagerie interne arrive au chantier 7.5 ; en attendant, le profil public (chantier
-            polish) affichera ses coordonnées de contact.
+            Ce produit est en don gratuit : entre en contact avec la personne via la{' '}
+            <a href="/s-informer/reseau/messages" className="underline">
+              messagerie interne du réseau social
+            </a>
+            .
           </Alert>
         ) : null}
 

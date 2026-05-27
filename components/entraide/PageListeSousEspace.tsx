@@ -86,8 +86,11 @@ export async function PageListeSousEspace({ type }: PageListeSousEspaceProps) {
 
       <footer className="mt-12 border-t border-border pt-6 text-sm text-text-3">
         <p>
-          Modération <strong>a posteriori</strong>. Contact via l'email du créateur·ice tant que la
-          messagerie interne n'est pas en ligne (chantier 7.5).
+          Modération <strong>a posteriori</strong>. Contact via la messagerie interne du{' '}
+          <a href="/s-informer/reseau/messages" className="underline">
+            réseau social
+          </a>
+          .
         </p>
       </footer>
     </>
