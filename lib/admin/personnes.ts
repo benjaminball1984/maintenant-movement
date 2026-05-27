@@ -17,6 +17,13 @@ export interface OptionsListePersonnes {
   motCle?: string;
   statut?: 'tous' | 'actif' | 'anonymise' | 'suppression_demandee';
   limite?: number;
+  /** Offset 0-indexé (pour pagination). Par défaut 0. */
+  debutIdx?: number;
+}
+
+export interface ResultatListePersonnes {
+  lignes: LignePersonneAdmin[];
+  total: number;
 }
 
 /**
@@ -33,14 +40,27 @@ export interface OptionsListePersonnes {
 export async function listerPersonnesAdmin(
   options: OptionsListePersonnes = {},
 ): Promise<LignePersonneAdmin[]> {
+  const r = await listerPersonnesAdminPagine(options);
+  return r.lignes;
+}
+
+/**
+ * Variante paginée : retourne aussi le total exact (pour Pagination UI).
+ */
+export async function listerPersonnesAdminPagine(
+  options: OptionsListePersonnes = {},
+): Promise<ResultatListePersonnes> {
   const supabase = await getSupabaseServer();
+  const debut = options.debutIdx ?? 0;
+  const taille = options.limite ?? 100;
   let query = supabase
     .from('personne')
     .select(
       'id, email, prenom, nom, statut, email_verifie, derniere_connexion_le, created_at, anonymise_le, suppression_demandee_le',
+      { count: 'exact' },
     )
     .order('created_at', { ascending: false })
-    .limit(options.limite ?? 100);
+    .range(debut, debut + taille - 1);
 
   if (options.statut === 'actif') {
     query = query.is('anonymise_le', null).is('suppression_demandee_le', null);
@@ -55,8 +75,8 @@ export async function listerPersonnesAdmin(
     query = query.or(`email.ilike.${motif},prenom.ilike.${motif},nom.ilike.${motif}`);
   }
 
-  const { data } = await query;
-  return (data ?? []).map((p) => ({
+  const { data, count } = await query;
+  const lignes = (data ?? []).map((p) => ({
     id: p.id,
     email: p.email,
     prenom: p.prenom,
@@ -68,4 +88,5 @@ export async function listerPersonnesAdmin(
     anonymiseLe: p.anonymise_le,
     suppressionDemandeeLe: p.suppression_demandee_le,
   }));
+  return { lignes, total: count ?? 0 };
 }

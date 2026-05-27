@@ -1,5 +1,7 @@
-import { Alert, Badge, Card, Heading } from '@/components/ui';
-import { type OptionsListePersonnes, listerPersonnesAdmin } from '@/lib/admin/personnes';
+import { Alert, Badge, Card, Heading, Pagination } from '@/components/ui';
+import { type OptionsListePersonnes, listerPersonnesAdminPagine } from '@/lib/admin/personnes';
+import { lirePageDepuisParams, paginer } from '@/lib/pagination';
+import { compter } from '@/lib/pluriel';
 import { CheckCircle, Mail, ShieldOff, UserX, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -22,8 +24,10 @@ const STATUTS: Array<{ value: NonNullable<OptionsListePersonnes['statut']>; labe
 ];
 
 interface Props {
-  searchParams: Promise<{ q?: string; statut?: string }>;
+  searchParams: Promise<{ q?: string; statut?: string; page?: string }>;
 }
+
+const PAR_PAGE = 50;
 
 /**
  * Page `/admin/national/personnes` (V2.4.29).
@@ -41,10 +45,30 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
     | 'anonymise'
     | 'suppression_demandee';
 
-  const personnes = await listerPersonnesAdmin({
+  const pageDemandee = lirePageDepuisParams(sp);
+  // 1er appel pour connaître le total : on demande la 1ʳᵉ page avec count exact.
+  const premier = await listerPersonnesAdminPagine({
     motCle: motCle === '' ? undefined : motCle,
     statut: statutFiltre,
+    limite: PAR_PAGE,
+    debutIdx: 0,
   });
+  const pagination = paginer({
+    page: pageDemandee,
+    parPage: PAR_PAGE,
+    total: premier.total,
+  });
+  // Si la page demandée n'est pas la 1ʳᵉ, on refait un appel avec le bon range.
+  const resultat =
+    pagination.page === 1
+      ? premier
+      : await listerPersonnesAdminPagine({
+          motCle: motCle === '' ? undefined : motCle,
+          statut: statutFiltre,
+          limite: PAR_PAGE,
+          debutIdx: pagination.debutIdx,
+        });
+  const personnes = resultat.lignes;
 
   return (
     <>
@@ -95,7 +119,7 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
       </form>
 
       <p className="mt-4 text-text-3 text-xs">
-        {personnes.length} résultat{personnes.length > 1 ? 's' : ''}
+        {compter(premier.total, 'résultat')} · page {pagination.page} sur {pagination.nbPages}
       </p>
 
       {personnes.length === 0 ? (
@@ -162,6 +186,13 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
           })}
         </ul>
       )}
+
+      <Pagination
+        page={pagination.page}
+        nbPages={pagination.nbPages}
+        href="/admin/national/personnes"
+        paramsAPreserver={{ q: motCle, statut: statutFiltre }}
+      />
     </>
   );
 }
