@@ -8,10 +8,17 @@ import { defineConfig, devices } from '@playwright/test';
  *     portrait/paysage, desktop. Tous les tests tournent sur chaque
  *     viewport pour vérifier qu'aucune mise en page ne casse.
  *   - 2 navigateurs supplémentaires (Firefox, WebKit) sur viewport
- *     desktop : sanity cross-browser.
+ *     desktop : sanity cross-browser, activés uniquement quand la
+ *     variable `PLAYWRIGHT_FULL=1` est définie. Évite de tenter de
+ *     lancer des binaires non installés (cas CI de push, qui installe
+ *     `chromium` seul). Le workflow programmé `ci-cross-browser.yml`
+ *     positionne `PLAYWRIGHT_FULL=1` et installe les 3 navigateurs.
  *
  * Pour ne lancer qu'un seul viewport :
  *   npm run test:e2e -- --project=mobile-portrait
+ *
+ * Pour inclure Firefox + WebKit en local :
+ *   PLAYWRIGHT_FULL=1 npm run test:e2e
  *
  * Le `webServer` lance `npm run dev` automatiquement avant les tests.
  */
@@ -23,6 +30,47 @@ const VIEWPORT_MOBILE_PAYSAGE = { width: 667, height: 375 };
 const VIEWPORT_TABLETTE_PORTRAIT = { width: 768, height: 1024 };
 const VIEWPORT_TABLETTE_PAYSAGE = { width: 1024, height: 768 };
 const VIEWPORT_DESKTOP = { width: 1440, height: 900 };
+
+const PROJETS_CHROMIUM = [
+  {
+    name: 'mobile-portrait',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PORTRAIT },
+  },
+  {
+    name: 'mobile-paysage',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PAYSAGE },
+  },
+  {
+    name: 'tablette-portrait',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PORTRAIT },
+  },
+  {
+    name: 'tablette-paysage',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PAYSAGE },
+  },
+  {
+    name: 'desktop',
+    use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_DESKTOP },
+  },
+];
+
+const PROJETS_CROSS_BROWSER = [
+  {
+    name: 'desktop-firefox',
+    use: { ...devices['Desktop Firefox'], viewport: VIEWPORT_DESKTOP },
+  },
+  {
+    name: 'desktop-webkit',
+    use: { ...devices['Desktop Safari'], viewport: VIEWPORT_DESKTOP },
+  },
+];
+
+// Firefox + WebKit ne sont inclus que sur opt-in explicite (PLAYWRIGHT_FULL=1).
+// Cf. workflow `.github/workflows/ci-cross-browser.yml` (programmé mensuel).
+const projets =
+  process.env.PLAYWRIGHT_FULL === '1'
+    ? [...PROJETS_CHROMIUM, ...PROJETS_CROSS_BROWSER]
+    : PROJETS_CHROMIUM;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -38,36 +86,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     locale: 'fr-FR',
   },
-  projects: [
-    {
-      name: 'mobile-portrait',
-      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PORTRAIT },
-    },
-    {
-      name: 'mobile-paysage',
-      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_MOBILE_PAYSAGE },
-    },
-    {
-      name: 'tablette-portrait',
-      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PORTRAIT },
-    },
-    {
-      name: 'tablette-paysage',
-      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_TABLETTE_PAYSAGE },
-    },
-    {
-      name: 'desktop',
-      use: { ...devices['Desktop Chrome'], viewport: VIEWPORT_DESKTOP },
-    },
-    {
-      name: 'desktop-firefox',
-      use: { ...devices['Desktop Firefox'], viewport: VIEWPORT_DESKTOP },
-    },
-    {
-      name: 'desktop-webkit',
-      use: { ...devices['Desktop Safari'], viewport: VIEWPORT_DESKTOP },
-    },
-  ],
+  projects: projets,
   webServer: {
     command: 'npm run dev',
     url: BASE_URL,

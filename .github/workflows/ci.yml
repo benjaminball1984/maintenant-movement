@@ -49,6 +49,22 @@ jobs:
     name: Tests E2E (Playwright)
     runs-on: ubuntu-latest
     needs: lint-typecheck
+    # Le site fonctionne en mocks (CLAUDE.md §6). Aucune spec E2E ne tape
+    # la vraie BDD : des placeholders syntaxiquement valides suffisent à
+    # franchir les getters `lib/supabase/env.ts` (lecture paresseuse) et
+    # à éviter un 500 sur la première navigation. Si une spec a besoin
+    # d'une vraie instance, passer en B2 : secrets GitHub `SUPABASE_*`.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://localhost.supabase.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      EMAIL_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      T99CP_NETWORK: mock
+      LIVEKIT_PROVIDER: mock
+      TURNSTILE_PROVIDER: mock
+      NEXT_PUBLIC_TURNSTILE_PROVIDER: mock
+      IMAGE_STORAGE_PROVIDER: mock
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -56,6 +72,9 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Chromium seul : `playwright.config.ts` filtre Firefox/WebKit
+      # tant que PLAYWRIGHT_FULL n'est pas positionné. Le workflow
+      # `ci-cross-browser.yml` (mensuel) installe tous les navigateurs.
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run test:e2e
