@@ -4,8 +4,12 @@ import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { SOUS_ESPACES } from '@/lib/entraide/config';
 import {
+  MESSAGES_VALIDATION_ENTRAIDE_DEFAUT,
+  type MessagesValidationEntraide,
+} from '@/lib/messages-validation';
+import {
   type DonneesCreerOffreEntraide,
-  creerOffreEntraideSchema,
+  creerOffreEntraideFactory,
 } from '@/lib/validations/entraide';
 import type { TypeOffreEntraide } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +25,7 @@ interface FormulaireCreationOffreProps {
   ) => Promise<
     { ok: true; slug: string; type: TypeOffreEntraide } | { ok: false; message: string }
   >;
+  messages?: MessagesValidationEntraide;
 }
 
 const ROUTES: Record<TypeOffreEntraide, string> = {
@@ -33,6 +38,7 @@ const ROUTES: Record<TypeOffreEntraide, string> = {
 export function FormulaireCreationOffre({
   typeParDefaut,
   creerOffreEntraide,
+  messages = MESSAGES_VALIDATION_ENTRAIDE_DEFAUT,
 }: FormulaireCreationOffreProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -44,7 +50,7 @@ export function FormulaireCreationOffre({
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerOffreEntraide>({
-    resolver: zodResolver(creerOffreEntraideSchema),
+    resolver: zodResolver(creerOffreEntraideFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',

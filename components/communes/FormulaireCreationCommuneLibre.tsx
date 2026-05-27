@@ -2,7 +2,14 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerCommuneLibre, creerCommuneLibreSchema } from '@/lib/validations/communes';
+import {
+  MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+  type MessagesValidationCommunes,
+} from '@/lib/messages-validation';
+import {
+  type DonneesCreerCommuneLibre,
+  creerCommuneLibreFactory,
+} from '@/lib/validations/communes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,10 +19,12 @@ interface FormulaireCreationCommuneLibreProps {
   creerCommuneLibre: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationCommunes;
 }
 
 export function FormulaireCreationCommuneLibre({
   creerCommuneLibre,
+  messages = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
 }: FormulaireCreationCommuneLibreProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -27,7 +36,7 @@ export function FormulaireCreationCommuneLibre({
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerCommuneLibre>({
-    resolver: zodResolver(creerCommuneLibreSchema),
+    resolver: zodResolver(creerCommuneLibreFactory(messages)),
     defaultValues: {
       nom: '',
       description_courte: '',

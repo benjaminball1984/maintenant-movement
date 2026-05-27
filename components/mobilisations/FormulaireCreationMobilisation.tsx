@@ -3,8 +3,12 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
+  MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+  type MessagesValidationMobilisation,
+} from '@/lib/messages-validation';
+import {
   type DonneesCreerMobilisation,
-  creerMobilisationSchema,
+  creerMobilisationFactory,
 } from '@/lib/validations/mobilisation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -15,6 +19,8 @@ interface FormulaireCreationMobilisationProps {
   creerMobilisation: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  /** Messages de validation Zod surchargeables admin via CMS. */
+  messages?: MessagesValidationMobilisation;
 }
 
 /**
@@ -29,6 +35,7 @@ interface FormulaireCreationMobilisationProps {
  */
 export function FormulaireCreationMobilisation({
   creerMobilisation,
+  messages = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
 }: FormulaireCreationMobilisationProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -40,7 +47,7 @@ export function FormulaireCreationMobilisation({
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerMobilisation>({
-    resolver: zodResolver(creerMobilisationSchema),
+    resolver: zodResolver(creerMobilisationFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',

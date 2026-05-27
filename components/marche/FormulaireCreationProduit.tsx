@@ -2,7 +2,14 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerProduitMarche, creerProduitMarcheSchema } from '@/lib/validations/marche';
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
+import {
+  type DonneesCreerProduitMarche,
+  creerProduitMarcheFactory,
+} from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,6 +19,7 @@ interface FormulaireCreationProduitProps {
   creerProduitMarche: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationMarche;
 }
 
 /**
@@ -21,7 +29,10 @@ interface FormulaireCreationProduitProps {
  * (vente / don) bascule l'affichage des champs de prix. En don, les
  * prix sont forcés à 0 avant envoi.
  */
-export function FormulaireCreationProduit({ creerProduitMarche }: FormulaireCreationProduitProps) {
+export function FormulaireCreationProduit({
+  creerProduitMarche,
+  messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+}: FormulaireCreationProduitProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -33,7 +44,7 @@ export function FormulaireCreationProduit({ creerProduitMarche }: FormulaireCrea
     watch,
     formState: { errors },
   } = useForm<DonneesCreerProduitMarche>({
-    resolver: zodResolver(creerProduitMarcheSchema),
+    resolver: zodResolver(creerProduitMarcheFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',

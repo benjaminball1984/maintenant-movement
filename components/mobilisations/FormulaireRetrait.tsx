@@ -2,8 +2,12 @@
 
 import { Alert, Button, Label, Textarea } from '@/components/ui';
 import {
+  MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+  type MessagesValidationMobilisation,
+} from '@/lib/messages-validation';
+import {
   type DonneesRetirerMobilisation,
-  retirerMobilisationSchema,
+  creerRetirerMobilisationSchema,
 } from '@/lib/validations/mobilisation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -12,6 +16,7 @@ import { useForm } from 'react-hook-form';
 interface FormulaireRetraitProps {
   mobilisationId: string;
   retirerMobilisation: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationMobilisation;
 }
 
 /**
@@ -21,7 +26,11 @@ interface FormulaireRetraitProps {
  * est destructive (la rend invisible). On masque le formulaire derrière
  * un bouton « Retirer », demande une raison >= 10 chars, puis confirme.
  */
-export function FormulaireRetrait({ mobilisationId, retirerMobilisation }: FormulaireRetraitProps) {
+export function FormulaireRetrait({
+  mobilisationId,
+  retirerMobilisation,
+  messages = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
+}: FormulaireRetraitProps) {
   const [ouvert, setOuvert] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [confirme, setConfirme] = useState(false);
@@ -32,7 +41,7 @@ export function FormulaireRetrait({ mobilisationId, retirerMobilisation }: Formu
     handleSubmit,
     formState: { errors },
   } = useForm<DonneesRetirerMobilisation>({
-    resolver: zodResolver(retirerMobilisationSchema),
+    resolver: zodResolver(creerRetirerMobilisationSchema(messages)),
     defaultValues: {
       mobilisation_id: mobilisationId,
       raison_retrait: '',

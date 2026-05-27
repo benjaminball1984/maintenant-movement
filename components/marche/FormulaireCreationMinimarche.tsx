@@ -3,7 +3,11 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import { MONNAIES, MONNAIES_PHYSIQUES } from '@/lib/marche/config';
-import { type DonneesCreerMinimarche, creerMinimarcheSchema } from '@/lib/validations/marche';
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
+import { type DonneesCreerMinimarche, creerMinimarcheFactory } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,10 +17,12 @@ interface FormulaireCreationMinimarcheProps {
   creerMinimarche: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationMarche;
 }
 
 export function FormulaireCreationMinimarche({
   creerMinimarche,
+  messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireCreationMinimarcheProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -29,7 +35,7 @@ export function FormulaireCreationMinimarche({
     watch,
     formState: { errors },
   } = useForm<DonneesCreerMinimarche>({
-    resolver: zodResolver(creerMinimarcheSchema),
+    resolver: zodResolver(creerMinimarcheFactory(messages)),
     defaultValues: {
       titre: '',
       description: '',

@@ -3,7 +3,11 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Label } from '@/components/ui';
 import { formaterEuros, formaterT99CP } from '@/lib/marche/config';
-import { type DonneesAcheterProduit, acheterProduitSchema } from '@/lib/validations/marche';
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
+import { type DonneesAcheterProduit, creerAcheterProduitSchema } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -16,6 +20,7 @@ interface FormulaireAchatProps {
   acheterProduit: (
     donnees: unknown,
   ) => Promise<{ ok: true; urlRedirection?: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationMarche;
 }
 
 /**
@@ -31,6 +36,7 @@ export function FormulaireAchat({
   prixEurosCentimes,
   prixT99CPUnites,
   acheterProduit,
+  messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireAchatProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -51,7 +57,7 @@ export function FormulaireAchat({
     watch,
     formState: { errors },
   } = useForm<DonneesAcheterProduit>({
-    resolver: zodResolver(acheterProduitSchema),
+    resolver: zodResolver(creerAcheterProduitSchema(messages)),
     defaultValues: {
       produit_id: produitId,
       monnaie: aPrixEur ? 'EUR' : 'T99CP',

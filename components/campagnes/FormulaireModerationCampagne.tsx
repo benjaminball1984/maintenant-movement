@@ -1,7 +1,14 @@
 'use client';
 
 import { Alert, Button, Label, Textarea } from '@/components/ui';
-import { type DonneesModererCampagne, modererCampagneSchema } from '@/lib/validations/campagne';
+import {
+  MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
+  type MessagesValidationCampagne,
+} from '@/lib/messages-validation';
+import {
+  type DonneesModererCampagne,
+  creerModererCampagneSchema,
+} from '@/lib/validations/campagne';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,6 +16,7 @@ import { useForm } from 'react-hook-form';
 interface FormulaireModerationCampagneProps {
   campagneId: string;
   modererCampagne: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationCampagne;
 }
 
 /**
@@ -22,6 +30,7 @@ interface FormulaireModerationCampagneProps {
 export function FormulaireModerationCampagne({
   campagneId,
   modererCampagne,
+  messages = MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
 }: FormulaireModerationCampagneProps) {
   const [modeRejet, setModeRejet] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -33,7 +42,7 @@ export function FormulaireModerationCampagne({
     handleSubmit,
     formState: { errors },
   } = useForm<DonneesModererCampagne>({
-    resolver: zodResolver(modererCampagneSchema),
+    resolver: zodResolver(creerModererCampagneSchema(messages)),
     defaultValues: {
       campagne_id: campagneId,
       decision: 'publiee',

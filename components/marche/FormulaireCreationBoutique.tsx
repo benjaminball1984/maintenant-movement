@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerBoutique, creerBoutiqueSchema } from '@/lib/validations/marche';
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
+import { type DonneesCreerBoutique, creerBoutiqueFactory } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,9 +16,13 @@ interface FormulaireCreationBoutiqueProps {
   creerBoutique: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationMarche;
 }
 
-export function FormulaireCreationBoutique({ creerBoutique }: FormulaireCreationBoutiqueProps) {
+export function FormulaireCreationBoutique({
+  creerBoutique,
+  messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+}: FormulaireCreationBoutiqueProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -25,7 +33,7 @@ export function FormulaireCreationBoutique({ creerBoutique }: FormulaireCreation
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerBoutique>({
-    resolver: zodResolver(creerBoutiqueSchema),
+    resolver: zodResolver(creerBoutiqueFactory(messages)),
     defaultValues: {
       nom: '',
       description: '',

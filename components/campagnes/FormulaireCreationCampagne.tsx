@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerCampagne, creerCampagneSchema } from '@/lib/validations/campagne';
+import {
+  MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
+  type MessagesValidationCampagne,
+} from '@/lib/messages-validation';
+import { type DonneesCreerCampagne, creerCampagneFactory } from '@/lib/validations/campagne';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,6 +16,7 @@ interface FormulaireCreationCampagneProps {
   creerCampagne: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string; campagne_id: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationCampagne;
 }
 
 /**
@@ -23,7 +28,10 @@ interface FormulaireCreationCampagneProps {
  * admin / l'API (Server Action `attacherModule`) — une UI dédiée
  * d'édition des modules viendra dans un chantier polish.
  */
-export function FormulaireCreationCampagne({ creerCampagne }: FormulaireCreationCampagneProps) {
+export function FormulaireCreationCampagne({
+  creerCampagne,
+  messages = MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
+}: FormulaireCreationCampagneProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -34,7 +42,7 @@ export function FormulaireCreationCampagne({ creerCampagne }: FormulaireCreation
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerCampagne>({
-    resolver: zodResolver(creerCampagneSchema),
+    resolver: zodResolver(creerCampagneFactory(messages)),
     defaultValues: {
       titre: '',
       texte: '',

@@ -3,7 +3,14 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { SelectEtoiles } from '@/components/marche/NotationEtoiles';
 import { Alert, Button, Label, Textarea } from '@/components/ui';
-import { type DonneesNoterVendeureuse, noterVendeureuseSchema } from '@/lib/validations/marche';
+import {
+  MESSAGES_VALIDATION_MARCHE_DEFAUT,
+  type MessagesValidationMarche,
+} from '@/lib/messages-validation';
+import {
+  type DonneesNoterVendeureuse,
+  creerNoterVendeureuseSchema,
+} from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,6 +19,7 @@ import { Controller, useForm } from 'react-hook-form';
 interface FormulaireNotationProps {
   produitId: string;
   noterVendeureuse: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  messages?: MessagesValidationMarche;
 }
 
 /**
@@ -20,7 +28,11 @@ interface FormulaireNotationProps {
  * S'affiche seulement après que le produit a été marqué `vendu` par
  * la vendeureuse (la BDD refuse les notations sur les autres statuts).
  */
-export function FormulaireNotation({ produitId, noterVendeureuse }: FormulaireNotationProps) {
+export function FormulaireNotation({
+  produitId,
+  noterVendeureuse,
+  messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
+}: FormulaireNotationProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -32,7 +44,7 @@ export function FormulaireNotation({ produitId, noterVendeureuse }: FormulaireNo
     control,
     formState: { errors },
   } = useForm<DonneesNoterVendeureuse>({
-    resolver: zodResolver(noterVendeureuseSchema),
+    resolver: zodResolver(creerNoterVendeureuseSchema(messages)),
     defaultValues: {
       produit_id: produitId,
       etoiles: 5,

@@ -2,7 +2,11 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesCreerFederation, creerFederationSchema } from '@/lib/validations/communes';
+import {
+  MESSAGES_VALIDATION_COMMUNES_DEFAUT,
+  type MessagesValidationCommunes,
+} from '@/lib/messages-validation';
+import { type DonneesCreerFederation, creerFederationFactory } from '@/lib/validations/communes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -12,10 +16,12 @@ interface FormulaireCreationFederationProps {
   creerFederation: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  messages?: MessagesValidationCommunes;
 }
 
 export function FormulaireCreationFederation({
   creerFederation,
+  messages = MESSAGES_VALIDATION_COMMUNES_DEFAUT,
 }: FormulaireCreationFederationProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
@@ -27,7 +33,7 @@ export function FormulaireCreationFederation({
     setValue,
     formState: { errors },
   } = useForm<DonneesCreerFederation>({
-    resolver: zodResolver(creerFederationSchema),
+    resolver: zodResolver(creerFederationFactory(messages)),
     defaultValues: {
       nom: '',
       type: 'mixte',
