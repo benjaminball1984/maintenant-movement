@@ -10,8 +10,55 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { mettreAJourPreferencesNotifications } from '../actions';
 
+/** Libelles surchargeables admin via CMS (V2.4.143). */
+export interface LibellesNotifications {
+  alertErreurTitre: string;
+  alertSuccesTitre: string;
+  alertSuccesMessage: string;
+  alertToujoursActifsTitre: string;
+  alertToujoursActifsMessage: string;
+  legendePush: string;
+  libellePush: string;
+  aidePush: string;
+  libelleSon: string;
+  aideSon: string;
+  libelleVibration: string;
+  aideVibration: string;
+  legendeEmails: string;
+  libelleMardi: string;
+  aideMardi: string;
+  libelleVendredi: string;
+  aideVendredi: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesNotifications = {
+  alertErreurTitre: 'Sauvegarde impossible',
+  alertSuccesTitre: 'Préférences enregistrées',
+  alertSuccesMessage: 'Tes choix de notifications sont à jour.',
+  alertToujoursActifsTitre: 'Toujours actifs',
+  alertToujoursActifsMessage:
+    'La messagerie interne et la cloche restent toujours actives : c’est par là que les choses importantes (DM, désignations, modération te concernant) arrivent.',
+  legendePush: 'Notifications push (navigateur)',
+  libellePush: 'Activer les notifications push',
+  aidePush: 'Affiche un badge discret sur la cloche. Aucune capture d’attention.',
+  libelleSon: 'Son',
+  aideSon: 'Désactivé par défaut. Tu peux l’activer si tu veux.',
+  libelleVibration: 'Vibration',
+  aideVibration: 'Mobile uniquement.',
+  legendeEmails: 'Emails hebdomadaires',
+  libelleMardi: 'Mardi : récap personnel',
+  aideMardi: 'Regroupement style Facebook de ce qui s’est passé dans tes espaces.',
+  libelleVendredi: 'Vendredi : newsletter du mouvement',
+  aideVendredi: 'Édito de la semaine, taggée par origine et département.',
+  ctaSubmit: 'Enregistrer mes préférences',
+  ctaEnCours: 'Envoi en cours...',
+};
+
 interface FormulaireNotificationsProps {
   valeursInitiales: PreferencesNotifications;
+  libelles?: LibellesNotifications;
 }
 
 /**
@@ -19,7 +66,10 @@ interface FormulaireNotificationsProps {
  * Messagerie interne et cloche sont toujours actives (non négociables).
  * Push, push son/vibration, mardi récap, vendredi newsletter : configurables.
  */
-export function FormulaireNotifications({ valeursInitiales }: FormulaireNotificationsProps) {
+export function FormulaireNotifications({
+  valeursInitiales,
+  libelles = LIBELLES_DEFAUT,
+}: FormulaireNotificationsProps) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -53,67 +103,66 @@ export function FormulaireNotifications({ valeursInitiales }: FormulaireNotifica
       aria-label="Préférences de notifications"
     >
       {erreur !== null ? (
-        <Alert variant="danger" titre="Sauvegarde impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
       {succes ? (
-        <Alert variant="success" titre="Préférences enregistrées">
-          Tes choix de notifications sont à jour.
+        <Alert variant="success" titre={libelles.alertSuccesTitre}>
+          {libelles.alertSuccesMessage}
         </Alert>
       ) : null}
 
       <fieldset className="grid gap-3 rounded-md border border-border p-4">
         <legend className="px-1 text-sm font-bold uppercase tracking-cap text-text-3">
-          Notifications push (navigateur)
+          {libelles.legendePush}
         </legend>
         <Case
           id="prefs-push"
           {...register('push')}
-          libelle="Activer les notifications push"
-          aide="Affiche un badge discret sur la cloche. Aucune capture d’attention."
+          libelle={libelles.libellePush}
+          aide={libelles.aidePush}
         />
         <Case
           id="prefs-push-son"
           {...register('push_son')}
-          libelle="Son"
-          aide="Désactivé par défaut. Tu peux l’activer si tu veux."
+          libelle={libelles.libelleSon}
+          aide={libelles.aideSon}
           disabled={!pushActif}
         />
         <Case
           id="prefs-push-vibration"
           {...register('push_vibration')}
-          libelle="Vibration"
-          aide="Mobile uniquement."
+          libelle={libelles.libelleVibration}
+          aide={libelles.aideVibration}
           disabled={!pushActif}
         />
       </fieldset>
 
       <fieldset className="grid gap-3 rounded-md border border-border p-4">
         <legend className="px-1 text-sm font-bold uppercase tracking-cap text-text-3">
-          Emails hebdomadaires
+          {libelles.legendeEmails}
         </legend>
         <Case
           id="prefs-mardi"
           {...register('mardi_recap')}
-          libelle="Mardi : récap personnel"
-          aide="Regroupement style Facebook de ce qui s’est passé dans tes espaces."
+          libelle={libelles.libelleMardi}
+          aide={libelles.aideMardi}
         />
         <Case
           id="prefs-vendredi"
           {...register('vendredi_newsletter')}
-          libelle="Vendredi : newsletter du mouvement"
-          aide="Édito de la semaine, taggée par origine et département."
+          libelle={libelles.libelleVendredi}
+          aide={libelles.aideVendredi}
         />
       </fieldset>
 
-      <Alert variant="info" titre="Toujours actifs">
-        La messagerie interne et la cloche restent toujours actives : c’est par là que les choses
-        importantes (DM, désignations, modération te concernant) arrivent.
+      <Alert variant="info" titre={libelles.alertToujoursActifsTitre}>
+        {libelles.alertToujoursActifsMessage}
       </Alert>
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Envoi en cours...' : 'Enregistrer mes préférences'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );
