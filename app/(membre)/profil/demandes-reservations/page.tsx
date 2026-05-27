@@ -9,6 +9,7 @@ import {
 } from '@/lib/reseau/identite';
 import {
   type EntreeJournalReservation,
+  type StatutReservation,
   listerJournauxReservations,
   listerReservationsRecuesParProprietaire,
 } from '@/lib/reservation';
@@ -30,9 +31,37 @@ export const metadata: Metadata = {
  * (pas demandeuse). Permet d'accepter / refuser / marquer réalisée
  * selon la machine à états D8.
  */
-export default async function PageDemandesReservations() {
+const STATUTS_FILTRES: ReadonlyArray<{ slug: 'tous' | StatutReservation; libelle: string }> = [
+  { slug: 'tous', libelle: 'Tous' },
+  { slug: 'proposee', libelle: 'En attente' },
+  { slug: 'acceptee', libelle: 'Acceptées' },
+  { slug: 'refusee', libelle: 'Refusées' },
+  { slug: 'realisee', libelle: 'Réalisées' },
+  { slug: 'confirmee', libelle: 'Confirmées' },
+  { slug: 'annulee', libelle: 'Annulées' },
+  { slug: 'litige', libelle: 'En litige' },
+];
+
+function estFiltreValide(s: string | string[] | undefined): s is StatutReservation {
+  return (
+    typeof s === 'string' &&
+    ['proposee', 'acceptee', 'refusee', 'realisee', 'confirmee', 'annulee', 'litige'].includes(s)
+  );
+}
+
+export default async function PageDemandesReservations({
+  searchParams,
+}: {
+  searchParams: Promise<{ statut?: string }>;
+}) {
   const session = await getSessionOuRediriger('/profil/demandes-reservations');
-  const reservations = await listerReservationsRecuesParProprietaire(session.userId);
+  const { statut: statutBrut } = await searchParams;
+  const filtreActif: StatutReservation | null = estFiltreValide(statutBrut) ? statutBrut : null;
+
+  const toutes = await listerReservationsRecuesParProprietaire(session.userId);
+  const reservations =
+    filtreActif === null ? toutes : toutes.filter((r) => r.statut === filtreActif);
+
   const [titresParId, journauxParId] = await Promise.all([
     chargerTitresOffres(reservations),
     listerJournauxReservations(reservations.map((r) => r.id)),
@@ -47,6 +76,9 @@ export default async function PageDemandesReservations() {
   }
   const identitesParId = await chargerIdentitesAffichables([...idsAResoudre]);
 
+  const compteurs = new Map<StatutReservation, number>();
+  for (const r of toutes) compteurs.set(r.statut, (compteurs.get(r.statut) ?? 0) + 1);
+
   return (
     <Container taille="md" className="py-12">
       <Heading niveau={1}>Demandes de réservation reçues</Heading>
@@ -56,15 +88,47 @@ export default async function PageDemandesReservations() {
         la rencontre.
       </p>
 
+      {toutes.length > 0 ? (
+        <nav
+          aria-label="Filtrer par statut"
+          className="mt-6 flex flex-wrap gap-2 border-border border-b pb-3"
+        >
+          {STATUTS_FILTRES.map((f) => {
+            const n =
+              f.slug === 'tous' ? toutes.length : (compteurs.get(f.slug as StatutReservation) ?? 0);
+            const estActif = (filtreActif === null && f.slug === 'tous') || filtreActif === f.slug;
+            return (
+              <Link
+                key={f.slug}
+                href={
+                  f.slug === 'tous'
+                    ? '/profil/demandes-reservations'
+                    : `/profil/demandes-reservations?statut=${f.slug}`
+                }
+                className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                  estActif
+                    ? 'border-brand bg-brand text-bg'
+                    : 'border-border bg-surface text-text-2 hover:bg-surface-2'
+                }`}
+                aria-current={estActif ? 'page' : undefined}
+              >
+                {f.libelle} ({n})
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
+
       {reservations.length === 0 ? (
         <Card variant="ombre" className="mt-8">
           <p className="text-text-2">
-            Aucune demande pour le moment. Quand quelqu’un demandera à réserver l’une de tes offres,
-            sa demande apparaîtra ici.
+            {toutes.length === 0
+              ? 'Aucune demande pour le moment. Quand quelqu’un demandera à réserver l’une de tes offres, sa demande apparaîtra ici.'
+              : 'Aucune demande pour ce filtre. Choisis « Tous » pour voir l’ensemble.'}
           </p>
         </Card>
       ) : (
-        <ul className="mt-8 flex flex-col gap-4">
+        <ul className="mt-6 flex flex-col gap-4">
           {reservations.map((reservation) => (
             <li key={reservation.id}>
               <CarteDemande
