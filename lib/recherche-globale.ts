@@ -40,6 +40,28 @@ export function libelleType(t: TypeResultatRecherche): string {
 }
 
 /**
+ * Trie une liste de résultats par pertinence par rapport à une requête
+ * (V2.4.30). Pur, testable.
+ *
+ * Règle de pertinence (volontairement simple) :
+ * - les titres dont la version `toLowerCase()` commence par `query` passent avant
+ * - à pertinence égale, le plus court titre passe en premier
+ *
+ * Stable au sens où on retourne un nouveau tableau (pas de mutation).
+ */
+export function trierParPertinence<T extends { titre: string }>(items: T[], query: string): T[] {
+  const qLower = query.trim().toLowerCase();
+  if (qLower === '') return [...items];
+  return [...items].sort((a, b) => {
+    const aPrefixe = a.titre.toLowerCase().startsWith(qLower);
+    const bPrefixe = b.titre.toLowerCase().startsWith(qLower);
+    if (aPrefixe && !bPrefixe) return -1;
+    if (!aPrefixe && bPrefixe) return 1;
+    return a.titre.length - b.titre.length;
+  });
+}
+
+/**
  * Recherche globale (V2.4.24) — recherche `ilike` sur le titre / nom
  * de toutes les entités publiques principales du site, en parallèle.
  * Limite 10 résultats par type. RLS Supabase filtre les éléments non
@@ -219,15 +241,5 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
     });
   }
 
-  // Tri pertinence simple : préfixe avant infixe, longueur de titre.
-  const qLower = q.toLowerCase();
-  resultats.sort((a, b) => {
-    const aPrefixe = a.titre.toLowerCase().startsWith(qLower);
-    const bPrefixe = b.titre.toLowerCase().startsWith(qLower);
-    if (aPrefixe && !bPrefixe) return -1;
-    if (!aPrefixe && bPrefixe) return 1;
-    return a.titre.length - b.titre.length;
-  });
-
-  return resultats;
+  return trierParPertinence(resultats, q);
 }
