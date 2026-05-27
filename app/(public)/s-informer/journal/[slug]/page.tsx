@@ -1,4 +1,5 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { Badge, Container, Heading } from '@/components/ui';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
@@ -83,11 +84,11 @@ export default async function PageEditionJournal({ params }: Props) {
         </div>
       ) : null}
 
-      <article className="prose-maintenant mt-8 whitespace-pre-wrap font-body text-text-1">
+      <article className="prose-maintenant mt-8 font-body text-text-1">
         {e.contenu_md === '' ? (
           <p className="text-text-3 italic">Contenu non encore rédigé.</p>
         ) : (
-          e.contenu_md
+          <MarkdownLeger texte={e.contenu_md} />
         )}
       </article>
     </Container>
