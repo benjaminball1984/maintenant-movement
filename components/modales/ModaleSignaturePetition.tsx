@@ -2,11 +2,63 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, IconButton, Input, Label } from '@/components/ui';
-import { type DonneesSignerPetition, signerPetitionSchema } from '@/lib/validations/petition';
+import {
+  MESSAGES_VALIDATION_PETITION_DEFAUT,
+  type MessagesValidationPetition,
+} from '@/lib/messages-validation';
+import { type DonneesSignerPetition, creerSignerPetitionSchema } from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+
+/** Libelles surchargeables admin via CMS (V2.4.141). */
+export interface LibellesSignaturePetition {
+  ariaOuvrir: string;
+  ctaDeclencheur: string;
+  ariaFermer: string;
+  ariaModale: string;
+  surtitre: string;
+  alertErreurTitre: string;
+  merciTitre: string;
+  merciMessage: string;
+  merciFermer: string;
+  labelPrenom: string;
+  labelNom: string;
+  labelEmail: string;
+  labelCodePostal: string;
+  labelTelephone: string;
+  labelNewsletter: string;
+  labelContactCreatricePrefixe: string;
+  labelContactCreatriceSuffixe: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaAnnuler: string;
+}
+
+const LIBELLES_DEFAUT: LibellesSignaturePetition = {
+  ariaOuvrir: 'Ouvrir la modale de signature de :',
+  ctaDeclencheur: 'Signer la pétition',
+  ariaFermer: 'Fermer la modale',
+  ariaModale: 'Signer la pétition :',
+  surtitre: 'Signer la pétition',
+  alertErreurTitre: 'Signature impossible',
+  merciTitre: 'Merci pour ta signature.',
+  merciMessage: "Ton signal est enregistré. Pas de partage à demander : c'est déjà fort.",
+  merciFermer: 'Fermer',
+  labelPrenom: 'Prénom',
+  labelNom: 'Nom',
+  labelEmail: 'Email',
+  labelCodePostal: 'Code postal',
+  labelTelephone: 'Téléphone (optionnel)',
+  labelNewsletter: 'Je veux recevoir la newsletter Maintenant! (mardi récap + vendredi édito).',
+  labelContactCreatricePrefixe: "J'autorise",
+  labelContactCreatriceSuffixe:
+    '(qui a créé cette pétition) à me contacter par email pour des actualités liées.',
+  ctaSubmit: 'Signer maintenant',
+  ctaEnCours: 'Envoi en cours...',
+  ctaAnnuler: 'Annuler',
+};
 
 interface ModaleSignaturePetitionProps {
   /** ID UUID de la pétition à signer. */
@@ -19,6 +71,10 @@ interface ModaleSignaturePetitionProps {
   signerPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   /** Élément déclencheur du dialog (par défaut un Button gradient). */
   declencheur?: React.ReactNode;
+  /** Libelles surchargeables admin via CMS. */
+  libelles?: LibellesSignaturePetition;
+  /** Messages de validation Zod surchargeables admin via CMS. */
+  messages?: MessagesValidationPetition;
 }
 
 /**
@@ -39,6 +95,8 @@ export function ModaleSignaturePetition({
   createuricePrenom,
   signerPetition,
   declencheur,
+  libelles = LIBELLES_DEFAUT,
+  messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: ModaleSignaturePetitionProps) {
   const refDialog = useRef<HTMLDialogElement>(null);
   const [merci, setMerci] = useState(false);
@@ -52,7 +110,7 @@ export function ModaleSignaturePetition({
     reset,
     formState: { errors },
   } = useForm<DonneesSignerPetition>({
-    resolver: zodResolver(signerPetitionSchema),
+    resolver: zodResolver(creerSignerPetitionSchema(messages)),
     defaultValues: {
       petition_id: petitionId,
       accepte_newsletter: false,
@@ -115,45 +173,43 @@ export function ModaleSignaturePetition({
           type="button"
           onClick={ouvrir}
           className="contents text-left"
-          aria-label={`Ouvrir la modale de signature de : ${petitionTitre}`}
+          aria-label={`${libelles.ariaOuvrir} ${petitionTitre}`}
         >
           {declencheur}
         </button>
       ) : (
-        <Button onClick={ouvrir}>Signer la pétition</Button>
+        <Button onClick={ouvrir}>{libelles.ctaDeclencheur}</Button>
       )}
 
       <dialog
         ref={refDialog}
         className="m-auto w-full max-w-lg rounded-lg border border-border bg-surface p-0 shadow-lg backdrop:bg-black/40"
-        aria-label={`Signer la pétition : ${petitionTitre}`}
+        aria-label={`${libelles.ariaModale} ${petitionTitre}`}
       >
         <header className="flex items-start justify-between gap-3 border-b border-border p-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-              Signer la pétition
+              {libelles.surtitre}
             </p>
             <p className="mt-1 font-bold text-text-1">{petitionTitre}</p>
           </div>
-          <IconButton aria-label="Fermer la modale" onClick={fermer} taille="sm">
+          <IconButton aria-label={libelles.ariaFermer} onClick={fermer} taille="sm">
             <X size={16} strokeWidth={1.5} />
           </IconButton>
         </header>
 
         {merci ? (
           <div className="grid gap-4 p-6 text-center">
-            <p className="font-display text-2xl font-bold text-text-1">Merci pour ta signature.</p>
-            <p className="text-text-2">
-              Ton signal est enregistré. Pas de partage à demander : c'est déjà fort.
-            </p>
+            <p className="font-display text-2xl font-bold text-text-1">{libelles.merciTitre}</p>
+            <p className="text-text-2">{libelles.merciMessage}</p>
             <Button onClick={fermer} variant="ghost">
-              Fermer
+              {libelles.merciFermer}
             </Button>
           </div>
         ) : (
           <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-3 p-6">
             {erreur !== null ? (
-              <Alert variant="danger" titre="Signature impossible">
+              <Alert variant="danger" titre={libelles.alertErreurTitre}>
                 {erreur}
               </Alert>
             ) : null}
@@ -163,7 +219,7 @@ export function ModaleSignaturePetition({
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="sig-prenom" obligatoire>
-                  Prénom
+                  {libelles.labelPrenom}
                 </Label>
                 <Input id="sig-prenom" autoComplete="given-name" {...register('prenom')} />
                 {errors.prenom !== undefined ? (
@@ -172,7 +228,7 @@ export function ModaleSignaturePetition({
               </div>
               <div>
                 <Label htmlFor="sig-nom" obligatoire>
-                  Nom
+                  {libelles.labelNom}
                 </Label>
                 <Input id="sig-nom" autoComplete="family-name" {...register('nom')} />
                 {errors.nom !== undefined ? (
@@ -183,7 +239,7 @@ export function ModaleSignaturePetition({
 
             <div>
               <Label htmlFor="sig-email" obligatoire>
-                Email
+                {libelles.labelEmail}
               </Label>
               <Input id="sig-email" type="email" autoComplete="email" {...register('email')} />
               {errors.email !== undefined ? (
@@ -194,7 +250,7 @@ export function ModaleSignaturePetition({
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="sig-cp" obligatoire>
-                  Code postal
+                  {libelles.labelCodePostal}
                 </Label>
                 <Input
                   id="sig-cp"
@@ -208,7 +264,7 @@ export function ModaleSignaturePetition({
                 ) : null}
               </div>
               <div>
-                <Label htmlFor="sig-tel">Téléphone (optionnel)</Label>
+                <Label htmlFor="sig-tel">{libelles.labelTelephone}</Label>
                 <Input id="sig-tel" type="tel" autoComplete="tel" {...register('telephone')} />
                 {errors.telephone !== undefined ? (
                   <p className="mt-1 text-xs text-danger">{errors.telephone.message}</p>
@@ -226,9 +282,7 @@ export function ModaleSignaturePetition({
                 className="mt-1 h-4 w-4 rounded-xs accent-brand"
                 {...register('accepte_newsletter')}
               />
-              <span>
-                Je veux recevoir la newsletter Maintenant! (mardi récap + vendredi édito).
-              </span>
+              <span>{libelles.labelNewsletter}</span>
             </label>
 
             <label
@@ -242,8 +296,8 @@ export function ModaleSignaturePetition({
                 {...register('accepte_contact_createurice')}
               />
               <span>
-                J'autorise <strong>{createuricePrenom}</strong> (qui a créé cette pétition) à me
-                contacter par email pour des actualités liées.
+                {libelles.labelContactCreatricePrefixe} <strong>{createuricePrenom}</strong>{' '}
+                {libelles.labelContactCreatriceSuffixe}
               </span>
             </label>
 
@@ -251,10 +305,10 @@ export function ModaleSignaturePetition({
 
             <div className="mt-2 flex gap-3">
               <Button type="submit" disabled={envoiEnCours}>
-                {envoiEnCours ? 'Envoi en cours...' : 'Signer maintenant'}
+                {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
               </Button>
               <Button type="button" variant="ghost" onClick={fermer}>
-                Annuler
+                {libelles.ctaAnnuler}
               </Button>
             </div>
           </form>

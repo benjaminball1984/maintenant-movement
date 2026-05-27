@@ -88,6 +88,57 @@ export const MESSAGES_VALIDATION_PROFIL_DEFAUT: MessagesValidationProfil = {
 };
 
 // ============================================================
+// Petition (signature + creation + edition + moderation)
+// ============================================================
+
+export interface MessagesValidationPetition {
+  petitionUuidInvalide: string;
+  nomRequis: string;
+  prenomRequis: string;
+  emailFormat: string;
+  codePostalFormat: string;
+  telephoneFormat: string;
+  turnstileRequis: string;
+  titreMin: string;
+  titreMax: string;
+  texteMin: string;
+  texteMax: string;
+  destinataireMin: string;
+  destinataireMax: string;
+  imageUrl: string;
+  objectifEntier: string;
+  objectifMin: string;
+  objectifMax: string;
+  dateFormat: string;
+  dateCoherence: string;
+  raisonRejetRequise: string;
+}
+
+export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
+  petitionUuidInvalide: 'Identifiant de pétition invalide.',
+  nomRequis: 'Le nom est requis.',
+  prenomRequis: 'Le prénom est requis.',
+  emailFormat: "Le format de l'email semble incorrect.",
+  codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
+  telephoneFormat: 'Format de téléphone français invalide.',
+  turnstileRequis: 'Vérification anti-bot requise.',
+  titreMin: 'Le titre doit comporter au moins 5 caractères.',
+  titreMax: 'Le titre doit faire 200 caractères maximum.',
+  texteMin: 'Le texte doit comporter au moins 100 caractères (argumenter clairement).',
+  texteMax: 'Le texte doit faire 5000 caractères maximum.',
+  destinataireMin: 'Le destinataire est requis (institution, élu·e, entreprise...).',
+  destinataireMax: 'Le destinataire doit faire 200 caractères maximum.',
+  imageUrl: "URL d'image invalide.",
+  objectifEntier: 'L’objectif doit être un nombre entier.',
+  objectifMin: 'L’objectif minimum est 100 signataires.',
+  objectifMax: 'L’objectif maximum est 1 000 000 signataires.',
+  dateFormat: 'Date invalide (format attendu : AAAA-MM-JJ).',
+  dateCoherence: "L'échéance ne peut pas précéder la date de lancement.",
+  raisonRejetRequise:
+    'Une raison de rejet d’au moins 10 caractères est requise pour rejeter une pétition.',
+};
+
+// ============================================================
 // Lecture des messages depuis le CMS
 // ============================================================
 
@@ -112,6 +163,28 @@ export async function lireMessagesValidationAuth(): Promise<MessagesValidationAu
     resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_AUTH_DEFAUT[cle];
   });
   return resultat as unknown as MessagesValidationAuth;
+}
+
+/**
+ * Lit les messages de validation petition depuis le CMS et fusionne avec
+ * les defauts. Cles CMS : `validation.petition.<nomDuMessage>`.
+ */
+export async function lireMessagesValidationPetition(): Promise<MessagesValidationPetition> {
+  const cles = Object.keys(MESSAGES_VALIDATION_PETITION_DEFAUT) as Array<
+    keyof MessagesValidationPetition
+  >;
+  const lectures = await Promise.all(
+    cles.map((cle) =>
+      lireContenuEditorial(`validation.petition.${cle}`, {
+        valeurMd: MESSAGES_VALIDATION_PETITION_DEFAUT[cle],
+      }),
+    ),
+  );
+  const resultat: Record<string, string> = {};
+  cles.forEach((cle, i) => {
+    resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_PETITION_DEFAUT[cle];
+  });
+  return resultat as unknown as MessagesValidationPetition;
 }
 
 /**

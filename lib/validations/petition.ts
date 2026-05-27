@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_PETITION_DEFAUT,
+  type MessagesValidationPetition,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
 
 /**
  * Schéma de signature d'une pétition (modale page d'accueil + page pétition).
@@ -12,24 +15,32 @@ import { codePostalFrancaisSchema, tokenTurnstileSchema } from './auth';
  * pas d'authentification. Tag de la signature avec l'ID de la pétition
  * et l'origine pour la newsletter (taggage à 3 axes, cf. spec §10).
  */
-export const signerPetitionSchema = z
-  .object({
-    petition_id: z.string().uuid('Identifiant de pétition invalide.'),
-    nom: z.string().trim().min(1, 'Le nom est requis.').max(100),
-    prenom: z.string().trim().min(1, 'Le prénom est requis.').max(100),
-    email: z.string().trim().toLowerCase().email("Le format de l'email semble incorrect."),
-    code_postal: codePostalFrancaisSchema,
-    telephone: z
-      .string()
-      .trim()
-      .regex(/^(\+33|0)[1-9](\d{2}){4}$/, 'Format de téléphone français invalide.')
-      .optional()
-      .or(z.literal('')),
-    accepte_newsletter: z.boolean(),
-    accepte_contact_createurice: z.boolean(),
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerSignerPetitionSchema(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      petition_id: z.string().uuid(messages.petitionUuidInvalide),
+      nom: z.string().trim().min(1, messages.nomRequis).max(100),
+      prenom: z.string().trim().min(1, messages.prenomRequis).max(100),
+      email: z.string().trim().toLowerCase().email(messages.emailFormat),
+      code_postal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat),
+      telephone: z
+        .string()
+        .trim()
+        .regex(/^(\+33|0)[1-9](\d{2}){4}$/, messages.telephoneFormat)
+        .optional()
+        .or(z.literal('')),
+      accepte_newsletter: z.boolean(),
+      accepte_contact_createurice: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const signerPetitionSchema = creerSignerPetitionSchema();
 
 export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
 
@@ -56,36 +67,35 @@ export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
  * Extraits ici pour rester DRY : un seul endroit définit les règles de
  * titre / texte / destinataire / image / objectif.
  */
-const champsContenuPetition = {
-  titre: z
-    .string()
-    .trim()
-    .min(5, 'Le titre doit comporter au moins 5 caractères.')
-    .max(200, 'Le titre doit faire 200 caractères maximum.'),
-  texte: z
-    .string()
-    .trim()
-    .min(100, 'Le texte doit comporter au moins 100 caractères (argumenter clairement).')
-    .max(5000, 'Le texte doit faire 5000 caractères maximum.'),
-  destinataire: z
-    .string()
-    .trim()
-    .min(5, 'Le destinataire est requis (institution, élu·e, entreprise...).')
-    .max(200, 'Le destinataire doit faire 200 caractères maximum.'),
-  image_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-  objectif: z
-    .number()
-    .int('L’objectif doit être un nombre entier.')
-    .min(100, 'L’objectif minimum est 100 signataires.')
-    .max(1_000_000, 'L’objectif maximum est 1 000 000 signataires.'),
-} as const;
+function champsContenuPetition(messages: MessagesValidationPetition) {
+  return {
+    titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+    texte: z.string().trim().min(100, messages.texteMin).max(5000, messages.texteMax),
+    destinataire: z
+      .string()
+      .trim()
+      .min(5, messages.destinataireMin)
+      .max(200, messages.destinataireMax),
+    image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+    objectif: z
+      .number()
+      .int(messages.objectifEntier)
+      .min(100, messages.objectifMin)
+      .max(1_000_000, messages.objectifMax),
+  } as const;
+}
 
-export const creerPetitionSchema = z
-  .object({
-    ...champsContenuPetition,
-    token_turnstile: tokenTurnstileSchema,
-  })
-  .strict();
+export function creerPetitionFactory(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      ...champsContenuPetition(messages),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const creerPetitionSchema = creerPetitionFactory();
 
 export type DonneesCreerPetition = z.infer<typeof creerPetitionSchema>;
 
@@ -98,11 +108,9 @@ export type DonneesCreerPetition = z.infer<typeof creerPetitionSchema>;
  * chaîne vide pour « pas de date ». La Server Action convertit la chaîne
  * vide en `null` avant l'écriture en base.
  */
-const dateOptionnelleSchema = z
-  .string()
-  .date('Date invalide (format attendu : AAAA-MM-JJ).')
-  .or(z.literal(''))
-  .optional();
+function dateOptionnelleSchema(messages: MessagesValidationPetition) {
+  return z.string().date(messages.dateFormat).or(z.literal('')).optional();
+}
 
 /**
  * Édition complète d'une pétition par l'équipe : tout le contenu, plus les
@@ -114,22 +122,27 @@ const dateOptionnelleSchema = z
  * reflète la contrainte SQL `petition_dates_coherentes`, pour offrir un
  * message clair avant même de toucher la base.
  */
-export const editerPetitionSchema = z
-  .object({
-    petition_id: z.string().uuid(),
-    ...champsContenuPetition,
-    date_lancement: dateOptionnelleSchema,
-    date_echeance: dateOptionnelleSchema,
-  })
-  .strict()
-  .refine(
-    (data) =>
-      !data.date_lancement || !data.date_echeance || data.date_echeance >= data.date_lancement,
-    {
-      message: "L'échéance ne peut pas précéder la date de lancement.",
-      path: ['date_echeance'],
-    },
-  );
+export function creerEditerPetitionSchema(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      petition_id: z.string().uuid(),
+      ...champsContenuPetition(messages),
+      date_lancement: dateOptionnelleSchema(messages),
+      date_echeance: dateOptionnelleSchema(messages),
+    })
+    .strict()
+    .refine(
+      (data) =>
+        !data.date_lancement || !data.date_echeance || data.date_echeance >= data.date_lancement,
+      {
+        message: messages.dateCoherence,
+        path: ['date_echeance'],
+      },
+    );
+}
+export const editerPetitionSchema = creerEditerPetitionSchema();
 
 export type DonneesEditerPetition = z.infer<typeof editerPetitionSchema>;
 
@@ -143,23 +156,27 @@ export type DonneesEditerPetition = z.infer<typeof editerPetitionSchema>;
  * Si `decision = 'rejetee'`, `raison_rejet` est requise (transparence
  * envers la créatrice). Sinon, raison_rejet est ignorée.
  */
-export const modererPetitionSchema = z
-  .object({
-    petition_id: z.string().uuid(),
-    decision: z.enum(['publiee', 'rejetee']),
-    raison_rejet: z.string().trim().max(500).optional(),
-  })
-  .strict()
-  .refine(
-    (data) =>
-      data.decision !== 'rejetee' ||
-      (data.raison_rejet !== undefined && data.raison_rejet.length >= 10),
-    {
-      message:
-        'Une raison de rejet d’au moins 10 caractères est requise pour rejeter une pétition.',
-      path: ['raison_rejet'],
-    },
-  );
+export function creerModererPetitionSchema(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      petition_id: z.string().uuid(),
+      decision: z.enum(['publiee', 'rejetee']),
+      raison_rejet: z.string().trim().max(500).optional(),
+    })
+    .strict()
+    .refine(
+      (data) =>
+        data.decision !== 'rejetee' ||
+        (data.raison_rejet !== undefined && data.raison_rejet.length >= 10),
+      {
+        message: messages.raisonRejetRequise,
+        path: ['raison_rejet'],
+      },
+    );
+}
+export const modererPetitionSchema = creerModererPetitionSchema();
 
 export type DonneesModererPetition = z.infer<typeof modererPetitionSchema>;
 
