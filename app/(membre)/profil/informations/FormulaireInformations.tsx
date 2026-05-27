@@ -1,7 +1,14 @@
 'use client';
 
 import { Alert, Button, Heading, Input, Label, Textarea } from '@/components/ui';
-import { type DonneesMiseAJourProfil, mettreAJourProfilSchema } from '@/lib/validations/profil';
+import {
+  MESSAGES_VALIDATION_PROFIL_DEFAUT,
+  type MessagesValidationProfil,
+} from '@/lib/messages-validation';
+import {
+  type DonneesMiseAJourProfil,
+  creerMettreAJourProfilSchema,
+} from '@/lib/validations/profil';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -57,6 +64,7 @@ const LIBELLES_DEFAUT: LibellesInformations = {
 interface FormulaireInformationsProps {
   valeursInitiales: DonneesMiseAJourProfil;
   libelles?: LibellesInformations;
+  messages?: MessagesValidationProfil;
 }
 
 /**
@@ -66,6 +74,7 @@ interface FormulaireInformationsProps {
 export function FormulaireInformations({
   valeursInitiales,
   libelles = LIBELLES_DEFAUT,
+  messages = MESSAGES_VALIDATION_PROFIL_DEFAUT,
 }: FormulaireInformationsProps) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
@@ -76,7 +85,7 @@ export function FormulaireInformations({
     handleSubmit,
     formState: { errors },
   } = useForm<DonneesMiseAJourProfil>({
-    resolver: zodResolver(mettreAJourProfilSchema),
+    resolver: zodResolver(creerMettreAJourProfilSchema(messages)),
     defaultValues: valeursInitiales,
   });
 

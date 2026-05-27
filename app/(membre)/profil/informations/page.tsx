@@ -3,6 +3,7 @@ import { Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { lireMessagesValidationProfil } from '@/lib/messages-validation';
 import { getNumeroUnifie } from '@/lib/profil/unifie';
 import type { DonneesMiseAJourProfil } from '@/lib/validations/profil';
 import type { Metadata } from 'next';
@@ -66,6 +67,7 @@ export default async function PageInformations() {
     cardNumeroEnAttente,
     cardNumeroHint,
     libellesFormulaire,
+    messagesValidation,
   ] = await Promise.all([
     getNumeroUnifie(personne.id),
     estAdminCourant(),
@@ -81,6 +83,7 @@ export default async function PageInformations() {
       valeurMd: FALLBACKS.cardNumeroHint,
     }),
     lireLibellesFormulaire(),
+    lireMessagesValidationProfil(),
   ]);
 
   const valeursInitiales: DonneesMiseAJourProfil = {
@@ -153,7 +156,11 @@ export default async function PageInformations() {
         </TexteEditableAdmin>
       </Card>
 
-      <FormulaireInformations valeursInitiales={valeursInitiales} libelles={libellesFormulaire} />
+      <FormulaireInformations
+        valeursInitiales={valeursInitiales}
+        libelles={libellesFormulaire}
+        messages={messagesValidation}
+      />
     </article>
   );
 }

@@ -58,6 +58,36 @@ export const MESSAGES_VALIDATION_AUTH_DEFAUT: MessagesValidationAuth = {
 };
 
 // ============================================================
+// Profil (mise a jour des informations)
+// ============================================================
+
+export interface MessagesValidationProfil {
+  nomRequis: string;
+  prenomRequis: string;
+  pronomRequis: string;
+  codePostalFormat: string;
+  telephoneFormat: string;
+  photoUrlFormat: string;
+  bioLongueur: string;
+  emailFormat: string;
+  totpFormat: string;
+  signatureUuid: string;
+}
+
+export const MESSAGES_VALIDATION_PROFIL_DEFAUT: MessagesValidationProfil = {
+  nomRequis: 'Le nom est requis.',
+  prenomRequis: 'Le prénom est requis.',
+  pronomRequis: 'Le pronom est requis.',
+  codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
+  telephoneFormat: 'Format de téléphone français invalide.',
+  photoUrlFormat: "URL d'image invalide.",
+  bioLongueur: 'La bio doit faire 500 caractères maximum.',
+  emailFormat: "Le format de l'email semble incorrect.",
+  totpFormat: 'Le code TOTP doit comporter 6 chiffres.',
+  signatureUuid: 'Signature invalide.',
+};
+
+// ============================================================
 // Lecture des messages depuis le CMS
 // ============================================================
 
@@ -82,4 +112,26 @@ export async function lireMessagesValidationAuth(): Promise<MessagesValidationAu
     resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_AUTH_DEFAUT[cle];
   });
   return resultat as unknown as MessagesValidationAuth;
+}
+
+/**
+ * Lit les messages de validation profil depuis le CMS et fusionne avec
+ * les defauts. Cles CMS : `validation.profil.<nomDuMessage>`.
+ */
+export async function lireMessagesValidationProfil(): Promise<MessagesValidationProfil> {
+  const cles = Object.keys(MESSAGES_VALIDATION_PROFIL_DEFAUT) as Array<
+    keyof MessagesValidationProfil
+  >;
+  const lectures = await Promise.all(
+    cles.map((cle) =>
+      lireContenuEditorial(`validation.profil.${cle}`, {
+        valeurMd: MESSAGES_VALIDATION_PROFIL_DEFAUT[cle],
+      }),
+    ),
+  );
+  const resultat: Record<string, string> = {};
+  cles.forEach((cle, i) => {
+    resultat[cle] = lectures[i]?.valeurMd ?? MESSAGES_VALIDATION_PROFIL_DEFAUT[cle];
+  });
+  return resultat as unknown as MessagesValidationProfil;
 }

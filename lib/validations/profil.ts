@@ -1,5 +1,8 @@
+import {
+  MESSAGES_VALIDATION_PROFIL_DEFAUT,
+  type MessagesValidationProfil,
+} from '@/lib/messages-validation';
 import { z } from 'zod';
-import { codePostalFrancaisSchema } from './auth';
 
 /**
  * Schémas de validation des actions de profil.
@@ -88,27 +91,31 @@ export const PREFERENCES_NOTIFICATIONS_DEFAUT: PreferencesNotifications = {
 // Mise à jour des informations de profil
 // ============================================================
 
-export const mettreAJourProfilSchema = z
-  .object({
-    nom: z.string().trim().min(1, 'Le nom est requis.').max(100),
-    prenom: z.string().trim().min(1, 'Le prénom est requis.').max(100),
-    pronom: z.string().trim().min(1, 'Le pronom est requis.').max(50),
-    code_postal: codePostalFrancaisSchema,
-    telephone: z
-      .string()
-      .trim()
-      .regex(/^(\+33|0)[1-9](\d{2}){4}$/, 'Format de téléphone français invalide.')
-      .optional()
-      .or(z.literal('')),
-    photo_url: z.string().url("URL d'image invalide.").optional().or(z.literal('')),
-    bio: z
-      .string()
-      .max(500, 'La bio doit faire 500 caractères maximum.')
-      .optional()
-      .or(z.literal('')),
-    mode_theme: z.enum(['auto', 'light', 'dark']),
-  })
-  .strict();
+export function creerMettreAJourProfilSchema(
+  messages: MessagesValidationProfil = MESSAGES_VALIDATION_PROFIL_DEFAUT,
+) {
+  return z
+    .object({
+      nom: z.string().trim().min(1, messages.nomRequis).max(100),
+      prenom: z.string().trim().min(1, messages.prenomRequis).max(100),
+      pronom: z.string().trim().min(1, messages.pronomRequis).max(50),
+      code_postal: z
+        .string()
+        .trim()
+        .regex(/^\d{5}$/, messages.codePostalFormat),
+      telephone: z
+        .string()
+        .trim()
+        .regex(/^(\+33|0)[1-9](\d{2}){4}$/, messages.telephoneFormat)
+        .optional()
+        .or(z.literal('')),
+      photo_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
+      bio: z.string().max(500, messages.bioLongueur).optional().or(z.literal('')),
+      mode_theme: z.enum(['auto', 'light', 'dark']),
+    })
+    .strict();
+}
+export const mettreAJourProfilSchema = creerMettreAJourProfilSchema();
 
 export type DonneesMiseAJourProfil = z.infer<typeof mettreAJourProfilSchema>;
 
@@ -121,11 +128,16 @@ export type DonneesMiseAJourProfil = z.infer<typeof mettreAJourProfilSchema>;
  * confirmer (anti-action accidentelle). Match l'email en BDD côté
  * Server Action.
  */
-export const demanderSuppressionSchema = z
-  .object({
-    confirmation_email: z.string().trim().toLowerCase().email(),
-  })
-  .strict();
+export function creerDemanderSuppressionSchema(
+  messages: MessagesValidationProfil = MESSAGES_VALIDATION_PROFIL_DEFAUT,
+) {
+  return z
+    .object({
+      confirmation_email: z.string().trim().toLowerCase().email(messages.emailFormat),
+    })
+    .strict();
+}
+export const demanderSuppressionSchema = creerDemanderSuppressionSchema();
 
 export type DonneesDemanderSuppression = z.infer<typeof demanderSuppressionSchema>;
 
@@ -133,15 +145,20 @@ export type DonneesDemanderSuppression = z.infer<typeof demanderSuppressionSchem
 // 2FA TOTP (RGPD §5F)
 // ============================================================
 
-export const verifierTotpSchema = z
-  .object({
-    factor_id: z.string().min(1),
-    code: z
-      .string()
-      .trim()
-      .regex(/^\d{6}$/, 'Le code TOTP doit comporter 6 chiffres.'),
-  })
-  .strict();
+export function creerVerifierTotpSchema(
+  messages: MessagesValidationProfil = MESSAGES_VALIDATION_PROFIL_DEFAUT,
+) {
+  return z
+    .object({
+      factor_id: z.string().min(1),
+      code: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/, messages.totpFormat),
+    })
+    .strict();
+}
+export const verifierTotpSchema = creerVerifierTotpSchema();
 
 export type DonneesVerifierTotp = z.infer<typeof verifierTotpSchema>;
 
@@ -156,11 +173,16 @@ export type DonneesVerifierTotp = z.infer<typeof verifierTotpSchema>;
  * au profil) : une personne peut l'autoriser pour une pétition et pas une
  * autre. Cf. `signature_petition.accepte_contact_createurice`.
  */
-export const definirRecontactSignatureSchema = z
-  .object({
-    signature_id: z.string().uuid('Signature invalide.'),
-    autorise: z.boolean(),
-  })
-  .strict();
+export function creerDefinirRecontactSignatureSchema(
+  messages: MessagesValidationProfil = MESSAGES_VALIDATION_PROFIL_DEFAUT,
+) {
+  return z
+    .object({
+      signature_id: z.string().uuid(messages.signatureUuid),
+      autorise: z.boolean(),
+    })
+    .strict();
+}
+export const definirRecontactSignatureSchema = creerDefinirRecontactSignatureSchema();
 
 export type DonneesDefinirRecontactSignature = z.infer<typeof definirRecontactSignatureSchema>;
