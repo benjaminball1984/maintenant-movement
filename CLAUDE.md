@@ -432,8 +432,12 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 approfondissement : recherche globale, bibliothèque images, footer enrichi, dashboard admin avec modération)
-**Dernier chantier terminé** : V2.4.27 (dashboard admin enrichi : état modération en tête) — sur `main` (tip `e813175`). Alerte « N éléments en attente » + 6 cartes file modération en haut de `/admin`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 qualité : extraction helpers purs + tests, admin personnes)
+**Dernier chantier terminé** : V2.4.31 (extraire `formaterTailleOctets` + 5 tests) — sur `main` (tip `718b29c`). 448 tests verts.
+**Dernier chantier terminé (antérieur)** : V2.4.30 (extraire `trierParPertinence` + 7 tests) — sur `main` (tip `4a54cd1`). Non-mutation garantie, insensible casse, prefixe avant infixe, longueur à égalité.
+**Dernier chantier terminé (antérieur)** : V2.4.29 (page admin `/admin/national/personnes` filtrable) — sur `main` (tip `6ab2bf8`). Recherche email/prénom/nom (ilike OR), filtre par statut (tous/actifs/anonymisés/suppression), badges visuels.
+**Dernier chantier terminé (antérieur)** : V2.4.28 (helper `slugifier` commun + 9 tests) — sur `main` (tip `91a7506`). Extrait des slugify locaux Décider+Journal qui se répétaient. DRY -16 lignes.
+**Dernier chantier terminé (antérieur)** : V2.4.27 (dashboard admin enrichi : état modération en tête) — sur `main` (tip `e813175`). Alerte « N éléments en attente » + 6 cartes file modération en haut de `/admin`.
 **Dernier chantier terminé (antérieur)** : V2.4.26 (footer enrichi avec colonne Explorer) — sur `main` (tip `23a5bb5`). 4e colonne : Recherche / Agenda / Cartes / Décider / Maintenant Médias.
 **Dernier chantier terminé (antérieur)** : V2.4.25 (bibliothèque d'images admin `/admin/national/images`) — sur `main` (tip `d0c0d58`). Liste fichiers Supabase Storage bucket `media`, filtres par préfixe, vignettes + métadonnées + URL clickable.
 **Dernier chantier terminé (antérieur)** : V2.4.24 (recherche globale `/recherche`) — sur `main` (tip `494a47d`). 11 requêtes ilike parallèles sur pétition/mobilisation/cagnotte/commune/fédération/média/sondage/salle/journal/groupe/campagne, tri pertinence, icône Search dans header.
