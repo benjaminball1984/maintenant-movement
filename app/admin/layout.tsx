@@ -59,6 +59,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
             <p className="mb-3 text-xs font-bold uppercase tracking-cap text-text-3">Modération</p>
             <ul className="grid gap-1">
               {[
+                { href: '/admin/moderation', libelle: '→ File globale' },
                 { href: '/admin/moderation/petitions', libelle: 'Pétitions' },
                 { href: '/admin/moderation/campagnes', libelle: 'Campagnes' },
                 { href: '/admin/moderation/mobilisations', libelle: 'Mobilisations' },
