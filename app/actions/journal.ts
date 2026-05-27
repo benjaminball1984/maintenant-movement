@@ -75,6 +75,69 @@ export async function creerEditionJournalAction(donnees: unknown): Promise<Resul
   return { ok: true, slug };
 }
 
+const schemaMaj = z.object({
+  id: z.string().uuid(),
+  titre: z.string().min(1).max(300).optional(),
+  sous_titre: z.string().max(500).nullable().optional(),
+  contenu_md: z.string().max(50000).optional(),
+  image_couverture_url: z.string().url().nullable().optional(),
+  numero: z.number().int().positive().optional(),
+  format: z.enum(['A3', 'A4']).optional(),
+});
+
+/**
+ * Met à jour une édition existante (V2.4.19). Admin uniquement.
+ * Permet d'éditer titre / sous-titre / contenu / couverture / numéro / format.
+ */
+export async function mettreAJourEditionAction(
+  donnees: unknown,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const session = await getSession();
+  if (session === null) return { ok: false, message: 'Connexion requise.' };
+
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) return { ok: false, message: 'Action réservée aux admins.' };
+
+  const parse = schemaMaj.safeParse(donnees);
+  if (!parse.success) return { ok: false, message: parse.error.issues[0]?.message ?? 'Invalide.' };
+
+  const d = parse.data;
+  const maj: {
+    titre?: string;
+    sous_titre?: string | null;
+    contenu_md?: string;
+    image_couverture_url?: string | null;
+    numero?: number;
+    format?: 'A3' | 'A4';
+  } = {};
+  if (d.titre !== undefined) maj.titre = d.titre;
+  if (d.sous_titre !== undefined) maj.sous_titre = d.sous_titre;
+  if (d.contenu_md !== undefined) maj.contenu_md = d.contenu_md;
+  if (d.image_couverture_url !== undefined) maj.image_couverture_url = d.image_couverture_url;
+  if (d.numero !== undefined) maj.numero = d.numero;
+  if (d.format !== undefined) maj.format = d.format;
+
+  if (Object.keys(maj).length === 0) {
+    return { ok: false, message: 'Rien à modifier.' };
+  }
+
+  // Charge le slug pour revalider la page publique.
+  const { data: row } = await supabase
+    .from('journal_affiche')
+    .select('slug')
+    .eq('id', d.id)
+    .maybeSingle();
+
+  const { error } = await supabase.from('journal_affiche').update(maj).eq('id', d.id);
+  if (error !== null) return { ok: false, message: error.message };
+
+  revalidatePath('/s-informer/journal');
+  revalidatePath('/admin/national/journal');
+  if (row?.slug !== undefined) revalidatePath(`/s-informer/journal/${row.slug}`);
+  return { ok: true };
+}
+
 const schemaStatut = z.object({
   id: z.string().uuid(),
   statut: z.enum(['brouillon', 'publie', 'archive']),

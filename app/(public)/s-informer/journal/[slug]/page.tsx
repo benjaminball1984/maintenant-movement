@@ -1,11 +1,13 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { Badge, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { FormulaireMajEdition } from './FormulaireMajEdition';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -44,7 +46,7 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
  */
 export default async function PageEditionJournal({ params }: Props) {
   const { slug } = await params;
-  const e = await chargerEdition(slug);
+  const [e, estAdmin] = await Promise.all([chargerEdition(slug), estAdminCourant()]);
   if (e === null) notFound();
 
   return (
@@ -91,6 +93,23 @@ export default async function PageEditionJournal({ params }: Props) {
           <MarkdownLeger texte={e.contenu_md} />
         )}
       </article>
+
+      {estAdmin ? (
+        <section className="mt-12">
+          <Heading niveau={2} apparenceComme={3}>
+            Administration (réservé admins)
+          </Heading>
+          <FormulaireMajEdition
+            id={e.id}
+            titreInitial={e.titre}
+            sousTitreInitial={e.sous_titre ?? ''}
+            contenuInitial={e.contenu_md}
+            imageInitial={e.image_couverture_url ?? ''}
+            numeroInitial={e.numero}
+            formatInitial={e.format === 'A4' ? 'A4' : 'A3'}
+          />
+        </section>
+      ) : null}
     </Container>
   );
 }
