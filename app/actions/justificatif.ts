@@ -48,3 +48,33 @@ export async function televerserJustificatifAction(
   const storage = getJustificatifStorageService();
   return storage.televerser(fichier, prefixeChemin);
 }
+
+/**
+ * Renvoie une URL signée 60s pour télécharger un justificatif existant
+ * (V2.3.35). Réservée aux admins nationaux.
+ *
+ * Utilisée par la page détail caisse pour rendre les justificatifs
+ * cliquables sans exposer le bucket en public.
+ */
+export async function obtenirUrlJustificatifAction(
+  cheminBucket: string,
+): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
+  const supabase = await getSupabaseServer();
+  const { data: estAdmin } = await supabase.rpc('est_admin_general');
+  if (estAdmin !== true) {
+    return { ok: false, message: 'Action réservée aux admins nationaux.' };
+  }
+  if (typeof cheminBucket !== 'string' || cheminBucket.length === 0) {
+    return { ok: false, message: 'Chemin invalide.' };
+  }
+
+  const storage = getJustificatifStorageService();
+  const url = await storage.obtenirUrlSignee(cheminBucket, 60);
+  if (url === null) {
+    return {
+      ok: false,
+      message: 'URL signée indisponible (fichier introuvable ou bucket non configuré).',
+    };
+  }
+  return { ok: true, url };
+}

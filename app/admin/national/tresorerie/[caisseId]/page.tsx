@@ -1,4 +1,5 @@
 import { FormulaireInitierReversement } from '@/components/admin/tresorerie/FormulaireInitierReversement';
+import { LienJustificatif } from '@/components/admin/tresorerie/LienJustificatif';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
 import { calculerSoldeCaisse } from '@/lib/caisse-solde';
@@ -268,10 +269,11 @@ export default async function PageDetailCaisse({
                   <p className="flex items-center gap-2 text-sm text-text-3">
                     <FileText size={14} aria-hidden="true" />
                     Justificatif :{' '}
-                    <span className="font-mono text-xs">{t.justificatifNomOriginal}</span>
-                    <span className="text-text-3 text-xs">
-                      ({t.justificatifMimeType}, chemin {t.justificatifStoragePath.slice(0, 30)}…)
-                    </span>
+                    <LienJustificatif
+                      cheminBucket={t.justificatifStoragePath}
+                      nomOriginal={t.justificatifNomOriginal}
+                    />
+                    <span className="text-text-3 text-xs">({t.justificatifMimeType})</span>
                   </p>
                   <p className="text-text-3 text-xs">
                     Initiée le {FORMATEUR_DATE.format(new Date(t.initieLe))} par{' '}
