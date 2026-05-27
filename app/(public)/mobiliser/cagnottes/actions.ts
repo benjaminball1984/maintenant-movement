@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { obtenirOuCreerCaisseCagnotte, poserEntreeCaisse } from '@/lib/caisse-flux';
 import { calculerFraisEuros, getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -227,6 +228,14 @@ export async function confirmerDonEuros(sessionId: string, donId: string): Promi
     return { ok: false, message: 'Paiement non confirmé.' };
   }
 
+  // Charge le don (avant update) pour récupérer le montant et le payeur,
+  // utilisés ensuite pour poser l'entrée de caisse V2.3.27.
+  const { data: donAvant } = await supabase
+    .from('don')
+    .select('montant_centimes, cagnotte_id, personne_id, monnaie')
+    .eq('id', donId)
+    .maybeSingle();
+
   const { error } = await supabase
     .from('don')
     .update({
@@ -241,7 +250,7 @@ export async function confirmerDonEuros(sessionId: string, donId: string): Promi
     return { ok: false, message: `Confirmation impossible : ${error.message}` };
   }
 
-  // Récupère le slug pour revalidate ciblée.
+  // Récupère le slug pour revalidate ciblée + libellé pour caisse.
   const { data: don } = await supabase
     .from('don')
     .select('cagnotte_id')
@@ -250,11 +259,28 @@ export async function confirmerDonEuros(sessionId: string, donId: string): Promi
   if (don !== null) {
     const { data: cagnotte } = await supabase
       .from('cagnotte')
-      .select('slug')
+      .select('slug, titre')
       .eq('id', don.cagnotte_id)
       .maybeSingle();
     if (cagnotte !== null) {
       revalidatePath(`/mobiliser/cagnottes/${cagnotte.slug}`);
+
+      // V2.3.27 : poser l'entrée dans la caisse cagnotte.
+      if (donAvant !== null) {
+        const c = await obtenirOuCreerCaisseCagnotte(don.cagnotte_id, cagnotte.titre);
+        if (c.ok) {
+          await poserEntreeCaisse({
+            caisseId: c.caisseId,
+            sourceType: 'don',
+            sourceId: donId,
+            montant: donAvant.montant_centimes / 100,
+            canal: 'euro',
+            motif: `Don sur cagnotte « ${cagnotte.titre.slice(0, 100)} »`,
+            payeurPersonneId: donAvant.personne_id ?? undefined,
+            metadata: { stripe_session_id: sessionId },
+          });
+        }
+      }
     }
   }
   revalidatePath('/mobiliser/cagnottes');
@@ -331,6 +357,39 @@ export async function faireDonT99CP(donneesBrutes: unknown): Promise<ResultatAct
       return { ok: false, message: 'Ce don T99CP a déjà été enregistré.' };
     }
     return { ok: false, message: `Enregistrement impossible : ${error.message}` };
+  }
+
+  // V2.3.27 : poser l'entrée dans la caisse cagnotte (canal 99-coin).
+  // Le `don` T99CP a déjà été inséré ci-dessus avec `statut='confirme'`.
+  // On recharge son id pour le passer comme `source_id`.
+  const { data: donInsere } = await supabase
+    .from('don')
+    .select('id')
+    .eq('cagnotte_id', cagnotte.id)
+    .eq('tx_hash', donnees.tx_hash)
+    .maybeSingle();
+  if (donInsere !== null) {
+    const c = await obtenirOuCreerCaisseCagnotte(cagnotte.id, donnees.cagnotte_id);
+    if (c.ok) {
+      await poserEntreeCaisse({
+        caisseId: c.caisseId,
+        sourceType: 'don',
+        sourceId: donInsere.id,
+        montant: Number(montantUnites),
+        canal: '99_coin',
+        motif: 'Don T99CP sur cagnotte',
+        payeurPersonneId: session?.userId ?? undefined,
+        payeurExterneNom:
+          session === null && donnees.prenom !== undefined && donnees.prenom !== ''
+            ? `${donnees.prenom} ${donnees.nom ?? ''}`.trim()
+            : undefined,
+        payeurExterneEmail:
+          session === null && donnees.email !== undefined && donnees.email !== ''
+            ? donnees.email
+            : undefined,
+        metadata: { tx_hash: donnees.tx_hash },
+      });
+    }
   }
 
   revalidatePath(`/mobiliser/cagnottes/${cagnotte.slug}`);

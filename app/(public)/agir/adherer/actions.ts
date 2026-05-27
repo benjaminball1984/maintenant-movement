@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { obtenirOuCreerCaisseGlobale, poserEntreeCaisse } from '@/lib/caisse-flux';
 import { getEmailService } from '@/lib/email';
 import { getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
@@ -178,14 +179,35 @@ export async function adhererT99CP(donneesBrutes: unknown): Promise<ResultatActi
     donnees.tx_hash === '' || donnees.tx_hash === undefined ? tx.txHash : donnees.tx_hash;
 
   const supabase = await getSupabaseServer();
-  const { error } = await supabase.from('adhesion').insert({
-    personne_id: session.userId,
-    chemin: 't99cp',
-    montant_t99cp_unites: MONTANT_ADHESION_T99CP_UNITES,
-    tx_hash: txHash,
-  });
+  const { data: adhesionInseree, error } = await supabase
+    .from('adhesion')
+    .insert({
+      personne_id: session.userId,
+      chemin: 't99cp',
+      montant_t99cp_unites: MONTANT_ADHESION_T99CP_UNITES,
+      tx_hash: txHash,
+    })
+    .select('id')
+    .single();
   if (error !== null) {
     return { ok: false, message: `Adhésion impossible : ${error.message}` };
+  }
+
+  // V2.3.27 : poser l'entrée dans la caisse globale adhésion (canal 99-coin).
+  if (adhesionInseree !== null) {
+    const c = await obtenirOuCreerCaisseGlobale('adhesion');
+    if (c.ok) {
+      await poserEntreeCaisse({
+        caisseId: c.caisseId,
+        sourceType: 'adhesion',
+        sourceId: adhesionInseree.id,
+        montant: Number(MONTANT_ADHESION_T99CP_UNITES),
+        canal: '99_coin',
+        motif: 'Adhésion annuelle (chemin 99-coin)',
+        payeurPersonneId: session.userId,
+        metadata: { tx_hash: txHash },
+      });
+    }
   }
 
   revalidatePath('/profil');
@@ -214,6 +236,28 @@ export async function confirmerAdhesionEuros(
     .eq('id', adhesionId);
   if (error !== null) {
     return { ok: false, message: `Confirmation impossible : ${error.message}` };
+  }
+
+  // V2.3.27 : poser l'entrée dans la caisse globale adhésion.
+  const { data: adhesion } = await supabase
+    .from('adhesion')
+    .select('personne_id, montant_euros_centimes')
+    .eq('id', adhesionId)
+    .maybeSingle();
+  if (adhesion !== null) {
+    const c = await obtenirOuCreerCaisseGlobale('adhesion');
+    if (c.ok) {
+      await poserEntreeCaisse({
+        caisseId: c.caisseId,
+        sourceType: 'adhesion',
+        sourceId: adhesionId,
+        montant: adhesion.montant_euros_centimes / 100,
+        canal: 'euro',
+        motif: 'Adhésion annuelle (chemin euros)',
+        payeurPersonneId: adhesion.personne_id,
+        metadata: { stripe_session_id: sessionId },
+      });
+    }
   }
 
   revalidatePath('/profil');
