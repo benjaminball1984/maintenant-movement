@@ -1,6 +1,9 @@
 import { modererPetition } from '@/app/(public)/mobiliser/petitions/actions';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FormulaireModeration } from '@/components/petitions/FormulaireModeration';
 import { Alert, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { listerPetitionsAModerer } from '@/lib/petitions/requetes';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -22,18 +25,44 @@ export const metadata: Metadata = {
  * droit `petitions` spécifique (défense en profondeur).
  */
 export default async function PageModerationPetitions() {
-  const petitions = await listerPetitionsAModerer();
+  const [petitions, estAdmin, titre, intro] = await Promise.all([
+    listerPetitionsAModerer(),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.petitions.titre', {
+      valeurMd: 'Modération des pétitions',
+    }),
+    lireContenuEditorial('admin.moderation.petitions.intro', {
+      valeurMd:
+        "Pétitions en attente de publication, triées par ordre d'arrivée. Délai cible : moins de 48 heures.",
+    }),
+  ]);
 
   return (
     <section className="grid gap-6">
       <header>
-        <Heading niveau={1} apparenceComme={2}>
-          Modération des pétitions
-        </Heading>
-        <p className="mt-2 text-text-2">
-          Pétitions en attente de publication, triées par ordre d'arrivée. Délai cible : moins de 48
-          heures.
-        </p>
+        <TexteEditableAdmin
+          cle="admin.moderation.petitions.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console petitions"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Heading niveau={1} apparenceComme={2}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="admin.moderation.petitions.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console petitions"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       {petitions.length === 0 ? (

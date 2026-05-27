@@ -1,6 +1,9 @@
 import { retirerMobilisation } from '@/app/(public)/mobiliser/mobilisations/actions';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FormulaireRetrait } from '@/components/mobilisations/FormulaireRetrait';
 import { Alert, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterPlage } from '@/lib/mobilisations/dates';
 import { listerMobilisationsAVerifier } from '@/lib/mobilisations/requetes';
 import type { Metadata } from 'next';
@@ -24,19 +27,44 @@ export const metadata: Metadata = {
  * introduira la table `signalement`.
  */
 export default async function PageModerationMobilisations() {
-  const mobilisations = await listerMobilisationsAVerifier();
+  const [mobilisations, estAdmin, titre, intro] = await Promise.all([
+    listerMobilisationsAVerifier(),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.mobilisations.titre', {
+      valeurMd: 'Modération des mobilisations',
+    }),
+    lireContenuEditorial('admin.moderation.mobilisations.intro', {
+      valeurMd:
+        'Modération **a posteriori** : les mobilisations sont déjà publiques. Cette liste présente les plus récentes pour permettre une vérification éclair (lieu réel, ton, calendrier). Bouton « Retirer » avec raison obligatoire.',
+    }),
+  ]);
 
   return (
     <section className="grid gap-6">
       <header>
-        <Heading niveau={1} apparenceComme={2}>
-          Modération des mobilisations
-        </Heading>
-        <p className="mt-2 text-text-2">
-          Modération <strong>a posteriori</strong> : les mobilisations sont déjà publiques. Cette
-          liste présente les plus récentes pour permettre une vérification éclair (lieu réel, ton,
-          calendrier). Bouton « Retirer » avec raison obligatoire.
-        </p>
+        <TexteEditableAdmin
+          cle="admin.moderation.mobilisations.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console mobilisations"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Heading niveau={1} apparenceComme={2}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="admin.moderation.mobilisations.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console mobilisations"
+          multilignes
+          longueurMax={400}
+        >
+          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       {mobilisations.length === 0 ? (

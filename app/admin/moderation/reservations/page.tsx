@@ -1,6 +1,9 @@
 import { BoutonsResolutionLitige } from '@/components/admin/moderation/BoutonsResolutionLitige';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransitions';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -30,9 +33,17 @@ export const metadata: Metadata = {
  */
 export default async function PageModerationReservationsEnLitige() {
   const reservations = await listerReservationsEnLitige();
-  const [titresParId, journauxParId] = await Promise.all([
+  const [titresParId, journauxParId, estAdmin, titre, intro] = await Promise.all([
     chargerTitresOffres(reservations),
     listerJournauxReservations(reservations.map((r) => r.id)),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.reservations.titre', {
+      valeurMd: 'Modération — Réservations en litige',
+    }),
+    lireContenuEditorial('admin.moderation.reservations.intro', {
+      valeurMd:
+        'Réservations basculées en statut **litige** par leur demandeur (V2.3.16). À arbitrer en lecture du motif et du journal complet (qui a fait quoi, et quand). Décision : confirmer la prestation (en faveur du propriétaire) ou annuler (en faveur du demandeur).',
+    }),
   ]);
 
   const idsAResoudre = new Set<string>();
@@ -46,12 +57,25 @@ export default async function PageModerationReservationsEnLitige() {
 
   return (
     <>
-      <Heading niveau={1}>Modération — Réservations en litige</Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Réservations basculées en statut <strong>litige</strong> par leur demandeur (V2.3.16). À
-        arbitrer en lecture du motif et du journal complet (qui a fait quoi, et quand). Décision :
-        confirmer la prestation (en faveur du propriétaire) ou annuler (en faveur du demandeur).
-      </p>
+      <TexteEditableAdmin
+        cle="admin.moderation.reservations.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre console reservations litige"
+        longueurMax={60}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="admin.moderation.reservations.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console reservations litige"
+        multilignes
+        longueurMax={400}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       {reservations.length === 0 ? (
         <Alert variant="info" titre="Aucun litige en cours" className="mt-6">

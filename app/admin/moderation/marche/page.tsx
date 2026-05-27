@@ -1,12 +1,15 @@
 import { retirerProduit } from '@/app/(public)/s-entraider/marche/actions';
 import { ControleModeration } from '@/components/admin/moderation/ControleModeration';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default async function PageModerationMarche() {
   const supabase = await getSupabaseServer();
-  const [{ data: produits }, { data: notations }] = await Promise.all([
+  const [{ data: produits }, { data: notations }, estAdmin, titre, intro] = await Promise.all([
     supabase
       .from('produit_marche')
       .select('id, slug, titre, mode, statut')
@@ -18,13 +21,34 @@ export default async function PageModerationMarche() {
       .lt('etoiles', 3)
       .order('created_at', { ascending: false })
       .limit(50),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.marche.titre', {
+      valeurMd: 'Modération — Marché solidaire',
+    }),
+    lireContenuEditorial('admin.moderation.marche.intro', {
+      valeurMd: 'Produits récents et notations 1-2 étoiles (à examiner en priorité).',
+    }),
   ]);
   return (
     <>
-      <Heading niveau={1}>Modération — Marché solidaire</Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Produits récents et notations 1-2 étoiles (à examiner en priorité).
-      </p>
+      <TexteEditableAdmin
+        cle="admin.moderation.marche.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre console marche"
+        longueurMax={60}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="admin.moderation.marche.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console marche"
+        longueurMax={200}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-6">
         <h2 className="mb-2 font-bold">Notations basses ({(notations ?? []).length})</h2>

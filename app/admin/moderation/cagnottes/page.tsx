@@ -1,8 +1,11 @@
 import { retablirCagnotte, suspendreCagnotte } from '@/app/(public)/mobiliser/cagnottes/actions';
 import { FormulaireModerationCagnotte } from '@/components/cagnottes/FormulaireModerationCagnotte';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { listerCagnottesAVerifier } from '@/lib/cagnottes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -24,18 +27,44 @@ const LIBELLE_TYPE: Record<string, string> = {
  * la vérification et la suspension / rétablissement.
  */
 export default async function PageModerationCagnottes() {
-  const cagnottes = await listerCagnottesAVerifier();
+  const [cagnottes, estAdmin, titre, intro] = await Promise.all([
+    listerCagnottesAVerifier(),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.cagnottes.titre', {
+      valeurMd: 'Modération des cagnottes',
+    }),
+    lireContenuEditorial('admin.moderation.cagnottes.intro', {
+      valeurMd:
+        'Modération **a posteriori** : les cagnottes sont déjà publiques. Suspension en cas de comportement louche (raison obligatoire, visible publiquement).',
+    }),
+  ]);
 
   return (
     <section className="grid gap-6">
       <header>
-        <Heading niveau={1} apparenceComme={2}>
-          Modération des cagnottes
-        </Heading>
-        <p className="mt-2 text-text-2">
-          Modération <strong>a posteriori</strong> : les cagnottes sont déjà publiques. Suspension
-          en cas de comportement louche (raison obligatoire, visible publiquement).
-        </p>
+        <TexteEditableAdmin
+          cle="admin.moderation.cagnottes.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console cagnottes"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Heading niveau={1} apparenceComme={2}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="admin.moderation.cagnottes.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console cagnottes"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       {cagnottes.length === 0 ? (

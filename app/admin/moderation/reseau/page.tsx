@@ -1,6 +1,9 @@
 import { retirerCommentaire, retirerPost } from '@/app/(public)/s-informer/reseau/actions';
 import { ControleModeration } from '@/components/admin/moderation/ControleModeration';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 
 /** Tronque un texte pour l'aperçu de modération. */
@@ -16,7 +19,7 @@ function apercu(texte: string, max = 240): string {
  */
 export default async function PageModerationReseau() {
   const supabase = await getSupabaseServer();
-  const [{ data: posts }, { data: commentaires }] = await Promise.all([
+  const [{ data: posts }, { data: commentaires }, estAdmin, titre, intro] = await Promise.all([
     supabase
       .from('post_reseau')
       .select('id, texte, statut, created_at')
@@ -27,15 +30,37 @@ export default async function PageModerationReseau() {
       .select('id, texte, statut, created_at')
       .order('created_at', { ascending: false })
       .limit(50),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.reseau.titre', {
+      valeurMd: 'Modération — Réseau social',
+    }),
+    lireContenuEditorial('admin.moderation.reseau.intro', {
+      valeurMd:
+        'Modération a posteriori : les contenus sont publiés immédiatement, retirés ici en cas de problème (motif obligatoire, tracé dans le journal d’audit).',
+    }),
   ]);
 
   return (
     <>
-      <Heading niveau={1}>Modération — Réseau social</Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Modération a posteriori : les contenus sont publiés immédiatement, retirés ici en cas de
-        problème (motif obligatoire, tracé dans le journal d’audit).
-      </p>
+      <TexteEditableAdmin
+        cle="admin.moderation.reseau.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre console reseau"
+        longueurMax={60}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="admin.moderation.reseau.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console reseau"
+        multilignes
+        longueurMax={300}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-6">
         <h2 className="mb-2 font-bold">Publications ({(posts ?? []).length})</h2>

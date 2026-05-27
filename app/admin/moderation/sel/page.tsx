@@ -1,12 +1,15 @@
 import { retirerServiceSel } from '@/app/(public)/s-entraider/sel/actions';
 import { ControleModeration } from '@/components/admin/moderation/ControleModeration';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default async function PageModerationSel() {
   const supabase = await getSupabaseServer();
-  const [{ data: services }, { data: prestations }] = await Promise.all([
+  const [{ data: services }, { data: prestations }, estAdmin, titre, intro] = await Promise.all([
     supabase
       .from('service_sel')
       .select('id, slug, titre, categorie, sens, statut')
@@ -18,13 +21,33 @@ export default async function PageModerationSel() {
       .in('statut', ['en_moderation', 'contestee'])
       .order('declaree_realisee_le', { ascending: false })
       .limit(50),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.sel.titre', { valeurMd: 'Modération — SEL' }),
+    lireContenuEditorial('admin.moderation.sel.intro', {
+      valeurMd:
+        'Services publiés + prestations en attente de crédit (modération 2 h) ou contestées.',
+    }),
   ]);
   return (
     <>
-      <Heading niveau={1}>Modération — SEL</Heading>
-      <p className="mt-2 text-sm text-text-3">
-        Services publiés + prestations en attente de crédit (modération 2 h) ou contestées.
-      </p>
+      <TexteEditableAdmin
+        cle="admin.moderation.sel.titre"
+        valeurInitiale={titre.valeurMd}
+        estAdmin={estAdmin}
+        libelle="titre console SEL"
+        longueurMax={60}
+      >
+        {(t) => <Heading niveau={1}>{t}</Heading>}
+      </TexteEditableAdmin>
+      <TexteEditableAdmin
+        cle="admin.moderation.sel.intro"
+        valeurInitiale={intro.valeurMd}
+        estAdmin={estAdmin}
+        libelle="intro console SEL"
+        longueurMax={200}
+      >
+        {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
+      </TexteEditableAdmin>
 
       <section className="mt-6">
         <h2 className="mb-2 font-bold">Prestations à modérer ({(prestations ?? []).length})</h2>

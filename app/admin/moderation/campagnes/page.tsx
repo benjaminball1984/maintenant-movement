@@ -1,7 +1,10 @@
 import { modererCampagne } from '@/app/(public)/mobiliser/campagnes/actions';
 import { FormulaireModerationCampagne } from '@/components/campagnes/FormulaireModerationCampagne';
+import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Card, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { listerCampagnesAModerer } from '@/lib/campagnes/requetes';
+import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -16,18 +19,44 @@ export const metadata: Metadata = {
  * action publier / rejeter (avec motif).
  */
 export default async function PageModerationCampagnes() {
-  const campagnes = await listerCampagnesAModerer();
+  const [campagnes, estAdmin, titre, intro] = await Promise.all([
+    listerCampagnesAModerer(),
+    estAdminCourant(),
+    lireContenuEditorial('admin.moderation.campagnes.titre', {
+      valeurMd: 'Modération des campagnes',
+    }),
+    lireContenuEditorial('admin.moderation.campagnes.intro', {
+      valeurMd:
+        "Campagnes en attente de publication, triées par ordre d'arrivée. Délai cible : moins de 48 heures.",
+    }),
+  ]);
 
   return (
     <section className="grid gap-6">
       <header>
-        <Heading niveau={1} apparenceComme={2}>
-          Modération des campagnes
-        </Heading>
-        <p className="mt-2 text-text-2">
-          Campagnes en attente de publication, triées par ordre d'arrivée. Délai cible : moins de 48
-          heures.
-        </p>
+        <TexteEditableAdmin
+          cle="admin.moderation.campagnes.titre"
+          valeurInitiale={titre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre console campagnes"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Heading niveau={1} apparenceComme={2}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="admin.moderation.campagnes.intro"
+          valeurInitiale={intro.valeurMd}
+          estAdmin={estAdmin}
+          libelle="intro console campagnes"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+        </TexteEditableAdmin>
       </header>
 
       {campagnes.length === 0 ? (
