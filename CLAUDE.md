@@ -432,8 +432,11 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 > Tu mets à jour cette section à la fin de chaque chantier.
 
-**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 outillage admin et helpers étendus)
-**Dernier chantier terminé** : V2.4.47 (`lib/format-date.ts` + 7 tests) — sur `main` (tip `349a285`). 525 tests verts. 4 helpers centralisés : `formaterDateCourte`, `formaterDateLongue`, `formaterDateHeure`, `formaterDateIso`.
+**Dernière mise à jour** : 2026-05-27 (suite — VAGUE 4 bibliothèque helpers + admin sondages)
+**Dernier chantier terminé** : V2.4.50 (`lib/email-valide.ts` + 13 tests) — sur `main` (tip `4b26879`). 550 tests verts. Validation pragmatique + normalisation (trim+lowercase).
+**Dernier chantier terminé (antérieur)** : V2.4.49 (`lib/temps-lecture.ts` + 11 tests + branchement) — sur `main` (tip `be9f190`). 200 mots/min, min 1 min, ligne d'attribution média gagne « · X min de lecture ».
+**Dernier chantier terminé (antérieur)** : V2.4.48 (admin sondages `/admin/national/sondages`) — sur `main` (tip `29015d2`). Double filtre statut + mode, recherche titre/question, nb d'options.
+**Dernier chantier terminé (antérieur)** : V2.4.47 (`lib/format-date.ts` + 7 tests) — sur `main` (tip `349a285`). 525 tests verts. 4 helpers centralisés : `formaterDateCourte`, `formaterDateLongue`, `formaterDateHeure`, `formaterDateIso`.
 **Dernier chantier terminé (antérieur)** : V2.4.46 (healthcheck `/api/health`) — sur `main` (tip `fbdf253`). 200/503 selon état Supabase, JSON avec uptime + timestamp + checks, no-store.
 **Dernier chantier terminé (antérieur)** : V2.4.45 (admin groupes d'entraide locaux) — sur `main` (tip `07d51b4`). Recherche par nom/zone, filtre statut, badges outils activés.
 **Dernier chantier terminé (antérieur)** : V2.4.44 (`lib/format-t99cp.ts` + 10 tests) — sur `main` (tip `03a6d54`). 518 tests verts. Extraction du formaterT99CP avec BigInt pour préservation précision, suffixe configurable.
