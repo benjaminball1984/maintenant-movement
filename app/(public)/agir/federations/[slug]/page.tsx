@@ -8,6 +8,7 @@ import { federationParSlug } from '@/lib/communes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -35,7 +36,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
     objet: {
       titre: federation.nom,
       description: `Fédération ${federation.nom} du mouvement Maintenant!`,
-      image_url: null,
+      image_url: federation.image_url, // V2.5.4 : utilise la colonne réelle
       type_objet: 'federation',
     },
     cheminPage: `/agir/federations/${slug}`,
@@ -85,6 +86,21 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
           </BoutonAdminEditer>
         </div>
         <Heading niveau={1}>{federation.nom}</Heading>
+
+        {/* V2.5.4 Phase C : image de couverture si disponible. */}
+        {federation.image_url !== null && federation.image_url.trim() !== '' ? (
+          <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
+            <Image
+              src={federation.image_url}
+              alt=""
+              fill
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 720px"
+              className="object-cover"
+            />
+          </div>
+        ) : null}
+
         {federation.description_courte !== null && federation.description_courte.trim() !== '' ? (
           <p className="text-text-2">{federation.description_courte}</p>
         ) : null}

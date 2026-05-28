@@ -18,6 +18,7 @@ import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -47,9 +48,10 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
     objet: {
       titre: commune.nom,
       description: commune.description_courte ?? `Commune libre de ${commune.nom}`,
-      // Pas de champ image_url en V1 sur `commune` (cf. types/database) :
-      // on tombe sur l'image par défaut `commune.svg` de la bibliothèque ET1.
-      image_url: null,
+      // V2.5.4 : la colonne `image_url` existe bien sur `commune` (migration
+      // 20260520120003), on l'utilise. Fallback sur l'image par défaut
+      // `commune.svg` géré côté `metadataPourPartage`.
+      image_url: commune.image_url,
       type_objet: 'commune_libre',
     },
     cheminPage: `/agir/communes/${slug}`,
@@ -172,6 +174,25 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{commune.nom}</Heading>
+
+          {/* V2.5.4 Phase C : image de couverture en 16/9 si elle existe.
+              Donne au gabarit de la commune libre le même rendu riche que
+              les pages campagne et autres espaces collectifs. Tomber sur
+              l'image par défaut si elle est manquante reste géré côté CMS
+              admin (téléversement via /admin/national/communes). */}
+          {commune.image_url !== null && commune.image_url.trim() !== '' ? (
+            <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
+              <Image
+                src={commune.image_url}
+                alt=""
+                fill
+                unoptimized
+                sizes="(max-width: 768px) 100vw, 720px"
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+
           {commune.description_courte !== null && commune.description_courte.trim() !== '' ? (
             <p className="text-text-2">{commune.description_courte}</p>
           ) : null}
