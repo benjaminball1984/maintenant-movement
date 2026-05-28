@@ -13,15 +13,51 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesCreationMinimarche {
+  alertErreurTitre: string;
+  labelTitre: string;
+  placeholderTitre: string;
+  labelDescription: string;
+  labelLieu: string;
+  placeholderLieu: string;
+  labelDebut: string;
+  labelFin: string;
+  legendeMonnaies: string;
+  hintMonnaies: string;
+  libelleImage: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationMinimarche = {
+  alertErreurTitre: 'Publication impossible',
+  labelTitre: 'Titre du minimarché',
+  placeholderTitre: 'Exemple : Minimarché solidaire Belleville',
+  labelDescription: 'Description (conseils pratiques, organisation)',
+  labelLieu: 'Lieu (adresse précise pour la carte)',
+  placeholderLieu: 'Place du marché, 75020 Paris',
+  labelDebut: 'Date et heure de début',
+  labelFin: 'Date et heure de fin',
+  legendeMonnaies: 'Monnaies acceptées',
+  hintMonnaies:
+    'Au moins une monnaie. T99CP et Euros sont acceptés en physique comme en ligne. Ğ1 et monnaies locales restent réservées au physique.',
+  libelleImage: 'Image illustrative (optionnelle)',
+  ctaSubmit: 'Annoncer le minimarché',
+  ctaEnCours: 'Publication...',
+};
+
 interface FormulaireCreationMinimarcheProps {
   creerMinimarche: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  libelles?: LibellesCreationMinimarche;
   messages?: MessagesValidationMarche;
 }
 
 export function FormulaireCreationMinimarche({
   creerMinimarche,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireCreationMinimarcheProps) {
   const router = useRouter();
@@ -89,18 +125,18 @@ export function FormulaireCreationMinimarche({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Publication impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <div>
         <Label htmlFor="minimarche-titre" obligatoire>
-          Titre du minimarché
+          {libelles.labelTitre}
         </Label>
         <Input
           id="minimarche-titre"
-          placeholder="Exemple : Minimarché solidaire Belleville"
+          placeholder={libelles.placeholderTitre}
           {...register('titre')}
         />
         {errors.titre !== undefined ? (
@@ -110,7 +146,7 @@ export function FormulaireCreationMinimarche({
 
       <div>
         <Label htmlFor="minimarche-description" obligatoire>
-          Description (conseils pratiques, organisation)
+          {libelles.labelDescription}
         </Label>
         <Textarea id="minimarche-description" rows={6} {...register('description')} />
         {errors.description !== undefined ? (
@@ -120,13 +156,9 @@ export function FormulaireCreationMinimarche({
 
       <div>
         <Label htmlFor="minimarche-lieu" obligatoire>
-          Lieu (adresse précise pour la carte)
+          {libelles.labelLieu}
         </Label>
-        <Input
-          id="minimarche-lieu"
-          placeholder="Place du marché, 75020 Paris"
-          {...register('lieu')}
-        />
+        <Input id="minimarche-lieu" placeholder={libelles.placeholderLieu} {...register('lieu')} />
         {errors.lieu !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.lieu.message}</p>
         ) : null}
@@ -135,7 +167,7 @@ export function FormulaireCreationMinimarche({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="minimarche-debut" obligatoire>
-            Date et heure de début
+            {libelles.labelDebut}
           </Label>
           <Input id="minimarche-debut" type="datetime-local" {...register('commence_le')} />
           {errors.commence_le !== undefined ? (
@@ -144,7 +176,7 @@ export function FormulaireCreationMinimarche({
         </div>
         <div>
           <Label htmlFor="minimarche-fin" obligatoire>
-            Date et heure de fin
+            {libelles.labelFin}
           </Label>
           <Input id="minimarche-fin" type="datetime-local" {...register('termine_le')} />
           {errors.termine_le !== undefined ? (
@@ -155,12 +187,9 @@ export function FormulaireCreationMinimarche({
 
       <fieldset>
         <legend className="mb-2 font-body text-sm font-medium text-text-2">
-          Monnaies acceptées
+          {libelles.legendeMonnaies}
         </legend>
-        <p className="mb-2 text-xs text-text-3">
-          Au moins une monnaie. T99CP et Euros sont acceptés en physique comme en ligne. Ğ1 et
-          monnaies locales restent réservées au physique.
-        </p>
+        <p className="mb-2 text-xs text-text-3">{libelles.hintMonnaies}</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {MONNAIES_PHYSIQUES.map((code) => {
             const config = MONNAIES[code];
@@ -191,14 +220,14 @@ export function FormulaireCreationMinimarche({
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.libelleImage}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Publication...' : 'Annoncer le minimarché'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

@@ -12,6 +12,41 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesEditionPetition {
+  alertErreurTitre: string;
+  alertSuccesTitre: string;
+  alertSuccesCorps: string;
+  labelTitre: string;
+  labelDestinataire: string;
+  libelleImage: string;
+  labelTexte: string;
+  labelObjectif: string;
+  labelDateLancement: string;
+  hintDateLancement: string;
+  labelDateEcheance: string;
+  hintDateEcheance: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesEditionPetition = {
+  alertErreurTitre: 'Édition impossible',
+  alertSuccesTitre: 'Modifications enregistrées',
+  alertSuccesCorps: 'La pétition a été mise à jour.',
+  labelTitre: 'Titre',
+  labelDestinataire: 'Destinataire',
+  libelleImage: 'Image illustrative (optionnelle)',
+  labelTexte: 'Texte de la pétition',
+  labelObjectif: 'Objectif chiffré (nombre de signataires)',
+  labelDateLancement: 'Date de lancement (optionnel)',
+  hintDateLancement: 'Début officiel de la campagne.',
+  labelDateEcheance: "Date d'échéance (optionnel)",
+  hintDateEcheance: 'Date limite affichée publiquement.',
+  ctaSubmit: 'Enregistrer les modifications',
+  ctaEnCours: 'Enregistrement...',
+};
+
 interface FormulaireEditionPetitionProps {
   /** Pétition à éditer (toutes colonnes, dont les dates). */
   petition: Petition;
@@ -20,6 +55,7 @@ interface FormulaireEditionPetitionProps {
    * client/serveur, on ne l'importe pas côté client).
    */
   editerPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesEditionPetition;
   messages?: MessagesValidationPetition;
 }
 
@@ -45,6 +81,7 @@ function versInputDate(valeur: string | null): string {
 export function FormulaireEditionPetition({
   petition,
   editerPetition,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: FormulaireEditionPetitionProps) {
   const router = useRouter();
@@ -91,13 +128,13 @@ export function FormulaireEditionPetition({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Édition impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
       {succes ? (
-        <Alert variant="success" titre="Modifications enregistrées">
-          La pétition a été mise à jour.
+        <Alert variant="success" titre={libelles.alertSuccesTitre}>
+          {libelles.alertSuccesCorps}
         </Alert>
       ) : null}
 
@@ -105,7 +142,7 @@ export function FormulaireEditionPetition({
 
       <div>
         <Label htmlFor="edit-titre" obligatoire>
-          Titre
+          {libelles.labelTitre}
         </Label>
         <Input id="edit-titre" {...register('titre')} />
         {errors.titre !== undefined ? (
@@ -115,7 +152,7 @@ export function FormulaireEditionPetition({
 
       <div>
         <Label htmlFor="edit-destinataire" obligatoire>
-          Destinataire
+          {libelles.labelDestinataire}
         </Label>
         <Input id="edit-destinataire" {...register('destinataire')} />
         {errors.destinataire !== undefined ? (
@@ -125,7 +162,7 @@ export function FormulaireEditionPetition({
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.libelleImage}
         valeurInitiale={petition.image_url}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
@@ -135,7 +172,7 @@ export function FormulaireEditionPetition({
 
       <div>
         <Label htmlFor="edit-texte" obligatoire>
-          Texte de la pétition
+          {libelles.labelTexte}
         </Label>
         <Textarea id="edit-texte" rows={10} {...register('texte')} />
         {errors.texte !== undefined ? (
@@ -145,7 +182,7 @@ export function FormulaireEditionPetition({
 
       <div>
         <Label htmlFor="edit-objectif" obligatoire>
-          Objectif chiffré (nombre de signataires)
+          {libelles.labelObjectif}
         </Label>
         <Input
           id="edit-objectif"
@@ -163,17 +200,17 @@ export function FormulaireEditionPetition({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <Label htmlFor="edit-date-lancement">Date de lancement (optionnel)</Label>
+          <Label htmlFor="edit-date-lancement">{libelles.labelDateLancement}</Label>
           <Input id="edit-date-lancement" type="date" {...register('date_lancement')} />
-          <p className="mt-1 text-xs text-text-3">Début officiel de la campagne.</p>
+          <p className="mt-1 text-xs text-text-3">{libelles.hintDateLancement}</p>
           {errors.date_lancement !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.date_lancement.message}</p>
           ) : null}
         </div>
         <div>
-          <Label htmlFor="edit-date-echeance">Date d'échéance (optionnel)</Label>
+          <Label htmlFor="edit-date-echeance">{libelles.labelDateEcheance}</Label>
           <Input id="edit-date-echeance" type="date" {...register('date_echeance')} />
-          <p className="mt-1 text-xs text-text-3">Date limite affichée publiquement.</p>
+          <p className="mt-1 text-xs text-text-3">{libelles.hintDateEcheance}</p>
           {errors.date_echeance !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.date_echeance.message}</p>
           ) : null}
@@ -182,7 +219,7 @@ export function FormulaireEditionPetition({
 
       <div className="flex gap-3">
         <Button type="submit" disabled={envoiEnCours}>
-          {envoiEnCours ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>
     </form>

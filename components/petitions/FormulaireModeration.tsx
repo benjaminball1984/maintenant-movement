@@ -13,9 +13,42 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesModerationPetition {
+  alertConfirmeTitre: string;
+  alertConfirmePubliee: string;
+  alertConfirmeRejetee: string;
+  alertErreurTitre: string;
+  ctaPublier: string;
+  ctaPublierEnCours: string;
+  ctaRejeterOuvrir: string;
+  labelRaison: string;
+  placeholderRaison: string;
+  ctaRejeterSubmit: string;
+  ctaRejeterEnCours: string;
+  ctaAnnuler: string;
+}
+
+const LIBELLES_DEFAUT: LibellesModerationPetition = {
+  alertConfirmeTitre: 'Décision enregistrée',
+  alertConfirmePubliee: 'La pétition est maintenant publiée.',
+  alertConfirmeRejetee:
+    'La pétition a été rejetée. La créatrice peut soumettre une nouvelle version.',
+  alertErreurTitre: 'Action impossible',
+  ctaPublier: 'Publier',
+  ctaPublierEnCours: 'Envoi...',
+  ctaRejeterOuvrir: 'Rejeter',
+  labelRaison: 'Raison du rejet',
+  placeholderRaison: 'Au moins 10 caractères, visibles par la créatrice.',
+  ctaRejeterSubmit: 'Confirmer le rejet',
+  ctaRejeterEnCours: 'Envoi...',
+  ctaAnnuler: 'Annuler',
+};
+
 interface FormulaireModerationProps {
   petitionId: string;
   modererPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesModerationPetition;
   messages?: MessagesValidationPetition;
 }
 
@@ -32,6 +65,7 @@ interface FormulaireModerationProps {
 export function FormulaireModeration({
   petitionId,
   modererPetition,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: FormulaireModerationProps) {
   const [modeRejet, setModeRejet] = useState(false);
@@ -93,10 +127,11 @@ export function FormulaireModeration({
 
   if (confirme !== null) {
     return (
-      <Alert variant={confirme === 'publiee' ? 'success' : 'info'} titre="Décision enregistrée">
-        {confirme === 'publiee'
-          ? 'La pétition est maintenant publiée.'
-          : 'La pétition a été rejetée. La créatrice peut soumettre une nouvelle version.'}
+      <Alert
+        variant={confirme === 'publiee' ? 'success' : 'info'}
+        titre={libelles.alertConfirmeTitre}
+      >
+        {confirme === 'publiee' ? libelles.alertConfirmePubliee : libelles.alertConfirmeRejetee}
       </Alert>
     );
   }
@@ -104,7 +139,7 @@ export function FormulaireModeration({
   return (
     <div className="grid gap-3 border-t border-border pt-4">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Action impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
@@ -114,22 +149,22 @@ export function FormulaireModeration({
       {!modeRejet ? (
         <div className="flex flex-wrap gap-3">
           <Button onClick={publier} disabled={envoiEnCours}>
-            {envoiEnCours ? 'Envoi...' : 'Publier'}
+            {envoiEnCours ? libelles.ctaPublierEnCours : libelles.ctaPublier}
           </Button>
           <Button variant="ghost" onClick={() => setModeRejet(true)} disabled={envoiEnCours}>
-            Rejeter
+            {libelles.ctaRejeterOuvrir}
           </Button>
         </div>
       ) : (
         <form noValidate onSubmit={handleSubmit(rejeter)} className="grid gap-3">
           <div>
             <Label htmlFor={`raison-${petitionId}`} obligatoire>
-              Raison du rejet
+              {libelles.labelRaison}
             </Label>
             <Textarea
               id={`raison-${petitionId}`}
               rows={3}
-              placeholder="Au moins 10 caractères, visibles par la créatrice."
+              placeholder={libelles.placeholderRaison}
               {...register('raison_rejet')}
             />
             {errors.raison_rejet !== undefined ? (
@@ -138,7 +173,7 @@ export function FormulaireModeration({
           </div>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={envoiEnCours}>
-              {envoiEnCours ? 'Envoi...' : 'Confirmer le rejet'}
+              {envoiEnCours ? libelles.ctaRejeterEnCours : libelles.ctaRejeterSubmit}
             </Button>
             <Button
               type="button"
@@ -146,7 +181,7 @@ export function FormulaireModeration({
               onClick={() => setModeRejet(false)}
               disabled={envoiEnCours}
             >
-              Annuler
+              {libelles.ctaAnnuler}
             </Button>
           </div>
         </form>

@@ -12,15 +12,55 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesCreationBoutique {
+  alertErreurTitre: string;
+  legendeSens: string;
+  optionSensPropose: string;
+  optionSensCherche: string;
+  labelNom: string;
+  placeholderNom: string;
+  labelDescription: string;
+  labelOuvertureDu: string;
+  labelOuvertureAu: string;
+  hintHoraires: string;
+  labelLieu: string;
+  placeholderLieu: string;
+  libelleImage: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationBoutique = {
+  alertErreurTitre: 'Publication impossible',
+  legendeSens: 'Sens',
+  optionSensPropose: 'Je crée ma boutique',
+  optionSensCherche: 'Je cherche à rejoindre ou co-créer',
+  labelNom: 'Nom de la boutique',
+  placeholderNom: 'Exemple : Vide-grenier de Saint-Denis',
+  labelDescription: 'Description',
+  labelOuvertureDu: 'Ouverture (début)',
+  labelOuvertureAu: 'Fermeture (fin)',
+  hintHoraires:
+    'Laisser vide pour une boutique permanente. Sinon, indiquer la plage du vide-grenier ou de la brocante.',
+  labelLieu: 'Lieu (optionnel)',
+  placeholderLieu: 'Ville ou adresse',
+  libelleImage: 'Image illustrative (optionnelle)',
+  ctaSubmit: 'Publier la boutique',
+  ctaEnCours: 'Publication...',
+};
+
 interface FormulaireCreationBoutiqueProps {
   creerBoutique: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  libelles?: LibellesCreationBoutique;
   messages?: MessagesValidationMarche;
 }
 
 export function FormulaireCreationBoutique({
   creerBoutique,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireCreationBoutiqueProps) {
   const router = useRouter();
@@ -63,13 +103,15 @@ export function FormulaireCreationBoutique({
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Publication impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">Sens</legend>
+        <legend className="mb-2 font-body text-sm font-medium text-text-2">
+          {libelles.legendeSens}
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
             <input
@@ -78,7 +120,7 @@ export function FormulaireCreationBoutique({
               {...register('sens')}
               className="mt-0.5 accent-brand"
             />
-            <span>Je crée ma boutique</span>
+            <span>{libelles.optionSensPropose}</span>
           </label>
           <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
             <input
@@ -87,20 +129,16 @@ export function FormulaireCreationBoutique({
               {...register('sens')}
               className="mt-0.5 accent-brand"
             />
-            <span>Je cherche à rejoindre ou co-créer</span>
+            <span>{libelles.optionSensCherche}</span>
           </label>
         </div>
       </fieldset>
 
       <div>
         <Label htmlFor="boutique-nom" obligatoire>
-          Nom de la boutique
+          {libelles.labelNom}
         </Label>
-        <Input
-          id="boutique-nom"
-          placeholder="Exemple : Vide-grenier de Saint-Denis"
-          {...register('nom')}
-        />
+        <Input id="boutique-nom" placeholder={libelles.placeholderNom} {...register('nom')} />
         {errors.nom !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.nom.message}</p>
         ) : null}
@@ -108,7 +146,7 @@ export function FormulaireCreationBoutique({
 
       <div>
         <Label htmlFor="boutique-description" obligatoire>
-          Description
+          {libelles.labelDescription}
         </Label>
         <Textarea id="boutique-description" rows={6} {...register('description')} />
         {errors.description !== undefined ? (
@@ -118,37 +156,34 @@ export function FormulaireCreationBoutique({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <Label htmlFor="boutique-du">Ouverture (début)</Label>
+          <Label htmlFor="boutique-du">{libelles.labelOuvertureDu}</Label>
           <Input id="boutique-du" type="datetime-local" {...register('ouverte_du')} />
         </div>
         <div>
-          <Label htmlFor="boutique-au">Fermeture (fin)</Label>
+          <Label htmlFor="boutique-au">{libelles.labelOuvertureAu}</Label>
           <Input id="boutique-au" type="datetime-local" {...register('ouverte_au')} />
         </div>
       </div>
-      <p className="text-xs text-text-3">
-        Laisser vide pour une boutique permanente. Sinon, indiquer la plage du vide-grenier ou de la
-        brocante.
-      </p>
+      <p className="text-xs text-text-3">{libelles.hintHoraires}</p>
       {errors.ouverte_du !== undefined ? (
         <p className="text-xs text-danger">{errors.ouverte_du.message}</p>
       ) : null}
 
       <div>
-        <Label htmlFor="boutique-lieu">Lieu (optionnel)</Label>
-        <Input id="boutique-lieu" placeholder="Ville ou adresse" {...register('lieu')} />
+        <Label htmlFor="boutique-lieu">{libelles.labelLieu}</Label>
+        <Input id="boutique-lieu" placeholder={libelles.placeholderLieu} {...register('lieu')} />
       </div>
 
       <ChampImageObjet
         name="image_url"
-        libelle="Image illustrative (optionnelle)"
+        libelle={libelles.libelleImage}
         onChange={(url) => setValue('image_url', url ?? '')}
       />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Publication...' : 'Publier la boutique'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

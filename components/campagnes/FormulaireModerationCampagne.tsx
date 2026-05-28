@@ -13,9 +13,42 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesModerationCampagne {
+  alertConfirmeTitre: string;
+  alertConfirmePubliee: string;
+  alertConfirmeRejetee: string;
+  alertErreurTitre: string;
+  ctaPublier: string;
+  ctaPublierEnCours: string;
+  ctaRejeterOuvrir: string;
+  labelRaison: string;
+  placeholderRaison: string;
+  ctaRejeterSubmit: string;
+  ctaRejeterEnCours: string;
+  ctaAnnuler: string;
+}
+
+const LIBELLES_DEFAUT: LibellesModerationCampagne = {
+  alertConfirmeTitre: 'Décision enregistrée',
+  alertConfirmePubliee: 'La campagne est maintenant publiée.',
+  alertConfirmeRejetee:
+    'La campagne a été rejetée. La créateurice peut soumettre une nouvelle version.',
+  alertErreurTitre: 'Action impossible',
+  ctaPublier: 'Publier',
+  ctaPublierEnCours: 'Envoi...',
+  ctaRejeterOuvrir: 'Rejeter',
+  labelRaison: 'Raison du rejet',
+  placeholderRaison: 'Au moins 10 caractères, visibles par la créateurice.',
+  ctaRejeterSubmit: 'Confirmer le rejet',
+  ctaRejeterEnCours: 'Envoi...',
+  ctaAnnuler: 'Annuler',
+};
+
 interface FormulaireModerationCampagneProps {
   campagneId: string;
   modererCampagne: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesModerationCampagne;
   messages?: MessagesValidationCampagne;
 }
 
@@ -30,6 +63,7 @@ interface FormulaireModerationCampagneProps {
 export function FormulaireModerationCampagne({
   campagneId,
   modererCampagne,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
 }: FormulaireModerationCampagneProps) {
   const [modeRejet, setModeRejet] = useState(false);
@@ -83,10 +117,11 @@ export function FormulaireModerationCampagne({
 
   if (confirme !== null) {
     return (
-      <Alert variant={confirme === 'publiee' ? 'success' : 'info'} titre="Décision enregistrée">
-        {confirme === 'publiee'
-          ? 'La campagne est maintenant publiée.'
-          : 'La campagne a été rejetée. La créateurice peut soumettre une nouvelle version.'}
+      <Alert
+        variant={confirme === 'publiee' ? 'success' : 'info'}
+        titre={libelles.alertConfirmeTitre}
+      >
+        {confirme === 'publiee' ? libelles.alertConfirmePubliee : libelles.alertConfirmeRejetee}
       </Alert>
     );
   }
@@ -94,7 +129,7 @@ export function FormulaireModerationCampagne({
   return (
     <div className="grid gap-3 border-t border-border pt-4">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Action impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
@@ -104,22 +139,22 @@ export function FormulaireModerationCampagne({
       {!modeRejet ? (
         <div className="flex flex-wrap gap-3">
           <Button onClick={publier} disabled={envoiEnCours}>
-            {envoiEnCours ? 'Envoi...' : 'Publier'}
+            {envoiEnCours ? libelles.ctaPublierEnCours : libelles.ctaPublier}
           </Button>
           <Button variant="ghost" onClick={() => setModeRejet(true)} disabled={envoiEnCours}>
-            Rejeter
+            {libelles.ctaRejeterOuvrir}
           </Button>
         </div>
       ) : (
         <form noValidate onSubmit={handleSubmit(rejeter)} className="grid gap-3">
           <div>
             <Label htmlFor={`raison-camp-${campagneId}`} obligatoire>
-              Raison du rejet
+              {libelles.labelRaison}
             </Label>
             <Textarea
               id={`raison-camp-${campagneId}`}
               rows={3}
-              placeholder="Au moins 10 caractères, visibles par la créateurice."
+              placeholder={libelles.placeholderRaison}
               {...register('raison_rejet')}
             />
             {errors.raison_rejet !== undefined ? (
@@ -128,7 +163,7 @@ export function FormulaireModerationCampagne({
           </div>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={envoiEnCours}>
-              {envoiEnCours ? 'Envoi...' : 'Confirmer le rejet'}
+              {envoiEnCours ? libelles.ctaRejeterEnCours : libelles.ctaRejeterSubmit}
             </Button>
             <Button
               type="button"
@@ -136,7 +171,7 @@ export function FormulaireModerationCampagne({
               onClick={() => setModeRejet(false)}
               disabled={envoiEnCours}
             >
-              Annuler
+              {libelles.ctaAnnuler}
             </Button>
           </div>
         </form>

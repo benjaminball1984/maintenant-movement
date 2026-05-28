@@ -16,9 +16,27 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesNotation {
+  alertErreurTitre: string;
+  labelEtoiles: string;
+  labelCommentaire: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+}
+
+const LIBELLES_DEFAUT: LibellesNotation = {
+  alertErreurTitre: 'Notation impossible',
+  labelEtoiles: "Combien d'étoiles ?",
+  labelCommentaire: 'Commentaire (optionnel)',
+  ctaSubmit: 'Publier la notation',
+  ctaEnCours: 'Envoi...',
+};
+
 interface FormulaireNotationProps {
   produitId: string;
   noterVendeureuse: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesNotation;
   messages?: MessagesValidationMarche;
 }
 
@@ -31,6 +49,7 @@ interface FormulaireNotationProps {
 export function FormulaireNotation({
   produitId,
   noterVendeureuse,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 }: FormulaireNotationProps) {
   const router = useRouter();
@@ -69,13 +88,13 @@ export function FormulaireNotation({
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       <input type="hidden" {...register('produit_id')} />
       {erreur !== null ? (
-        <Alert variant="danger" titre="Notation impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       <div>
-        <Label htmlFor="notation-etoiles">Combien d'étoiles ?</Label>
+        <Label htmlFor="notation-etoiles">{libelles.labelEtoiles}</Label>
         <Controller
           name="etoiles"
           control={control}
@@ -93,7 +112,7 @@ export function FormulaireNotation({
       </div>
 
       <div>
-        <Label htmlFor="notation-commentaire">Commentaire (optionnel)</Label>
+        <Label htmlFor="notation-commentaire">{libelles.labelCommentaire}</Label>
         <Textarea id="notation-commentaire" rows={4} {...register('commentaire')} />
         {errors.commentaire !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.commentaire.message}</p>
@@ -103,7 +122,7 @@ export function FormulaireNotation({
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       <Button type="submit" disabled={envoiEnCours}>
-        {envoiEnCours ? 'Envoi...' : 'Publier la notation'}
+        {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>
   );

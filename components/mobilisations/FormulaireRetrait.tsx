@@ -13,9 +13,36 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Libelles surchargeables admin via CMS (V2.4.152). */
+export interface LibellesRetraitMobilisation {
+  alertConfirmeTitre: string;
+  alertConfirmeCorps: string;
+  alertErreurTitre: string;
+  ctaOuvrir: string;
+  labelRaison: string;
+  placeholderRaison: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  ctaAnnuler: string;
+}
+
+const LIBELLES_DEFAUT: LibellesRetraitMobilisation = {
+  alertConfirmeTitre: 'Mobilisation retirée',
+  alertConfirmeCorps:
+    "La mobilisation n'est plus visible publiquement. La créateurice peut republier une version corrigée.",
+  alertErreurTitre: 'Action impossible',
+  ctaOuvrir: 'Retirer cette mobilisation',
+  labelRaison: 'Raison du retrait',
+  placeholderRaison: 'Au moins 10 caractères, visibles par la créateurice.',
+  ctaSubmit: 'Confirmer le retrait',
+  ctaEnCours: 'Envoi...',
+  ctaAnnuler: 'Annuler',
+};
+
 interface FormulaireRetraitProps {
   mobilisationId: string;
   retirerMobilisation: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  libelles?: LibellesRetraitMobilisation;
   messages?: MessagesValidationMobilisation;
 }
 
@@ -29,6 +56,7 @@ interface FormulaireRetraitProps {
 export function FormulaireRetrait({
   mobilisationId,
   retirerMobilisation,
+  libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
 }: FormulaireRetraitProps) {
   const [ouvert, setOuvert] = useState(false);
@@ -65,9 +93,8 @@ export function FormulaireRetrait({
 
   if (confirme) {
     return (
-      <Alert variant="info" titre="Mobilisation retirée">
-        La mobilisation n'est plus visible publiquement. La créateurice peut republier une version
-        corrigée.
+      <Alert variant="info" titre={libelles.alertConfirmeTitre}>
+        {libelles.alertConfirmeCorps}
       </Alert>
     );
   }
@@ -75,25 +102,25 @@ export function FormulaireRetrait({
   return (
     <div className="grid gap-3 border-t border-border pt-4">
       {erreur !== null ? (
-        <Alert variant="danger" titre="Action impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
 
       {!ouvert ? (
         <Button variant="ghost" onClick={() => setOuvert(true)}>
-          Retirer cette mobilisation
+          {libelles.ctaOuvrir}
         </Button>
       ) : (
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-3">
           <div>
             <Label htmlFor={`raison-mob-${mobilisationId}`} obligatoire>
-              Raison du retrait
+              {libelles.labelRaison}
             </Label>
             <Textarea
               id={`raison-mob-${mobilisationId}`}
               rows={3}
-              placeholder="Au moins 10 caractères, visibles par la créateurice."
+              placeholder={libelles.placeholderRaison}
               {...register('raison_retrait')}
             />
             {errors.raison_retrait !== undefined ? (
@@ -102,7 +129,7 @@ export function FormulaireRetrait({
           </div>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={envoiEnCours}>
-              {envoiEnCours ? 'Envoi...' : 'Confirmer le retrait'}
+              {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
             </Button>
             <Button
               type="button"
@@ -110,7 +137,7 @@ export function FormulaireRetrait({
               onClick={() => setOuvert(false)}
               disabled={envoiEnCours}
             >
-              Annuler
+              {libelles.ctaAnnuler}
             </Button>
           </div>
         </form>
