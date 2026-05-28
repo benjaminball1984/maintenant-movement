@@ -1607,6 +1607,24 @@ export type Database = {
           },
         ];
       };
+      objet_demo: {
+        Row: {
+          cree_le: string;
+          id_ligne: string;
+          nom_table: string;
+        };
+        Insert: {
+          cree_le?: string;
+          id_ligne: string;
+          nom_table: string;
+        };
+        Update: {
+          cree_le?: string;
+          id_ligne?: string;
+          nom_table?: string;
+        };
+        Relationships: [];
+      };
       offre_entraide: {
         Row: {
           created_at: string;
