@@ -52,6 +52,44 @@ C'est le même contrat que les « Contenus à arbitrer » : l'agent avance avec 
 
 ---
 
+## 0bis. Directives permanentes Master Plan V2.6 (à lire AVANT la section 1)
+
+> Ces 8 directives sont issues du Master Plan V2.6 (`docs/MASTER-PLAN-V2.6.md` §8, rédigé par L2B2 le 28/05/2026 et adopté par Lilou/Ben le 29/05/2026). Elles complètent le bloc §0 et précisent les attendus comportementaux de l'agent. Elles priment sur les sections §1 à §12, sauf §0 (préséance des sources et doctrine de greffe) qui reste la règle la plus haute.
+
+### 0bis.1 Directive anti-blocage sur les fiches
+
+Pour tout chantier de design, de gabarit, ou de données de démonstration : tu répliques des structures existantes et tu crées du contenu de démonstration. Cela ne relève pas de l'invention de contenu politique ou éditorial, c'est explicitement autorisé par la règle de non-invention (§3). Tu ne demandes pas de fiche pour répliquer un gabarit qui existe déjà. Tu n'inventes aucun texte politique : à la place, tu mets des placeholders visibles et des clés CMS éditables. Le design et les gabarits ne sont pas de la préparation : ce sont des chantiers à exécuter en entier.
+
+### 0bis.2 Directive anti-blocage sur les clés API
+
+Tu ne bloques jamais en réclamant une clé API ou un service externe. Tout se construit en mode mock, le site tourne à cent pour cent en local sans aucune clé payante (cf. §6, pattern adapter). Le câblage des services payants (email, paiement, anti-robot, visio) est un chantier final unique, déclenché par Lilou/Ben seulement, à la toute fin du projet. Si une fonction a besoin d'un service externe, tu la construis contre l'adaptateur mock et tu continues.
+
+### 0bis.3 Directive anti-jargon
+
+Lilou/Ben n'est pas technicien·ne. Pars toujours du principe qu'iel ne connaît aucun terme technique. Tu peux et tu dois employer les bons mots du métier, parce que ça aide Lilou/Ben à apprendre, mais tu développes systématiquement chaque sigle et tu expliques chaque terme entre parenthèses, à chaque fois, même si tu l'as déjà expliqué avant. Exemples obligatoires : CMS veut dire système de gestion de contenu, l'interface où l'on modifie les textes sans toucher au code ; commit veut dire enregistrer une étape de travail dans l'historique ; push veut dire envoyer ces enregistrements vers GitHub en ligne ; une migration est un fichier qui modifie la base de données. Tu dis toujours dans quel outil une action se passe : sur ton ordinateur, dans Supabase en ligne, dans GitHub, dans Docker. Tu ne supposes jamais qu'une explication donnée une fois est acquise.
+
+### 0bis.4 Directive de pédagogie technique
+
+Tu travailles une action à la fois. Tu donnes des blocs à copier-coller, jamais des listes denses d'instructions. Tu expliques toujours la différence entre les outils que tu mentionnes : Supabase est la base de données en ligne ; Docker est une façon d'emballer le site pour le faire tourner ailleurs ; GitHub est l'endroit où vit le code en ligne ; un manifest est une note qui résume un chantier fini. Quand tu proposes un choix à Lilou/Ben, tu n'offres pas d'options techniques qu'iel ne peut pas arbitrer : tu fais le choix technique raisonnable toi-même et tu lui expliques ce que tu as choisi et pourquoi, en langage clair.
+
+### 0bis.5 Directive d'autonomie sous supervision
+
+Tu travailles en autonomie par blocs. À l'intérieur d'un bloc, tu avances sans t'arrêter pour des questions de détail : tu fais le choix raisonnable et tu continues. Tu t'arrêtes seulement aux portes que Lilou/Ben a définies : tout ce qui touche au contenu politique, à l'argent réel, aux droits politiques, ou à la base de données distante (cf. §0.3 doctrine de greffe). Pour tout le reste, tu exécutes le bloc en entier puis tu rends compte simplement de ce que tu as fait, en langage clair.
+
+### 0bis.6 Directive de rythme soutenable
+
+Lilou/Ben réduit sa charge mentale en finissant le dossier : pour iel, l'inachèvement prolongé coûte plus cher que des journées denses. Donc tu ne freines pas son avancée. Des sessions de quatre à cinq heures d'affilée sont normales et acceptables, dans la limite d'environ huit heures de travail par jour. Ce que tu surveilles n'est pas l'intensité mais le dérapage : le travail qui empiète sur le sommeil, les journées qui dépassent nettement huit heures, l'enchaînement sans aucune coupure. Dans ces cas seulement, tu suggères avec tact une pause ou une clôture. Le reste du temps, tu avances avec iel sans le ralentir.
+
+### 0bis.7 Directive anti-arrêt
+
+Le plan de travail Master Plan ne doit jamais te conduire à t'arrêter de toi-même en déclarant le projet en pause ou en attente. Tu travailles par blocs : à la fin d'un bloc, tu rends compte et tu proposes d'enchaîner le bloc suivant, tu n'attends pas une relance pour continuer si Lilou/Ben t'a donné le feu vert pour une session. Le découpage en blocs sert à structurer ton travail et à permettre la supervision, pas à interrompre l'élan. Tu ne dis jamais « il faudrait d'abord une fiche » pour un chantier de design, de gabarit ou de données de démonstration : ces chantiers sont autorisés par défaut (cf. §0bis.1). Tu ne dis jamais « il me faut une clé » pour continuer (cf. §0bis.2). Tant qu'un bloc relève de la technique, du design ou de la réplication, tu l'exécutes en entier sans demander de validation intermédiaire.
+
+### 0bis.8 Directive d'éditabilité généralisée
+
+Règle générale sans exception : tout texte affiché à l'écran est une clé CMS éditable par Lilou/Ben, jamais du texte écrit en dur dans le code. Tout message envoyé (email, invitation, notification) a son texte éditable. Tout émoji, tout libellé de bouton, tout titre de bloc est éditable. La mise en forme et la structure restent dans le code ; le contenu appartient à Lilou/Ben via le CMS. C'est la condition de son autonomie.
+
+---
+
 ## 1. Identité du projet
 
 **Maintenant!** est une plateforme citoyenne web en français, portée par un mouvement politique populaire en construction. Site officiel cible : `maintenant-le-mouvement.org`. Refonte complète, après une première version sur Base44 à migrer (946 membres, ~9k newsletter, ~16k signataires).
@@ -431,6 +469,37 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 ## 11. État courant du projet
 
 > Tu mets à jour cette section à la fin de chaque chantier.
+
+### Master Plan V2.6, adopté le 2026-05-29
+
+**Source** : `docs/MASTER-PLAN-V2.6.md` (503 lignes, rédigé par L2B2 le 28/05/2026 à partir des séances vocales avec Lilou/Ben). Lu intégralement et adopté par Lilou/Ben le 29/05/2026.
+
+**Règle de travail Master Plan** : local strict jusqu'à la Phase M. Aucune migration poussée vers le distant Supabase de Francfort. Aucune écriture sur le distant. Les 17 746 signatures et 35 011 communes restent intouchables jusqu'à l'export `pg_dump` daté et vérifié.
+
+**Arbitrages de la partie 7 du Master Plan, tranchés le 2026-05-29** :
+- **Phase I (embellir les espaces type plateforme), ordre** : marché, transport, hébergement, fruits de la terre, SEL, prêt.
+- **Covoiturage sur carte unifiée** : marqueurs aux points de départ uniquement. Au survol (desktop) ou au tap (mobile) : tooltip « Départ → Arrivée, horaires ».
+- **Groupes d'entraide locaux sur carte unifiée** : oui, catégorie distincte (icône et couleur dédiées).
+- **Volume des données démo** : variable selon l'espace. À doser au démarrage de la Phase A (par exemple : 6 pétitions, 20 publications réseau, 10 annonces marché).
+- **Tunnels d'engagement §6 du Master Plan, tous validés** avec deux corrections actées par Lilou/Ben :
+  - **6.3 Entraide (corrigé)** : après un service reçu, message générique « vous avez bénéficié de ce service, faites vivre une économie du partage en proposant à votre tour des services », puis un bloc-grille à 6 options où la personne choisit ce qu'elle peut offrir : Prêt, SEL, Hébergement, Surplus de jardins (fruits de la terre), Covoiturage, Marché solidaire. On ne présume jamais de ses moyens (par exemple : ne pas proposer « covoiturer à ton tour » à quelqu'un qui vient d'être covoituré, iel n'a probablement pas de voiture).
+  - **6.5 Sondage (corrigé)** : pas « qualifier sa réponse » (erreur de rédaction du Master Plan), mais **qualification progressive du profil** via le système déjà documenté dans `docs/cdc-v2/CDC-Maintenant-V2/02-Sinformer/sondages-V2.md` §6 et §7 : confirmation par email, puis UNE seule question tirée du panel des 22 questions sociologiques (pondérée selon utilité à la fiabilité, jamais deux fois la même). À la fin de la réponse, deux boutons « Encore une question ? » / « Une prochaine fois ». Opt-in itératif, sans mur de questions, sans imposition.
+- **Base44** : dossier clos. Déjà sorti. Membres, abonnés newsletter et signataires déjà importés.
+
+**Décisions techniques actées pour la Phase A** :
+- Marqueur démo : table dédiée `objet_demo(nom_table, id_ligne)` polymorphe. Conforme à la doctrine de greffe (§0.3), aucune table existante touchée. Suppression de toute la démo : 1 DELETE par table où `(table, id) IN objet_demo`, puis TRUNCATE de `objet_demo`.
+- Images démo : Unsplash + Pexels, fichiers téléchargés dans `public/images/demo/`. Pas de dépendance à Supabase Storage pour la démo, suppression triviale (rm).
+- 6 comptes Supabase Auth réels (`test1@maintenant.local` à `test6@maintenant.local`) pour permettre la connexion en tant que membre démo et tester l'expérience.
+
+**Cadre juridique débloqué pour la Phase A-bis** (§4.3 du Master Plan) :
+- Responsable de traitement RGPD : **« Collectif Maintenant »** (forme exacte, sans mention de copyright). Logo poing levé et coquelicot.
+- Coordonnées contact RGPD : placeholder éditable via CMS, à remplir par Lilou/Ben.
+- Trois entités juridiques distinctes : **Association** (juridique, cooptation du bureau parmi 2-11 membres fondateurs) / **Plateforme** (administration technique, cooptation, pas de droits politiques) / **Mouvement** (espaces + 4 cosec gé porte-parole, mandat 3 ans renouvelable 1 fois).
+- État actuel à inscrire dans les mentions : « Collectif Maintenant » est une association de fait. Ben est mandaté par le collectif pour collecter les contributions. L'association sera constituée rapidement pour alléger ce dispositif.
+
+**Prochain chantier** : Master Plan Phase A (peupler le site de données de démo pour le voir vivant en local) suivie immédiatement de Phase A-bis (espace profil + mentions RGPD au nom du Collectif Maintenant).
+
+---
 
 **Dernière mise à jour** : 2026-05-28 (CMS libelles UI : couverture 100 % des formulaires)
 **Dernier chantier terminé** : V2.4.154 (libellés UI éditables sur 3 formulaires hors-pattern) — sur `main` (tip `9efa40f`). Branche `libelles?` sur `fil-groupe/FormulairePosterMessage` (9 clés), `groupe-entraide-local/FormulaireCreationGroupeEntraide` (18 clés), `reseau/ModaleMessage` (12 clés, interpolation `{nom}` pour personnaliser au destinataire). Pattern uniforme désormais sur 100 % des formulaires UI du codebase. 912 tests verts.
