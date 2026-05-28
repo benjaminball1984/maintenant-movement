@@ -4,6 +4,7 @@ import {
   rejoindreCommune,
 } from '@/app/(public)/agir/communes/actions';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { RenduBlocsEspace } from '@/components/blocs/RenduBlocsEspace';
 import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCommune';
 import { ListeMembres } from '@/components/communes/ListeMembres';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
@@ -234,6 +235,12 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             </div>
           </div>
         </Card>
+
+        {/* V2.5.5 Phase D : blocs personnalisables de la commune (texte,
+            image, lien, bouton). Idéal pour ajouter le lien WhatsApp ou
+            Telegram de la commune, des annonces, etc. Édition admin via
+            la console (à venir). */}
+        <RenduBlocsEspace espaceType="commune" espaceId={commune.id} />
 
         {session === null ? (
           <Alert

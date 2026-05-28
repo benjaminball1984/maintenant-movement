@@ -308,6 +308,10 @@ async function main(): Promise<void> {
   await seedAppartenancesCommune(supabase, profilIds);
   log('');
 
+  log('— Blocs personnalisables sur les communes démo —');
+  await seedBlocsCommune(supabase);
+  log('');
+
   log('Seeding démo terminé.');
 }
 
@@ -688,6 +692,73 @@ async function seedAppartenancesCommune(
     // Pas de marqueur démo sur l'appartenance : elle disparaît par cascade
     // quand le compte auth.users du profil est supprimé.
     log(`  · profil ${i + 1} → commune [DÉMO] ${ville.nom}`);
+  }
+}
+
+/**
+ * Pose 3 blocs personnalisables sur chaque commune démo pour illustrer
+ * le système blocs façon newsletter (V2.5.5 Phase D). Idempotent : si
+ * la commune a déjà au moins 1 bloc, on skip pour ne pas dupliquer.
+ */
+async function seedBlocsCommune(supabase: SupabaseClient<Database>): Promise<void> {
+  // Récupérer les ids des 6 communes démo via le marqueur objet_demo
+  const { data: marques } = await supabase
+    .from('objet_demo')
+    .select('id_ligne')
+    .eq('nom_table', 'commune');
+  const communeIds = (marques ?? []).map((m) => m.id_ligne);
+
+  for (const [i, communeId] of communeIds.entries()) {
+    // Idempotence : skip si la commune a déjà des blocs.
+    const { count } = await supabase
+      .from('bloc_espace')
+      .select('*', { count: 'exact', head: true })
+      .eq('espace_type', 'commune')
+      .eq('espace_id', communeId);
+    if ((count ?? 0) > 0) {
+      log(`  · commune ${i + 1} : ${count} bloc(s) déjà présent(s), skip`);
+      continue;
+    }
+
+    const blocs: Array<{ type: string; contenu_json: unknown; ordre: number }> = [
+      {
+        type: 'texte',
+        contenu_json: {
+          texte:
+            'Bienvenue sur la page de notre commune libre ! Voici les outils que notre groupe local utilise. Ces blocs sont des exemples de démonstration : la véritable commune les éditera comme elle veut.',
+        },
+        ordre: 10,
+      },
+      {
+        type: 'lien',
+        contenu_json: {
+          url: 'https://chat.whatsapp.com/exemple-commune',
+          libelle: 'Rejoindre notre groupe WhatsApp',
+          externe: true,
+        },
+        ordre: 20,
+      },
+      {
+        type: 'bouton',
+        contenu_json: {
+          url: 'https://meet.example.com/notre-prochaine-reunion',
+          libelle: 'Prochaine réunion mensuelle (lien visio)',
+          variante: 'primary',
+        },
+        ordre: 30,
+      },
+    ];
+
+    for (const bloc of blocs) {
+      await supabase.from('bloc_espace').insert({
+        espace_type: 'commune',
+        espace_id: communeId,
+        type: bloc.type,
+        contenu_json: bloc.contenu_json as never,
+        ordre: bloc.ordre,
+      });
+    }
+    log(`  · commune ${i + 1} : 3 blocs démo créés`);
   }
 }
 

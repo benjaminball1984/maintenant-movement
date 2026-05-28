@@ -529,6 +529,50 @@ export type Database = {
           },
         ];
       };
+      bloc_espace: {
+        Row: {
+          contenu_json: Json;
+          cree_le: string;
+          cree_par: string | null;
+          espace_id: string;
+          espace_type: string;
+          id: string;
+          ordre: number;
+          type: string;
+          updated_at: string;
+        };
+        Insert: {
+          contenu_json?: Json;
+          cree_le?: string;
+          cree_par?: string | null;
+          espace_id: string;
+          espace_type: string;
+          id?: string;
+          ordre?: number;
+          type: string;
+          updated_at?: string;
+        };
+        Update: {
+          contenu_json?: Json;
+          cree_le?: string;
+          cree_par?: string | null;
+          espace_id?: string;
+          espace_type?: string;
+          id?: string;
+          ordre?: number;
+          type?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'bloc_espace_cree_par_fkey';
+            columns: ['cree_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       boutique_marche: {
         Row: {
           created_at: string;
