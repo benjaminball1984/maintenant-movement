@@ -4,6 +4,54 @@ import { creerGroupeEntraide } from '@/app/actions/groupe-entraide-local';
 import { Alert, Button, Input, Label, Textarea } from '@/components/ui';
 import { type FormEvent, useState } from 'react';
 
+/** Libelles surchargeables admin via CMS (V2.4.154). */
+export interface LibellesCreationGroupeEntraide {
+  alertErreurTitre: string;
+  labelNom: string;
+  placeholderNom: string;
+  labelDescriptionCourte: string;
+  placeholderDescriptionCourte: string;
+  labelDescription: string;
+  placeholderDescription: string;
+  labelZone: string;
+  placeholderZone: string;
+  hintZone: string;
+  labelLatitude: string;
+  placeholderLatitude: string;
+  labelLongitude: string;
+  placeholderLongitude: string;
+  hintGeo: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  hintModeration: string;
+}
+
+const LIBELLES_DEFAUT: LibellesCreationGroupeEntraide = {
+  alertErreurTitre: 'Création impossible',
+  labelNom: 'Nom du groupe',
+  placeholderNom: 'Maraude solidaire Lyon 7, Voisinage rue X, AMAP du Plateau…',
+  labelDescriptionCourte: 'Description courte (chapô)',
+  placeholderDescriptionCourte: 'Une à deux phrases qui apparaîtront sur la liste et en partage.',
+  labelDescription: 'Description complète',
+  placeholderDescription: 'Présente le groupe, son intention, ses activités envisagées.',
+  labelZone: 'Zone géographique',
+  placeholderZone: 'Lyon 7e, immeuble 5 rue X, quartier de la Croix-Rousse…',
+  hintZone: 'Texte libre. Un groupe peut couvrir un quartier, un immeuble, une AMAP, etc.',
+  labelLatitude: 'Latitude (optionnelle)',
+  placeholderLatitude: 'ex. 45.7484',
+  labelLongitude: 'Longitude (optionnelle)',
+  placeholderLongitude: 'ex. 4.8467',
+  hintGeo:
+    "Si tu remplis l'une, l'autre est obligatoire. Le groupe apparaîtra alors sur la carte transversale.",
+  ctaSubmit: 'Créer le groupe',
+  ctaEnCours: 'Création…',
+  hintModeration: 'Le groupe sera soumis à modération avant publication.',
+};
+
+interface FormulaireCreationGroupeEntraideProps {
+  libelles?: LibellesCreationGroupeEntraide;
+}
+
 /**
  * Formulaire de création d'un groupe d'entraide local (cycle V2 V2.3.2).
  *
@@ -14,7 +62,9 @@ import { type FormEvent, useState } from 'react';
  * Image de couverture : à brancher sur `TeleverseurImage` (V2.0.3) dans le
  * chantier V2.3.4 (branchement TeleverseurImage sur formulaires).
  */
-export function FormulaireCreationGroupeEntraide() {
+export function FormulaireCreationGroupeEntraide({
+  libelles = LIBELLES_DEFAUT,
+}: FormulaireCreationGroupeEntraideProps = {}) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
 
@@ -60,25 +110,25 @@ export function FormulaireCreationGroupeEntraide() {
   return (
     <form onSubmit={surSoumission} className="flex flex-col gap-5">
       {erreur !== null && (
-        <Alert variant="danger" titre="Création impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       )}
 
       <div>
-        <Label htmlFor="nom">Nom du groupe</Label>
+        <Label htmlFor="nom">{libelles.labelNom}</Label>
         <Input
           id="nom"
           name="nom"
           required
           minLength={3}
           maxLength={200}
-          placeholder="Maraude solidaire Lyon 7, Voisinage rue X, AMAP du Plateau…"
+          placeholder={libelles.placeholderNom}
         />
       </div>
 
       <div>
-        <Label htmlFor="description_courte">Description courte (chapô)</Label>
+        <Label htmlFor="description_courte">{libelles.labelDescriptionCourte}</Label>
         <Textarea
           id="description_courte"
           name="description_courte"
@@ -86,12 +136,12 @@ export function FormulaireCreationGroupeEntraide() {
           minLength={10}
           maxLength={500}
           rows={2}
-          placeholder="Une à deux phrases qui apparaîtront sur la liste et en partage."
+          placeholder={libelles.placeholderDescriptionCourte}
         />
       </div>
 
       <div>
-        <Label htmlFor="description">Description complète</Label>
+        <Label htmlFor="description">{libelles.labelDescription}</Label>
         <Textarea
           id="description"
           name="description"
@@ -99,28 +149,26 @@ export function FormulaireCreationGroupeEntraide() {
           minLength={10}
           maxLength={5000}
           rows={6}
-          placeholder="Présente le groupe, son intention, ses activités envisagées."
+          placeholder={libelles.placeholderDescription}
         />
       </div>
 
       <div>
-        <Label htmlFor="zone_geographique">Zone géographique</Label>
+        <Label htmlFor="zone_geographique">{libelles.labelZone}</Label>
         <Input
           id="zone_geographique"
           name="zone_geographique"
           required
           minLength={2}
           maxLength={200}
-          placeholder="Lyon 7e, immeuble 5 rue X, quartier de la Croix-Rousse…"
+          placeholder={libelles.placeholderZone}
         />
-        <p className="mt-1 text-text-3 text-xs">
-          Texte libre. Un groupe peut couvrir un quartier, un immeuble, une AMAP, etc.
-        </p>
+        <p className="mt-1 text-text-3 text-xs">{libelles.hintZone}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <Label htmlFor="latitude">Latitude (optionnelle)</Label>
+          <Label htmlFor="latitude">{libelles.labelLatitude}</Label>
           <Input
             id="latitude"
             name="latitude"
@@ -128,11 +176,11 @@ export function FormulaireCreationGroupeEntraide() {
             step="any"
             min={-90}
             max={90}
-            placeholder="ex. 45.7484"
+            placeholder={libelles.placeholderLatitude}
           />
         </div>
         <div>
-          <Label htmlFor="longitude">Longitude (optionnelle)</Label>
+          <Label htmlFor="longitude">{libelles.labelLongitude}</Label>
           <Input
             id="longitude"
             name="longitude"
@@ -140,20 +188,17 @@ export function FormulaireCreationGroupeEntraide() {
             step="any"
             min={-180}
             max={180}
-            placeholder="ex. 4.8467"
+            placeholder={libelles.placeholderLongitude}
           />
         </div>
       </div>
-      <p className="-mt-2 text-text-3 text-xs">
-        Si tu remplis l'une, l'autre est obligatoire. Le groupe apparaîtra alors sur la carte
-        transversale.
-      </p>
+      <p className="-mt-2 text-text-3 text-xs">{libelles.hintGeo}</p>
 
       <div className="flex items-center gap-3">
         <Button type="submit" variant="primary" disabled={enCours}>
-          {enCours ? 'Création…' : 'Créer le groupe'}
+          {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
-        <p className="text-text-3 text-xs">Le groupe sera soumis à modération avant publication.</p>
+        <p className="text-text-3 text-xs">{libelles.hintModeration}</p>
       </div>
     </form>
   );
