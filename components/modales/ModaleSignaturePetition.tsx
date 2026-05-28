@@ -34,6 +34,11 @@ export interface LibellesSignaturePetition {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaAnnuler: string;
+  /** V2.5.6 Phase E — tunnel post-signature. */
+  tunnelTitre: string;
+  tunnelIntro: string;
+  tunnelCtaAdherer: string;
+  tunnelCtaCommune: string;
 }
 
 const LIBELLES_DEFAUT: LibellesSignaturePetition = {
@@ -44,7 +49,7 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   surtitre: 'Signer la pétition',
   alertErreurTitre: 'Signature impossible',
   merciTitre: 'Merci pour ta signature.',
-  merciMessage: "Ton signal est enregistré. Pas de partage à demander : c'est déjà fort.",
+  merciMessage: 'Ton signal est enregistré. Tu vas recevoir un email pour confirmer.',
   merciFermer: 'Fermer',
   labelPrenom: 'Prénom',
   labelNom: 'Nom',
@@ -58,6 +63,11 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   ctaSubmit: 'Signer maintenant',
   ctaEnCours: 'Envoi en cours...',
   ctaAnnuler: 'Annuler',
+  tunnelTitre: 'Aller plus loin avec Maintenant!',
+  tunnelIntro:
+    "Tu viens de t'engager. Si tu veux peser davantage, deux portes simples s'ouvrent à toi :",
+  tunnelCtaAdherer: 'Devenir adhérent·e',
+  tunnelCtaCommune: 'Rejoindre une commune libre',
 };
 
 interface ModaleSignaturePetitionProps {
@@ -199,9 +209,34 @@ export function ModaleSignaturePetition({
         </header>
 
         {merci ? (
-          <div className="grid gap-4 p-6 text-center">
+          <div className="grid gap-5 p-6 text-center">
             <p className="font-display text-2xl font-bold text-text-1">{libelles.merciTitre}</p>
             <p className="text-text-2">{libelles.merciMessage}</p>
+
+            {/* V2.5.6 Phase E : tunnel d'engagement après signature.
+                Deux portes simples vers les marches suivantes : adhérer
+                (devient adhérent·e du mouvement) et rejoindre une commune
+                libre (entre dans un collectif local). Pas de pression :
+                les deux CTA cohabitent avec un "fermer" sobre. */}
+            <div className="mt-2 grid gap-3 rounded-md border border-border bg-surface-2 p-4 text-left">
+              <p className="font-display text-base font-bold text-text-1">{libelles.tunnelTitre}</p>
+              <p className="text-sm text-text-2">{libelles.tunnelIntro}</p>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="/agir/adherer"
+                  className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+                >
+                  {libelles.tunnelCtaAdherer}
+                </a>
+                <a
+                  href="/agir/communes"
+                  className="inline-flex h-11 items-center justify-center rounded-md border border-brand bg-transparent px-5 font-body text-sm font-bold text-brand transition hover:bg-brand-light"
+                >
+                  {libelles.tunnelCtaCommune}
+                </a>
+              </div>
+            </div>
+
             <Button onClick={fermer} variant="ghost">
               {libelles.merciFermer}
             </Button>
