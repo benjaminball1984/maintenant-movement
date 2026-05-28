@@ -84,7 +84,17 @@ export async function Footer() {
     <footer className="border-t border-border bg-surface-2">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
-          <p className="font-display text-lg font-bold text-text-1">{SITE.nom}</p>
+          {/* Emplacement du logo officiel (poing levé + coquelicot).
+              Tant que le SVG/PNG n'est pas fourni par Lilou/Ben, on affiche
+              juste le wordmark stylisé avec le dégradé signature. Le
+              remplacement se fait en collant l'image dans `public/logo/`
+              et en remplaçant ce bloc par <Image src="/logo/maintenant.svg" ... />. */}
+          <p
+            className="bg-grad bg-clip-text font-display text-2xl font-extrabold text-transparent"
+            aria-label={`${SITE.nom} (logo)`}
+          >
+            {SITE.nom}
+          </p>
           <TexteEditableAdmin
             cle="footer.baseline"
             valeurInitiale={baseline.valeurMd}
