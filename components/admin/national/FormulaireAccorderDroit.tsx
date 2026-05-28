@@ -18,6 +18,59 @@ import type { NiveauDroitAdmin } from '@/types/database';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+/** Libelles surchargeables admin via CMS (V2.4.153). */
+export interface LibellesAccorderDroit {
+  titre: string;
+  alertErreurTitre: string;
+  alertSuccesTitre: string;
+  alertSuccesCorps: string;
+  legendeBeneficiaire: string;
+  ctaChangerBeneficiaire: string;
+  labelNiveau: string;
+  legendeOnglets: string;
+  hintOnglets: string;
+  legendeCommune: string;
+  ctaChangerCommune: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  erreurChoisirPersonne: string;
+  erreurChoisirCommune: string;
+  placeholderRecherchePersonne: string;
+  ariaRecherchePersonne: string;
+  placeholderRechercheCommune: string;
+  ariaRechercheCommune: string;
+  enCoursRecherche: string;
+  sansNom: string;
+}
+
+const LIBELLES_DEFAUT: LibellesAccorderDroit = {
+  titre: 'Accorder un droit',
+  alertErreurTitre: 'Attribution impossible',
+  alertSuccesTitre: 'Droit accordé',
+  alertSuccesCorps: 'Le droit a été attribué et consigné dans le journal d’audit.',
+  legendeBeneficiaire: 'Personne bénéficiaire',
+  ctaChangerBeneficiaire: 'Changer',
+  labelNiveau: 'Niveau de droit',
+  legendeOnglets: 'Onglets de modération',
+  hintOnglets: 'Aucun coché = accès à tous les onglets.',
+  legendeCommune: 'Commune animée',
+  ctaChangerCommune: 'Changer',
+  ctaSubmit: 'Accorder le droit',
+  ctaEnCours: 'Attribution...',
+  erreurChoisirPersonne: 'Choisis d’abord une personne.',
+  erreurChoisirCommune: 'Choisis une commune pour un droit d’animation.',
+  placeholderRecherchePersonne: 'Email, nom ou prénom (2 caractères minimum)',
+  ariaRecherchePersonne: 'Rechercher une personne bénéficiaire',
+  placeholderRechercheCommune: 'Nom de commune ou code postal',
+  ariaRechercheCommune: 'Rechercher une commune',
+  enCoursRecherche: 'Recherche...',
+  sansNom: 'Sans nom',
+};
+
+interface FormulaireAccorderDroitProps {
+  libelles?: LibellesAccorderDroit;
+}
+
 /**
  * Formulaire d'attribution d'un droit d'administration (console nationale).
  *
@@ -30,7 +83,9 @@ import { useEffect, useRef, useState } from 'react';
  * La validation finale et la journalisation sont faites côté serveur par
  * `accorderDroit`. Ici on assure surtout le confort de saisie.
  */
-export function FormulaireAccorderDroit() {
+export function FormulaireAccorderDroit({
+  libelles = LIBELLES_DEFAUT,
+}: FormulaireAccorderDroitProps = {}) {
   const router = useRouter();
 
   const [beneficiaire, setBeneficiaire] = useState<BeneficiaireDroit | null>(null);
@@ -60,11 +115,11 @@ export function FormulaireAccorderDroit() {
     setSucces(false);
 
     if (beneficiaire === null) {
-      setErreur('Choisis d’abord une personne.');
+      setErreur(libelles.erreurChoisirPersonne);
       return;
     }
     if (niveau === 'animation' && commune === null) {
-      setErreur('Choisis une commune pour un droit d’animation.');
+      setErreur(libelles.erreurChoisirCommune);
       return;
     }
 
@@ -89,35 +144,41 @@ export function FormulaireAccorderDroit() {
   return (
     <Card variant="ombre" className="grid gap-5">
       <Heading niveau={2} apparenceComme={3}>
-        Accorder un droit
+        {libelles.titre}
       </Heading>
 
       {erreur !== null ? (
-        <Alert variant="danger" titre="Attribution impossible">
+        <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
         </Alert>
       ) : null}
       {succes ? (
-        <Alert variant="success" titre="Droit accordé">
-          Le droit a été attribué et consigné dans le journal d’audit.
+        <Alert variant="success" titre={libelles.alertSuccesTitre}>
+          {libelles.alertSuccesCorps}
         </Alert>
       ) : null}
 
       {/* 1. Bénéficiaire */}
       <div className="grid gap-2">
-        <p className="font-body text-sm font-medium text-text-2">Personne bénéficiaire</p>
+        <p className="font-body text-sm font-medium text-text-2">{libelles.legendeBeneficiaire}</p>
         {beneficiaire === null ? (
-          <RechercheBeneficiaire onChoix={setBeneficiaire} />
+          <RechercheBeneficiaire
+            onChoix={setBeneficiaire}
+            placeholder={libelles.placeholderRecherchePersonne}
+            ariaLabel={libelles.ariaRecherchePersonne}
+            enCoursRecherche={libelles.enCoursRecherche}
+            sansNom={libelles.sansNom}
+          />
         ) : (
           <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface-2 px-4 py-2.5">
             <span className="text-sm text-text-1">
-              {nomAffiche(beneficiaire)}{' '}
+              {nomAffiche(beneficiaire, libelles.sansNom)}{' '}
               {beneficiaire.email !== null ? (
                 <span className="text-text-3">· {beneficiaire.email}</span>
               ) : null}
             </span>
             <Button variant="ghost" taille="sm" onClick={() => setBeneficiaire(null)}>
-              Changer
+              {libelles.ctaChangerBeneficiaire}
             </Button>
           </div>
         )}
@@ -125,7 +186,7 @@ export function FormulaireAccorderDroit() {
 
       {/* 2. Niveau */}
       <div className="grid gap-2">
-        <Label htmlFor="niveau-droit">Niveau de droit</Label>
+        <Label htmlFor="niveau-droit">{libelles.labelNiveau}</Label>
         <select
           id="niveau-droit"
           value={niveau}
@@ -150,8 +211,8 @@ export function FormulaireAccorderDroit() {
       {/* 3a. Périmètre de modération */}
       {niveau === 'moderation' ? (
         <fieldset className="grid gap-2">
-          <legend className="text-sm font-bold text-text-2">Onglets de modération</legend>
-          <p className="text-xs text-text-3">Aucun coché = accès à tous les onglets.</p>
+          <legend className="text-sm font-bold text-text-2">{libelles.legendeOnglets}</legend>
+          <p className="text-xs text-text-3">{libelles.hintOnglets}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {ONGLETS_MODERATION.map((onglet) => (
               <label key={onglet} className="flex items-center gap-2 text-sm text-text-1">
@@ -171,9 +232,14 @@ export function FormulaireAccorderDroit() {
       {/* 3b. Commune d'animation */}
       {niveau === 'animation' ? (
         <div className="grid gap-2">
-          <p className="font-body text-sm font-medium text-text-2">Commune animée</p>
+          <p className="font-body text-sm font-medium text-text-2">{libelles.legendeCommune}</p>
           {commune === null ? (
-            <RechercheCommune onChoix={setCommune} />
+            <RechercheCommune
+              onChoix={setCommune}
+              placeholder={libelles.placeholderRechercheCommune}
+              ariaLabel={libelles.ariaRechercheCommune}
+              enCoursRecherche={libelles.enCoursRecherche}
+            />
           ) : (
             <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface-2 px-4 py-2.5">
               <span className="text-sm text-text-1">
@@ -183,7 +249,7 @@ export function FormulaireAccorderDroit() {
                 ) : null}
               </span>
               <Button variant="ghost" taille="sm" onClick={() => setCommune(null)}>
-                Changer
+                {libelles.ctaChangerCommune}
               </Button>
             </div>
           )}
@@ -192,7 +258,7 @@ export function FormulaireAccorderDroit() {
 
       <div>
         <Button onClick={soumettre} disabled={envoiEnCours}>
-          {envoiEnCours ? 'Attribution...' : 'Accorder le droit'}
+          {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>
     </Card>
@@ -204,10 +270,10 @@ export function FormulaireAccorderDroit() {
 // ============================================================
 
 /** Nom affichable d'un·e bénéficiaire (fallback sur l'email puis « Sans nom »). */
-function nomAffiche(personne: BeneficiaireDroit): string {
+function nomAffiche(personne: BeneficiaireDroit, sansNom = 'Sans nom'): string {
   const complet = [personne.prenom, personne.nom].filter((s) => s && s.trim() !== '').join(' ');
   if (complet !== '') return complet;
-  return personne.email ?? 'Sans nom';
+  return personne.email ?? sansNom;
 }
 
 /** Petit hook de recherche débouncée et générique. */
@@ -241,7 +307,19 @@ function useRechercheDebouncee<T>(
   return { saisie, setSaisie, resultats, enCours };
 }
 
-function RechercheBeneficiaire({ onChoix }: { onChoix: (p: BeneficiaireDroit) => void }) {
+function RechercheBeneficiaire({
+  onChoix,
+  placeholder,
+  ariaLabel,
+  enCoursRecherche,
+  sansNom,
+}: {
+  onChoix: (p: BeneficiaireDroit) => void;
+  placeholder: string;
+  ariaLabel: string;
+  enCoursRecherche: string;
+  sansNom: string;
+}) {
   const { saisie, setSaisie, resultats, enCours } = useRechercheDebouncee(chercherPersonnes);
 
   return (
@@ -249,11 +327,11 @@ function RechercheBeneficiaire({ onChoix }: { onChoix: (p: BeneficiaireDroit) =>
       <Input
         value={saisie}
         onChange={(e) => setSaisie(e.target.value)}
-        placeholder="Email, nom ou prénom (2 caractères minimum)"
-        aria-label="Rechercher une personne bénéficiaire"
+        placeholder={placeholder}
+        aria-label={ariaLabel}
         autoComplete="off"
       />
-      {enCours ? <p className="text-xs text-text-3">Recherche...</p> : null}
+      {enCours ? <p className="text-xs text-text-3">{enCoursRecherche}</p> : null}
       {resultats.length > 0 ? (
         <ul className="grid gap-1 rounded-md border border-border bg-surface p-1">
           {resultats.map((personne) => (
@@ -263,7 +341,7 @@ function RechercheBeneficiaire({ onChoix }: { onChoix: (p: BeneficiaireDroit) =>
                 onClick={() => onChoix(personne)}
                 className="block w-full rounded-sm px-3 py-2 text-left text-sm text-text-1 hover:bg-surface-2"
               >
-                {nomAffiche(personne)}
+                {nomAffiche(personne, sansNom)}
                 {personne.email !== null ? (
                   <span className="text-text-3"> · {personne.email}</span>
                 ) : null}
@@ -276,7 +354,17 @@ function RechercheBeneficiaire({ onChoix }: { onChoix: (p: BeneficiaireDroit) =>
   );
 }
 
-function RechercheCommune({ onChoix }: { onChoix: (c: CommuneRecherche) => void }) {
+function RechercheCommune({
+  onChoix,
+  placeholder,
+  ariaLabel,
+  enCoursRecherche,
+}: {
+  onChoix: (c: CommuneRecherche) => void;
+  placeholder: string;
+  ariaLabel: string;
+  enCoursRecherche: string;
+}) {
   const { saisie, setSaisie, resultats, enCours } = useRechercheDebouncee(chercherCommunes);
 
   return (
@@ -284,11 +372,11 @@ function RechercheCommune({ onChoix }: { onChoix: (c: CommuneRecherche) => void 
       <Input
         value={saisie}
         onChange={(e) => setSaisie(e.target.value)}
-        placeholder="Nom de commune ou code postal"
-        aria-label="Rechercher une commune"
+        placeholder={placeholder}
+        aria-label={ariaLabel}
         autoComplete="off"
       />
-      {enCours ? <p className="text-xs text-text-3">Recherche...</p> : null}
+      {enCours ? <p className="text-xs text-text-3">{enCoursRecherche}</p> : null}
       {resultats.length > 0 ? (
         <ul className="grid gap-1 rounded-md border border-border bg-surface p-1">
           {resultats.map((commune) => (

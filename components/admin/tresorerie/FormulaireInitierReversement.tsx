@@ -19,6 +19,54 @@ import { useState } from 'react';
  * `app/actions/`.
  */
 
+/** Libelles surchargeables admin via CMS (V2.4.153). */
+export interface LibellesInitierReversement {
+  alertSansReceptacleTitre: string;
+  alertSansReceptacleCorps: string;
+  rappelD12bis: string;
+  alertSuccesTitre: string;
+  alertSuccesCorps: string;
+  labelReceptacle: string;
+  legendeBeneficiaire: string;
+  optionExterne: string;
+  optionInterne: string;
+  placeholderNomExterne: string;
+  placeholderIban: string;
+  placeholderWallet: string;
+  placeholderUuidInterne: string;
+  labelMontantEur: string;
+  labelMontantCoin: string;
+  labelMotif: string;
+  ctaSubmit: string;
+  ctaEnCours: string;
+  hintIncomplet: string;
+}
+
+const LIBELLES_DEFAUT: LibellesInitierReversement = {
+  alertSansReceptacleTitre: 'Aucun réceptacle actif',
+  alertSansReceptacleCorps:
+    'Cette caisse n’a aucun réceptacle ouvert. Pose d’abord un réceptacle (canal euro ou 99-coin) pour pouvoir initier un reversement.',
+  rappelD12bis:
+    'Rappel D12bis : tout reversement exige un justificatif obligatoire (PDF ou image). Une transaction reste au statut « initiée » jusqu’à confirmation comptable séparée.',
+  alertSuccesTitre: 'Reversement initié',
+  alertSuccesCorps:
+    'La transaction est enregistrée au statut « initiée ». Tu peux en initier un autre.',
+  labelReceptacle: 'Réceptacle source',
+  legendeBeneficiaire: 'Bénéficiaire',
+  optionExterne: 'Externe',
+  optionInterne: 'Membre interne',
+  placeholderNomExterne: 'Nom du bénéficiaire (organisation, famille…)',
+  placeholderIban: 'IBAN (optionnel)',
+  placeholderWallet: 'Adresse wallet (optionnel)',
+  placeholderUuidInterne: 'UUID du compte interne',
+  labelMontantEur: 'Montant (EUR)',
+  labelMontantCoin: 'Montant (99-coin)',
+  labelMotif: 'Motif (5 à 1000 caractères)',
+  ctaSubmit: 'Initier le reversement',
+  ctaEnCours: 'Envoi…',
+  hintIncomplet: 'Remplis tous les champs et téléverse un justificatif pour activer.',
+};
+
 interface ReceptacleChoix {
   id: string;
   canal: 'euro' | '99_coin';
@@ -28,9 +76,14 @@ interface ReceptacleChoix {
 interface Props {
   caisseId: string;
   receptaclesActifs: ReceptacleChoix[];
+  libelles?: LibellesInitierReversement;
 }
 
-export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Props) {
+export function FormulaireInitierReversement({
+  caisseId,
+  receptaclesActifs,
+  libelles = LIBELLES_DEFAUT,
+}: Props) {
   const [receptacleId, setReceptacleId] = useState(receptaclesActifs[0]?.id ?? '');
   const [typeBeneficiaire, setTypeBeneficiaire] = useState<'interne' | 'externe'>('externe');
   const [beneficiairePersonneId, setBeneficiairePersonneId] = useState('');
@@ -99,28 +152,24 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
 
   if (receptaclesActifs.length === 0) {
     return (
-      <Alert variant="warning" titre="Aucun réceptacle actif">
-        Cette caisse n’a aucun réceptacle ouvert. Pose d’abord un réceptacle (canal euro ou 99-coin)
-        pour pouvoir initier un reversement.
+      <Alert variant="warning" titre={libelles.alertSansReceptacleTitre}>
+        {libelles.alertSansReceptacleCorps}
       </Alert>
     );
   }
 
   return (
     <div className="flex flex-col gap-4 rounded-md border border-border bg-surface p-4">
-      <p className="text-sm text-text-2">
-        <strong>Rappel D12bis :</strong> tout reversement exige un justificatif obligatoire (PDF ou
-        image). Une transaction reste au statut « initiée » jusqu’à confirmation comptable séparée.
-      </p>
+      <p className="text-sm text-text-2">{libelles.rappelD12bis}</p>
 
       {succes ? (
-        <Alert variant="success" titre="Reversement initié">
-          La transaction est enregistrée au statut « initiée ». Tu peux en initier un autre.
+        <Alert variant="success" titre={libelles.alertSuccesTitre}>
+          {libelles.alertSuccesCorps}
         </Alert>
       ) : null}
 
       <div>
-        <Label htmlFor="receptacle">Réceptacle source</Label>
+        <Label htmlFor="receptacle">{libelles.labelReceptacle}</Label>
         <select
           id="receptacle"
           value={receptacleId}
@@ -136,7 +185,9 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
       </div>
 
       <fieldset>
-        <legend className="mb-2 font-medium text-sm text-text-1">Bénéficiaire</legend>
+        <legend className="mb-2 font-medium text-sm text-text-1">
+          {libelles.legendeBeneficiaire}
+        </legend>
         <div className="flex gap-2">
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -144,7 +195,7 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
               checked={typeBeneficiaire === 'externe'}
               onChange={() => setTypeBeneficiaire('externe')}
             />
-            Externe
+            {libelles.optionExterne}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -152,18 +203,18 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
               checked={typeBeneficiaire === 'interne'}
               onChange={() => setTypeBeneficiaire('interne')}
             />
-            Membre interne
+            {libelles.optionInterne}
           </label>
         </div>
         {typeBeneficiaire === 'externe' ? (
           <div className="mt-2 flex flex-col gap-2">
             <Input
-              placeholder="Nom du bénéficiaire (organisation, famille…)"
+              placeholder={libelles.placeholderNomExterne}
               value={beneficiaireNom}
               onChange={(e) => setBeneficiaireNom(e.target.value)}
             />
             <Input
-              placeholder={canal === 'euro' ? 'IBAN (optionnel)' : 'Adresse wallet (optionnel)'}
+              placeholder={canal === 'euro' ? libelles.placeholderIban : libelles.placeholderWallet}
               value={beneficiaireIban}
               onChange={(e) => setBeneficiaireIban(e.target.value)}
             />
@@ -171,7 +222,7 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
         ) : (
           <Input
             className="mt-2"
-            placeholder="UUID du compte interne"
+            placeholder={libelles.placeholderUuidInterne}
             value={beneficiairePersonneId}
             onChange={(e) => setBeneficiairePersonneId(e.target.value)}
           />
@@ -180,7 +231,8 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
 
       <div>
         <Label htmlFor="montant">
-          Montant ({canal === 'euro' ? 'EUR' : '99-coin'}) <span className="text-danger">*</span>
+          {canal === 'euro' ? libelles.labelMontantEur : libelles.labelMontantCoin}{' '}
+          <span className="text-danger">*</span>
         </Label>
         <Input
           id="montant"
@@ -194,7 +246,7 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
 
       <div>
         <Label htmlFor="motif">
-          Motif (5 à 1000 caractères) <span className="text-danger">*</span>
+          {libelles.labelMotif} <span className="text-danger">*</span>
         </Label>
         <Textarea
           id="motif"
@@ -214,13 +266,9 @@ export function FormulaireInitierReversement({ caisseId, receptaclesActifs }: Pr
 
       <div className="flex items-center gap-2">
         <Button onClick={surSoumettre} disabled={!peutSoumettre || enCours}>
-          {enCours ? 'Envoi…' : 'Initier le reversement'}
+          {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
-        {!peutSoumettre && (
-          <p className="text-text-3 text-xs">
-            Remplis tous les champs et téléverse un justificatif pour activer.
-          </p>
-        )}
+        {!peutSoumettre && <p className="text-text-3 text-xs">{libelles.hintIncomplet}</p>}
       </div>
 
       {erreur !== null && (
