@@ -46,15 +46,15 @@ export function CarteMomentSolidaire({ moment, enAvant = false }: CarteMomentPro
       <p className="text-sm text-text-2">{accroche}</p>
       <dl className="grid gap-1 text-sm text-text-3">
         <div className="flex items-center gap-2">
-          <CalendarRange size={14} strokeWidth={1.5} />
+          <CalendarRange size={14} strokeWidth={1.5} aria-hidden="true" />
           <dd>{FORMATEUR.format(new Date(moment.commence_le))}</dd>
         </div>
         <div className="flex items-center gap-2">
-          <MapPin size={14} strokeWidth={1.5} />
+          <MapPin size={14} strokeWidth={1.5} aria-hidden="true" />
           <dd>{moment.lieu}</dd>
         </div>
         <div className="flex items-center gap-2">
-          <Users size={14} strokeWidth={1.5} />
+          <Users size={14} strokeWidth={1.5} aria-hidden="true" />
           <dd>
             {moment.nombre_participants} participant·e{moment.nombre_participants > 1 ? 's' : ''}
             {moment.capacite_max !== null ? ` / ${moment.capacite_max}` : ''}

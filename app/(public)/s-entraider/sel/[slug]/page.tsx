@@ -218,7 +218,7 @@ export default async function PageDetailService({ params }: PageDetailProps) {
 
         <Card variant="ombre" className="grid gap-3">
           <div className="flex items-start gap-3">
-            <Clock size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <Clock size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="sel.fiche.label_duree"
@@ -257,7 +257,7 @@ export default async function PageDetailService({ params }: PageDetailProps) {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="sel.fiche.label_lieu"

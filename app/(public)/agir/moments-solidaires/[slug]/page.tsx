@@ -196,7 +196,12 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
 
         <Card variant="ombre" className="grid gap-3">
           <div className="flex items-start gap-3">
-            <CalendarRange size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <CalendarRange
+              size={18}
+              strokeWidth={1.5}
+              className="mt-0.5 text-text-3"
+              aria-hidden="true"
+            />
             <div>
               <TexteEditableAdmin
                 cle="moments.fiche.label_quand"
@@ -225,7 +230,7 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="moments.fiche.label_ou"
@@ -240,7 +245,7 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="moments.fiche.label_participants"

@@ -100,7 +100,7 @@ export default async function PageAdminMoments({ searchParams }: Props) {
           className="text-brand hover:underline"
           download
         >
-          Export CSV ↓
+          Export CSV <span aria-hidden="true">↓</span>
         </a>
       </p>
 
@@ -114,11 +114,13 @@ export default async function PageAdminMoments({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="titre, lieu…"
+          aria-label="Rechercher un moment solidaire"
           className="rounded-md border border-border bg-surface p-2"
         />
         <select
           name="statut"
           defaultValue={statutFiltre}
+          aria-label="Filtrer par statut"
           className="rounded-md border border-border bg-surface p-2"
         >
           {STATUTS.map((s) => (
@@ -130,6 +132,7 @@ export default async function PageAdminMoments({ searchParams }: Props) {
         <select
           name="type"
           defaultValue={typeFiltre}
+          aria-label="Filtrer par type"
           className="rounded-md border border-border bg-surface p-2"
         >
           {TYPES.map((t) => (

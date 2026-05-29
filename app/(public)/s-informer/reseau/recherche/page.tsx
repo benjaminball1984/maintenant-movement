@@ -124,6 +124,7 @@ export default async function PageRechercheReseau({
         <input
           type="search"
           name="q"
+          aria-label="Rechercher dans le réseau (numéro, prénom)"
           defaultValue={q}
           placeholder="Numéro M+7, prénom, ou mots-clés…"
           minLength={2}

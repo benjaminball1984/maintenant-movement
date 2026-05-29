@@ -245,7 +245,12 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
 
         <dl className="grid gap-3 rounded-lg border border-border bg-surface p-4 text-sm">
           <div className="flex items-start gap-3">
-            <Calendar size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <Calendar
+              size={18}
+              strokeWidth={1.5}
+              className="mt-0.5 text-text-3"
+              aria-hidden="true"
+            />
             <div>
               <TexteEditableAdmin
                 cle="mobilisations.fiche.label_quand"
@@ -262,7 +267,7 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="mobilisations.fiche.label_ou"

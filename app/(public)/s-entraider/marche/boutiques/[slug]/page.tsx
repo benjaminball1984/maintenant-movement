@@ -126,13 +126,23 @@ export default async function PageDetailBoutique({ params }: PageDetailProps) {
         <dl className="grid gap-2 text-sm text-text-2 sm:grid-cols-2">
           {boutique.lieu !== null && boutique.lieu.trim() !== '' ? (
             <div className="flex items-start gap-2">
-              <MapPin size={16} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+              <MapPin
+                size={16}
+                strokeWidth={1.5}
+                className="mt-0.5 text-text-3"
+                aria-hidden="true"
+              />
               <dd>{boutique.lieu}</dd>
             </div>
           ) : null}
           {boutique.ouverte_du !== null ? (
             <div className="flex items-start gap-2">
-              <CalendarRange size={16} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+              <CalendarRange
+                size={16}
+                strokeWidth={1.5}
+                className="mt-0.5 text-text-3"
+                aria-hidden="true"
+              />
               <dd>
                 {FORMATEUR_DATE.format(new Date(boutique.ouverte_du))}
                 {boutique.ouverte_au !== null

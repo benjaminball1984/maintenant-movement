@@ -206,7 +206,12 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
         <Card variant="ombre" className="grid gap-3">
           {commune.code_postal_principal !== null ? (
             <div className="flex items-start gap-3">
-              <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+              <MapPin
+                size={18}
+                strokeWidth={1.5}
+                className="mt-0.5 text-text-3"
+                aria-hidden="true"
+              />
               <div>
                 <TexteEditableAdmin
                   cle="communes.fiche.label_code_postal"
@@ -224,7 +229,7 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             </div>
           ) : null}
           <div className="flex items-start gap-3">
-            <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <Users size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="communes.fiche.label_adherents"

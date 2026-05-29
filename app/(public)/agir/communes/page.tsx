@@ -101,6 +101,7 @@ export default async function PageCommunes({ searchParams }: PageCommunesProps) 
         <input
           type="search"
           name="recherche"
+          aria-label="Rechercher une commune"
           placeholder={recherchePlaceholder.valeurMd}
           defaultValue={recherche ?? ''}
           className="w-full rounded-sm border border-border bg-surface p-2 text-sm"

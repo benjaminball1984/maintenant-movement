@@ -102,7 +102,7 @@ export function CarteOffre({ offre, enAvant = false }: CarteOffreProps) {
         {offre.type === 'hebergement' ? <EncartHebergement meta={offre.meta} /> : null}
 
         <div className="flex items-center gap-1.5 text-xs text-text-3">
-          <MapPin size={12} strokeWidth={1.5} />
+          <MapPin size={12} strokeWidth={1.5} aria-hidden="true" />
           <span className="line-clamp-1">{offre.lieu}</span>
         </div>
 
@@ -129,7 +129,7 @@ function EncartTransport({ meta }: { meta: unknown }) {
       ) : null}
       {horaire !== null ? (
         <div className="flex items-center gap-1.5 text-text-3">
-          <Clock size={12} strokeWidth={1.5} />
+          <Clock size={12} strokeWidth={1.5} aria-hidden="true" />
           <span>{horaire}</span>
         </div>
       ) : null}
@@ -155,7 +155,7 @@ function EncartHebergement({ meta }: { meta: unknown }) {
       ) : null}
       {capaciteRaw !== null ? (
         <div className="flex items-center gap-1.5 text-text-3">
-          <Users size={12} strokeWidth={1.5} />
+          <Users size={12} strokeWidth={1.5} aria-hidden="true" />
           <span>
             {capaciteRaw} personne{capaciteRaw === '1' ? '' : 's'}
           </span>

@@ -58,13 +58,18 @@ export function CarteMinimarche({ minimarche, enAvant = false }: CarteMinimarche
 
       <dl className="grid gap-1 text-sm text-text-2">
         <div className="flex items-start gap-2">
-          <CalendarRange size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+          <CalendarRange
+            size={14}
+            strokeWidth={1.5}
+            className="mt-0.5 text-text-3"
+            aria-hidden="true"
+          />
           <dd>
             {debut} → {fin}
           </dd>
         </div>
         <div className="flex items-start gap-2">
-          <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+          <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
           <dd>{minimarche.lieu}</dd>
         </div>
       </dl>

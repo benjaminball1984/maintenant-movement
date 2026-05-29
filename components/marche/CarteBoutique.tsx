@@ -59,18 +59,23 @@ export function CarteBoutique({ boutique, enAvant = false }: CarteBoutiqueProps)
       <dl className="grid gap-1 text-sm text-text-2">
         {boutique.lieu !== null && boutique.lieu.trim() !== '' ? (
           <div className="flex items-start gap-2">
-            <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <dd>{boutique.lieu}</dd>
           </div>
         ) : (
           <div className="flex items-start gap-2 text-text-3">
-            <Store size={14} strokeWidth={1.5} className="mt-0.5" />
+            <Store size={14} strokeWidth={1.5} className="mt-0.5" aria-hidden="true" />
             <dd>Boutique en ligne uniquement</dd>
           </div>
         )}
         {plage !== null ? (
           <div className="flex items-start gap-2">
-            <CalendarRange size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <CalendarRange
+              size={14}
+              strokeWidth={1.5}
+              className="mt-0.5 text-text-3"
+              aria-hidden="true"
+            />
             <dd>{plage}</dd>
           </div>
         ) : null}

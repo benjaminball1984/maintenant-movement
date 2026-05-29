@@ -81,7 +81,7 @@ export default async function PageAdminFederations({ searchParams }: Props) {
           className="text-brand hover:underline"
           download
         >
-          Export CSV ↓
+          Export CSV <span aria-hidden="true">↓</span>
         </a>
       </p>
 
@@ -95,11 +95,13 @@ export default async function PageAdminFederations({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="nom de fédération…"
+          aria-label="Rechercher une fédération"
           className="rounded-md border border-border bg-surface p-2"
         />
         <select
           name="type"
           defaultValue={typeFiltre}
+          aria-label="Filtrer par type"
           className="rounded-md border border-border bg-surface p-2"
         >
           {TYPES.map((s) => (

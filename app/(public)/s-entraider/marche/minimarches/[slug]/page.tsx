@@ -114,7 +114,12 @@ export default async function PageDetailMinimarche({ params }: PageDetailProps) 
 
         <Card variant="ombre" className="grid gap-3">
           <div className="flex items-start gap-3">
-            <CalendarRange size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <CalendarRange
+              size={18}
+              strokeWidth={1.5}
+              className="mt-0.5 text-text-3"
+              aria-hidden="true"
+            />
             <div>
               <TexteEditableAdmin
                 cle="minimarche.fiche.label_dates"
@@ -133,7 +138,7 @@ export default async function PageDetailMinimarche({ params }: PageDetailProps) 
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="minimarche.fiche.label_lieu"

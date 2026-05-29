@@ -89,11 +89,13 @@ export default async function PageAdminCampagnes({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="titre de campagne…"
+          aria-label="Rechercher une campagne"
           className="rounded-md border border-border bg-surface p-2"
         />
         <select
           name="statut"
           defaultValue={statutFiltre}
+          aria-label="Filtrer par statut"
           className="rounded-md border border-border bg-surface p-2"
         >
           {STATUTS.map((s) => (

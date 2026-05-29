@@ -94,7 +94,7 @@ export default async function PageAdminSondages({ searchParams }: Props) {
           className="text-brand hover:underline"
           download
         >
-          Export CSV ↓
+          Export CSV <span aria-hidden="true">↓</span>
         </a>
       </p>
 
@@ -108,11 +108,13 @@ export default async function PageAdminSondages({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="titre, question…"
+          aria-label="Rechercher un sondage"
           className="rounded-md border border-border bg-surface p-2"
         />
         <select
           name="statut"
           defaultValue={statutFiltre}
+          aria-label="Filtrer par statut"
           className="rounded-md border border-border bg-surface p-2"
         >
           {STATUTS.map((s) => (
@@ -124,6 +126,7 @@ export default async function PageAdminSondages({ searchParams }: Props) {
         <select
           name="mode"
           defaultValue={modeFiltre}
+          aria-label="Filtrer par mode"
           className="rounded-md border border-border bg-surface p-2"
         >
           {MODES.map((m) => (

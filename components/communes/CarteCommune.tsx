@@ -35,12 +35,12 @@ export function CarteCommune({ commune, enAvant = false }: CarteCommuneProps) {
       <dl className="grid gap-1 text-sm text-text-3">
         {commune.code_postal_principal !== null ? (
           <div className="flex items-center gap-2">
-            <MapPin size={14} strokeWidth={1.5} />
+            <MapPin size={14} strokeWidth={1.5} aria-hidden="true" />
             <dd>{commune.code_postal_principal}</dd>
           </div>
         ) : null}
         <div className="flex items-center gap-2">
-          <Users size={14} strokeWidth={1.5} />
+          <Users size={14} strokeWidth={1.5} aria-hidden="true" />
           <dd>
             {commune.nombre_adherents} adhérent{commune.nombre_adherents > 1 ? 's·es' : ''}
           </dd>

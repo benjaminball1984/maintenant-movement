@@ -96,7 +96,7 @@ export function CarteProduit({ produit, enAvant = false }: CarteProduitProps) {
         </h3>
 
         <div className="flex items-center gap-1.5 text-xs text-text-3">
-          <MapPin size={12} strokeWidth={1.5} />
+          <MapPin size={12} strokeWidth={1.5} aria-hidden="true" />
           <span className="line-clamp-1">{produit.lieu}</span>
         </div>
 

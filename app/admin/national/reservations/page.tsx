@@ -118,11 +118,13 @@ export default async function PageAdminReservations({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="message d'amorce…"
+          aria-label="Rechercher une réservation"
           className="rounded-md border border-border bg-surface p-2"
         />
         <select
           name="statut"
           defaultValue={statutFiltre}
+          aria-label="Filtrer par statut"
           className="rounded-md border border-border bg-surface p-2"
         >
           {STATUTS.map((s) => (
@@ -134,6 +136,7 @@ export default async function PageAdminReservations({ searchParams }: Props) {
         <select
           name="type"
           defaultValue={typeFiltre}
+          aria-label="Filtrer par type"
           className="rounded-md border border-border bg-surface p-2"
         >
           {TYPES_OFFRE.map((t) => (

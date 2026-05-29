@@ -200,7 +200,7 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
 
         <Card variant="ombre" className="grid gap-3">
           <div className="flex items-start gap-3">
-            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" />
+            <MapPin size={18} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
             <div>
               <TexteEditableAdmin
                 cle="produit.fiche.label_retrait"
@@ -215,12 +215,14 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
               <p className="mt-1 flex flex-wrap items-center gap-3 text-xs text-text-3">
                 {produit.remise_main_propre ? (
                   <span className="inline-flex items-center gap-1">
-                    <Package size={12} strokeWidth={1.5} /> {badgeMainPropre.valeurMd}
+                    <Package size={12} strokeWidth={1.5} aria-hidden="true" />{' '}
+                    {badgeMainPropre.valeurMd}
                   </span>
                 ) : null}
                 {produit.envoi_postal ? (
                   <span className="inline-flex items-center gap-1">
-                    <Truck size={12} strokeWidth={1.5} /> {badgeEnvoiPostal.valeurMd}
+                    <Truck size={12} strokeWidth={1.5} aria-hidden="true" />{' '}
+                    {badgeEnvoiPostal.valeurMd}
                   </span>
                 ) : null}
               </p>

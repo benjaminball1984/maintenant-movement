@@ -113,7 +113,7 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
           className="text-brand hover:underline"
           download
         >
-          Export CSV (50 000 max) ↓
+          Export CSV (50 000 max) <span aria-hidden="true">↓</span>
         </a>
       </p>
 
@@ -144,6 +144,7 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
           name="q"
           defaultValue={motCle}
           placeholder="nom, code INSEE, code postal…"
+          aria-label="Rechercher une commune"
           className="rounded-md border border-border bg-surface p-2"
         />
         <input
@@ -152,11 +153,13 @@ export default async function PageAdminCommunes({ searchParams }: Props) {
           defaultValue={departement}
           placeholder="dép. (ex. 75)"
           maxLength={3}
+          aria-label="Filtrer par département"
           className="w-24 rounded-md border border-border bg-surface p-2"
         />
         <select
           name="statut"
           defaultValue={statutFiltre}
+          aria-label="Filtrer par statut"
           className="rounded-md border border-border bg-surface p-2"
         >
           {STATUTS.map((s) => (

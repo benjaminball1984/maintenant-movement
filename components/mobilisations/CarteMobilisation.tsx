@@ -40,15 +40,30 @@ export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobili
 
       <dl className="grid gap-1 text-sm text-text-2">
         <div className="flex items-start gap-2">
-          <Calendar size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-text-3" />
+          <Calendar
+            size={16}
+            strokeWidth={1.5}
+            className="mt-0.5 shrink-0 text-text-3"
+            aria-hidden="true"
+          />
           <dd>{formaterPlage(mobilisation.date_debut, mobilisation.date_fin)}</dd>
         </div>
         <div className="flex items-start gap-2">
-          <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-text-3" />
+          <MapPin
+            size={16}
+            strokeWidth={1.5}
+            className="mt-0.5 shrink-0 text-text-3"
+            aria-hidden="true"
+          />
           <dd>{mobilisation.lieu}</dd>
         </div>
         <div className="flex items-start gap-2">
-          <Users size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-text-3" />
+          <Users
+            size={16}
+            strokeWidth={1.5}
+            className="mt-0.5 shrink-0 text-text-3"
+            aria-hidden="true"
+          />
           <dd>
             {mobilisation.nombre_participant_es} participant·e
             {mobilisation.nombre_participant_es > 1 ? 's' : ''}
