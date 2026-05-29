@@ -1916,6 +1916,8 @@ export type Database = {
         Row: {
           anonymise_le: string | null;
           bio: string | null;
+          /** V2.5.49 — bio HTML riche optionnel. */
+          bio_html: string | null;
           code_postal: string | null;
           cover_url: string | null;
           created_at: string;
@@ -1939,6 +1941,7 @@ export type Database = {
         Insert: {
           anonymise_le?: string | null;
           bio?: string | null;
+          bio_html?: string | null;
           code_postal?: string | null;
           cover_url?: string | null;
           created_at?: string;
@@ -1962,6 +1965,7 @@ export type Database = {
         Update: {
           anonymise_le?: string | null;
           bio?: string | null;
+          bio_html?: string | null;
           code_postal?: string | null;
           cover_url?: string | null;
           created_at?: string;

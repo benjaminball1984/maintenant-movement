@@ -147,6 +147,10 @@ export function creerMettreAJourProfilSchema(
       photo_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
       cover_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
       bio: z.string().max(500, messages.bioLongueur).optional().or(z.literal('')),
+      /** V2.5.49 — bio en HTML riche (sanitizée au save). Plus longue
+       *  que la bio texte plat (~20 000 chars) pour permettre une
+       *  presentation enrichie avec mise en forme, liens, listes. */
+      bio_html: z.string().max(20000).optional().or(z.literal('')),
       mode_theme: z.enum(['auto', 'light', 'dark']),
     })
     .strict();

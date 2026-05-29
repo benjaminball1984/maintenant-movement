@@ -2,6 +2,7 @@
 
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { envoyerEmailTemplee } from '@/lib/email-templates';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import {
   type DonneesDemanderSuppression,
@@ -46,6 +47,13 @@ export async function mettreAJourProfil(donneesBrutes: unknown): Promise<Resulta
   const { userId } = await getPersonneOuRediriger('/profil/informations');
   const supabase = await getSupabaseServer();
 
+  // V2.5.49 — sanitize la bio HTML riche avant insertion. Vide = NULL
+  // (suppression de la bio riche, retour au texte plat).
+  const bioHtmlPropre =
+    donnees.bio_html !== undefined && donnees.bio_html !== ''
+      ? sanitizeRichHtml(donnees.bio_html)
+      : null;
+
   const { error } = await supabase
     .from('personne')
     .update({
@@ -57,6 +65,7 @@ export async function mettreAJourProfil(donneesBrutes: unknown): Promise<Resulta
       photo_url: donnees.photo_url === '' ? null : (donnees.photo_url ?? null),
       cover_url: donnees.cover_url === '' ? null : (donnees.cover_url ?? null),
       bio: donnees.bio === '' ? null : (donnees.bio ?? null),
+      bio_html: bioHtmlPropre,
       mode_theme: donnees.mode_theme,
     })
     .eq('id', userId);

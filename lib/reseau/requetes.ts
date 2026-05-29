@@ -30,6 +30,8 @@ export interface IdentiteAffichee {
 export interface ProfilReseau extends IdentiteAffichee {
   pronom: string | null;
   bio: string | null;
+  /** V2.5.49 — bio HTML riche (optionnel). Suit le même flag de visibilité que `bio`. */
+  bioHtml: string | null;
   /** V2.5.13.a — image de couverture (bandeau haut du profil), nul = dégradé. */
   coverUrl: string | null;
   nbAbonnes: number;
@@ -166,6 +168,9 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
     pronom: aff.pronom,
     photoUrl: aff.photo_url,
     bio: aff.bio,
+    // V2.5.49 — bio HTML riche (cast défensif si la migration RPC
+    // 20260530810000 n'est pas encore appliquée sur le distant).
+    bioHtml: (aff as { bio_html?: string | null }).bio_html ?? null,
     coverUrl:
       typeof coverRes.data === 'string' && coverRes.data.trim() !== '' ? coverRes.data : null,
     nbAbonnes: abonnes.count ?? 0,

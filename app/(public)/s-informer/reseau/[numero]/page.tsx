@@ -103,7 +103,15 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
           </div>
         </div>
 
-        {profil.bio !== null && profil.bio.trim() !== '' ? (
+        {profil.bioHtml !== null && profil.bioHtml.trim() !== '' ? (
+          // V2.5.49 — bio rich text (déjà sanitizée au save). Classes
+          // prose pour aérer titres/listes/citations.
+          <div
+            className="prose prose-sm max-w-2xl [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-lg [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 leading-relaxed text-text-2"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
+            dangerouslySetInnerHTML={{ __html: profil.bioHtml }}
+          />
+        ) : profil.bio !== null && profil.bio.trim() !== '' ? (
           <p className="max-w-2xl leading-relaxed text-text-2">{profil.bio}</p>
         ) : null}
 

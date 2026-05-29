@@ -1,16 +1,19 @@
 'use client';
 
+import { EditeurRicheAvecToolbar } from '@/components/rich-text/EditeurRicheAvecToolbar';
 import { Alert, Button, Heading, Input, Label, Textarea } from '@/components/ui';
 import { ChampImageObjet } from '@/components/ui/ChampImageObjet';
 import {
   MESSAGES_VALIDATION_PROFIL_DEFAUT,
   type MessagesValidationProfil,
 } from '@/lib/messages-validation';
+import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
 import {
   type DonneesMiseAJourProfil,
   creerMettreAJourProfilSchema,
 } from '@/lib/validations/profil';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FileText, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { mettreAJourProfil } from '../actions';
@@ -82,11 +85,19 @@ export function FormulaireInformations({
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  // V2.5.49 — etat du switch Riche/Markdown pour la bio.
+  const [bioHtml, setBioHtml] = useState(valeursInitiales.bio_html ?? '');
+  const [modeBio, setModeBio] = useState<'markdown' | 'riche'>(
+    valeursInitiales.bio_html !== undefined && valeursInitiales.bio_html !== ''
+      ? 'riche'
+      : 'markdown',
+  );
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesMiseAJourProfil>({
     resolver: zodResolver(creerMettreAJourProfilSchema(messages)),
@@ -221,11 +232,76 @@ export function FormulaireInformations({
           ) : null}
         </div>
         <div className="mt-4">
-          <Label htmlFor="inf-bio">{libelles.labelBio}</Label>
-          <Textarea id="inf-bio" rows={4} {...register('bio')} />
-          {errors.bio !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.bio.message}</p>
-          ) : null}
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <Label htmlFor="inf-bio">{libelles.labelBio}</Label>
+            <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  // V2.5.49 — bascule vers Riche pre-remplit avec la
+                  // conversion du Markdown courant si HTML vide.
+                  const bioActuelle = watch('bio') ?? '';
+                  if (bioHtml === '' && bioActuelle.trim() !== '') {
+                    setBioHtml(markdownLegerEnHtml(bioActuelle));
+                  }
+                  setModeBio('riche');
+                }}
+                className={`inline-flex items-center gap-1 px-3 py-1 ${
+                  modeBio === 'riche' ? 'bg-brand text-white' : 'bg-surface text-text-2'
+                }`}
+                aria-pressed={modeBio === 'riche'}
+              >
+                <Sparkles size={11} aria-hidden="true" />
+                Riche
+              </button>
+              <button
+                type="button"
+                onClick={() => setModeBio('markdown')}
+                className={`inline-flex items-center gap-1 border-border border-l px-3 py-1 ${
+                  modeBio === 'markdown' ? 'bg-brand text-white' : 'bg-surface text-text-2'
+                }`}
+                aria-pressed={modeBio === 'markdown'}
+              >
+                <FileText size={11} aria-hidden="true" />
+                Markdown
+              </button>
+            </div>
+          </div>
+          {modeBio === 'riche' ? (
+            <>
+              <EditeurRicheAvecToolbar
+                contenuInitialHtml={bioHtml}
+                onChange={(html) => {
+                  setBioHtml(html);
+                  setValue('bio_html', html, { shouldDirty: true });
+                }}
+                placeholder="Présente-toi (couleurs, polices, listes, liens, images, YouTube…)"
+                hauteurMin={180}
+              />
+              {bioHtml !== '' ? (
+                <p className="mt-1 text-right text-text-3 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBioHtml('');
+                      setValue('bio_html', '', { shouldDirty: true });
+                    }}
+                    className="text-danger hover:underline"
+                  >
+                    Vider la bio riche (retour Markdown)
+                  </button>
+                </p>
+              ) : null}
+              <input type="hidden" {...register('bio_html')} />
+            </>
+          ) : (
+            <>
+              <Textarea id="inf-bio" rows={4} {...register('bio')} />
+              {errors.bio !== undefined ? (
+                <p className="mt-1 text-danger text-xs">{errors.bio.message}</p>
+              ) : null}
+            </>
+          )}
         </div>
       </section>
 
