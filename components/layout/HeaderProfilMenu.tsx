@@ -20,7 +20,11 @@ interface HeaderProfilMenuProps {
  * dropdown avec : lien vers le profil, bouton déconnexion.
  *
  * Ferme automatiquement sur clic extérieur ou touche Échap.
- * Accessibilité : `aria-haspopup`, `aria-expanded`, focus visible.
+ *
+ * Accessibilité : c'est une simple liste de liens navigable au Tab (et non un
+ * menu ARIA `role="menu"`, qui exigerait la navigation aux flèches + gestion du
+ * focus initial + Escape→retour focus, non implémentée ici). Le bouton porte
+ * `aria-expanded` + `aria-controls` vers la liste.
  */
 export function HeaderProfilMenu({ email, prenom, estAdmin = false }: HeaderProfilMenuProps) {
   const [ouvert, setOuvert] = useState(false);
@@ -59,8 +63,9 @@ export function HeaderProfilMenu({ email, prenom, estAdmin = false }: HeaderProf
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        aria-haspopup="menu"
+        aria-haspopup="true"
         aria-expanded={ouvert}
+        aria-controls="header-profil-menu-liste"
         onClick={() => setOuvert((v) => !v)}
         className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm font-medium text-text-1 hover:bg-surface-2"
       >
@@ -76,41 +81,46 @@ export function HeaderProfilMenu({ email, prenom, estAdmin = false }: HeaderProf
 
       {ouvert ? (
         <div
-          role="menu"
+          id="header-profil-menu-liste"
           aria-label="Menu profil"
           className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-md border border-border bg-surface shadow-md"
         >
           <div className="border-b border-border px-3 py-2 text-xs text-text-3">{email}</div>
-          <Link
-            href="/profil/dashboard"
-            role="menuitem"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-            onClick={() => setOuvert(false)}
-          >
-            <User size={14} strokeWidth={1.75} />
-            Mon profil
-          </Link>
-          {estAdmin ? (
-            <Link
-              href="/admin"
-              role="menuitem"
-              className="flex items-center gap-2 border-t border-border px-3 py-2 text-sm font-bold text-brand hover:bg-surface-2"
-              onClick={() => setOuvert(false)}
-            >
-              <Shield size={14} strokeWidth={1.75} />
-              Console admin
-            </Link>
-          ) : null}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={gererDeconnexion}
-            disabled={deconnexionEnCours}
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-1 hover:bg-surface-2 disabled:opacity-50"
-          >
-            <LogOut size={14} strokeWidth={1.75} />
-            {deconnexionEnCours ? 'Déconnexion...' : 'Se déconnecter'}
-          </button>
+          <ul>
+            <li>
+              <Link
+                href="/profil/dashboard"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                onClick={() => setOuvert(false)}
+              >
+                <User size={14} strokeWidth={1.75} />
+                Mon profil
+              </Link>
+            </li>
+            {estAdmin ? (
+              <li>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 border-t border-border px-3 py-2 text-sm font-bold text-brand hover:bg-surface-2"
+                  onClick={() => setOuvert(false)}
+                >
+                  <Shield size={14} strokeWidth={1.75} />
+                  Console admin
+                </Link>
+              </li>
+            ) : null}
+            <li>
+              <button
+                type="button"
+                onClick={gererDeconnexion}
+                disabled={deconnexionEnCours}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-1 hover:bg-surface-2 disabled:opacity-50"
+              >
+                <LogOut size={14} strokeWidth={1.75} />
+                {deconnexionEnCours ? 'Déconnexion...' : 'Se déconnecter'}
+              </button>
+            </li>
+          </ul>
         </div>
       ) : null}
     </div>

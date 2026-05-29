@@ -138,9 +138,11 @@ export default async function PageDetailCaisse({
                 <Card variant="ombre" className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
+                      <span className="sr-only">Canal : </span>
                       <Badge variant={r.canal === 'euro' ? 'default' : 'info'}>
                         {r.canal === 'euro' ? 'Euro (Stripe)' : '99-coin (Polygon)'}
                       </Badge>
+                      <span className="sr-only">Statut : </span>
                       <Badge variant={r.valideAu === null ? 'success' : 'default'}>
                         {r.valideAu === null ? 'Actif' : 'Fermé'}
                       </Badge>
@@ -177,13 +179,17 @@ export default async function PageDetailCaisse({
                 <Card variant="ombre" className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
+                      <span className="sr-only">Statut : </span>
                       <Badge variant={LIBELLE_STATUT_ENTREE[e.statut].variant}>
                         {LIBELLE_STATUT_ENTREE[e.statut].libelle}
                       </Badge>
+                      <span className="sr-only">Source : </span>
                       <Badge variant="default">{LIBELLE_SOURCE[e.sourceType]}</Badge>
+                      <span className="sr-only">Canal : </span>
                       <Badge variant="info">{e.canal === 'euro' ? '€' : '99c'}</Badge>
                     </div>
                     <span className="font-display font-bold text-lg text-text-1">
+                      <span className="sr-only">Montant : </span>
                       {formaterMontant(e.montant, e.canal)}
                     </span>
                   </div>
@@ -239,12 +245,15 @@ export default async function PageDetailCaisse({
                 <Card variant="ombre" className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
+                      <span className="sr-only">Statut : </span>
                       <Badge variant={STATUT_TX_VARIANT[t.statut]}>
                         {LIBELLE_STATUT_TX[t.statut]}
                       </Badge>
+                      <span className="sr-only">Canal : </span>
                       <Badge variant="default">{t.canal === 'euro' ? '€' : '99c'}</Badge>
                     </div>
                     <span className="font-display font-bold text-lg text-text-1">
+                      <span className="sr-only">Montant : </span>
                       {formaterMontant(t.montant, t.canal)}
                     </span>
                   </div>

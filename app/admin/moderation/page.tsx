@@ -245,7 +245,11 @@ export default async function PageModerationGlobale() {
           const Icone = l.icone;
           return (
             <li key={l.cle}>
-              <Link href={l.href} className="block">
+              <Link
+                href={l.href}
+                className="block"
+                aria-label={`${l.libelle} : ${FORMATEUR_NB.format(l.nb)} en attente`}
+              >
                 <Card
                   variant={l.nb > 0 ? 'ombre' : 'plat'}
                   className="grid grid-cols-[auto_1fr_auto] items-center gap-3 hover:bg-surface-2"

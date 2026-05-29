@@ -60,11 +60,13 @@ export function CarteBoutique({ boutique, enAvant = false }: CarteBoutiqueProps)
         {boutique.lieu !== null && boutique.lieu.trim() !== '' ? (
           <div className="flex items-start gap-2">
             <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
+            <dt className="sr-only">Lieu</dt>
             <dd>{boutique.lieu}</dd>
           </div>
         ) : (
           <div className="flex items-start gap-2 text-text-3">
             <Store size={14} strokeWidth={1.5} className="mt-0.5" aria-hidden="true" />
+            <dt className="sr-only">Lieu</dt>
             <dd>Boutique en ligne uniquement</dd>
           </div>
         )}
@@ -76,6 +78,7 @@ export function CarteBoutique({ boutique, enAvant = false }: CarteBoutiqueProps)
               className="mt-0.5 text-text-3"
               aria-hidden="true"
             />
+            <dt className="sr-only">Dates</dt>
             <dd>{plage}</dd>
           </div>
         ) : null}

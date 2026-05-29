@@ -64,12 +64,14 @@ export function CarteMinimarche({ minimarche, enAvant = false }: CarteMinimarche
             className="mt-0.5 text-text-3"
             aria-hidden="true"
           />
+          <dt className="sr-only">Dates</dt>
           <dd>
             {debut} → {fin}
           </dd>
         </div>
         <div className="flex items-start gap-2">
           <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" aria-hidden="true" />
+          <dt className="sr-only">Lieu</dt>
           <dd>{minimarche.lieu}</dd>
         </div>
       </dl>

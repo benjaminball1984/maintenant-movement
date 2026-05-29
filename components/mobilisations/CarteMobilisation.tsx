@@ -46,6 +46,7 @@ export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobili
             className="mt-0.5 shrink-0 text-text-3"
             aria-hidden="true"
           />
+          <dt className="sr-only">Dates</dt>
           <dd>{formaterPlage(mobilisation.date_debut, mobilisation.date_fin)}</dd>
         </div>
         <div className="flex items-start gap-2">
@@ -55,6 +56,7 @@ export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobili
             className="mt-0.5 shrink-0 text-text-3"
             aria-hidden="true"
           />
+          <dt className="sr-only">Lieu</dt>
           <dd>{mobilisation.lieu}</dd>
         </div>
         <div className="flex items-start gap-2">
@@ -64,6 +66,7 @@ export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobili
             className="mt-0.5 shrink-0 text-text-3"
             aria-hidden="true"
           />
+          <dt className="sr-only">Participant·es</dt>
           <dd>
             {mobilisation.nombre_participant_es} participant·e
             {mobilisation.nombre_participant_es > 1 ? 's' : ''}

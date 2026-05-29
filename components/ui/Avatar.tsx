@@ -47,11 +47,7 @@ export function Avatar({ id, nomComplet, photoUrl, taille = 'md', className }: A
 
   if (photoUrl !== null && photoUrl !== undefined && photoUrl.trim() !== '') {
     return (
-      <div
-        className={classNameBase}
-        style={{ width: tailleNum, height: tailleNum }}
-        aria-label={nomComplet}
-      >
+      <div className={classNameBase} style={{ width: tailleNum, height: tailleNum }}>
         <Image
           src={photoUrl}
           alt={nomComplet}

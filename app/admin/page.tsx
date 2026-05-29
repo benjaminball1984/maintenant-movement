@@ -173,22 +173,32 @@ export default async function PageAdmin() {
 
 function Carte({ titre, valeur }: { titre: string; valeur: string }) {
   return (
-    <Card variant="ombre" className="grid gap-1">
-      <p className="text-xs font-bold uppercase tracking-cap text-text-3">{titre}</p>
-      <p className="font-display text-2xl text-text-1">{valeur}</p>
+    <Card variant="ombre" className="grid gap-1" aria-label={`${titre} : ${valeur}`}>
+      <p aria-hidden="true" className="text-xs font-bold uppercase tracking-cap text-text-3">
+        {titre}
+      </p>
+      <p aria-hidden="true" className="font-display text-2xl text-text-1">
+        {valeur}
+      </p>
     </Card>
   );
 }
 
 function CarteAttente({ href, libelle, nb }: { href: string; libelle: string; nb: number }) {
   return (
-    <Link href={href} className="block">
+    <Link
+      href={href}
+      className="block"
+      aria-label={`${libelle} : ${FORMAT_NB.format(nb)} en attente`}
+    >
       <Card
         variant={nb > 0 ? 'ombre' : 'plat'}
         className="flex items-center justify-between gap-2 hover:bg-surface-2"
       >
-        <p className={nb > 0 ? 'font-bold text-text-1' : 'text-text-2'}>{libelle}</p>
-        <Badge variant={nb >= 5 ? 'danger' : nb > 0 ? 'warning' : 'default'}>
+        <p aria-hidden="true" className={nb > 0 ? 'font-bold text-text-1' : 'text-text-2'}>
+          {libelle}
+        </p>
+        <Badge variant={nb >= 5 ? 'danger' : nb > 0 ? 'warning' : 'default'} aria-hidden="true">
           {FORMAT_NB.format(nb)}
         </Badge>
       </Card>

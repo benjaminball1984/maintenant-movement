@@ -46,6 +46,8 @@ export function CartePost({
   const [commentaires, setCommentaires] = useState<CommentaireAffiche[] | null>(null);
   const [nouveauCommentaire, setNouveauCommentaire] = useState('');
   const [enCours, setEnCours] = useState(false);
+  // Confirmation inline en 2 étapes pour la suppression (remplace window.confirm).
+  const [confirmerSuppression, setConfirmerSuppression] = useState(false);
   // Message d'état annoncé aux lecteurs d'écran (région live masquée).
   const [messageStatut, setMessageStatut] = useState('');
   // Identifiant de la zone commentaires (pour aria-controls / aria-expanded).
@@ -91,9 +93,9 @@ export function CartePost({
   };
 
   const supprimer = async () => {
-    if (!confirm('Supprimer cette publication ?')) return;
     const resultat = await supprimerPost({ cible_id: post.id });
     if (resultat.ok) {
+      setConfirmerSuppression(false);
       setMessageStatut('Publication supprimée');
       router.refresh();
     }
@@ -172,16 +174,29 @@ export function CartePost({
           <span className="font-medium">{post.nbCommentaires}</span>
           <span className="hidden sm:inline">commentaire{post.nbCommentaires > 1 ? 's' : ''}</span>
         </button>
-        {estMien ? (
+        {estMien && !confirmerSuppression ? (
           <button
             type="button"
-            onClick={supprimer}
+            onClick={() => setConfirmerSuppression(true)}
             className="ml-auto text-text-3 transition hover:text-danger"
+            aria-label="Supprimer cette publication"
           >
             Supprimer
           </button>
         ) : null}
       </footer>
+
+      {estMien && confirmerSuppression ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-danger/40 bg-danger/5 px-3 py-2 text-sm">
+          <span className="text-text-2">Confirmer la suppression ?</span>
+          <Button variant="primary" taille="sm" onClick={supprimer}>
+            Confirmer
+          </Button>
+          <Button variant="ghost" taille="sm" onClick={() => setConfirmerSuppression(false)}>
+            Annuler
+          </Button>
+        </div>
+      ) : null}
 
       {ouvertCommentaires ? (
         <div id={idCommentaires} className="grid gap-3 border-t border-border pt-3">

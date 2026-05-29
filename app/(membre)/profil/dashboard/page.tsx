@@ -222,7 +222,9 @@ export default async function PageDashboard() {
         <Heading niveau={1}>
           <TexteEditableAdmin {...E('salutation', 40)}>{(t) => <>{t}</>}</TexteEditableAdmin>{' '}
           {personne.prenom ?? cms.salutationFallback}
-          <span className="ml-2 inline-block">👋</span>
+          <span className="ml-2 inline-block" aria-hidden="true">
+            👋
+          </span>
         </Heading>
         {personne.statut === 'pending_deletion' ? (
           <TexteEditableAdmin {...E('badgeSuppression', 60)}>

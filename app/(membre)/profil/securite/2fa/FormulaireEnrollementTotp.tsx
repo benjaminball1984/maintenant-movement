@@ -86,19 +86,26 @@ export function FormulaireEnrollementTotp() {
           // Le QR est retourné par Supabase au format SVG inline.
           // biome-ignore lint/security/noDangerouslySetInnerHtml: SVG contrôlé venant du serveur Supabase.
           dangerouslySetInnerHTML={{ __html: etat.qr }}
-          aria-label="QR code TOTP"
+          role="img"
+          aria-label="QR code de configuration 2FA (une clé secrète en texte est fournie ci-dessous comme alternative)"
           // Fond blanc volontaire (bg-white) en mode clair comme en mode
           // sombre : le QR a besoin d'un contraste maximal sur clair pour
           // rester scannable par les apps d'authentification. La bordure
           // rounded-sm le détoure du conteneur surface.
           className="rounded-sm bg-white p-2"
         />
-        <details className="w-full">
-          <summary className="cursor-pointer text-sm text-text-3">
-            Saisir manuellement à la place
-          </summary>
-          <p className="mt-2 break-all font-mono text-xs text-text-2">{etat.uri}</p>
-        </details>
+        {/*
+          Clé secrète textuelle TOUJOURS visible (accessibilité) : une personne
+          aveugle ou ne pouvant pas scanner le QR doit pouvoir saisir le secret
+          à la main dans son app d'authentification. On ne la cache plus dans un
+          `<details>` replié.
+        */}
+        <div className="w-full">
+          <p className="text-sm text-text-2">
+            Clé secrète à saisir dans ton application (alternative au QR code) :
+          </p>
+          <p className="mt-1 break-all font-mono text-xs text-text-2">{etat.uri}</p>
+        </div>
       </div>
 
       <form onSubmit={gererVerification} className="grid gap-3" aria-label="Vérification TOTP">

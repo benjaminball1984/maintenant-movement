@@ -177,7 +177,9 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
                   <div>
                     <p className="font-bold text-text-1">{nomAffiche}</p>
                     <p className="text-text-3 text-xs">
+                      <span className="sr-only">Email : </span>
                       <code className="font-mono">{p.email ?? '(pas d’email)'}</code> ·{' '}
+                      <span className="sr-only">Identifiant : </span>
                       <code className="font-mono">{p.id}</code>
                     </p>
                     <p className="mt-1 text-text-3 text-xs">
