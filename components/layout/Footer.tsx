@@ -2,6 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { SITE } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const FALLBACK_BASELINE = SITE.descriptionCourte;
@@ -84,17 +85,21 @@ export async function Footer() {
     <footer className="border-t border-border bg-surface-2">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
-          {/* Emplacement du logo officiel (poing levé + coquelicot).
-              Tant que le SVG/PNG n'est pas fourni par Lilou/Ben, on affiche
-              juste le wordmark stylisé avec le dégradé signature. Le
-              remplacement se fait en collant l'image dans `public/logo/`
-              et en remplaçant ce bloc par <Image src="/logo/maintenant.svg" ... />. */}
-          <p
-            className="bg-grad bg-clip-text font-display text-2xl font-extrabold text-transparent"
-            aria-label={`${SITE.nom} (logo)`}
-          >
-            {SITE.nom}
-          </p>
+          {/* Logo officiel Maintenant! (poing levé + coquelicot, dégradé
+              violet→framboise, wordmark intégré). Fourni le 2026-05-29 par
+              Lilou/Ben, stocké dans `public/logo/maintenant.png` (1 Mo
+              source PNG bitmap, qualité native conservée pour les écrans
+              haute densité). */}
+          <Link href="/" aria-label={`${SITE.nom} — accueil`} className="inline-block">
+            <Image
+              src="/logo/maintenant.png"
+              alt={`${SITE.nom} (logo : poing levé violet et coquelicot rouge)`}
+              width={140}
+              height={156}
+              priority
+              className="h-auto w-32 sm:w-36"
+            />
+          </Link>
           <TexteEditableAdmin
             cle="footer.baseline"
             valeurInitiale={baseline.valeurMd}

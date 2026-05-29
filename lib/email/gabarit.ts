@@ -105,11 +105,17 @@ ${blockPreheader}
 
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:8px;border:1px solid ${COULEUR_BORDURE};overflow:hidden;">
 
-<!-- Bandeau identitaire -->
+<!-- Bandeau identitaire (logo poing levé + coquelicot, ajouté V2.5.16 post-Master Plan).
+     Le PNG est hébergé sur le site public (URL absolue obligatoire pour les
+     clients mail qui ne suivent pas les chemins relatifs). Largeur cappée à
+     120 px pour rester compact dans le bandeau, hauteur auto. display:block
+     évite l espace blanc sous l image dans Gmail / Outlook. -->
 <tr>
-<td style="background:${COULEUR_BRAND};padding:24px 32px;text-align:center;">
-<a href="${urlSite}" style="color:#ffffff;text-decoration:none;font-family:'Inter',Arial,sans-serif;font-size:24px;font-weight:800;letter-spacing:-0.02em;">${escapeHtml(SITE.nom)}</a>
-<p style="margin:4px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">${escapeHtml(baselineCms.valeurMd)}</p>
+<td style="background:${COULEUR_BRAND};padding:20px 32px;text-align:center;">
+<a href="${urlSite}" style="text-decoration:none;color:#ffffff;">
+<img src="${urlSite}/logo/maintenant.png" alt="${escapeHtml(SITE.nom)}" width="120" height="134" style="display:block;margin:0 auto 8px;width:120px;height:auto;border:0;outline:none;" />
+<span style="display:inline-block;color:#ffffff;font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:500;opacity:0.92;">${escapeHtml(baselineCms.valeurMd)}</span>
+</a>
 </td>
 </tr>
 

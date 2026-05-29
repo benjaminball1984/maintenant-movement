@@ -6,6 +6,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -96,23 +97,33 @@ export default async function PageAdherer() {
 
   return (
     <Container taille="lg" className="py-12">
-      <header className="mb-10">
-        <p className="text-xs font-bold uppercase tracking-cap text-text-3">Agir</p>
-        <Heading niveau={1}>Adhérer</Heading>
-        <TexteEditableAdmin
-          cle="agir.adherer.intro"
-          valeurInitiale={intro.valeurMd}
-          estAdmin={estAdmin}
-          libelle="intro page adherer (Markdown leger : **gras**)"
-          multilignes
-          longueurMax={500}
-        >
-          {(t) => (
-            <div className="mt-3 max-w-2xl text-text-2">
-              <MarkdownLeger texte={t} />
-            </div>
-          )}
-        </TexteEditableAdmin>
+      <header className="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+        <Image
+          src="/logo/maintenant.png"
+          alt="Logo Maintenant! (poing levé et coquelicot)"
+          width={96}
+          height={107}
+          priority
+          className="h-auto w-20 shrink-0 sm:w-24"
+        />
+        <div>
+          <p className="text-xs font-bold uppercase tracking-cap text-text-3">Agir</p>
+          <Heading niveau={1}>Adhérer</Heading>
+          <TexteEditableAdmin
+            cle="agir.adherer.intro"
+            valeurInitiale={intro.valeurMd}
+            estAdmin={estAdmin}
+            libelle="intro page adherer (Markdown leger : **gras**)"
+            multilignes
+            longueurMax={500}
+          >
+            {(t) => (
+              <div className="mt-3 max-w-2xl text-text-2">
+                <MarkdownLeger texte={t} />
+              </div>
+            )}
+          </TexteEditableAdmin>
+        </div>
       </header>
 
       {adhesion !== null && adhesion.expire_le !== null && adhesion.chemin !== null ? (
