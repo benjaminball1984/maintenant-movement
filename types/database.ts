@@ -173,12 +173,16 @@ export type Database = {
           salle_id: string;
           titre: string;
           ordre_jour_md: string;
+          /** V2.5.35 — HTML riche optionnel de l'OJ. */
+          ordre_jour_html: string | null;
           debut_le: string;
           fin_le: string | null;
           mode_decision: string;
           statut: string;
           enregistree: boolean;
           pv_md: string | null;
+          /** V2.5.35 — HTML riche optionnel du PV. */
+          pv_html: string | null;
           convoque_par_personne_id: string | null;
           created_at: string;
           updated_at: string;
@@ -188,12 +192,14 @@ export type Database = {
           salle_id: string;
           titre: string;
           ordre_jour_md?: string;
+          ordre_jour_html?: string | null;
           debut_le: string;
           fin_le?: string | null;
           mode_decision?: string;
           statut?: string;
           enregistree?: boolean;
           pv_md?: string | null;
+          pv_html?: string | null;
           convoque_par_personne_id?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -203,12 +209,14 @@ export type Database = {
           salle_id?: string;
           titre?: string;
           ordre_jour_md?: string;
+          ordre_jour_html?: string | null;
           debut_le?: string;
           fin_le?: string | null;
           mode_decision?: string;
           statut?: string;
           enregistree?: boolean;
           pv_md?: string | null;
+          pv_html?: string | null;
           convoque_par_personne_id?: string | null;
           created_at?: string;
           updated_at?: string;

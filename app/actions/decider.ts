@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -66,6 +67,8 @@ const schemaReunion = z.object({
   salle_id: z.string().uuid(),
   titre: z.string().min(1).max(300),
   ordre_jour_md: z.string().max(20000).optional(),
+  /** V2.5.35 — HTML riche optionnel de l'OJ (sanitizé). */
+  ordre_jour_html: z.string().max(100000).optional(),
   debut_le: z.string(),
   fin_le: z.string().optional(),
   mode_decision: z.enum(['consensus', 'levee_objections', 'jugement_majoritaire']),
@@ -85,12 +88,18 @@ export async function creerReunionAction(
   if (!parse.success) return { ok: false, message: parse.error.issues[0]?.message ?? 'Invalide.' };
 
   const d = parse.data;
+  // V2.5.35 — sanitize HTML riche de l'OJ avant insertion.
+  const ojHtmlPropre =
+    d.ordre_jour_html !== undefined && d.ordre_jour_html.trim() !== ''
+      ? sanitizeRichHtml(d.ordre_jour_html)
+      : null;
   const { data, error } = await supabase
     .from('reunion_decider')
     .insert({
       salle_id: d.salle_id,
       titre: d.titre,
       ordre_jour_md: d.ordre_jour_md ?? '',
+      ordre_jour_html: ojHtmlPropre,
       debut_le: d.debut_le,
       fin_le: d.fin_le ?? null,
       mode_decision: d.mode_decision,
@@ -111,7 +120,11 @@ export async function creerReunionAction(
 const schemaMajReunion = z.object({
   id: z.string().uuid(),
   ordre_jour_md: z.string().max(20000).optional(),
+  /** V2.5.35 — HTML riche optionnel de l'OJ. Vide → efface. */
+  ordre_jour_html: z.string().max(100000).optional(),
   pv_md: z.string().max(50000).optional(),
+  /** V2.5.35 — HTML riche optionnel du PV. Vide → efface. */
+  pv_html: z.string().max(200000).optional(),
   statut: z.enum(['planifiee', 'en_cours', 'terminee', 'annulee']).optional(),
 });
 
@@ -142,11 +155,20 @@ export async function mettreAJourReunionAction(
 
   const maj: {
     ordre_jour_md?: string;
+    ordre_jour_html?: string | null;
     pv_md?: string;
+    pv_html?: string | null;
     statut?: 'planifiee' | 'en_cours' | 'terminee' | 'annulee';
   } = {};
   if (d.ordre_jour_md !== undefined) maj.ordre_jour_md = d.ordre_jour_md;
+  if (d.ordre_jour_html !== undefined) {
+    maj.ordre_jour_html =
+      d.ordre_jour_html.trim() === '' ? null : sanitizeRichHtml(d.ordre_jour_html);
+  }
   if (d.pv_md !== undefined) maj.pv_md = d.pv_md;
+  if (d.pv_html !== undefined) {
+    maj.pv_html = d.pv_html.trim() === '' ? null : sanitizeRichHtml(d.pv_html);
+  }
   if (d.statut !== undefined) maj.statut = d.statut;
 
   if (Object.keys(maj).length === 0) {
