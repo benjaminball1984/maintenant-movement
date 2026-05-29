@@ -140,6 +140,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                     { href: '/admin/national/audit', libelle: 'Audit journal D8' },
                     { href: '/admin/national/contenus', libelle: 'Contenus éditoriaux' },
                     { href: '/admin/national/emails-preview', libelle: 'Aperçu des emails' },
+                    { href: '/admin/national/rich-text-demo', libelle: 'Démo rich text' },
                     { href: '/admin/national/decider', libelle: 'Décider (salles)' },
                     { href: '/admin/national/journal', libelle: 'Journal-affiche' },
                     { href: '/admin/national/images', libelle: 'Bibliothèque images' },
