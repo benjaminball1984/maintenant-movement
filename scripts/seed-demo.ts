@@ -312,6 +312,10 @@ async function main(): Promise<void> {
   await seedBlocsCommune(supabase);
   log('');
 
+  log("— Publications au nom d'espaces (Phase H, double visage) —");
+  await seedPostsEspaces(supabase, profilIds);
+  log('');
+
   log('Seeding démo terminé.');
 }
 
@@ -759,6 +763,64 @@ async function seedBlocsCommune(supabase: SupabaseClient<Database>): Promise<voi
       });
     }
     log(`  · commune ${i + 1} : 3 blocs démo créés`);
+  }
+}
+
+/**
+ * Pose 6 publications au nom des communes démo (Phase H — V2.5.10). Permet
+ * de voir le double visage en action : la commune existe comme espace
+ * d'action ET comme entité postante dans le flux du réseau social.
+ *
+ * Idempotent : skip si la commune a déjà au moins une publication au nom
+ * de l'espace.
+ */
+async function seedPostsEspaces(
+  supabase: SupabaseClient<Database>,
+  profilIds: string[],
+): Promise<void> {
+  // Récupérer les ids des communes démo + les profils membres correspondants
+  const { data: marques } = await supabase
+    .from('objet_demo')
+    .select('id_ligne')
+    .eq('nom_table', 'commune');
+  const communeIds = (marques ?? []).map((m) => m.id_ligne);
+
+  const textesDemo = [
+    'Bonjour à toutes et à tous ! Voici le premier message officiel de notre commune libre. Une assemblée est prévue le mois prochain.',
+    'Compte-rendu de notre dernière assemblée : 8 personnes présentes, 3 décisions actées. Le détail est dans notre fil interne.',
+    'Notre commune lance une mobilisation pour la rénovation de la place centrale. Toutes les bonnes volontés sont bienvenues.',
+    'Un grand merci aux 12 personnes qui ont rejoint cette semaine. Bienvenue dans le mouvement Maintenant! local.',
+    'Soirée portes ouvertes vendredi soir, lieu en MP. On parlera des prochaines actions communes.',
+    'Annonce : notre commune propose un atelier compostage samedi matin. Inscription gratuite, matériel fourni.',
+  ];
+
+  for (const [i, communeId] of communeIds.entries()) {
+    // Idempotence : skip si la commune a déjà des posts au nom de l'espace
+    const { count } = await supabase
+      .from('post_reseau')
+      .select('*', { count: 'exact', head: true })
+      .eq('espace_type', 'commune')
+      .eq('espace_id', communeId);
+    if ((count ?? 0) > 0) {
+      log(`  · commune ${i + 1} : ${count} publication(s) espace déjà présente(s), skip`);
+      continue;
+    }
+    const auteurice = profilIds[i % profilIds.length];
+    const texte = textesDemo[i % textesDemo.length];
+    if (!auteurice || !texte) continue;
+
+    const { error } = await supabase.from('post_reseau').insert({
+      auteurice_id: auteurice,
+      espace_type: 'commune',
+      espace_id: communeId,
+      texte: `[DÉMO espace] ${texte}`,
+      statut: 'publie',
+    });
+    if (error) {
+      logErr(`  ✗ post espace commune ${i + 1} : ${error.message}`);
+      continue;
+    }
+    log(`  · commune ${i + 1} : 1 publication au nom de l'espace créée`);
   }
 }
 

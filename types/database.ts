@@ -2707,6 +2707,8 @@ export type Database = {
         Row: {
           auteurice_id: string;
           created_at: string;
+          espace_id: string | null;
+          espace_type: string | null;
           id: string;
           image_url: string | null;
           raison_retrait: string | null;
@@ -2719,6 +2721,8 @@ export type Database = {
         Insert: {
           auteurice_id: string;
           created_at?: string;
+          espace_id?: string | null;
+          espace_type?: string | null;
           id?: string;
           image_url?: string | null;
           raison_retrait?: string | null;
@@ -2731,6 +2735,8 @@ export type Database = {
         Update: {
           auteurice_id?: string;
           created_at?: string;
+          espace_id?: string | null;
+          espace_type?: string | null;
           id?: string;
           image_url?: string | null;
           raison_retrait?: string | null;
