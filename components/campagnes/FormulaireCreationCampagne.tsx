@@ -1,13 +1,16 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import { EditeurRicheAvecToolbar } from '@/components/rich-text/EditeurRicheAvecToolbar';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
   type MessagesValidationCampagne,
 } from '@/lib/messages-validation';
+import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
 import { type DonneesCreerCampagne, creerCampagneFactory } from '@/lib/validations/campagne';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FileText, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,17 +67,22 @@ export function FormulaireCreationCampagne({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  // V2.5.51 — switch Riche/Markdown pour la presentation.
+  const [texteHtml, setTexteHtml] = useState('');
+  const [modeTexte, setModeTexte] = useState<'markdown' | 'riche'>('markdown');
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesCreerCampagne>({
     resolver: zodResolver(creerCampagneFactory(messages)),
     defaultValues: {
       titre: '',
       texte: '',
+      texte_html: '',
       image_url: '',
       token_turnstile: '',
     },
@@ -112,19 +120,91 @@ export function FormulaireCreationCampagne({
       </div>
 
       <div>
-        <Label htmlFor="camp-texte" obligatoire>
-          {libelles.labelTexte}
-        </Label>
-        <Textarea
-          id="camp-texte"
-          rows={10}
-          placeholder={libelles.placeholderTexte}
-          {...register('texte')}
-        />
-        <p className="mt-1 text-xs text-text-3">{libelles.hintTexte}</p>
-        {errors.texte !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.texte.message}</p>
-        ) : null}
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <Label htmlFor="camp-texte" obligatoire>
+            {libelles.labelTexte}
+          </Label>
+          <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                // V2.5.51 — bascule vers Riche pre-remplit avec la
+                // conversion du Markdown courant si HTML vide.
+                const texteCourant = watch('texte') ?? '';
+                if (texteHtml === '' && texteCourant.trim() !== '') {
+                  const html = markdownLegerEnHtml(texteCourant);
+                  setTexteHtml(html);
+                  setValue('texte_html', html, { shouldDirty: true });
+                }
+                setModeTexte('riche');
+              }}
+              className={`inline-flex items-center gap-1 px-3 py-1 ${
+                modeTexte === 'riche' ? 'bg-brand text-white' : 'bg-surface text-text-2'
+              }`}
+              aria-pressed={modeTexte === 'riche'}
+            >
+              <Sparkles size={11} aria-hidden="true" />
+              Riche
+            </button>
+            <button
+              type="button"
+              onClick={() => setModeTexte('markdown')}
+              className={`inline-flex items-center gap-1 border-border border-l px-3 py-1 ${
+                modeTexte === 'markdown' ? 'bg-brand text-white' : 'bg-surface text-text-2'
+              }`}
+              aria-pressed={modeTexte === 'markdown'}
+            >
+              <FileText size={11} aria-hidden="true" />
+              Markdown
+            </button>
+          </div>
+        </div>
+        {modeTexte === 'riche' ? (
+          <>
+            <EditeurRicheAvecToolbar
+              contenuInitialHtml={texteHtml}
+              onChange={(html) => {
+                setTexteHtml(html);
+                setValue('texte_html', html, { shouldDirty: true });
+              }}
+              placeholder={libelles.placeholderTexte}
+              hauteurMin={280}
+            />
+            <p className="mt-1 text-text-3 text-xs">{libelles.hintTexte}</p>
+            <input type="hidden" {...register('texte_html')} />
+            {/* Le champ texte reste obligatoire (validation Zod min 100 chars).
+                Quand on est en mode Riche, on continue de saisir un texte plat
+                qui servira de fallback et de SEO. */}
+            <details className="mt-2 text-xs">
+              <summary className="cursor-pointer text-text-3 hover:text-text-1">
+                Version texte plat (obligatoire, 100 chars min) — résumé/fallback
+              </summary>
+              <Textarea
+                id="camp-texte"
+                rows={4}
+                placeholder="Résumé en texte plat (sert de fallback et pour le SEO)"
+                {...register('texte')}
+                className="mt-2"
+              />
+              {errors.texte !== undefined ? (
+                <p className="mt-1 text-danger text-xs">{errors.texte.message}</p>
+              ) : null}
+            </details>
+          </>
+        ) : (
+          <>
+            <Textarea
+              id="camp-texte"
+              rows={10}
+              placeholder={libelles.placeholderTexte}
+              {...register('texte')}
+            />
+            <p className="mt-1 text-text-3 text-xs">{libelles.hintTexte}</p>
+            {errors.texte !== undefined ? (
+              <p className="mt-1 text-danger text-xs">{errors.texte.message}</p>
+            ) : null}
+          </>
+        )}
       </div>
 
       <ChampImageObjet
