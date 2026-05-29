@@ -1902,6 +1902,7 @@ export type Database = {
           anonymise_le: string | null;
           bio: string | null;
           code_postal: string | null;
+          cover_url: string | null;
           created_at: string;
           date_naissance: string | null;
           derniere_connexion_le: string | null;
@@ -1924,6 +1925,7 @@ export type Database = {
           anonymise_le?: string | null;
           bio?: string | null;
           code_postal?: string | null;
+          cover_url?: string | null;
           created_at?: string;
           date_naissance?: string | null;
           derniere_connexion_le?: string | null;
@@ -1946,6 +1948,7 @@ export type Database = {
           anonymise_le?: string | null;
           bio?: string | null;
           code_postal?: string | null;
+          cover_url?: string | null;
           created_at?: string;
           date_naissance?: string | null;
           derniere_connexion_le?: string | null;
@@ -3874,6 +3877,10 @@ export type Database = {
           photo_url: string | null;
           bio: string | null;
         }[];
+      };
+      personne_cover_url: {
+        Args: { cible: string };
+        Returns: string;
       };
       est_ami_reseau: {
         Args: { cible: string };

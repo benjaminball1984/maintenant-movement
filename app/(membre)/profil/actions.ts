@@ -55,6 +55,7 @@ export async function mettreAJourProfil(donneesBrutes: unknown): Promise<Resulta
       code_postal: donnees.code_postal,
       telephone: donnees.telephone === '' ? null : (donnees.telephone ?? null),
       photo_url: donnees.photo_url === '' ? null : (donnees.photo_url ?? null),
+      cover_url: donnees.cover_url === '' ? null : (donnees.cover_url ?? null),
       bio: donnees.bio === '' ? null : (donnees.bio ?? null),
       mode_theme: donnees.mode_theme,
     })

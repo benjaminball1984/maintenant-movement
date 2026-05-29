@@ -30,6 +30,8 @@ export interface IdentiteAffichee {
 export interface ProfilReseau extends IdentiteAffichee {
   pronom: string | null;
   bio: string | null;
+  /** V2.5.13.a — image de couverture (bandeau haut du profil), nul = dégradé. */
+  coverUrl: string | null;
   nbAbonnes: number;
   nbSuivis: number;
   estMoi: boolean;
@@ -124,7 +126,7 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
     return null;
   }
 
-  const [abonnes, suivis] = await Promise.all([
+  const [abonnes, suivis, coverRes] = await Promise.all([
     supabase
       .from('relation_reseau')
       .select('suiveur_id', { count: 'exact', head: true })
@@ -133,6 +135,7 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
       .from('relation_reseau')
       .select('suivi_id', { count: 'exact', head: true })
       .eq('suiveur_id', personneId),
+    supabase.rpc('personne_cover_url', { cible: personneId }),
   ]);
 
   const session = await getSession();
@@ -163,6 +166,8 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
     pronom: aff.pronom,
     photoUrl: aff.photo_url,
     bio: aff.bio,
+    coverUrl:
+      typeof coverRes.data === 'string' && coverRes.data.trim() !== '' ? coverRes.data : null,
     nbAbonnes: abonnes.count ?? 0,
     nbSuivis: suivis.count ?? 0,
     estMoi,

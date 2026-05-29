@@ -110,6 +110,7 @@ export function creerMettreAJourProfilSchema(
         .optional()
         .or(z.literal('')),
       photo_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
+      cover_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
       bio: z.string().max(500, messages.bioLongueur).optional().or(z.literal('')),
       mode_theme: z.enum(['auto', 'light', 'dark']),
     })

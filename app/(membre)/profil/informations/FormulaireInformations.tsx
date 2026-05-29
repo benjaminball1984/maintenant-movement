@@ -28,6 +28,7 @@ export interface LibellesInformations {
   labelTelephone: string;
   sectionPresentation: string;
   labelPhoto: string;
+  labelCover: string;
   labelBio: string;
   sectionPreference: string;
   labelTheme: string;
@@ -51,6 +52,7 @@ const LIBELLES_DEFAUT: LibellesInformations = {
   labelTelephone: 'Téléphone (optionnel)',
   sectionPresentation: 'Présentation publique',
   labelPhoto: 'Photo de profil (URL)',
+  labelCover: 'Image de couverture du profil (URL, optionnel)',
   labelBio: 'Bio courte (500 caractères max)',
   sectionPreference: 'Préférence d’interface',
   labelTheme: 'Thème par défaut',
@@ -194,6 +196,13 @@ export function FormulaireInformations({
           <Input id="inf-photo" type="url" {...register('photo_url')} />
           {errors.photo_url !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.photo_url.message}</p>
+          ) : null}
+        </div>
+        <div className="mt-4">
+          <Label htmlFor="inf-cover">{libelles.labelCover}</Label>
+          <Input id="inf-cover" type="url" placeholder="https://..." {...register('cover_url')} />
+          {errors.cover_url !== undefined ? (
+            <p className="mt-1 text-xs text-danger">{errors.cover_url.message}</p>
           ) : null}
         </div>
         <div className="mt-4">

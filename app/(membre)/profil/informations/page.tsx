@@ -23,6 +23,7 @@ async function lireLibellesFormulaire(): Promise<LibellesInformations> {
     ['labelTelephone', 'Téléphone (optionnel)'],
     ['sectionPresentation', 'Présentation publique'],
     ['labelPhoto', 'Photo de profil (URL)'],
+    ['labelCover', 'Image de couverture du profil (URL, optionnel)'],
     ['labelBio', 'Bio courte (500 caractères max)'],
     ['sectionPreference', 'Préférence d’interface'],
     ['labelTheme', 'Thème par défaut'],
@@ -93,6 +94,7 @@ export default async function PageInformations() {
     code_postal: personne.code_postal ?? '',
     telephone: personne.telephone ?? '',
     photo_url: personne.photo_url ?? '',
+    cover_url: personne.cover_url ?? '',
     bio: personne.bio ?? '',
     mode_theme: personne.mode_theme ?? 'auto',
   };

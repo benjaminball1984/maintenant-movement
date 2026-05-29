@@ -6,6 +6,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compterMessagesNonLus, getFluxReseau } from '@/lib/reseau/requetes';
+import { Heart, MessageCircle, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -92,10 +93,12 @@ export default async function PageReseau() {
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-cap text-text-3">S'informer</p>
-          <Heading niveau={1}>Réseau social</Heading>
+          <Heading niveau={1} className="bg-grad bg-clip-text text-transparent">
+            Réseau social
+          </Heading>
         </div>
         {connecte ? (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
             <TexteEditableAdmin
               cle="s-informer.reseau.cta_rechercher"
               valeurInitiale={ctaRechercher.valeurMd}
@@ -106,8 +109,9 @@ export default async function PageReseau() {
               {(t) => (
                 <Link
                   href="/s-informer/reseau/recherche"
-                  className="text-sm font-bold text-brand hover:underline"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-bold text-text-1 transition hover:border-brand hover:text-brand"
                 >
+                  <Search size={14} strokeWidth={1.5} />
                   {t}
                 </Link>
               )}
@@ -122,10 +126,15 @@ export default async function PageReseau() {
               {(t) => (
                 <Link
                   href="/s-informer/reseau/messages"
-                  className="text-sm font-bold text-brand hover:underline"
+                  className="relative inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-bold text-text-1 transition hover:border-brand hover:text-brand"
                 >
+                  <MessageCircle size={14} strokeWidth={1.5} />
                   {t}
-                  {nonLus > 0 ? ` (${nonLus})` : ''}
+                  {nonLus > 0 ? (
+                    <span className="-top-1.5 -right-1.5 absolute inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-danger px-1 font-bold text-white text-xs">
+                      {nonLus}
+                    </span>
+                  ) : null}
                 </Link>
               )}
             </TexteEditableAdmin>
@@ -159,7 +168,11 @@ export default async function PageReseau() {
         </TexteEditableAdmin>
       </Alert>
 
-      <Card variant="ombre" className="my-6 flex flex-wrap items-center justify-between gap-3">
+      <Card
+        variant="ombre"
+        className="my-6 flex flex-wrap items-center gap-3 border-brand/20 bg-brand-light/40"
+      >
+        <Heart size={20} strokeWidth={1.5} className="shrink-0 text-brand" aria-hidden="true" />
         <TexteEditableAdmin
           cle="s-informer.reseau.financement_texte"
           valeurInitiale={financementTexte.valeurMd}
@@ -168,7 +181,7 @@ export default async function PageReseau() {
           multilignes
           longueurMax={300}
         >
-          {(t) => <p className="text-sm text-text-2">{t}</p>}
+          {(t) => <p className="flex-1 text-sm text-text-2">{t}</p>}
         </TexteEditableAdmin>
         <TexteEditableAdmin
           cle="s-informer.reseau.financement_cta"
@@ -180,7 +193,7 @@ export default async function PageReseau() {
           {(t) => (
             <Link
               href="/mobiliser/cagnottes"
-              className="text-sm font-bold text-brand hover:underline"
+              className="inline-flex h-9 items-center rounded-md bg-grad px-4 text-sm font-bold text-white shadow-brand transition hover:brightness-110"
             >
               {t}
             </Link>

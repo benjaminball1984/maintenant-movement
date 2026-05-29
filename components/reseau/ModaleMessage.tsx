@@ -3,7 +3,7 @@
 import { envoyerMessage } from '@/app/(public)/s-informer/reseau/actions';
 import { Alert, Button, IconButton, Label, Textarea } from '@/components/ui';
 import type { VariantBouton } from '@/components/ui/Button';
-import { X } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 /** Libelles surchargeables admin via CMS (V2.4.154). */
@@ -101,11 +101,19 @@ export function ModaleMessage({
         aria-label={libelles.ariaLabel.replace('{nom}', destinataireNom)}
       >
         <header className="flex items-start justify-between gap-3 border-b border-border p-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-              {libelles.surtitreA}
-            </p>
-            <p className="mt-1 font-bold text-text-1">{destinataireNom}</p>
+          <div className="flex items-center gap-3">
+            <span
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand"
+              aria-hidden="true"
+            >
+              <MessageCircle size={18} strokeWidth={1.5} />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-cap text-text-3">
+                {libelles.surtitreA}
+              </p>
+              <p className="mt-0.5 font-bold text-text-1">{destinataireNom}</p>
+            </div>
           </div>
           <IconButton aria-label={libelles.ariaFermer} onClick={fermer} taille="sm">
             <X size={16} strokeWidth={1.5} />
@@ -141,14 +149,18 @@ export function ModaleMessage({
               onChange={(e) => setTexte(e.target.value)}
               placeholder={libelles.placeholderMessage.replace('{nom}', destinataireNom)}
               maxLength={5000}
+              className="resize-none"
             />
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="ghost" onClick={fermer}>
-                {libelles.ctaAnnuler}
-              </Button>
-              <Button type="submit" disabled={enCours || texte.trim() === ''}>
-                {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
-              </Button>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs text-text-3">{texte.length}/5000</p>
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" onClick={fermer}>
+                  {libelles.ctaAnnuler}
+                </Button>
+                <Button type="submit" disabled={enCours || texte.trim() === ''}>
+                  {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
+                </Button>
+              </div>
             </div>
           </form>
         )}

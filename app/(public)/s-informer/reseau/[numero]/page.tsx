@@ -46,12 +46,24 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
         </Link>
       </p>
 
-      {/* V2.5.13 Phase J — bandeau dégradé style page profil moderne.
-          Pas de cover_url personnalisée pour l'instant (migration additive
-          reportée), on utilise le dégradé identitaire `bg-grad`. L'avatar
-          dépasse en bas avec une bordure surface qui le met en relief. */}
+      {/* V2.5.13 Phase J — bandeau de couverture du profil.
+          Si `coverUrl` est renseigné, on l'utilise comme arrière-plan
+          (V2.5.13.a). Sinon, on retombe sur le dégradé identitaire `bg-grad`.
+          L'avatar dépasse en bas avec une bordure surface qui le met en relief. */}
       <div className="relative mb-16">
-        <div className={cn('h-32 sm:h-48 rounded-lg bg-grad', 'shadow-brand/30 shadow-inner')} />
+        {profil.coverUrl !== null ? (
+          <div
+            className="h-32 rounded-lg bg-grad bg-center bg-cover shadow-brand/30 shadow-inner sm:h-48"
+            style={{ backgroundImage: `url(${profil.coverUrl})` }}
+            role="img"
+            aria-label="Couverture du profil"
+          />
+        ) : (
+          <div
+            className={cn('h-32 sm:h-48 rounded-lg bg-grad', 'shadow-brand/30 shadow-inner')}
+            aria-hidden="true"
+          />
+        )}
         <div className="-bottom-12 absolute left-4 sm:left-6">
           <div className="rounded-full border-4 border-surface bg-surface p-0">
             <AvatarReseau nom={nom} photoUrl={profil.photoUrl} taillePx={96} />
