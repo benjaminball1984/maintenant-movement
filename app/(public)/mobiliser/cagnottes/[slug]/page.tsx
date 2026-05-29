@@ -6,7 +6,9 @@ import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -516,6 +518,19 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
               </Card>
             ) : null}
           </section>
+        ) : null}
+
+        {/* V2.5.8 : moteur de partage applique aux cagnottes publiees.
+            Pour les cagnottes solidaires en particulier, le partage est
+            crucial pour atteindre l'objectif financier. */}
+        {estPubliee ? (
+          <BoutonsPartage
+            titre={cagnotte.titre}
+            url={`${getSiteUrl()}/mobiliser/cagnottes/${cagnotte.slug}`}
+            message={`Une cagnotte solidaire mérite d'être vue : ${cagnotte.titre}.`}
+            titreBloc="Faire connaître cette cagnotte"
+            intro="Plus on est nombreuses et nombreux à savoir, plus on a de chance d'atteindre l'objectif."
+          />
         ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">

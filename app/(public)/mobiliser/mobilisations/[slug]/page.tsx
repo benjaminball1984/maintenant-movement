@@ -4,7 +4,9 @@ import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
+import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
@@ -317,6 +319,19 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             {mobilisation.description}
           </div>
         </section>
+
+        {/* V2.5.8 : moteur de partage applique aussi aux mobilisations
+            publiees, pour aider a ramener du monde (cf. tunnel 6.6 du
+            Master Plan : participer → ramener des proches). */}
+        {estPubliee ? (
+          <BoutonsPartage
+            titre={mobilisation.titre}
+            url={`${getSiteUrl()}/mobiliser/mobilisations/${mobilisation.slug}`}
+            message={`Mobilisation Maintenant! : ${mobilisation.titre} le ${new Date(mobilisation.date_debut).toLocaleDateString('fr-FR')} à ${mobilisation.lieu}.`}
+            titreBloc="Ramener des proches"
+            intro="Partage cette mobilisation à celles et ceux qui pourraient venir avec toi."
+          />
+        ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {mobilisation.createurice_prenom !== null || mobilisation.createurice_nom !== null ? (
