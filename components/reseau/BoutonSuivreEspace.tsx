@@ -3,7 +3,8 @@
 import { basculerAbonnementEspaceAction } from '@/app/actions/abonnement-espace';
 import { Button } from '@/components/ui';
 import type { TypeEspacePostable } from '@/lib/reseau/types-espace';
-import { Check, Plus } from 'lucide-react';
+import { ArrowRight, Check, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface BoutonSuivreEspaceProps {
@@ -51,24 +52,42 @@ export function BoutonSuivreEspace({
   }
 
   return (
-    <Button
-      onClick={basculer}
-      variant={jeSuis ? 'ghost' : 'outline'}
-      taille="sm"
-      disabled={enCours}
-      aria-pressed={jeSuis}
-    >
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <Button
+        onClick={basculer}
+        variant={jeSuis ? 'ghost' : 'outline'}
+        taille="sm"
+        disabled={enCours}
+        aria-pressed={jeSuis}
+      >
+        {jeSuis ? (
+          <>
+            <Check size={14} strokeWidth={1.5} className="mr-1.5" aria-hidden="true" />
+            Suivi·e dans le réseau
+          </>
+        ) : (
+          <>
+            <Plus size={14} strokeWidth={1.5} className="mr-1.5" aria-hidden="true" />
+            Suivre {espaceNom} dans le réseau
+          </>
+        )}
+      </Button>
+
+      {/*
+        Quand on suit l'espace, on propose un point d'entrée explicite vers le
+        réseau social (la « double connexion » comme hameçon : suivre un espace
+        amène naturellement à venir voir son flux). Affiché seulement à l'état
+        suivi pour ne pas surcharger l'appel à l'action initial.
+      */}
       {jeSuis ? (
-        <>
-          <Check size={14} strokeWidth={1.5} className="mr-1.5" aria-hidden="true" />
-          Suivi·e dans le réseau
-        </>
-      ) : (
-        <>
-          <Plus size={14} strokeWidth={1.5} className="mr-1.5" aria-hidden="true" />
-          Suivre {espaceNom} dans le réseau
-        </>
-      )}
-    </Button>
+        <Link
+          href="/s-informer/reseau"
+          className="inline-flex items-center gap-1 font-medium text-brand text-sm hover:underline"
+        >
+          Voir dans le réseau social
+          <ArrowRight size={14} strokeWidth={1.5} aria-hidden="true" />
+        </Link>
+      ) : null}
+    </div>
   );
 }
