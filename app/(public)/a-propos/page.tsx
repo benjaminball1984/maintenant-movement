@@ -1,24 +1,41 @@
-import { PageEditorialeStub } from '@/components/home/PageEditorialeStub';
-import { Alert } from '@/components/ui';
+import { PageEditorialeCMS } from '@/components/contenu/PageEditorialeCMS';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Qui sommes-nous',
+  description:
+    'À propos du mouvement Maintenant!, histoire, doctrine générale, premiers signataires, structuration (cosec gé en collégial).',
 };
+
+/**
+ * Page À propos — migrée sur PageEditorialeCMS en V2.5.46 pour
+ * bénéficier du mode rich text (couleurs, polices, citations, embeds)
+ * et de l'édition admin inline.
+ *
+ * Le contenu attendu (cf. CONTENUS-A-ARBITRER.md) : présentation du
+ * mouvement Maintenant!, histoire, doctrine générale, premiers
+ * signataires, structuration (cosec gé en collégial), liens vers
+ * Doctrine et Commune libre. Citation à mettre en avant : « Le but
+ * de la plateforme n'est pas que la plateforme fonctionne. »
+ */
+
+const FALLBACK = `[TEXTE À FAIRE — page À propos]
+
+Contenu attendu : présentation du mouvement Maintenant!, histoire, doctrine générale, premiers signataires, structuration (cosec gé en collégial), liens vers Doctrine et Commune libre.
+
+## Citation à mettre en avant
+
+« Le but de la plateforme n'est pas que la plateforme fonctionne. »
+
+À rédiger par Lilou/Ben.`;
 
 export default function PageAPropos() {
   return (
-    <PageEditorialeStub
+    <PageEditorialeCMS
       surtitre="À propos"
-      titre="Qui sommes-nous"
-      placeholder={
-        <Alert variant="info" titre="[TEXTE À FAIRE — page À propos]">
-          Contenu attendu : présentation du mouvement Maintenant!, histoire, doctrine générale,
-          premiers signataires, structuration (cosec gé en collégial), liens vers Doctrine et
-          Commune libre. Citation à mettre en avant : « Le but de la plateforme n'est pas que la
-          plateforme fonctionne. » À rédiger par Lilou/Ben au chantier 2.2.
-        </Alert>
-      }
+      titreParDefaut="Qui sommes-nous"
+      cle="page.a-propos"
+      loremFallback={FALLBACK}
     />
   );
 }
