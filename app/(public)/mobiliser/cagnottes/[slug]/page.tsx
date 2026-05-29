@@ -9,6 +9,7 @@ import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherAC
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
@@ -570,11 +571,13 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[cagnotte.createurice_prenom, cagnotte.createurice_nom]
+              <LienAuteurReseau
+                personneId={cagnotte.createurice_id}
+                nom={[cagnotte.createurice_prenom, cagnotte.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>{' '}
+                className="font-bold text-text-2"
+              />{' '}
               <TexteEditableAdmin
                 cle="cagnottes.fiche.footer_milieu"
                 valeurInitiale={footerMilieu.valeurMd}

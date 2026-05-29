@@ -7,6 +7,7 @@ import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
@@ -377,11 +378,13 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[mobilisation.createurice_prenom, mobilisation.createurice_nom]
+              <LienAuteurReseau
+                personneId={mobilisation.createurice_id}
+                nom={[mobilisation.createurice_prenom, mobilisation.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>
+                className="font-bold text-text-2"
+              />
               .
             </p>
           ) : null}

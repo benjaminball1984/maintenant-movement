@@ -5,6 +5,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -187,11 +188,13 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
           {campagne.createurice_prenom !== null || campagne.createurice_nom !== null ? (
             <p>
               Lancée par{' '}
-              <strong className="text-text-2">
-                {[campagne.createurice_prenom, campagne.createurice_nom]
+              <LienAuteurReseau
+                personneId={campagne.createurice_id}
+                nom={[campagne.createurice_prenom, campagne.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>
+                className="font-bold text-text-2"
+              />
               .
             </p>
           ) : null}

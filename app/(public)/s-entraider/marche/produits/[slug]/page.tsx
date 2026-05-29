@@ -5,6 +5,7 @@ import { DoubleAffichagePrix } from '@/components/marche/BadgesMonnaies';
 import { FormulaireAchat } from '@/components/marche/FormulaireAchat';
 import { FormulaireNotation } from '@/components/marche/FormulaireNotation';
 import { NotationEtoiles } from '@/components/marche/NotationEtoiles';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -393,11 +394,13 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[produit.vendeureuse_prenom, produit.vendeureuse_nom]
+              <LienAuteurReseau
+                personneId={produit.vendeureuse_id}
+                nom={[produit.vendeureuse_prenom, produit.vendeureuse_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>
+                className="font-bold text-text-2"
+              />
               .{' '}
               <NotationEtoiles
                 note={produit.moyenne_etoiles}

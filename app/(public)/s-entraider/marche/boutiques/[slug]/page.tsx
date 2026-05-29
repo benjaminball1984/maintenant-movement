@@ -1,6 +1,7 @@
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { CarteProduit } from '@/components/marche/CarteProduit';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { Alert, Badge, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -219,11 +220,13 @@ export default async function PageDetailBoutique({ params }: PageDetailProps) {
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[boutique.createurice_prenom, boutique.createurice_nom]
+              <LienAuteurReseau
+                personneId={boutique.createurice_id}
+                nom={[boutique.createurice_prenom, boutique.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>
+                className="font-bold text-text-2"
+              />
               .
             </p>
           ) : null}

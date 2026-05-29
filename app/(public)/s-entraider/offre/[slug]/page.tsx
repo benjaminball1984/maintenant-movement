@@ -1,5 +1,6 @@
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -393,11 +394,13 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[offre.createurice_prenom, offre.createurice_nom]
+              <LienAuteurReseau
+                personneId={offre.createurice_id}
+                nom={[offre.createurice_prenom, offre.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>{' '}
+                className="font-bold text-text-2"
+              />{' '}
               <TexteEditableAdmin
                 cle="offre.fiche.footer_milieu"
                 valeurInitiale={footerMilieu.valeurMd}
