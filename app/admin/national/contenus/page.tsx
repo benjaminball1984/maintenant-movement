@@ -1,26 +1,26 @@
+import { ConsoleContenusCMS, type ContenuListe } from '@/components/contenu/ConsoleContenusCMS';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
-import { Badge, Card, Heading } from '@/components/ui';
+import { Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
-import { ExternalLink, FileText, Plus } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Contenus éditoriaux',
 };
 
 /**
- * Console admin des contenus éditoriaux CMS V2.4.1 / V2.4.6.
+ * Console admin des contenus éditoriaux CMS (V2.5.15 — Master Plan V2.6 Phase K).
  *
- * Liste tous les blocs `contenu_editorial` en base, avec leur date de
- * modification, leur taille, et un lien direct vers la page publique
- * où ils s'éditent. Pour modifier un contenu, l'admin va sur la page
- * publique et clique sur « Modifier ».
+ * Refonte : passage d'une liste plate de 10 pages connues + dump du reste à
+ * une console organisée et cherchable. Voir `<ConsoleContenusCMS>`.
  *
- * Les blocs « non encore en base » (pages où le fallback lorem ipsum
- * n'a pas été remplacé) sont listés à part en bas.
+ * Liste TOUS les contenus en base, groupés par préfixe d'espace (`home.*`,
+ * `footer.*`, `s-entraider.*`, etc.), avec recherche full-text instantanée
+ * sur clé + valeur + titre de page connue. Les pages connues qui n'ont pas
+ * encore de contenu personnalisé apparaissent en alerte en haut.
  */
 
 const PAGES_EDITORIALES_CONNUES: Array<{ cle: string; chemin: string; titre: string }> = [
@@ -44,36 +44,79 @@ const PAGES_EDITORIALES_CONNUES: Array<{ cle: string; chemin: string; titre: str
   { cle: 'page.contact', chemin: '/contact', titre: 'Contact' },
 ];
 
-const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
+/**
+ * Mapping additionnel cle → chemin public, pour les libellés UI que l'on
+ * sait localiser facilement. Sert au bouton « Éditer en place » de la
+ * console. Pas exhaustif : seules les clés dont on connaît la page sont
+ * listées. Les autres clés s'affichent sans lien (l'admin sait où aller).
+ */
+function devinerCheminPublic(cle: string): string | undefined {
+  // Préfixe → chemin canonique
+  const REGLES: Array<{ prefix: string; chemin: string }> = [
+    { prefix: 'home.', chemin: '/' },
+    { prefix: 'footer.', chemin: '/' },
+    { prefix: 's-informer.reseau.', chemin: '/s-informer/reseau' },
+    { prefix: 's-informer.decider.', chemin: '/s-informer/decider' },
+    { prefix: 's-informer.journal.', chemin: '/s-informer/journal' },
+    { prefix: 's-informer.medias.', chemin: '/s-informer/medias' },
+    { prefix: 's-entraider.', chemin: '/s-entraider' },
+    { prefix: 'mobiliser.petitions.', chemin: '/mobiliser/petitions' },
+    { prefix: 'mobiliser.mobilisations.', chemin: '/mobiliser/mobilisations' },
+    { prefix: 'mobiliser.cagnottes.', chemin: '/mobiliser/cagnottes' },
+    { prefix: 'mobiliser.campagnes.', chemin: '/mobiliser/campagnes' },
+    { prefix: 'mobiliser.', chemin: '/mobiliser' },
+    { prefix: 'agir.adherer.', chemin: '/agir/adherer' },
+    { prefix: 'agir.communes.', chemin: '/agir/communes' },
+    { prefix: 'agir.federations.', chemin: '/agir/federations' },
+    { prefix: 'agir.', chemin: '/agir' },
+    { prefix: 'comprendre.', chemin: '/comprendre' },
+    { prefix: 'decider.sondages.', chemin: '/decider/sondages' },
+    { prefix: 'decider.', chemin: '/decider' },
+    { prefix: 'cartes.', chemin: '/cartes' },
+    { prefix: 'agenda.', chemin: '/agenda' },
+    { prefix: 'recherche.', chemin: '/recherche' },
+    { prefix: 'communes.fiche.', chemin: '/agir/communes' },
+    { prefix: 'federations.fiche.', chemin: '/agir/federations' },
+    { prefix: 'petitions.fiche.', chemin: '/mobiliser/petitions' },
+    { prefix: 'cagnottes.fiche.', chemin: '/mobiliser/cagnottes' },
+    { prefix: 'mobilisations.fiche.', chemin: '/mobiliser/mobilisations' },
+    { prefix: 'co-construire.', chemin: '/co-construire' },
+    { prefix: 'profil.', chemin: '/profil' },
+    { prefix: 'admin.', chemin: '/admin' },
+  ];
+  for (const r of REGLES) {
+    if (cle.startsWith(r.prefix)) return r.chemin;
+  }
+  // Pages éditoriales explicitement listées
+  const direct = PAGES_EDITORIALES_CONNUES.find((p) => p.cle === cle);
+  return direct?.chemin;
+}
 
 export default async function PageContenusEditoriaux() {
   const supabase = await getSupabaseServer();
   const { data: contenus } = await supabase
     .from('contenu_editorial')
-    .select('cle, titre, valeur_md, updated_at, updated_by')
+    .select('cle, titre, valeur_md, updated_at')
     .order('updated_at', { ascending: false });
 
-  const enBaseParCle = new Map((contenus ?? []).map((c) => [c.cle, c]));
+  const titresParCle = new Map(PAGES_EDITORIALES_CONNUES.map((p) => [p.cle, p.titre]));
+  const cleesEnBase = new Set((contenus ?? []).map((c) => c.cle));
+  const pagesNonEditees = PAGES_EDITORIALES_CONNUES.filter((p) => !cleesEnBase.has(p.cle));
 
-  const editees: typeof PAGES_EDITORIALES_CONNUES = [];
-  const nonEditees: typeof PAGES_EDITORIALES_CONNUES = [];
-  for (const p of PAGES_EDITORIALES_CONNUES) {
-    if (enBaseParCle.has(p.cle)) editees.push(p);
-    else nonEditees.push(p);
-  }
+  const contenusListe: ContenuListe[] = (contenus ?? []).map((c) => ({
+    cle: c.cle,
+    valeurMd: c.valeur_md,
+    updatedAt: c.updated_at,
+    cheminPublic: devinerCheminPublic(c.cle),
+    titrePage: titresParCle.get(c.cle),
+  }));
 
   const [estAdmin, titre, intro] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('admin.national.contenus.titre', { valeurMd: 'Contenus éditoriaux' }),
     lireContenuEditorial('admin.national.contenus.intro', {
       valeurMd:
-        "CMS minimal V2.4.1. Pour modifier un contenu, va sur la page publique correspondante et clique sur « Modifier » (visible uniquement en tant qu'admin).",
+        "Console CMS V2.5.15. Cherche n'importe quel libellé du site par sa clé ou par son contenu, puis va l'éditer en place en cliquant sur ✏️ sur la page publique correspondante.",
     }),
   ]);
 
@@ -102,104 +145,9 @@ export default async function PageContenusEditoriaux() {
         {(t) => <p className="mt-2 text-sm text-text-3">{t}</p>}
       </TexteEditableAdmin>
 
-      <section className="mt-8">
-        <Heading niveau={2} apparenceComme={3}>
-          Pages déjà personnalisées ({editees.length})
-        </Heading>
-        {editees.length === 0 ? (
-          <p className="mt-2 text-sm text-text-3">
-            Aucune page n'a encore été personnalisée. Toutes affichent du lorem ipsum.
-          </p>
-        ) : (
-          <ul className="mt-4 grid gap-2">
-            {editees.map((p) => {
-              const c = enBaseParCle.get(p.cle);
-              return (
-                <li key={p.cle}>
-                  <Card variant="ombre" className="grid gap-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-bold">{p.titre}</p>
-                      <Badge variant="success">Personnalisé</Badge>
-                    </div>
-                    <p className="text-text-3 text-xs">
-                      <code className="font-mono">{p.cle}</code> · {c?.valeur_md.length ?? 0}{' '}
-                      caractères ·{' '}
-                      {c?.updated_at !== undefined
-                        ? `modifié le ${FORMATEUR_DATE.format(new Date(c.updated_at))}`
-                        : ''}
-                    </p>
-                    <Link
-                      href={p.chemin}
-                      className="inline-flex items-center gap-1 text-brand text-sm hover:underline"
-                    >
-                      <ExternalLink size={14} aria-hidden="true" />
-                      Voir / modifier sur {p.chemin}
-                    </Link>
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      <section className="mt-8">
-        <Heading niveau={2} apparenceComme={3}>
-          Pages avec lorem ipsum par défaut ({nonEditees.length})
-        </Heading>
-        {nonEditees.length === 0 ? (
-          <p className="mt-2 text-sm text-text-3">Toutes les pages connues sont personnalisées.</p>
-        ) : (
-          <ul className="mt-4 grid gap-2">
-            {nonEditees.map((p) => (
-              <li key={p.cle}>
-                <Card variant="plat" className="grid gap-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-bold">{p.titre}</p>
-                    <Badge variant="warning">
-                      <Plus size={12} aria-hidden="true" />À rédiger
-                    </Badge>
-                  </div>
-                  <p className="text-text-3 text-xs">
-                    <code className="font-mono">{p.cle}</code>
-                  </p>
-                  <Link
-                    href={p.chemin}
-                    className="inline-flex items-center gap-1 text-brand text-sm hover:underline"
-                  >
-                    <ExternalLink size={14} aria-hidden="true" />
-                    Aller éditer sur {p.chemin}
-                  </Link>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {(contenus ?? []).filter((c) => !PAGES_EDITORIALES_CONNUES.some((p) => p.cle === c.cle))
-        .length > 0 ? (
-        <section className="mt-8">
-          <Heading niveau={2} apparenceComme={3}>
-            Autres contenus en base (non listés)
-          </Heading>
-          <ul className="mt-4 grid gap-2">
-            {(contenus ?? [])
-              .filter((c) => !PAGES_EDITORIALES_CONNUES.some((p) => p.cle === c.cle))
-              .map((c) => (
-                <li key={c.cle}>
-                  <Card variant="plat" className="grid gap-1">
-                    <p className="font-mono text-text-1 text-sm">{c.cle}</p>
-                    <p className="text-text-3 text-xs">
-                      {c.valeur_md.length} caractères · modifié le{' '}
-                      {FORMATEUR_DATE.format(new Date(c.updated_at))}
-                    </p>
-                  </Card>
-                </li>
-              ))}
-          </ul>
-        </section>
-      ) : null}
+      <div className="mt-8">
+        <ConsoleContenusCMS contenus={contenusListe} pagesNonEditees={pagesNonEditees} />
+      </div>
     </>
   );
 }

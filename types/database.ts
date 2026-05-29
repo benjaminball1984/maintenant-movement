@@ -3882,6 +3882,10 @@ export type Database = {
         Args: { cible: string };
         Returns: string;
       };
+      peut_editer_cms: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       est_ami_reseau: {
         Args: { cible: string };
         Returns: boolean;

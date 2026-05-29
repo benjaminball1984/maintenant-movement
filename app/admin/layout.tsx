@@ -1,5 +1,6 @@
 import { SITE } from '@/config/site';
 import { estAdminNational } from '@/lib/admin/national/garde';
+import { estAdminCourant, peutEditerCmsCourant } from '@/lib/auth/admin';
 import { getSupabaseServer } from '@/lib/supabase';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -23,6 +24,12 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
 
   // La console nationale n'est proposée qu'aux admins du niveau le plus élevé.
   const peutNational = await estAdminNational();
+  // V2.5.15 Phase K — un compte avec niveau CMS uniquement (pas admin général)
+  // ne voit que la section Contenus dans la nav. Cohérent avec la doctrine
+  // §4.2 « la plateforme technique n'ouvre aucun droit politique ».
+  const estAdmin = await estAdminCourant();
+  const peutCms = await peutEditerCmsCourant();
+  const cmsSeulement = !estAdmin && peutCms;
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -49,53 +56,67 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
             <ul className="mb-4 grid gap-1">
               <li>
                 <Link
-                  href="/admin"
+                  href={cmsSeulement ? '/admin/national/contenus' : '/admin'}
                   className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
                 >
-                  Vue d'ensemble
+                  {cmsSeulement ? 'Contenus éditoriaux' : "Vue d'ensemble"}
                 </Link>
               </li>
             </ul>
-            <p className="mb-3 text-xs font-bold uppercase tracking-cap text-text-3">Modération</p>
-            <ul className="grid gap-1">
-              {[
-                { href: '/admin/moderation', libelle: '→ File globale' },
-                { href: '/admin/moderation/petitions', libelle: 'Pétitions' },
-                { href: '/admin/moderation/campagnes', libelle: 'Campagnes' },
-                { href: '/admin/moderation/mobilisations', libelle: 'Mobilisations' },
-                { href: '/admin/moderation/cagnottes', libelle: 'Cagnottes' },
-                { href: '/admin/moderation/media', libelle: 'Médias' },
-                { href: '/admin/moderation/sel', libelle: 'SEL' },
-                { href: '/admin/moderation/marche', libelle: 'Marché solidaire' },
-                { href: '/admin/moderation/moments', libelle: 'Moments' },
-                { href: '/admin/moderation/sondages', libelle: 'Sondages' },
-                { href: '/admin/moderation/reseau', libelle: 'Réseau social' },
-                { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
-                { href: '/admin/moderation/reservations', libelle: 'Réservations en litige' },
-              ].map((onglet) => (
-                <li key={onglet.href}>
-                  <Link
-                    href={onglet.href}
-                    className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                  >
-                    {onglet.libelle}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 mb-3 text-xs font-bold uppercase tracking-cap text-text-3">
-              Gestion
-            </p>
-            <ul className="grid gap-1">
-              <li>
-                <Link
-                  href="/admin/petitions"
-                  className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
-                >
-                  Pétitions (édition)
-                </Link>
-              </li>
-            </ul>
+            {cmsSeulement ? (
+              <p className="text-xs text-text-3">
+                Tu as un rôle de maintenance CMS. Tu peux éditer les libellés du site sans pouvoir
+                politique. Voir la page Contenus éditoriaux.
+              </p>
+            ) : null}
+            {!cmsSeulement ? (
+              <p className="mb-3 text-xs font-bold uppercase tracking-cap text-text-3">
+                Modération
+              </p>
+            ) : null}
+            {!cmsSeulement ? (
+              <>
+                <ul className="grid gap-1">
+                  {[
+                    { href: '/admin/moderation', libelle: '→ File globale' },
+                    { href: '/admin/moderation/petitions', libelle: 'Pétitions' },
+                    { href: '/admin/moderation/campagnes', libelle: 'Campagnes' },
+                    { href: '/admin/moderation/mobilisations', libelle: 'Mobilisations' },
+                    { href: '/admin/moderation/cagnottes', libelle: 'Cagnottes' },
+                    { href: '/admin/moderation/media', libelle: 'Médias' },
+                    { href: '/admin/moderation/sel', libelle: 'SEL' },
+                    { href: '/admin/moderation/marche', libelle: 'Marché solidaire' },
+                    { href: '/admin/moderation/moments', libelle: 'Moments' },
+                    { href: '/admin/moderation/sondages', libelle: 'Sondages' },
+                    { href: '/admin/moderation/reseau', libelle: 'Réseau social' },
+                    { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
+                    { href: '/admin/moderation/reservations', libelle: 'Réservations en litige' },
+                  ].map((onglet) => (
+                    <li key={onglet.href}>
+                      <Link
+                        href={onglet.href}
+                        className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                      >
+                        {onglet.libelle}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4 mb-3 text-xs font-bold uppercase tracking-cap text-text-3">
+                  Gestion
+                </p>
+                <ul className="grid gap-1">
+                  <li>
+                    <Link
+                      href="/admin/petitions"
+                      className="block rounded-sm px-3 py-2 text-sm text-text-1 hover:bg-surface-2"
+                    >
+                      Pétitions (édition)
+                    </Link>
+                  </li>
+                </ul>
+              </>
+            ) : null}
 
             {peutNational ? (
               <>
@@ -164,6 +185,12 @@ async function garantirAccesAdmin(prochaine: string): Promise<void> {
 
   const { data: estModerateurice } = await supabase.rpc('est_moderateurice', {});
   if (estModerateurice === true) return;
+
+  // V2.5.15 Master Plan §K — le rôle CMS donne accès à la console pour
+  // éditer les libellés sans pouvoir politique. La nav cache les onglets
+  // sensibles (modération, trésorerie, etc.) pour ces comptes-là.
+  const { data: peutEditerCms } = await supabase.rpc('peut_editer_cms');
+  if (peutEditerCms === true) return;
 
   redirect('/');
 }
