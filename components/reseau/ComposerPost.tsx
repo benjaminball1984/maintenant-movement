@@ -39,15 +39,21 @@ export function ComposerPost() {
   };
 
   return (
-    <form onSubmit={publier} className="grid gap-3 rounded-lg border border-border bg-surface p-4">
-      <Label htmlFor="post-texte">Partager quelque chose</Label>
+    <form
+      onSubmit={publier}
+      className="grid gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm transition focus-within:border-brand/40 focus-within:shadow-md"
+    >
+      <Label htmlFor="post-texte" className="font-display text-base text-text-1">
+        Quoi de neuf ?
+      </Label>
       <Textarea
         id="post-texte"
         rows={3}
         value={texte}
         onChange={(e) => setTexte(e.target.value)}
-        placeholder="Quoi de neuf dans le mouvement ?"
+        placeholder="Partage une nouvelle, une question, une victoire, un coup de gueule…"
         maxLength={5000}
+        className="resize-none"
       />
       <ChampImageObjet
         name="post-image"
@@ -58,7 +64,8 @@ export function ComposerPost() {
       />
       {erreur !== null ? <Alert variant="danger">{erreur}</Alert> : null}
       <CaptchaTurnstile onChange={setToken} />
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-text-3">{texte.length}/5000 caractères</p>
         <Button type="submit" disabled={enCours || texte.trim() === ''}>
           {enCours ? 'Publication...' : 'Publier'}
         </Button>

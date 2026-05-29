@@ -94,7 +94,7 @@ export function CartePost({
   const espace = post.espacePublieur;
 
   return (
-    <article className="grid gap-3 rounded-lg border border-border bg-surface p-4">
+    <article className="grid gap-3 rounded-lg border border-border bg-surface p-5 transition hover:border-brand/40 hover:shadow-sm">
       <header className="flex items-center gap-3">
         {espace !== null ? (
           <>
@@ -133,29 +133,36 @@ export function CartePost({
         <img src={post.imageUrl} alt="" className="max-h-96 w-full rounded-md object-cover" />
       ) : null}
 
-      <footer className="flex items-center gap-4 border-t border-border pt-2 text-sm">
+      <footer className="flex items-center gap-5 border-t border-border pt-3 text-sm">
         <button
           type="button"
           onClick={soutenir}
-          className={`inline-flex items-center gap-1.5 ${soutenu ? 'text-brand' : 'text-text-3 hover:text-text-1'}`}
+          className={`group inline-flex items-center gap-1.5 transition ${soutenu ? 'text-danger' : 'text-text-3 hover:text-danger'}`}
           aria-pressed={soutenu}
         >
-          <Heart size={18} strokeWidth={1.5} fill={soutenu ? 'currentColor' : 'none'} />
-          {nbSoutiens} soutien{nbSoutiens > 1 ? 's' : ''}
+          <Heart
+            size={18}
+            strokeWidth={1.5}
+            fill={soutenu ? 'currentColor' : 'none'}
+            className="transition-transform group-active:scale-90"
+          />
+          <span className="font-medium">{nbSoutiens}</span>
+          <span className="hidden sm:inline">soutien{nbSoutiens > 1 ? 's' : ''}</span>
         </button>
         <button
           type="button"
           onClick={basculerCommentaires}
-          className="inline-flex items-center gap-1.5 text-text-3 hover:text-text-1"
+          className="inline-flex items-center gap-1.5 text-text-3 transition hover:text-brand"
         >
           <MessageCircle size={18} strokeWidth={1.5} />
-          {post.nbCommentaires} commentaire{post.nbCommentaires > 1 ? 's' : ''}
+          <span className="font-medium">{post.nbCommentaires}</span>
+          <span className="hidden sm:inline">commentaire{post.nbCommentaires > 1 ? 's' : ''}</span>
         </button>
         {estMien ? (
           <button
             type="button"
             onClick={supprimer}
-            className="ml-auto text-text-3 hover:text-danger"
+            className="ml-auto text-text-3 transition hover:text-danger"
           >
             Supprimer
           </button>
