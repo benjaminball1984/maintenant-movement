@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -56,12 +57,19 @@ export async function creerCampagne(
   const supabase = await getSupabaseServer();
   const slug = await genererSlugUnique(donnees.titre, supabase);
 
+  // V2.5.50 — sanitize HTML riche optionnel avant insertion.
+  const texteHtmlPropre =
+    donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
+      ? sanitizeRichHtml(donnees.texte_html)
+      : null;
+
   const { data: cree, error } = await supabase
     .from('campagne')
     .insert({
       slug,
       titre: donnees.titre,
       texte: donnees.texte,
+      texte_html: texteHtmlPropre,
       image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
       createurice_id: session.userId,
       statut: 'en_moderation',

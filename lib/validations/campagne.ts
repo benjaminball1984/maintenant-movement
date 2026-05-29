@@ -36,6 +36,8 @@ export function creerCampagneFactory(
     .object({
       titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
       texte: z.string().trim().min(100, messages.texteMin).max(5000, messages.texteMax),
+      /** V2.5.50 — version HTML riche optionnelle (sanitizée au save). */
+      texte_html: z.string().max(50000).optional().or(z.literal('')),
       image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
       token_turnstile: z.string().min(1, messages.turnstileRequis),
     })

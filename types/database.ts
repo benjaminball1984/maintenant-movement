@@ -734,6 +734,8 @@ export type Database = {
           slug: string;
           statut: string;
           texte: string;
+          /** V2.5.50 — version HTML riche optionnelle. */
+          texte_html: string | null;
           titre: string;
           updated_at: string;
         };
@@ -748,6 +750,7 @@ export type Database = {
           slug: string;
           statut?: string;
           texte: string;
+          texte_html?: string | null;
           titre: string;
           updated_at?: string;
         };
@@ -762,6 +765,7 @@ export type Database = {
           slug?: string;
           statut?: string;
           texte?: string;
+          texte_html?: string | null;
           titre?: string;
           updated_at?: string;
         };
