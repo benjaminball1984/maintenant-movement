@@ -14,6 +14,7 @@
 
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getEmailService } from '@/lib/email';
+import { gabaritEmailHTML } from '@/lib/email/gabarit';
 import type { ResultatEnvoi } from '@/lib/email/types';
 
 /** Types d'emails transactionnels avec template editable. */
@@ -85,6 +86,11 @@ function interpoler(template: string, params: Record<string, string | null | und
 /**
  * Envoie un email transactionnel en resolvant sujet + html + texte depuis
  * le CMS (ou les defauts), apres interpolation des parametres.
+ *
+ * V2.5.16 Phase L : le HTML CMS-edite est desormais enveloppe automatiquement
+ * dans le gabarit identitaire Maintenant! (bandeau couleur, mise en page,
+ * pied de page avec lien desinscription). Le contenu CMS reste juste le
+ * "corps" du message, l'enveloppe est codee une fois dans `lib/email/gabarit.ts`.
  */
 export async function envoyerEmailTemplee(
   type: TypeEmail,
@@ -98,10 +104,21 @@ export async function envoyerEmailTemplee(
     lireContenuEditorial(`email.${type}.texte`, { valeurMd: defaut.texte }),
   ]);
 
+  const sujet = interpoler(sujetCms.valeurMd, params);
+  const corpsHtml = interpoler(htmlCms.valeurMd, params);
+  const htmlComplet = await gabaritEmailHTML(corpsHtml, {
+    titre: sujet,
+    preheader: sujet,
+    // Les transactionnels (suppression compte, export RGPD, etc.) ne sont
+    // jamais "désabonnables" : ils relèvent du contrat d'usage du service.
+    // L'option avecDesinscription reste à `false` par défaut.
+    avecDesinscription: false,
+  });
+
   return getEmailService().envoyerTransactionnel({
     destinataire,
-    sujet: interpoler(sujetCms.valeurMd, params),
-    html: interpoler(htmlCms.valeurMd, params),
+    sujet,
+    html: htmlComplet,
     texte: interpoler(texteCms.valeurMd, params),
   });
 }
