@@ -106,6 +106,13 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
   }, [contenus, recherche]);
 
   const totalAffiches = groupes.reduce((sum, g) => sum + g.items.length, 0);
+  // V2.5.43 — comptes rich text vs markdown pour la barre d'en-tête.
+  const totalAvecRiche = contenus.filter(
+    (c) => c.valeurHtml !== null && c.valeurHtml !== undefined && c.valeurHtml !== '',
+  ).length;
+  const totalSansRiche = contenus.length - totalAvecRiche;
+  const ratioRiche =
+    contenus.length === 0 ? 0 : Math.round((totalAvecRiche / contenus.length) * 100);
 
   function basculer(espace: string) {
     setOuverts((o) => ({ ...o, [espace]: !o[espace] }));
@@ -172,7 +179,7 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
             />
           </span>
         </label>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-text-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-text-3 text-xs">
           <p>
             <strong className="text-text-1">{totalAffiches}</strong> contenu
             {totalAffiches > 1 ? 's' : ''} en base · <strong>{groupes.length}</strong> espace
@@ -186,6 +193,31 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
             <button type="button" onClick={toutFermer} className="text-brand hover:underline">
               Tout fermer
             </button>
+          </div>
+        </div>
+        {/* V2.5.43 — barre de progression rich text : permet a Lilou/Ben
+            de voir en un coup d'oeil l'avancee de la migration en rich text
+            (script convertir-tout-en-riche V2.5.41 ou edition manuelle). */}
+        <div
+          aria-label={`Rich text : ${totalAvecRiche} sur ${contenus.length} contenus (${ratioRiche}%)`}
+          className="grid gap-1"
+        >
+          <div className="flex items-center justify-between text-text-3 text-xs">
+            <span>
+              <span className="font-bold text-brand">{totalAvecRiche}</span> en mode Riche ·{' '}
+              <span className="font-bold text-text-2">{totalSansRiche}</span> en Markdown
+            </span>
+            <span className="font-mono">{ratioRiche}%</span>
+          </div>
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-surface-2"
+            role="progressbar"
+            tabIndex={-1}
+            aria-valuenow={ratioRiche}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="h-full bg-brand transition-all" style={{ width: `${ratioRiche}%` }} />
           </div>
         </div>
       </div>
