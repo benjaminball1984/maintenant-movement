@@ -31,12 +31,19 @@ export default async function PageNotifications() {
   // Les préférences notif sont stockées dans preferences_visibilite (jsonb)
   // sous la clé `notifications`. Si absentes ou invalides, on retombe sur
   // les valeurs par défaut (cf. spec §10 : opt-in pour push, opt-out pour mails).
+  // V2.5.38 : merge avec DEFAUT pour les champs qui n'existaient pas dans
+  // les vieilles entrées (ex. reseau_*), au lieu d'écraser toutes les prefs.
   const prefsBrutes =
     typeof personne.preferences_visibilite === 'object' && personne.preferences_visibilite !== null
       ? (personne.preferences_visibilite as Record<string, unknown>).notifications
       : null;
 
-  const parse = preferencesNotificationsSchema.safeParse(prefsBrutes);
+  const prefsObjet =
+    typeof prefsBrutes === 'object' && prefsBrutes !== null
+      ? (prefsBrutes as Record<string, unknown>)
+      : {};
+  const prefsMergees = { ...PREFERENCES_NOTIFICATIONS_DEFAUT, ...prefsObjet };
+  const parse = preferencesNotificationsSchema.safeParse(prefsMergees);
   const valeursInitiales: PreferencesNotifications = parse.success
     ? parse.data
     : PREFERENCES_NOTIFICATIONS_DEFAUT;

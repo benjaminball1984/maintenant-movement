@@ -66,7 +66,30 @@ export type PreferencesVisibilite = z.infer<typeof preferencesVisibiliteSchema>;
  * Cinq canaux hiérarchisés (cf. spec §10). Les deux premiers (messagerie
  * interne, cloche) sont toujours actifs : on respecte l'attention sans
  * la couper. Les trois suivants sont opt-in/opt-out.
+ *
+ * V2.5.38 sous-chantier V2.5.30.a : ajoute 3 préférences par type de
+ * notification réseau. Modes possibles :
+ *  - `cloche` (défaut) : seulement la notification cloche in-app.
+ *  - `mail_immediat` : cloche + email immédiat.
+ *  - `digest_quotidien` : cloche + email digest une fois par jour.
+ *  - `digest_hebdo` : cloche + email digest une fois par semaine.
+ *  - `aucune` : ni cloche ni email (silence total).
+ *
+ * Les digests nécessitent un cron qui sera branché ultérieurement.
+ * Pour cette V2.5.38, les modes valides sont posés mais seuls
+ * `cloche` et `mail_immediat` et `aucune` sont effectivement traités
+ * (les digests tombent en `cloche` en attendant le cron).
  */
+export const modeNotifReseauSchema = z.enum([
+  'cloche',
+  'mail_immediat',
+  'digest_quotidien',
+  'digest_hebdo',
+  'aucune',
+]);
+
+export type ModeNotifReseau = z.infer<typeof modeNotifReseauSchema>;
+
 export const preferencesNotificationsSchema = z
   .object({
     push: z.boolean(),
@@ -74,6 +97,15 @@ export const preferencesNotificationsSchema = z
     push_vibration: z.boolean(),
     mardi_recap: z.boolean(),
     vendredi_newsletter: z.boolean(),
+    /** V2.5.38 — préf pour les messages directs reçus sur le réseau.
+     *  Pas de .default() Zod : ça rendrait le champ optionnel à l'input,
+     *  ce qui casse l'inférence côté react-hook-form. Le fallback se
+     *  fait dans la lecture côté page (`PREFERENCES_NOTIFICATIONS_DEFAUT`). */
+    reseau_message_recu: modeNotifReseauSchema,
+    /** V2.5.38 — préf pour les commentaires sur les publications de la personne. */
+    reseau_post_commente: modeNotifReseauSchema,
+    /** V2.5.38 — préf pour les soutiens (cœurs) sur les publications. */
+    reseau_post_soutenu: modeNotifReseauSchema,
   })
   .strict();
 
@@ -85,6 +117,9 @@ export const PREFERENCES_NOTIFICATIONS_DEFAUT: PreferencesNotifications = {
   push_vibration: false,
   mardi_recap: true,
   vendredi_newsletter: true,
+  reseau_message_recu: 'cloche',
+  reseau_post_commente: 'cloche',
+  reseau_post_soutenu: 'cloche',
 };
 
 // ============================================================

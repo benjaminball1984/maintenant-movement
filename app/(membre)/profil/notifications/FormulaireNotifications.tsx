@@ -2,6 +2,7 @@
 
 import { Alert, Button } from '@/components/ui';
 import {
+  type ModeNotifReseau,
   type PreferencesNotifications,
   preferencesNotificationsSchema,
 } from '@/lib/validations/profil';
@@ -31,6 +32,20 @@ export interface LibellesNotifications {
   aideVendredi: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  // V2.5.38 — section reseau social
+  legendeReseau: string;
+  libelleReseauMessage: string;
+  aideReseauMessage: string;
+  libelleReseauCommentaire: string;
+  aideReseauCommentaire: string;
+  libelleReseauSoutien: string;
+  aideReseauSoutien: string;
+  optionCloche: string;
+  optionMailImmediat: string;
+  optionDigestQuotidien: string;
+  optionDigestHebdo: string;
+  optionAucune: string;
+  hintDigestPasEncore: string;
 }
 
 const LIBELLES_DEFAUT: LibellesNotifications = {
@@ -54,6 +69,20 @@ const LIBELLES_DEFAUT: LibellesNotifications = {
   aideVendredi: 'Édito de la semaine, taggée par origine et département.',
   ctaSubmit: 'Enregistrer mes préférences',
   ctaEnCours: 'Envoi en cours...',
+  legendeReseau: 'Notifications du réseau social',
+  libelleReseauMessage: 'Quand je reçois un message direct',
+  aideReseauMessage: "Quelqu'un t'écrit en privé via la messagerie du réseau.",
+  libelleReseauCommentaire: 'Quand on commente ma publication',
+  aideReseauCommentaire: 'Une personne réagit à un de tes posts.',
+  libelleReseauSoutien: 'Quand on soutient ma publication',
+  aideReseauSoutien: 'Une personne pose un cœur sur un de tes posts.',
+  optionCloche: 'Cloche uniquement (défaut)',
+  optionMailImmediat: 'Cloche + email immédiat',
+  optionDigestQuotidien: 'Cloche + digest quotidien (à venir)',
+  optionDigestHebdo: 'Cloche + digest hebdomadaire (à venir)',
+  optionAucune: 'Silence total (ni cloche ni email)',
+  hintDigestPasEncore:
+    'Les digests sont préparés mais pas encore actifs : ils tombent en « cloche uniquement » en attendant le cron de regroupement.',
 };
 
 interface FormulaireNotificationsProps {
@@ -157,6 +186,35 @@ export function FormulaireNotifications({
         />
       </fieldset>
 
+      {/* V2.5.38 — préférences notifs réseau social (3 types × 5 modes) */}
+      <fieldset className="grid gap-4 rounded-md border border-border p-4">
+        <legend className="px-1 font-bold text-text-3 text-sm uppercase tracking-cap">
+          {libelles.legendeReseau}
+        </legend>
+        <SelecteurMode
+          id="prefs-reseau-message"
+          libelle={libelles.libelleReseauMessage}
+          aide={libelles.aideReseauMessage}
+          {...register('reseau_message_recu')}
+          libelles={libelles}
+        />
+        <SelecteurMode
+          id="prefs-reseau-comment"
+          libelle={libelles.libelleReseauCommentaire}
+          aide={libelles.aideReseauCommentaire}
+          {...register('reseau_post_commente')}
+          libelles={libelles}
+        />
+        <SelecteurMode
+          id="prefs-reseau-soutien"
+          libelle={libelles.libelleReseauSoutien}
+          aide={libelles.aideReseauSoutien}
+          {...register('reseau_post_soutenu')}
+          libelles={libelles}
+        />
+        <p className="text-text-3 text-xs italic">{libelles.hintDigestPasEncore}</p>
+      </fieldset>
+
       <Alert variant="info" titre={libelles.alertToujoursActifsTitre}>
         {libelles.alertToujoursActifsMessage}
       </Alert>
@@ -191,5 +249,54 @@ function Case({ id, libelle, aide, ...inputProps }: CaseProps) {
         {aide !== undefined ? <span className="text-xs text-text-3">{aide}</span> : null}
       </span>
     </label>
+  );
+}
+
+/**
+ * V2.5.38 — sélecteur de mode pour une préf de notif réseau.
+ * Présente 5 modes en select. Les digests sont visibles mais
+ * étiquetés « à venir » (cf. hintDigestPasEncore).
+ */
+interface SelecteurModeProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  id: string;
+  libelle: string;
+  aide?: string;
+  libelles: LibellesNotifications;
+}
+
+const MODES_ORDONNES: ModeNotifReseau[] = [
+  'cloche',
+  'mail_immediat',
+  'digest_quotidien',
+  'digest_hebdo',
+  'aucune',
+];
+
+function SelecteurMode({ id, libelle, aide, libelles, ...selectProps }: SelecteurModeProps) {
+  const labelMode: Record<ModeNotifReseau, string> = {
+    cloche: libelles.optionCloche,
+    mail_immediat: libelles.optionMailImmediat,
+    digest_quotidien: libelles.optionDigestQuotidien,
+    digest_hebdo: libelles.optionDigestHebdo,
+    aucune: libelles.optionAucune,
+  };
+  return (
+    <div className="grid gap-1">
+      <label htmlFor={id} className="font-medium text-sm text-text-1">
+        {libelle}
+      </label>
+      {aide !== undefined ? <span className="text-text-3 text-xs">{aide}</span> : null}
+      <select
+        id={id}
+        className="w-full rounded-md border border-border bg-surface p-2 text-sm"
+        {...selectProps}
+      >
+        {MODES_ORDONNES.map((m) => (
+          <option key={m} value={m}>
+            {labelMode[m]}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
