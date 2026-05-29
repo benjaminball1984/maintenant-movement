@@ -2884,6 +2884,53 @@ export type Database = {
           },
         ];
       };
+      commentaire_objet: {
+        Row: {
+          auteurice_id: string;
+          created_at: string;
+          id: string;
+          objet_id: string;
+          objet_type: string;
+          raison_retrait: string | null;
+          retire_le: string | null;
+          retire_par: string | null;
+          statut: string;
+          texte: string;
+        };
+        Insert: {
+          auteurice_id: string;
+          created_at?: string;
+          id?: string;
+          objet_id: string;
+          objet_type: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte: string;
+        };
+        Update: {
+          auteurice_id?: string;
+          created_at?: string;
+          id?: string;
+          objet_id?: string;
+          objet_type?: string;
+          raison_retrait?: string | null;
+          retire_le?: string | null;
+          retire_par?: string | null;
+          statut?: string;
+          texte?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'commentaire_objet_auteurice_id_fkey';
+            columns: ['auteurice_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       reaction_reseau: {
         Row: {
           created_at: string;

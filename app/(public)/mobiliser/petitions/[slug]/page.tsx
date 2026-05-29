@@ -1,5 +1,6 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
@@ -417,6 +418,12 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="petition"
+          objetId={petition.id}
+          cheminRevalidation={`/mobiliser/petitions/${slug}`}
+        />
       </article>
     </Container>
   );

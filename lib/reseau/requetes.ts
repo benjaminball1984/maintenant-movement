@@ -91,7 +91,7 @@ export interface MessageAffiche {
 export { nomAffiche } from './affichage';
 
 /** Hydrate les identités affichables d'un lot de personnes (dédupliqué). */
-async function chargerIdentites(
+export async function chargerIdentites(
   supabase: ClientSupabase,
   personneIds: string[],
 ): Promise<Map<string, IdentiteAffichee>> {
