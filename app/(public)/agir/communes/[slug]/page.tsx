@@ -9,6 +9,8 @@ import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCom
 import { ListeMembres } from '@/components/communes/ListeMembres';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { ComposerPostEspace } from '@/components/reseau/ComposerPostEspace';
+import { FilEspacePublic } from '@/components/reseau/FilEspacePublic';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -332,6 +334,28 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
             cheminRevalidation={`/agir/communes/${commune.slug}`}
           />
         ) : null}
+
+        {/* V2.5.18 Phase H V2.5.10.b — composer pour publier au nom de
+            l'espace dans le flux du réseau social. Visible aux membres
+            actif·ves uniquement. */}
+        {session !== null && dejaMembre ? (
+          <ComposerPostEspace
+            espaceType="commune"
+            espaceId={commune.id}
+            espaceNom={commune.nom}
+            cheminRevalidation={`/agir/communes/${commune.slug}`}
+          />
+        ) : null}
+
+        {/* V2.5.18 Phase H V2.5.10.c — fil propre de l'espace (publications
+            faites au nom de la commune via le composer ci-dessus). Affiché
+            à tout le monde, pas seulement aux membres : le contenu publié
+            au nom d'un espace est par construction destiné au public. */}
+        <FilEspacePublic
+          espaceType="commune"
+          espaceId={commune.id}
+          titre={`Publications de ${commune.nom}`}
+        />
       </article>
     </Container>
   );

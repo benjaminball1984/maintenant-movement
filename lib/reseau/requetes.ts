@@ -437,6 +437,33 @@ export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
   );
 }
 
+/**
+ * V2.5.18 (Phase H sous-chantier V2.5.10.c) — publications publiées AU NOM
+ * d'un espace collectif. Utilise l'index `post_reseau_espace_idx` (partiel
+ * sur les posts avec espace_type non-NULL).
+ */
+export async function listerPostsDeLEspace(
+  espaceType: string,
+  espaceId: string,
+  limite = 30,
+): Promise<PostAffiche[]> {
+  const supabase = await getSupabaseServer();
+  const session = await getSession();
+  const { data, error } = await supabase
+    .from('post_reseau')
+    .select('id, auteurice_id, texte, image_url, created_at, espace_type, espace_id')
+    .eq('espace_type', espaceType)
+    .eq('espace_id', espaceId)
+    .eq('statut', 'publie')
+    .order('created_at', { ascending: false })
+    .limit(limite);
+  if (error !== null || data === null) return [];
+
+  const viewerId = session?.userId ?? null;
+  const suivis = viewerId !== null ? await chargerSuivis(supabase, viewerId) : new Set<string>();
+  return hydraterPosts(supabase, data, viewerId, suivis);
+}
+
 /** Publications publiées d'une personne (page profil). */
 export async function listerPostsDePersonne(
   personneId: string,
