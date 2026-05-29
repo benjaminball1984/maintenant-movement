@@ -50,6 +50,7 @@ export async function PageEditorialeCMS({ surtitre, titreParDefaut, cle, loremFa
         <ContenuEditableAdmin
           cle={cle}
           valeurInitiale={contenu.valeurMd}
+          valeurHtmlInitiale={contenu.valeurHtml}
           estAdmin={estAdmin}
           titre={titre}
         />

@@ -106,15 +106,22 @@ export async function envoyerEmailTemplee(
   ]);
 
   const sujet = interpoler(sujetCms.valeurMd, params);
-  // V2.5.20 sous-chantier V2.5.16.c : le contenu CMS peut etre soit du HTML
-  // direct (<p>, <a>...) soit du Markdown leger (**gras**, [lien](url), - liste).
-  // Heuristique : si le contenu contient `<p>` ou `<a `, on le considere HTML
-  // (compatibilite avec les templates V2.4 existants). Sinon, on le passe par
-  // le parseur Markdown qui produit du HTML compatible email.
-  const corpsBrut = interpoler(htmlCms.valeurMd, params);
-  const corpsHtml = /<(p|a|ul|strong|em|br)\b/i.test(corpsBrut)
-    ? corpsBrut
-    : markdownEmail(corpsBrut);
+  // V2.5.23 Phase L rich text : priorité au HTML riche (colonne valeur_html
+  // posée via l'éditeur TipTap, déjà sanitizée au save). Permet aux admins
+  // de styler leurs emails (couleurs, polices, listes, citations, images)
+  // sans toucher au code.
+  // Fallback V2.5.20 V2.5.16.c : si pas de valeur_html, on lit valeur_md
+  // qui peut être soit du HTML direct (<p>, <a>...) soit du Markdown léger.
+  const sourceBrute = htmlCms.valeurHtml ?? htmlCms.valeurMd;
+  const corpsBrut = interpoler(sourceBrute, params);
+  // Si la source venait de valeur_html, c'est déjà du HTML propre. Sinon,
+  // heuristique : balises HTML reconnaissables → on garde, sinon Markdown.
+  const corpsHtml =
+    htmlCms.valeurHtml !== null && htmlCms.valeurHtml !== ''
+      ? corpsBrut
+      : /<(p|a|ul|strong|em|br)\b/i.test(corpsBrut)
+        ? corpsBrut
+        : markdownEmail(corpsBrut);
   const htmlComplet = await gabaritEmailHTML(corpsHtml, {
     titre: sujet,
     preheader: sujet,
