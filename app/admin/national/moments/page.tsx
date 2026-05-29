@@ -34,6 +34,15 @@ const TYPES: Array<{ value: string; label: string }> = [
   { value: 'repas_solidaire', label: 'Repas' },
 ];
 
+/** Libellés humains pour l'affichage d'un statut de moment solidaire (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  annonce: 'Annoncé',
+  en_cours: 'En cours',
+  termine: 'Terminé',
+  annule: 'Annulé',
+  retire: 'Retiré',
+};
+
 interface Props {
   searchParams: Promise<{ q?: string; statut?: string; type?: string }>;
 }
@@ -180,9 +189,11 @@ export default async function PageAdminMoments({ searchParams }: Props) {
                               : 'default'
                       }
                     >
-                      {m.statut}
+                      {LIBELLE_STATUT[m.statut] ?? m.statut}
                     </Badge>
-                    <Badge variant="info">{m.type}</Badge>
+                    <Badge variant="info">
+                      {TYPES.find((t) => t.value === m.type)?.label ?? m.type}
+                    </Badge>
                     {m.sousType !== null ? <Badge variant="default">{m.sousType}</Badge> : null}
                   </div>
                 </div>

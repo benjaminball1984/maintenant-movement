@@ -40,6 +40,30 @@ const LIBELLE_TYPE: Record<TypeCreation, string> = {
   commune_libre: 'Communes libres',
 };
 
+/**
+ * Libellés humains pour l'affichage d'un statut de création (badge).
+ * Les créations couvrent plusieurs types d'objets (pétition, cagnotte,
+ * média, moment, …) : on regroupe ici tous les statuts possibles.
+ */
+const LIBELLE_STATUT: Record<string, string> = {
+  publiee: 'Publiée',
+  publie: 'Publié',
+  ouvert: 'Ouvert',
+  ouverte: 'Ouverte',
+  disponible: 'Disponible',
+  en_cours: 'En cours',
+  cree: 'Créé',
+  en_moderation: 'En modération',
+  annonce: 'Annoncé',
+  brouillon: 'Brouillon',
+  rejetee: 'Rejetée',
+  suspendue: 'Suspendue',
+  fermee: 'Fermée',
+  cloturee: 'Clôturée',
+  retire: 'Retiré',
+  pre_creee: 'Pré-créée',
+};
+
 const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
   month: 'short',
@@ -157,7 +181,9 @@ export default async function PageMesCreations() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <h3 className="font-medium text-text-1">{c.titre}</h3>
                           {c.statut !== null ? (
-                            <Badge variant={variantStatut(c.statut)}>{c.statut}</Badge>
+                            <Badge variant={variantStatut(c.statut)}>
+                              {LIBELLE_STATUT[c.statut] ?? c.statut}
+                            </Badge>
                           ) : null}
                         </div>
                         <p className="text-text-3 text-xs">

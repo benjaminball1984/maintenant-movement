@@ -110,6 +110,13 @@ const VARIANT_STATUT = {
   fermee: 'default',
 } as const;
 
+/** Libellés humains pour l'affichage d'un statut de caisse (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  ouverte: 'Ouverte',
+  suspendue: 'Suspendue',
+  fermee: 'Fermée',
+};
+
 const LIBELLE_TYPE_CAISSE = {
   adhesion: 'Adhésions',
   cotisation_solidaire: 'Cotisations solidaires',
@@ -132,7 +139,9 @@ function CarteCaisse({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Badge variant="default">{LIBELLE_TYPE_CAISSE[caisse.typeCaisse]}</Badge>
-          <Badge variant={VARIANT_STATUT[caisse.statut]}>{caisse.statut}</Badge>
+          <Badge variant={VARIANT_STATUT[caisse.statut]}>
+            {LIBELLE_STATUT[caisse.statut] ?? caisse.statut}
+          </Badge>
         </div>
         <span className="text-text-3 text-xs">
           Ouverte le {new Date(caisse.ouverteLe).toLocaleDateString('fr-FR')}

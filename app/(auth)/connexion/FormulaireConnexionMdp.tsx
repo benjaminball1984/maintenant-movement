@@ -94,11 +94,14 @@ export function FormulaireConnexionMdp({
           id="cnx-mdp-email"
           type="email"
           autoComplete="email"
-          aria-invalid={errors.email !== undefined}
+          aria-invalid={errors.email !== undefined ? true : undefined}
+          aria-describedby={errors.email !== undefined ? 'cnx-mdp-email-erreur' : undefined}
           {...register('email')}
         />
         {errors.email !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+          <p id="cnx-mdp-email-erreur" className="mt-1 text-xs text-danger">
+            {errors.email.message}
+          </p>
         ) : null}
       </div>
       <div>
@@ -108,11 +111,14 @@ export function FormulaireConnexionMdp({
         <ChampMotDePasse
           id="cnx-mdp-passe"
           autoComplete="current-password"
-          aria-invalid={errors.mot_de_passe !== undefined}
+          aria-invalid={errors.mot_de_passe !== undefined ? true : undefined}
+          aria-describedby={errors.mot_de_passe !== undefined ? 'cnx-mdp-passe-erreur' : undefined}
           {...register('mot_de_passe')}
         />
         {errors.mot_de_passe !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.mot_de_passe.message}</p>
+          <p id="cnx-mdp-passe-erreur" className="mt-1 text-xs text-danger">
+            {errors.mot_de_passe.message}
+          </p>
         ) : null}
       </div>
 

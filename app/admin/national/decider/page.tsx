@@ -19,6 +19,24 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
   year: 'numeric',
 });
 
+/** Libellés humains pour l'affichage de l'espace d'une salle (badge). */
+const LIBELLE_ESPACE: Record<string, string> = {
+  commune: 'Commune',
+  federation: 'Fédération',
+  confederation: 'Confédération',
+  gt_thematique: 'Groupe de travail',
+  campagne: 'Campagne',
+  groupe_entraide_local: 'Groupe d’entraide',
+  national: 'National',
+};
+
+/** Libellés humains pour l'affichage de la visibilité d'une salle (badge). */
+const LIBELLE_VISIBILITE: Record<string, string> = {
+  membres: 'Membres',
+  fedeere: 'Fédéré',
+  public: 'Public',
+};
+
 /**
  * Console admin national / Décider (V2.4.12).
  *
@@ -100,8 +118,10 @@ export default async function PageAdminDecider() {
                 <Card variant="ombre" className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="info">{s.espaceType}</Badge>
-                      <Badge variant="default">{s.typeVisibilite}</Badge>
+                      <Badge variant="info">{LIBELLE_ESPACE[s.espaceType] ?? s.espaceType}</Badge>
+                      <Badge variant="default">
+                        {LIBELLE_VISIBILITE[s.typeVisibilite] ?? s.typeVisibilite}
+                      </Badge>
                     </div>
                     <span className="text-text-3 text-xs">
                       Créée le {FORMATEUR_DATE.format(new Date(s.createdAt))}

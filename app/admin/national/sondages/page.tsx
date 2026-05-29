@@ -26,6 +26,19 @@ const MODES: Array<{ value: NonNullable<OptionsListeSondages['mode']>; label: st
   { value: 'pondere', label: 'Pondéré' },
 ];
 
+/** Libellés humains pour l'affichage d'un statut de sondage (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  ouvert: 'Ouvert',
+  ferme: 'Fermé',
+  en_moderation: 'En modération',
+};
+
+/** Libellés humains pour l'affichage du mode d'un sondage (badge). */
+const LIBELLE_MODE: Record<string, string> = {
+  classique: 'Classique',
+  pondere: 'Pondéré',
+};
+
 interface Props {
   searchParams: Promise<{ q?: string; statut?: string; mode?: string }>;
 }
@@ -169,9 +182,9 @@ export default async function PageAdminSondages({ searchParams }: Props) {
                             : 'default'
                       }
                     >
-                      {s.statut}
+                      {LIBELLE_STATUT[s.statut] ?? s.statut}
                     </Badge>
-                    <Badge variant="info">{s.mode}</Badge>
+                    <Badge variant="info">{LIBELLE_MODE[s.mode] ?? s.mode}</Badge>
                     <Badge variant="default">{compter(s.nbOptions, 'option')}</Badge>
                   </div>
                 </div>

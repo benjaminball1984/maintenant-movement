@@ -251,18 +251,34 @@ export function ModaleSignaturePetition({
                 <Label htmlFor="sig-prenom" obligatoire>
                   {libelles.labelPrenom}
                 </Label>
-                <Input id="sig-prenom" autoComplete="given-name" {...register('prenom')} />
+                <Input
+                  id="sig-prenom"
+                  autoComplete="given-name"
+                  aria-invalid={errors.prenom !== undefined ? true : undefined}
+                  aria-describedby={errors.prenom !== undefined ? 'sig-prenom-erreur' : undefined}
+                  {...register('prenom')}
+                />
                 {errors.prenom !== undefined ? (
-                  <p className="mt-1 text-xs text-danger">{errors.prenom.message}</p>
+                  <p id="sig-prenom-erreur" className="mt-1 text-xs text-danger">
+                    {errors.prenom.message}
+                  </p>
                 ) : null}
               </div>
               <div>
                 <Label htmlFor="sig-nom" obligatoire>
                   {libelles.labelNom}
                 </Label>
-                <Input id="sig-nom" autoComplete="family-name" {...register('nom')} />
+                <Input
+                  id="sig-nom"
+                  autoComplete="family-name"
+                  aria-invalid={errors.nom !== undefined ? true : undefined}
+                  aria-describedby={errors.nom !== undefined ? 'sig-nom-erreur' : undefined}
+                  {...register('nom')}
+                />
                 {errors.nom !== undefined ? (
-                  <p className="mt-1 text-xs text-danger">{errors.nom.message}</p>
+                  <p id="sig-nom-erreur" className="mt-1 text-xs text-danger">
+                    {errors.nom.message}
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -271,9 +287,18 @@ export function ModaleSignaturePetition({
               <Label htmlFor="sig-email" obligatoire>
                 {libelles.labelEmail}
               </Label>
-              <Input id="sig-email" type="email" autoComplete="email" {...register('email')} />
+              <Input
+                id="sig-email"
+                type="email"
+                autoComplete="email"
+                aria-invalid={errors.email !== undefined ? true : undefined}
+                aria-describedby={errors.email !== undefined ? 'sig-email-erreur' : undefined}
+                {...register('email')}
+              />
               {errors.email !== undefined ? (
-                <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+                <p id="sig-email-erreur" className="mt-1 text-xs text-danger">
+                  {errors.email.message}
+                </p>
               ) : null}
             </div>
 
@@ -287,17 +312,30 @@ export function ModaleSignaturePetition({
                   inputMode="numeric"
                   maxLength={5}
                   autoComplete="postal-code"
+                  aria-invalid={errors.code_postal !== undefined ? true : undefined}
+                  aria-describedby={errors.code_postal !== undefined ? 'sig-cp-erreur' : undefined}
                   {...register('code_postal')}
                 />
                 {errors.code_postal !== undefined ? (
-                  <p className="mt-1 text-xs text-danger">{errors.code_postal.message}</p>
+                  <p id="sig-cp-erreur" className="mt-1 text-xs text-danger">
+                    {errors.code_postal.message}
+                  </p>
                 ) : null}
               </div>
               <div>
                 <Label htmlFor="sig-tel">{libelles.labelTelephone}</Label>
-                <Input id="sig-tel" type="tel" autoComplete="tel" {...register('telephone')} />
+                <Input
+                  id="sig-tel"
+                  type="tel"
+                  autoComplete="tel"
+                  aria-invalid={errors.telephone !== undefined ? true : undefined}
+                  aria-describedby={errors.telephone !== undefined ? 'sig-tel-erreur' : undefined}
+                  {...register('telephone')}
+                />
                 {errors.telephone !== undefined ? (
-                  <p className="mt-1 text-xs text-danger">{errors.telephone.message}</p>
+                  <p id="sig-tel-erreur" className="mt-1 text-xs text-danger">
+                    {errors.telephone.message}
+                  </p>
                 ) : null}
               </div>
             </div>

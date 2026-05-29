@@ -34,6 +34,13 @@ const TYPES: Array<{ value: string; label: string }> = [
   { value: 'newsletter', label: 'Newsletter' },
 ];
 
+/** Libellés humains pour l'affichage d'un statut de média (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  publie: 'Publié',
+  brouillon: 'Brouillon',
+  retire: 'Retiré',
+};
+
 interface Props {
   searchParams: Promise<{ q?: string; statut?: string; type?: string }>;
 }
@@ -182,9 +189,11 @@ export default async function PageAdminMedias({ searchParams }: Props) {
                               : 'default'
                         }
                       >
-                        {m.statut}
+                        {LIBELLE_STATUT[m.statut] ?? m.statut}
                       </Badge>
-                      <Badge variant="info">{m.type}</Badge>
+                      <Badge variant="info">
+                        {TYPES.find((t) => t.value === m.type)?.label ?? m.type}
+                      </Badge>
                       {m.provenanceExterne !== null ? (
                         <Badge variant="default">repris de {m.provenanceExterne}</Badge>
                       ) : null}

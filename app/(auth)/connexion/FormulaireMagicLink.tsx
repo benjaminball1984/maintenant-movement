@@ -92,11 +92,14 @@ export function FormulaireMagicLink({
           id="cnx-magic-email"
           type="email"
           autoComplete="email"
-          aria-invalid={errors.email !== undefined}
+          aria-invalid={errors.email !== undefined ? true : undefined}
+          aria-describedby={errors.email !== undefined ? 'cnx-magic-email-erreur' : undefined}
           {...register('email')}
         />
         {errors.email !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+          <p id="cnx-magic-email-erreur" className="mt-1 text-xs text-danger">
+            {errors.email.message}
+          </p>
         ) : null}
       </div>
 

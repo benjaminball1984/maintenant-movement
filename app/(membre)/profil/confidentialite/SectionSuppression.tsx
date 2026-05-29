@@ -115,14 +115,17 @@ export function SectionSuppression({ email, suppressionDemandeeLe }: SectionSupp
           value={emailSaisi}
           onChange={(e) => setEmailSaisi(e.target.value)}
           placeholder={email}
-          aria-describedby="supp-email-aide"
+          aria-invalid={erreur !== null ? true : undefined}
+          aria-describedby={
+            erreur !== null ? 'supp-email-aide supp-email-erreur' : 'supp-email-aide'
+          }
         />
         <p id="supp-email-aide" className="mt-1 text-xs text-text-3">
           Doit correspondre exactement à l’email de ton compte.
         </p>
       </div>
       {erreur !== null ? (
-        <Alert variant="danger" titre="Demande refusée">
+        <Alert id="supp-email-erreur" variant="danger" titre="Demande refusée">
           {erreur}
         </Alert>
       ) : null}

@@ -94,11 +94,14 @@ export function FormulaireNouveauMotDePasse({
         <ChampMotDePasse
           id="reset-mdp"
           autoComplete="new-password"
-          aria-invalid={errors.mot_de_passe !== undefined}
+          aria-invalid={errors.mot_de_passe !== undefined ? true : undefined}
+          aria-describedby={errors.mot_de_passe !== undefined ? 'reset-mdp-erreur' : undefined}
           {...register('mot_de_passe')}
         />
         {errors.mot_de_passe !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.mot_de_passe.message}</p>
+          <p id="reset-mdp-erreur" className="mt-1 text-xs text-danger">
+            {errors.mot_de_passe.message}
+          </p>
         ) : null}
       </div>
 

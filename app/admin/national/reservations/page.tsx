@@ -28,6 +28,17 @@ const STATUTS: Array<{
   { value: 'litige', label: 'En litige', variant: 'danger' },
 ];
 
+/** Libellés humains au singulier pour l'affichage d'un statut de réservation (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  proposee: 'Proposée',
+  acceptee: 'Acceptée',
+  refusee: 'Refusée',
+  realisee: 'Réalisée',
+  confirmee: 'Confirmée',
+  annulee: 'Annulée',
+  litige: 'Litige',
+};
+
 const TYPES_OFFRE: Array<{ value: string; label: string }> = [
   { value: '', label: 'Tous types' },
   { value: 'offre_entraide', label: 'Entraide' },
@@ -173,8 +184,10 @@ export default async function PageAdminReservations({ searchParams }: Props) {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-1">
-                      <Badge variant={variantBadge}>{r.statut}</Badge>
-                      <Badge variant="info">{r.offreType}</Badge>
+                      <Badge variant={variantBadge}>{LIBELLE_STATUT[r.statut] ?? r.statut}</Badge>
+                      <Badge variant="info">
+                        {TYPES_OFFRE.find((t) => t.value === r.offreType)?.label ?? r.offreType}
+                      </Badge>
                       {r.quantite > 1 ? <Badge variant="default">×{r.quantite}</Badge> : null}
                     </div>
                   </div>

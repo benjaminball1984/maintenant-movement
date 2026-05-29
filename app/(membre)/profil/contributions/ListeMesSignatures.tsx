@@ -27,6 +27,16 @@ export function ListeMesSignatures({ signatures }: ListeMesSignaturesProps) {
   );
 }
 
+/** Libellés humains pour l'affichage d'un statut de pétition (badge). */
+const LIBELLE_STATUT: Record<string, string> = {
+  brouillon: 'Brouillon',
+  en_moderation: 'En modération',
+  publiee: 'Publiée',
+  rejetee: 'Rejetée',
+  cloturee: 'Clôturée',
+  archivee: 'Archivée',
+};
+
 const FORMAT_DATE = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
   month: 'long',
@@ -77,7 +87,9 @@ function LigneSignature({ signature }: { signature: MaSignature }) {
       </div>
 
       {signature.petition_statut !== 'publiee' ? (
-        <Badge variant="default">{signature.petition_statut}</Badge>
+        <Badge variant="default">
+          {LIBELLE_STATUT[signature.petition_statut] ?? signature.petition_statut}
+        </Badge>
       ) : null}
 
       <label

@@ -145,18 +145,32 @@ export function FormulaireInformations({
             <Label htmlFor="inf-prenom" obligatoire>
               {libelles.labelPrenom}
             </Label>
-            <Input id="inf-prenom" {...register('prenom')} />
+            <Input
+              id="inf-prenom"
+              aria-invalid={errors.prenom !== undefined ? true : undefined}
+              aria-describedby={errors.prenom !== undefined ? 'inf-prenom-erreur' : undefined}
+              {...register('prenom')}
+            />
             {errors.prenom !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.prenom.message}</p>
+              <p id="inf-prenom-erreur" className="mt-1 text-xs text-danger">
+                {errors.prenom.message}
+              </p>
             ) : null}
           </div>
           <div>
             <Label htmlFor="inf-nom" obligatoire>
               {libelles.labelNom}
             </Label>
-            <Input id="inf-nom" {...register('nom')} />
+            <Input
+              id="inf-nom"
+              aria-invalid={errors.nom !== undefined ? true : undefined}
+              aria-describedby={errors.nom !== undefined ? 'inf-nom-erreur' : undefined}
+              {...register('nom')}
+            />
             {errors.nom !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.nom.message}</p>
+              <p id="inf-nom-erreur" className="mt-1 text-xs text-danger">
+                {errors.nom.message}
+              </p>
             ) : null}
           </div>
         </div>
@@ -164,9 +178,16 @@ export function FormulaireInformations({
           <Label htmlFor="inf-pronom" obligatoire>
             {libelles.labelPronom}
           </Label>
-          <Input id="inf-pronom" {...register('pronom')} />
+          <Input
+            id="inf-pronom"
+            aria-invalid={errors.pronom !== undefined ? true : undefined}
+            aria-describedby={errors.pronom !== undefined ? 'inf-pronom-erreur' : undefined}
+            {...register('pronom')}
+          />
           {errors.pronom !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.pronom.message}</p>
+            <p id="inf-pronom-erreur" className="mt-1 text-xs text-danger">
+              {errors.pronom.message}
+            </p>
           ) : null}
         </div>
       </section>
@@ -184,17 +205,31 @@ export function FormulaireInformations({
               id="inf-code-postal"
               inputMode="numeric"
               maxLength={5}
+              aria-invalid={errors.code_postal !== undefined ? true : undefined}
+              aria-describedby={
+                errors.code_postal !== undefined ? 'inf-code-postal-erreur' : undefined
+              }
               {...register('code_postal')}
             />
             {errors.code_postal !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.code_postal.message}</p>
+              <p id="inf-code-postal-erreur" className="mt-1 text-xs text-danger">
+                {errors.code_postal.message}
+              </p>
             ) : null}
           </div>
           <div>
             <Label htmlFor="inf-telephone">{libelles.labelTelephone}</Label>
-            <Input id="inf-telephone" type="tel" {...register('telephone')} />
+            <Input
+              id="inf-telephone"
+              type="tel"
+              aria-invalid={errors.telephone !== undefined ? true : undefined}
+              aria-describedby={errors.telephone !== undefined ? 'inf-telephone-erreur' : undefined}
+              {...register('telephone')}
+            />
             {errors.telephone !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.telephone.message}</p>
+              <p id="inf-telephone-erreur" className="mt-1 text-xs text-danger">
+                {errors.telephone.message}
+              </p>
             ) : null}
           </div>
         </div>
@@ -297,9 +332,17 @@ export function FormulaireInformations({
             </>
           ) : (
             <>
-              <Textarea id="inf-bio" rows={4} {...register('bio')} />
+              <Textarea
+                id="inf-bio"
+                rows={4}
+                aria-invalid={errors.bio !== undefined ? true : undefined}
+                aria-describedby={errors.bio !== undefined ? 'inf-bio-erreur' : undefined}
+                {...register('bio')}
+              />
               {errors.bio !== undefined ? (
-                <p className="mt-1 text-danger text-xs">{errors.bio.message}</p>
+                <p id="inf-bio-erreur" className="mt-1 text-danger text-xs">
+                  {errors.bio.message}
+                </p>
               ) : null}
             </>
           )}

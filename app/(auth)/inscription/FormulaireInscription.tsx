@@ -168,11 +168,14 @@ export function FormulaireInscription({
           <Input
             id="ins-prenom"
             autoComplete="given-name"
-            aria-invalid={errors.prenom !== undefined}
+            aria-invalid={errors.prenom !== undefined ? true : undefined}
+            aria-describedby={errors.prenom !== undefined ? 'ins-prenom-erreur' : undefined}
             {...register('prenom')}
           />
           {errors.prenom !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.prenom.message}</p>
+            <p id="ins-prenom-erreur" className="mt-1 text-xs text-danger">
+              {errors.prenom.message}
+            </p>
           ) : null}
         </div>
         <div>
@@ -182,11 +185,14 @@ export function FormulaireInscription({
           <Input
             id="ins-nom"
             autoComplete="family-name"
-            aria-invalid={errors.nom !== undefined}
+            aria-invalid={errors.nom !== undefined ? true : undefined}
+            aria-describedby={errors.nom !== undefined ? 'ins-nom-erreur' : undefined}
             {...register('nom')}
           />
           {errors.nom !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.nom.message}</p>
+            <p id="ins-nom-erreur" className="mt-1 text-xs text-danger">
+              {errors.nom.message}
+            </p>
           ) : null}
         </div>
       </div>
@@ -198,15 +204,19 @@ export function FormulaireInscription({
         <Input
           id="ins-pronom"
           placeholder={libelles.placeholderPronom}
-          aria-invalid={errors.pronom !== undefined}
-          aria-describedby="ins-pronom-aide"
+          aria-invalid={errors.pronom !== undefined ? true : undefined}
+          aria-describedby={
+            errors.pronom !== undefined ? 'ins-pronom-aide ins-pronom-erreur' : 'ins-pronom-aide'
+          }
           {...register('pronom')}
         />
         <p id="ins-pronom-aide" className="mt-1 text-xs text-text-3">
           {libelles.hintPronom}
         </p>
         {errors.pronom !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.pronom.message}</p>
+          <p id="ins-pronom-erreur" className="mt-1 text-xs text-danger">
+            {errors.pronom.message}
+          </p>
         ) : null}
       </div>
 
@@ -218,11 +228,14 @@ export function FormulaireInscription({
           id="ins-email"
           type="email"
           autoComplete="email"
-          aria-invalid={errors.email !== undefined}
+          aria-invalid={errors.email !== undefined ? true : undefined}
+          aria-describedby={errors.email !== undefined ? 'ins-email-erreur' : undefined}
           {...register('email')}
         />
         {errors.email !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+          <p id="ins-email-erreur" className="mt-1 text-xs text-danger">
+            {errors.email.message}
+          </p>
         ) : null}
       </div>
 
@@ -236,11 +249,16 @@ export function FormulaireInscription({
             inputMode="numeric"
             autoComplete="postal-code"
             maxLength={5}
-            aria-invalid={errors.code_postal !== undefined}
+            aria-invalid={errors.code_postal !== undefined ? true : undefined}
+            aria-describedby={
+              errors.code_postal !== undefined ? 'ins-code-postal-erreur' : undefined
+            }
             {...register('code_postal')}
           />
           {errors.code_postal !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.code_postal.message}</p>
+            <p id="ins-code-postal-erreur" className="mt-1 text-xs text-danger">
+              {errors.code_postal.message}
+            </p>
           ) : null}
         </div>
         <div>
@@ -250,11 +268,14 @@ export function FormulaireInscription({
             type="tel"
             autoComplete="tel"
             placeholder={libelles.placeholderTelephone}
-            aria-invalid={errors.telephone !== undefined}
+            aria-invalid={errors.telephone !== undefined ? true : undefined}
+            aria-describedby={errors.telephone !== undefined ? 'ins-telephone-erreur' : undefined}
             {...register('telephone')}
           />
           {errors.telephone !== undefined ? (
-            <p className="mt-1 text-xs text-danger">{errors.telephone.message}</p>
+            <p id="ins-telephone-erreur" className="mt-1 text-xs text-danger">
+              {errors.telephone.message}
+            </p>
           ) : null}
         </div>
       </div>
@@ -266,15 +287,19 @@ export function FormulaireInscription({
         <Input
           id="ins-date-naissance"
           type="date"
-          aria-invalid={errors.date_naissance !== undefined}
-          aria-describedby="ins-date-aide"
+          aria-invalid={errors.date_naissance !== undefined ? true : undefined}
+          aria-describedby={
+            errors.date_naissance !== undefined ? 'ins-date-aide ins-date-erreur' : 'ins-date-aide'
+          }
           {...register('date_naissance')}
         />
         <p id="ins-date-aide" className="mt-1 text-xs text-text-3">
           {libelles.hintDateNaissance}
         </p>
         {errors.date_naissance !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.date_naissance.message}</p>
+          <p id="ins-date-erreur" className="mt-1 text-xs text-danger">
+            {errors.date_naissance.message}
+          </p>
         ) : null}
       </div>
 
@@ -285,15 +310,19 @@ export function FormulaireInscription({
         <ChampMotDePasse
           id="ins-mdp"
           autoComplete="new-password"
-          aria-invalid={errors.mot_de_passe !== undefined}
-          aria-describedby="ins-mdp-aide"
+          aria-invalid={errors.mot_de_passe !== undefined ? true : undefined}
+          aria-describedby={
+            errors.mot_de_passe !== undefined ? 'ins-mdp-aide ins-mdp-erreur' : 'ins-mdp-aide'
+          }
           {...register('mot_de_passe')}
         />
         <p id="ins-mdp-aide" className="mt-1 text-xs text-text-3">
           {libelles.hintMotDePasse}
         </p>
         {errors.mot_de_passe !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.mot_de_passe.message}</p>
+          <p id="ins-mdp-erreur" className="mt-1 text-xs text-danger">
+            {errors.mot_de_passe.message}
+          </p>
         ) : null}
       </div>
 
@@ -302,7 +331,8 @@ export function FormulaireInscription({
           id="ins-cgu"
           type="checkbox"
           className="mt-1 h-4 w-4 rounded-xs accent-brand"
-          aria-invalid={errors.cgu_acceptees !== undefined}
+          aria-invalid={errors.cgu_acceptees !== undefined ? true : undefined}
+          aria-describedby={errors.cgu_acceptees !== undefined ? 'ins-cgu-erreur' : undefined}
           {...register('cgu_acceptees')}
         />
         <Label htmlFor="ins-cgu" className="m-0 text-sm font-normal text-text-2" obligatoire>
@@ -310,12 +340,16 @@ export function FormulaireInscription({
         </Label>
       </div>
       {errors.cgu_acceptees !== undefined ? (
-        <p className="-mt-2 text-xs text-danger">{errors.cgu_acceptees.message}</p>
+        <p id="ins-cgu-erreur" className="-mt-2 text-xs text-danger">
+          {errors.cgu_acceptees.message}
+        </p>
       ) : null}
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
       {errors.token_turnstile !== undefined ? (
-        <p className="text-xs text-danger">{errors.token_turnstile.message}</p>
+        <p id="ins-turnstile-erreur" className="text-xs text-danger">
+          {errors.token_turnstile.message}
+        </p>
       ) : null}
 
       <Button type="submit" disabled={envoiEnCours || !hydrate}>

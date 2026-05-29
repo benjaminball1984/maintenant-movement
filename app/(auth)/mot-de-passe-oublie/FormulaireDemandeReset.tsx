@@ -94,11 +94,14 @@ export function FormulaireDemandeReset({
           id="reset-email"
           type="email"
           autoComplete="email"
-          aria-invalid={errors.email !== undefined}
+          aria-invalid={errors.email !== undefined ? true : undefined}
+          aria-describedby={errors.email !== undefined ? 'reset-email-erreur' : undefined}
           {...register('email')}
         />
         {errors.email !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.email.message}</p>
+          <p id="reset-email-erreur" className="mt-1 text-xs text-danger">
+            {errors.email.message}
+          </p>
         ) : null}
       </div>
 
