@@ -15,6 +15,7 @@
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getEmailService } from '@/lib/email';
 import { gabaritEmailHTML } from '@/lib/email/gabarit';
+import { markdownEmail } from '@/lib/email/markdown';
 import type { ResultatEnvoi } from '@/lib/email/types';
 
 /** Types d'emails transactionnels avec template editable. */
@@ -105,7 +106,15 @@ export async function envoyerEmailTemplee(
   ]);
 
   const sujet = interpoler(sujetCms.valeurMd, params);
-  const corpsHtml = interpoler(htmlCms.valeurMd, params);
+  // V2.5.20 sous-chantier V2.5.16.c : le contenu CMS peut etre soit du HTML
+  // direct (<p>, <a>...) soit du Markdown leger (**gras**, [lien](url), - liste).
+  // Heuristique : si le contenu contient `<p>` ou `<a `, on le considere HTML
+  // (compatibilite avec les templates V2.4 existants). Sinon, on le passe par
+  // le parseur Markdown qui produit du HTML compatible email.
+  const corpsBrut = interpoler(htmlCms.valeurMd, params);
+  const corpsHtml = /<(p|a|ul|strong|em|br)\b/i.test(corpsBrut)
+    ? corpsBrut
+    : markdownEmail(corpsBrut);
   const htmlComplet = await gabaritEmailHTML(corpsHtml, {
     titre: sujet,
     preheader: sujet,

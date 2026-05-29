@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui';
 import type { OffreEnrichie } from '@/lib/entraide/requetes';
 import { cn } from '@/lib/utils';
-import { MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, MapPin, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -23,6 +23,16 @@ const IMAGE_DEFAUT_PAR_TYPE: Record<string, string> = {
 };
 
 /**
+ * Extrait sûrement une chaîne d'un objet JSONB inconnu. Utile pour lire
+ * `offre.meta` (typé Json) sans casser le typage strict.
+ */
+function lireMeta(meta: unknown, cle: string): string | null {
+  if (meta === null || typeof meta !== 'object') return null;
+  const v = (meta as Record<string, unknown>)[cle];
+  return typeof v === 'string' && v.trim() !== '' ? v : null;
+}
+
+/**
  * `<CarteOffre>` — vignette d'annonce d'entraide (V2.5.12).
  *
  * Refonte « grammaire visuelle des leaders grand public » (Master Plan
@@ -30,6 +40,12 @@ const IMAGE_DEFAUT_PAR_TYPE: Record<string, string> = {
  * le transport, Airbnb-like pour l'hébergement : on emprunte la grille
  * de vignettes + photo carrée + badge en surimpression, sans inventer
  * d'iconographie spécifique.
+ *
+ * V2.5.20 sous-chantiers V2.5.12.a (transport) et V2.5.12.b (hébergement) :
+ * lecture de `offre.meta` jsonb pour afficher les infos spécifiques par
+ * type — départ/arrivée/horaires pour transport, dates/capacité pour
+ * hébergement. Présenté sous la photo dans un encart compact identifiable
+ * au coup d'œil (mini-icônes en ligne).
  *
  * Utilisée par 4 sous-espaces qui partagent `<PageListeSousEspace>` :
  * hébergement, transport, fruits-de-la-terre, qui-prête-tout. Le SEL
@@ -79,6 +95,12 @@ export function CarteOffre({ offre, enAvant = false }: CarteOffreProps) {
           </Link>
         </h3>
 
+        {/* V2.5.12.a — encart BlaBlaCar pour transport : départ → arrivée + horaire */}
+        {offre.type === 'transport' ? <EncartTransport meta={offre.meta} /> : null}
+
+        {/* V2.5.12.b — encart Airbnb pour hébergement : dates + capacité */}
+        {offre.type === 'hebergement' ? <EncartHebergement meta={offre.meta} /> : null}
+
         <div className="flex items-center gap-1.5 text-xs text-text-3">
           <MapPin size={12} strokeWidth={1.5} />
           <span className="line-clamp-1">{offre.lieu}</span>
@@ -87,5 +109,58 @@ export function CarteOffre({ offre, enAvant = false }: CarteOffreProps) {
         <p className="line-clamp-3 text-xs text-text-2 leading-relaxed">{offre.description}</p>
       </div>
     </article>
+  );
+}
+
+/** Encart spécifique transport : départ → arrivée + horaire si présent. */
+function EncartTransport({ meta }: { meta: unknown }) {
+  const depart = lireMeta(meta, 'depart');
+  const arrivee = lireMeta(meta, 'arrivee');
+  const horaire = lireMeta(meta, 'horaire') ?? lireMeta(meta, 'date_depart');
+  if (depart === null && arrivee === null && horaire === null) return null;
+  return (
+    <div className="grid gap-1 rounded-md bg-surface-2 p-2 text-xs">
+      {depart !== null && arrivee !== null ? (
+        <div className="flex items-center gap-1.5 font-bold text-text-1">
+          <span className="line-clamp-1">{depart}</span>
+          <ArrowRight size={12} strokeWidth={1.5} aria-hidden="true" />
+          <span className="line-clamp-1">{arrivee}</span>
+        </div>
+      ) : null}
+      {horaire !== null ? (
+        <div className="flex items-center gap-1.5 text-text-3">
+          <Clock size={12} strokeWidth={1.5} />
+          <span>{horaire}</span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Encart spécifique hébergement : dates + capacité si présents. */
+function EncartHebergement({ meta }: { meta: unknown }) {
+  const dateDebut = lireMeta(meta, 'date_debut');
+  const dateFin = lireMeta(meta, 'date_fin');
+  const capaciteRaw = lireMeta(meta, 'capacite');
+  if (dateDebut === null && dateFin === null && capaciteRaw === null) return null;
+  return (
+    <div className="grid gap-1 rounded-md bg-surface-2 p-2 text-xs">
+      {dateDebut !== null || dateFin !== null ? (
+        <div className="flex items-center gap-1.5 font-bold text-text-1">
+          <Calendar size={12} strokeWidth={1.5} aria-hidden="true" />
+          <span className="line-clamp-1">
+            {dateDebut !== null ? dateDebut : '?'} → {dateFin !== null ? dateFin : '?'}
+          </span>
+        </div>
+      ) : null}
+      {capaciteRaw !== null ? (
+        <div className="flex items-center gap-1.5 text-text-3">
+          <Users size={12} strokeWidth={1.5} />
+          <span>
+            {capaciteRaw} personne{capaciteRaw === '1' ? '' : 's'}
+          </span>
+        </div>
+      ) : null}
+    </div>
   );
 }

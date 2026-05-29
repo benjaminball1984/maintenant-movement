@@ -16,6 +16,7 @@
  * via CMS (cf. directive 0bis.8 du CLAUDE.md).
  */
 
+import { InvitationInterne } from '@/components/partage/InvitationInterne';
 import { FABRICANTS_PARTAGE, type ParamsPartage } from '@/lib/partage/liens';
 
 interface BoutonsPartageProps extends ParamsPartage {
@@ -23,6 +24,8 @@ interface BoutonsPartageProps extends ParamsPartage {
   titreBloc?: string;
   /** Intro courte au-dessus des boutons. Éditable via CMS côté parent. */
   intro?: string;
+  /** Si vrai, ajoute le bouton « Inviter mes contacts Maintenant! » (voie interne). */
+  avecInvitationInterne?: boolean;
 }
 
 /**
@@ -45,6 +48,7 @@ export function BoutonsPartage({
   message,
   titreBloc = 'Partager',
   intro = 'Aide à diffuser, en un clic, vers les personnes qui pourraient être intéressées.',
+  avecInvitationInterne = true,
 }: BoutonsPartageProps) {
   return (
     <section aria-label="Partager cette page" className="grid gap-3">
@@ -52,6 +56,15 @@ export function BoutonsPartage({
         <p className="font-display text-base font-bold text-text-1">{titreBloc}</p>
         <p className="text-sm text-text-2">{intro}</p>
       </header>
+      {/* V2.5.20 sous-chantier V2.5.7.a — voie interne d'invitation à côté
+          des partages externes. La voie interne est mise en premier pour
+          encourager le contact direct avec les ami·es Maintenant! plutôt
+          que de relayer vers des plateformes captatrices. */}
+      {avecInvitationInterne ? (
+        <div>
+          <InvitationInterne messagePrerempli={message} url={url} />
+        </div>
+      ) : null}
       <ul className="flex flex-wrap gap-2">
         {FABRICANTS_PARTAGE.map((f) => {
           const href = f.fabricant({ titre, url, message });
