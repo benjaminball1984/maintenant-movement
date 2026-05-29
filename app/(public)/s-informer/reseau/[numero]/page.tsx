@@ -2,6 +2,7 @@ import { AvatarReseau } from '@/components/reseau/AvatarReseau';
 import { BoutonSuivre } from '@/components/reseau/BoutonSuivre';
 import { CartePost } from '@/components/reseau/CartePost';
 import { ModaleMessage } from '@/components/reseau/ModaleMessage';
+import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Button, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { getProfilReseauParNumero, listerPostsDePersonne, nomAffiche } from '@/lib/reseau/requetes';
@@ -104,13 +105,12 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
         </div>
 
         {profil.bioHtml !== null && profil.bioHtml.trim() !== '' ? (
-          // V2.5.49 — bio rich text (déjà sanitizée au save). Classes
-          // prose pour aérer titres/listes/citations.
-          <div
-            className="prose prose-sm max-w-2xl [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-lg [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-5 leading-relaxed text-text-2"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
-            dangerouslySetInnerHTML={{ __html: profil.bioHtml }}
-          />
+          // V2.5.49 — bio rich text (déjà sanitizée au save). V2.5.55 — rendu
+          // via RenduRiche (chemin canonique). Le parent max-w-2xl contraint
+          // la largeur (RenduRiche pose max-w-none en interne).
+          <div className="max-w-2xl">
+            <RenduRiche valeurHtml={profil.bioHtml} className="leading-relaxed text-text-2" />
+          </div>
         ) : profil.bio !== null && profil.bio.trim() !== '' ? (
           <p className="max-w-2xl leading-relaxed text-text-2">{profil.bio}</p>
         ) : null}

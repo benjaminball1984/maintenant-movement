@@ -1,6 +1,7 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -131,13 +132,7 @@ export default async function PageEditionJournal({ params }: Props) {
           // placeholder éditable.
           const html = (e as { contenu_html?: string | null }).contenu_html ?? null;
           if (html !== null && html.trim() !== '') {
-            return (
-              <div
-                className="prose prose-sm max-w-none [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h1]:mt-4 [&_h1]:font-bold [&_h1]:text-2xl [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_img]:my-4 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
-                // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action via sanitizeRichHtml
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
-            );
+            return <RenduRiche valeurHtml={html} />;
           }
           if (e.contenu_md !== '') return <MarkdownLeger texte={e.contenu_md} />;
           return (

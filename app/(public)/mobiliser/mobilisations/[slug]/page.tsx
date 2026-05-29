@@ -6,6 +6,7 @@ import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherAC
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
+import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -335,13 +336,7 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             const html =
               (mobilisation as { description_html?: string | null }).description_html ?? null;
             if (html !== null && html.trim() !== '') {
-              return (
-                <div
-                  className="prose prose-sm max-w-none leading-relaxed text-text-2 [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-              );
+              return <RenduRiche valeurHtml={html} className="text-text-2 leading-relaxed" />;
             }
             return (
               <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">

@@ -8,6 +8,7 @@ import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
+import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -425,13 +426,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
             // V2.5.53 — priorité au HTML riche (déjà sanitizé au save).
             const html = (cagnotte as { texte_html?: string | null }).texte_html ?? null;
             if (html !== null && html.trim() !== '') {
-              return (
-                <div
-                  className="prose prose-sm max-w-none leading-relaxed text-text-2 [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-              );
+              return <RenduRiche valeurHtml={html} className="text-text-2 leading-relaxed" />;
             }
             return (
               <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
