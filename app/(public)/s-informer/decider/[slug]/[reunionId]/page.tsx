@@ -138,19 +138,31 @@ export default async function PageReunion({ params }: Props) {
           )}
         </TexteEditableAdmin>
         <Card variant="ombre" className="mt-3">
-          {reunion.ordreJourMd === '' ? (
-            <TexteEditableAdmin
-              cle="reunion.fiche.oj_vide"
-              valeurInitiale={ojVide.valeurMd}
-              estAdmin={estAdmin}
-              libelle="message OJ vide"
-              longueurMax={100}
-            >
-              {(t) => <p className="text-sm text-text-3 italic">{t}</p>}
-            </TexteEditableAdmin>
-          ) : (
-            <MarkdownLeger texte={reunion.ordreJourMd} />
-          )}
+          {(() => {
+            // V2.5.37 — priorité au HTML riche s'il est posé (déjà sanitizé
+            // au save). Fallback Markdown léger. Sinon message vide éditable.
+            if (reunion.ordreJourHtml !== null && reunion.ordreJourHtml.trim() !== '') {
+              return (
+                <div
+                  className="prose prose-sm max-w-none [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
+                  dangerouslySetInnerHTML={{ __html: reunion.ordreJourHtml }}
+                />
+              );
+            }
+            if (reunion.ordreJourMd !== '') return <MarkdownLeger texte={reunion.ordreJourMd} />;
+            return (
+              <TexteEditableAdmin
+                cle="reunion.fiche.oj_vide"
+                valeurInitiale={ojVide.valeurMd}
+                estAdmin={estAdmin}
+                libelle="message OJ vide"
+                longueurMax={100}
+              >
+                {(t) => <p className="text-sm text-text-3 italic">{t}</p>}
+              </TexteEditableAdmin>
+            );
+          })()}
         </Card>
       </section>
 
@@ -168,17 +180,30 @@ export default async function PageReunion({ params }: Props) {
           </TexteEditableAdmin>
         </Heading>
         <Card variant="ombre" className="mt-3">
-          {reunion.pvMd === null || reunion.pvMd === '' ? (
-            <p className="text-sm text-text-3 italic">
-              {reunion.statut === 'terminee'
-                ? pvAttenteFin.valeurMd
-                : reunion.statut === 'annulee'
-                  ? pvAnnule.valeurMd
-                  : pvPlanifie.valeurMd}
-            </p>
-          ) : (
-            <MarkdownLeger texte={reunion.pvMd} />
-          )}
+          {(() => {
+            // V2.5.37 — priorité au HTML riche.
+            if (reunion.pvHtml !== null && reunion.pvHtml.trim() !== '') {
+              return (
+                <div
+                  className="prose prose-sm max-w-none [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
+                  dangerouslySetInnerHTML={{ __html: reunion.pvHtml }}
+                />
+              );
+            }
+            if (reunion.pvMd !== null && reunion.pvMd !== '') {
+              return <MarkdownLeger texte={reunion.pvMd} />;
+            }
+            return (
+              <p className="text-sm text-text-3 italic">
+                {reunion.statut === 'terminee'
+                  ? pvAttenteFin.valeurMd
+                  : reunion.statut === 'annulee'
+                    ? pvAnnule.valeurMd
+                    : pvPlanifie.valeurMd}
+              </p>
+            );
+          })()}
         </Card>
       </section>
 
@@ -200,7 +225,9 @@ export default async function PageReunion({ params }: Props) {
           <FormulaireMajReunion
             reunionId={reunion.id}
             ordreJourInitial={reunion.ordreJourMd}
+            ordreJourHtmlInitial={reunion.ordreJourHtml}
             pvInitial={reunion.pvMd ?? ''}
+            pvHtmlInitial={reunion.pvHtml}
             statutInitial={reunion.statut}
           />
         </section>

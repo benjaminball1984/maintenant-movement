@@ -51,12 +51,16 @@ export interface ReunionDecider {
   salleId: string;
   titre: string;
   ordreJourMd: string;
+  /** V2.5.37 — HTML riche optionnel de l'OJ. Si présent, prime à l'affichage. */
+  ordreJourHtml: string | null;
   debutLe: string;
   finLe: string | null;
   modeDecision: ModeDecision;
   statut: StatutReunion;
   enregistree: boolean;
   pvMd: string | null;
+  /** V2.5.37 — HTML riche optionnel du PV. Si présent, prime à l'affichage. */
+  pvHtml: string | null;
 }
 
 export async function listerSallesDecider(): Promise<SalleDecider[]> {
@@ -116,12 +120,14 @@ export async function listerReunionsSalle(
     salleId: r.salle_id,
     titre: r.titre,
     ordreJourMd: r.ordre_jour_md,
+    ordreJourHtml: (r as { ordre_jour_html?: string | null }).ordre_jour_html ?? null,
     debutLe: r.debut_le,
     finLe: r.fin_le,
     modeDecision: r.mode_decision as ModeDecision,
     statut: r.statut as StatutReunion,
     enregistree: r.enregistree,
     pvMd: r.pv_md,
+    pvHtml: (r as { pv_html?: string | null }).pv_html ?? null,
   }));
 }
 
@@ -153,12 +159,14 @@ export async function listerProchainesReunionsToutesSalles(
       salleId: r.salle_id,
       titre: r.titre,
       ordreJourMd: r.ordre_jour_md,
+      ordreJourHtml: (r as { ordre_jour_html?: string | null }).ordre_jour_html ?? null,
       debutLe: r.debut_le,
       finLe: r.fin_le,
       modeDecision: r.mode_decision as ModeDecision,
       statut: r.statut as StatutReunion,
       enregistree: r.enregistree,
       pvMd: r.pv_md,
+      pvHtml: (r as { pv_html?: string | null }).pv_html ?? null,
       salleSlug: salle?.slug ?? '',
       salleNom: salle?.nom ?? '',
     };
@@ -187,12 +195,14 @@ export async function listerDernieresReunionsAvecPV(limite = 6): Promise<Reunion
       salleId: r.salle_id,
       titre: r.titre,
       ordreJourMd: r.ordre_jour_md,
+      ordreJourHtml: (r as { ordre_jour_html?: string | null }).ordre_jour_html ?? null,
       debutLe: r.debut_le,
       finLe: r.fin_le,
       modeDecision: r.mode_decision as ModeDecision,
       statut: r.statut as StatutReunion,
       enregistree: r.enregistree,
       pvMd: r.pv_md,
+      pvHtml: (r as { pv_html?: string | null }).pv_html ?? null,
       salleSlug: salle?.slug ?? '',
       salleNom: salle?.nom ?? '',
     };
@@ -208,12 +218,14 @@ export async function chargerReunionParId(id: string): Promise<ReunionDecider | 
     salleId: data.salle_id,
     titre: data.titre,
     ordreJourMd: data.ordre_jour_md,
+    ordreJourHtml: (data as { ordre_jour_html?: string | null }).ordre_jour_html ?? null,
     debutLe: data.debut_le,
     finLe: data.fin_le,
     modeDecision: data.mode_decision as ModeDecision,
     statut: data.statut as StatutReunion,
     enregistree: data.enregistree,
     pvMd: data.pv_md,
+    pvHtml: (data as { pv_html?: string | null }).pv_html ?? null,
   };
 }
 
