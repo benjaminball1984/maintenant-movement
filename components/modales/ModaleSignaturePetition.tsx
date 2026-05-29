@@ -39,6 +39,8 @@ export interface LibellesSignaturePetition {
   tunnelIntro: string;
   tunnelCtaAdherer: string;
   tunnelCtaCommune: string;
+  /** V2.5.19 Phase E.bis — bouton unique vers la page intermédiaire de bienvenue. */
+  tunnelCtaDecouvrir: string;
 }
 
 const LIBELLES_DEFAUT: LibellesSignaturePetition = {
@@ -68,6 +70,7 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
     "Tu viens de t'engager. Si tu veux peser davantage, deux portes simples s'ouvrent à toi :",
   tunnelCtaAdherer: 'Devenir adhérent·e',
   tunnelCtaCommune: 'Rejoindre une commune libre',
+  tunnelCtaDecouvrir: 'Découvrir les prochaines étapes',
 };
 
 interface ModaleSignaturePetitionProps {
@@ -214,27 +217,19 @@ export function ModaleSignaturePetition({
             <p className="text-text-2">{libelles.merciMessage}</p>
 
             {/* V2.5.6 Phase E : tunnel d'engagement après signature.
-                Deux portes simples vers les marches suivantes : adhérer
-                (devient adhérent·e du mouvement) et rejoindre une commune
-                libre (entre dans un collectif local). Pas de pression :
-                les deux CTA cohabitent avec un "fermer" sobre. */}
+                V2.5.19 — un seul CTA vers la page intermédiaire de bienvenue
+                qui contextualise « tu viens de signer » et propose les 2
+                portes (adhérer + commune). Mieux qu'un choix forcé au
+                milieu de la modale. */}
             <div className="mt-2 grid gap-3 rounded-md border border-border bg-surface-2 p-4 text-left">
               <p className="font-display text-base font-bold text-text-1">{libelles.tunnelTitre}</p>
               <p className="text-sm text-text-2">{libelles.tunnelIntro}</p>
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href="/agir/adherer"
-                  className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
-                >
-                  {libelles.tunnelCtaAdherer}
-                </a>
-                <a
-                  href="/agir/communes"
-                  className="inline-flex h-11 items-center justify-center rounded-md border border-brand bg-transparent px-5 font-body text-sm font-bold text-brand transition hover:bg-brand-light"
-                >
-                  {libelles.tunnelCtaCommune}
-                </a>
-              </div>
+              <a
+                href="/agir/depuis-petition"
+                className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+              >
+                {libelles.tunnelCtaDecouvrir} →
+              </a>
             </div>
 
             <Button onClick={fermer} variant="ghost">
