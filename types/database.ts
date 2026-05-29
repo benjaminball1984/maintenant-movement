@@ -1368,6 +1368,8 @@ export type Database = {
           date_debut: string;
           date_fin: string | null;
           description: string;
+          /** V2.5.52 — version HTML riche optionnelle. */
+          description_html: string | null;
           id: string;
           image_url: string | null;
           latitude: number | null;
@@ -1387,6 +1389,7 @@ export type Database = {
           date_debut: string;
           date_fin?: string | null;
           description: string;
+          description_html?: string | null;
           id?: string;
           image_url?: string | null;
           latitude?: number | null;
@@ -1406,6 +1409,7 @@ export type Database = {
           date_debut?: string;
           date_fin?: string | null;
           description?: string;
+          description_html?: string | null;
           id?: string;
           image_url?: string | null;
           latitude?: number | null;

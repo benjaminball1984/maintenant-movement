@@ -329,9 +329,26 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
               </Heading>
             )}
           </TexteEditableAdmin>
-          <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
-            {mobilisation.description}
-          </div>
+          {(() => {
+            // V2.5.52 — priorité au HTML riche (déjà sanitizé au save),
+            // fallback texte brut.
+            const html =
+              (mobilisation as { description_html?: string | null }).description_html ?? null;
+            if (html !== null && html.trim() !== '') {
+              return (
+                <div
+                  className="prose prose-sm max-w-none leading-relaxed text-text-2 [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              );
+            }
+            return (
+              <div className="grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
+                {mobilisation.description}
+              </div>
+            );
+          })()}
         </section>
 
         {/* V2.5.8 : moteur de partage applique aussi aux mobilisations

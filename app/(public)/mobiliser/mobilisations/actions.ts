@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -58,10 +59,17 @@ export async function creerMobilisation(
   const dateFin =
     donnees.date_fin === '' || donnees.date_fin === undefined ? null : donnees.date_fin;
 
+  // V2.5.52 — sanitize HTML riche optionnel avant insertion.
+  const descriptionHtmlPropre =
+    donnees.description_html !== undefined && donnees.description_html.trim() !== ''
+      ? sanitizeRichHtml(donnees.description_html)
+      : null;
+
   const { error } = await supabase.from('mobilisation').insert({
     slug,
     titre: donnees.titre,
     description: donnees.description,
+    description_html: descriptionHtmlPropre,
     lieu: donnees.lieu,
     latitude: donnees.latitude ?? null,
     longitude: donnees.longitude ?? null,

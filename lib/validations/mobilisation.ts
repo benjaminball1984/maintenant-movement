@@ -37,6 +37,8 @@ export function creerMobilisationFactory(
           .trim()
           .min(50, messages.descriptionMin)
           .max(3000, messages.descriptionMax),
+        /** V2.5.52 — version HTML riche optionnelle (sanitizée au save). */
+        description_html: z.string().max(50000).optional().or(z.literal('')),
         lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
         latitude: z
           .number()
