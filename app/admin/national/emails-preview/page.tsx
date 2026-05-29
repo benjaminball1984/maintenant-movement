@@ -75,6 +75,42 @@ ${ctaEmail('Renouveler mon adhésion', 'https://maintenant-le-mouvement.org/agir
 <p>L'équipe Maintenant!</p>
 `,
   },
+  // V2.5.27 V2.5.16.d — Previews des templates email reseau. Pas encore
+  // appeles automatiquement (anti-spam), un futur systeme de preferences
+  // utilisateurice decidera quand basculer cloche → email.
+  {
+    titre: 'Tu as reçu un nouveau message',
+    description: 'Exemple : email de notification reseau social — message direct.',
+    preheader: "Camille t'a envoyé un message",
+    contenu: `
+<p>Bonjour,</p>
+<p><strong>Camille</strong> t'a envoyé un message sur le réseau Maintenant!.</p>
+${ctaEmail('Lire le message', 'https://maintenant-le-mouvement.org/s-informer/reseau/messages')}
+<p>L'équipe Maintenant!</p>
+`,
+  },
+  {
+    titre: 'Ta publication a un nouveau commentaire',
+    description: 'Exemple : email de notification reseau social — commentaire.',
+    preheader: 'Camille a commenté ta publication',
+    contenu: `
+<p>Bonjour,</p>
+<p><strong>Camille</strong> a commenté ta publication sur le réseau Maintenant!.</p>
+${ctaEmail('Voir la conversation', 'https://maintenant-le-mouvement.org/s-informer/reseau')}
+<p>L'équipe Maintenant!</p>
+`,
+  },
+  {
+    titre: 'Ta publication a un nouveau soutien',
+    description: 'Exemple : email de notification reseau social — soutien.',
+    preheader: 'Camille soutient ta publication',
+    contenu: `
+<p>Bonjour,</p>
+<p><strong>Camille</strong> soutient ta publication sur le réseau Maintenant!.</p>
+${ctaEmail('Voir la publication', 'https://maintenant-le-mouvement.org/s-informer/reseau')}
+<p>L'équipe Maintenant!</p>
+`,
+  },
 ];
 
 export default async function PagePreviewEmails() {

@@ -18,8 +18,20 @@ import { gabaritEmailHTML } from '@/lib/email/gabarit';
 import { markdownEmail } from '@/lib/email/markdown';
 import type { ResultatEnvoi } from '@/lib/email/types';
 
-/** Types d'emails transactionnels avec template editable. */
-export type TypeEmail = 'rgpd_export_demande' | 'rgpd_suppression_demande' | 'adhesion_relance';
+/** Types d'emails transactionnels avec template editable.
+ *  V2.5.27 sous-chantier V2.5.16.d : ajoute reseau_message_recu /
+ *  reseau_post_commente / reseau_post_soutenu pour les notifications
+ *  reseau social. Ces templates sont DEFINIS mais pas appeles
+ *  automatiquement (anti-spam) : un futur systeme de preferences
+ *  utilisateurice (digest hebdo / opt-in par type) decidera quand
+ *  basculer une notification cloche en email. */
+export type TypeEmail =
+  | 'rgpd_export_demande'
+  | 'rgpd_suppression_demande'
+  | 'adhesion_relance'
+  | 'reseau_message_recu'
+  | 'reseau_post_commente'
+  | 'reseau_post_soutenu';
 
 interface TemplateEmail {
   sujet: string;
@@ -71,6 +83,51 @@ Ton adhésion à Maintenant! arrive à échéance dans les 14 jours.
 Si tu souhaites rester adhérent·e, tu peux renouveler gratuitement, en euros (12 €) ou en 99-coin (12 T99CP).
 
 https://maintenant-le-mouvement.org/agir/adherer
+
+L’équipe Maintenant!`,
+  },
+  // V2.5.27 V2.5.16.d — Notifications reseau social. Templates definis mais
+  // PAS appeles automatiquement (anti-spam). Un futur systeme de preferences
+  // utilisateurice declenchera l'envoi pour les abonne·es opt-in.
+  reseau_message_recu: {
+    sujet: 'Tu as reçu un nouveau message',
+    html: `<p>Bonjour,</p>
+<p><strong>{auteur}</strong> t'a envoyé un message sur Maintenant!.</p>
+<p><a href="https://maintenant-le-mouvement.org/s-informer/reseau/messages">Lire le message</a></p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour,
+
+{auteur} t'a envoyé un message sur Maintenant!.
+
+Va le lire sur https://maintenant-le-mouvement.org/s-informer/reseau/messages
+
+L’équipe Maintenant!`,
+  },
+  reseau_post_commente: {
+    sujet: 'Ta publication a un nouveau commentaire',
+    html: `<p>Bonjour,</p>
+<p><strong>{auteur}</strong> a commenté ta publication sur le réseau Maintenant!.</p>
+<p><a href="https://maintenant-le-mouvement.org/s-informer/reseau">Voir la conversation</a></p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour,
+
+{auteur} a commenté ta publication sur le réseau Maintenant!.
+
+Va la lire sur https://maintenant-le-mouvement.org/s-informer/reseau
+
+L’équipe Maintenant!`,
+  },
+  reseau_post_soutenu: {
+    sujet: 'Ta publication a un nouveau soutien',
+    html: `<p>Bonjour,</p>
+<p><strong>{auteur}</strong> soutient ta publication sur le réseau Maintenant!.</p>
+<p><a href="https://maintenant-le-mouvement.org/s-informer/reseau">Voir la publication</a></p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour,
+
+{auteur} soutient ta publication sur le réseau Maintenant!.
+
+Va la voir sur https://maintenant-le-mouvement.org/s-informer/reseau
 
 L’équipe Maintenant!`,
   },
