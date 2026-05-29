@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-29
 **Branche** : main
-**Commit final** : `d288e70`
+**Commit final** : `81acacb`
 **Durée approximative** : 1 session Claude Code (courte)
 
 ## Contexte
