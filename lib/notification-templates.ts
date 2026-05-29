@@ -17,11 +17,21 @@
  */
 
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { envoyerEmailTemplee } from '@/lib/email-templates';
 import {
   type PoserNotificationOptions,
   type TypeNotification,
   poserNotification,
 } from '@/lib/notification';
+import { lireEmailPersonne, lirePrefNotifReseau } from '@/lib/preference-notif-reseau';
+
+/** V2.5.39 — types de notifs reseau dont le routage cloche/email est gouverne
+ *  par les preferences utilisateurice (cf. lirePrefNotifReseau). */
+const TYPES_RESEAU = new Set<TypeNotification>([
+  'reseau_message_recu',
+  'reseau_post_commente',
+  'reseau_post_soutenu',
+]);
 
 /** Templates par defaut. Surchargeables admin via le CMS. */
 const TEMPLATES_DEFAUT: Record<TypeNotification, { titre: string; message: string }> = {
@@ -124,6 +134,25 @@ export async function poserNotificationTemplee(
   const titre = interpoler(titreCms.valeurMd, params);
   const message = interpoler(messageCms.valeurMd, params);
 
+  // V2.5.39 — pour les notifs reseau, consulte la pref de la personne
+  // destinataire pour decider du routage cloche/email/aucune.
+  // Les autres types (reservation, moderation, info_groupe...) restent
+  // gouvernes par leur logique propre : cloche systematique.
+  let mode: 'cloche' | 'mail_immediat' | 'digest_quotidien' | 'digest_hebdo' | 'aucune' = 'cloche';
+  if (TYPES_RESEAU.has(type)) {
+    mode = await lirePrefNotifReseau(
+      optionsTechniques.destinatairePersonneId,
+      type as 'reseau_message_recu' | 'reseau_post_commente' | 'reseau_post_soutenu',
+    );
+  }
+
+  // Mode 'aucune' : ni cloche ni email. La personne a explicitement choisi
+  // le silence pour ce type.
+  if (mode === 'aucune') return;
+
+  // Cloche dans tous les autres cas (cloche / mail_immediat /
+  // digest_quotidien / digest_hebdo — les digests tombent en cloche
+  // en attendant le cron de regroupement).
   await poserNotification(
     {
       ...optionsTechniques,
@@ -133,6 +162,23 @@ export async function poserNotificationTemplee(
     },
     auteurId,
   );
+
+  // Email immediat si la pref le demande. Echec silencieux pour ne pas
+  // casser le pipeline cloche (qui a deja reussi).
+  if (mode === 'mail_immediat' && TYPES_RESEAU.has(type)) {
+    try {
+      const email = await lireEmailPersonne(optionsTechniques.destinatairePersonneId);
+      if (email !== null) {
+        await envoyerEmailTemplee(
+          type as 'reseau_message_recu' | 'reseau_post_commente' | 'reseau_post_soutenu',
+          email,
+          params,
+        );
+      }
+    } catch {
+      // Echec d'envoi email : on laisse passer (la cloche est posee, c'est l'essentiel).
+    }
+  }
 }
 
 /** Re-export pour ergonomie : un seul import pour les call sites. */
