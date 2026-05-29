@@ -3,7 +3,7 @@ import { Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
-import { lireMessagesValidationProfil } from '@/lib/messages-validation';
+import { lireMessagesValidationProfil } from '@/lib/messages-validation-loaders';
 import { getNumeroUnifie } from '@/lib/profil/unifie';
 import type { DonneesMiseAJourProfil } from '@/lib/validations/profil';
 import type { Metadata } from 'next';

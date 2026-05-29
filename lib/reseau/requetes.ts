@@ -328,6 +328,8 @@ async function hydraterPosts(
   }>,
   viewerId: string | null,
   suivis: Set<string>,
+  /** V2.5.22 — espaces suivis (clé "type:id"). Optionnel pour compat. */
+  espacesSuivis: Set<string> = new Set(),
 ): Promise<PostAffiche[]> {
   if (posts.length === 0) return [];
   const ids = posts.map((p) => p.id);
@@ -378,7 +380,19 @@ async function hydraterPosts(
   });
 
   return posts.map((p) => {
-    const palier: 0 | 1 | 2 = p.auteurice_id === viewerId ? 0 : suivis.has(p.auteurice_id) ? 1 : 2;
+    // V2.5.22 sous-chantier V2.5.10.d — un post publié par un espace SUIVI
+    // remonte au palier 1 (« suivi·e ») même si l'auteurice personne
+    // n'est pas suivie directement.
+    const espaceSuiviClef =
+      p.espace_type !== null &&
+      p.espace_id !== null &&
+      p.espace_type !== undefined &&
+      p.espace_id !== undefined
+        ? `${p.espace_type}:${p.espace_id}`
+        : null;
+    const espaceEstSuivi = espaceSuiviClef !== null && espacesSuivis.has(espaceSuiviClef);
+    const palier: 0 | 1 | 2 =
+      p.auteurice_id === viewerId ? 0 : suivis.has(p.auteurice_id) || espaceEstSuivi ? 1 : 2;
     const espacePublieur =
       p.espace_id !== null && p.espace_id !== undefined
         ? (attributionsEspaces.get(p.espace_id) ?? null)
@@ -408,6 +422,22 @@ async function chargerSuivis(supabase: ClientSupabase, viewerId: string): Promis
 }
 
 /**
+ * V2.5.22 sous-chantier V2.5.10.d — Ensemble des espaces suivis par le
+ * lecteur courant (clé "type:id"). Utilisé par `hydraterPosts` pour
+ * remonter un post d'espace suivi au palier 1 du flux transparent.
+ */
+async function chargerEspacesSuivis(
+  supabase: ClientSupabase,
+  viewerId: string,
+): Promise<Set<string>> {
+  const { data } = await supabase
+    .from('abonnement_espace_reseau')
+    .select('espace_type, espace_id')
+    .eq('suiveur_id', viewerId);
+  return new Set((data ?? []).map((r) => `${r.espace_type}:${r.espace_id}`));
+}
+
+/**
  * Flux hiérarchisé TRANSPARENT (spec §4E) :
  *   1. mes publications (palier 0)
  *   2. publications des personnes suivies (palier 1)
@@ -429,8 +459,14 @@ export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
   }
 
   const viewerId = session?.userId ?? null;
-  const suivis = viewerId !== null ? await chargerSuivis(supabase, viewerId) : new Set<string>();
-  const hydratees = await hydraterPosts(supabase, data, viewerId, suivis);
+  const [suivis, espacesSuivis] =
+    viewerId !== null
+      ? await Promise.all([
+          chargerSuivis(supabase, viewerId),
+          chargerEspacesSuivis(supabase, viewerId),
+        ])
+      : [new Set<string>(), new Set<string>()];
+  const hydratees = await hydraterPosts(supabase, data, viewerId, suivis, espacesSuivis);
 
   return hydratees.sort((a, b) =>
     a.palier !== b.palier ? a.palier - b.palier : b.createdAt.localeCompare(a.createdAt),
@@ -460,8 +496,14 @@ export async function listerPostsDeLEspace(
   if (error !== null || data === null) return [];
 
   const viewerId = session?.userId ?? null;
-  const suivis = viewerId !== null ? await chargerSuivis(supabase, viewerId) : new Set<string>();
-  return hydraterPosts(supabase, data, viewerId, suivis);
+  const [suivis, espacesSuivis] =
+    viewerId !== null
+      ? await Promise.all([
+          chargerSuivis(supabase, viewerId),
+          chargerEspacesSuivis(supabase, viewerId),
+        ])
+      : [new Set<string>(), new Set<string>()];
+  return hydraterPosts(supabase, data, viewerId, suivis, espacesSuivis);
 }
 
 /** Publications publiées d'une personne (page profil). */
@@ -481,8 +523,14 @@ export async function listerPostsDePersonne(
   if (error !== null || data === null) return [];
 
   const viewerId = session?.userId ?? null;
-  const suivis = viewerId !== null ? await chargerSuivis(supabase, viewerId) : new Set<string>();
-  return hydraterPosts(supabase, data, viewerId, suivis);
+  const [suivis, espacesSuivis] =
+    viewerId !== null
+      ? await Promise.all([
+          chargerSuivis(supabase, viewerId),
+          chargerEspacesSuivis(supabase, viewerId),
+        ])
+      : [new Set<string>(), new Set<string>()];
+  return hydraterPosts(supabase, data, viewerId, suivis, espacesSuivis);
 }
 
 /** Un post seul (page détail), hydraté. `null` si introuvable/retiré. */
@@ -497,8 +545,14 @@ export async function getPost(postId: string): Promise<PostAffiche | null> {
   if (error !== null || data === null || data.statut !== 'publie') return null;
 
   const viewerId = session?.userId ?? null;
-  const suivis = viewerId !== null ? await chargerSuivis(supabase, viewerId) : new Set<string>();
-  const [post] = await hydraterPosts(supabase, [data], viewerId, suivis);
+  const [suivis, espacesSuivis] =
+    viewerId !== null
+      ? await Promise.all([
+          chargerSuivis(supabase, viewerId),
+          chargerEspacesSuivis(supabase, viewerId),
+        ])
+      : [new Set<string>(), new Set<string>()];
+  const [post] = await hydraterPosts(supabase, [data], viewerId, suivis, espacesSuivis);
   return post ?? null;
 }
 

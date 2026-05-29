@@ -21,14 +21,11 @@
  */
 
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-
-export type TypeEspacePostable =
-  | 'commune'
-  | 'federation'
-  | 'confederation'
-  | 'gt_thematique'
-  | 'groupe_entraide_local'
-  | 'campagne';
+// V2.5.22 — les types client-safe vivent désormais dans `types-espace.ts`
+// pour pouvoir être importés depuis des composants client sans tirer la
+// chaîne runtime de ce module (Supabase admin / next/headers).
+export type { AttributionEspace, TypeEspacePostable } from './types-espace';
+import type { TypeEspacePostable } from './types-espace';
 
 interface ResultatPublication {
   ok: boolean;
@@ -153,15 +150,8 @@ export async function creerPostEspace(args: {
   return { ok: true, postId: data.id };
 }
 
-/** Informations d'un espace nécessaires à l'affichage d'un post publié en son nom. */
-export interface AttributionEspace {
-  type: TypeEspacePostable;
-  id: string;
-  nom: string;
-  slug: string;
-  imageUrl: string | null;
-  cheminPublic: string;
-}
+// V2.5.22 — `AttributionEspace` est maintenant défini dans `types-espace.ts`
+// et réexporté en tête de ce fichier. La définition dupliquée a été retirée.
 
 /**
  * Mapping type d'espace → chemin public de sa page détail. Sert à

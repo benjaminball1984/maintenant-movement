@@ -9,6 +9,7 @@ import { BoutonRejoindreCommune } from '@/components/communes/BoutonRejoindreCom
 import { ListeMembres } from '@/components/communes/ListeMembres';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { ComposerPostEspace } from '@/components/reseau/ComposerPostEspace';
 import { FilEspacePublic } from '@/components/reseau/FilEspacePublic';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -18,6 +19,7 @@ import { type MembreCommune, listerMembresCommune } from '@/lib/communes/membres
 import { communeParSlug } from '@/lib/communes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import { getSupabaseServer } from '@/lib/supabase';
 import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -356,6 +358,22 @@ export default async function PageDetailCommune({ params }: PageDetailProps) {
           espaceId={commune.id}
           titre={`Publications de ${commune.nom}`}
         />
+
+        {/* V2.5.22 Phase H V2.5.10.d — bouton « Suivre dans le réseau social ».
+            Distinct du bouton Rejoindre (membre de la commune) : on peut
+            suivre les publications d'une commune dans son flux réseau sans
+            forcément en être membre. */}
+        {session !== null ? (
+          <div className="mt-2">
+            <BoutonSuivreEspace
+              espaceType="commune"
+              espaceId={commune.id}
+              espaceNom={commune.nom}
+              jeSuisInitial={await jeSuisCetEspace('commune', commune.id)}
+              cheminRevalidation={`/agir/communes/${commune.slug}`}
+            />
+          </div>
+        ) : null}
       </article>
     </Container>
   );

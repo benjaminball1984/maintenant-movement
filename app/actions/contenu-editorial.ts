@@ -26,9 +26,15 @@ export async function mettreAJourContenuEditorialAction(donnees: unknown): Promi
   }
 
   const supabase = await getSupabaseServer();
-  const { data: estAdmin } = await supabase.rpc('est_admin_general');
-  if (estAdmin !== true) {
-    return { ok: false, message: 'Action réservée aux admins nationaux.' };
+  // V2.5.21 sous-chantier V2.5.15.b — autorisation étendue : les comptes
+  // niveau CMS (rôle dédié sans pouvoir politique, cf. V2.5.15) peuvent
+  // aussi éditer les libellés en plus des admins généraux.
+  const { data: peutEditer } = await supabase.rpc('peut_editer_cms');
+  if (peutEditer !== true) {
+    return {
+      ok: false,
+      message: 'Action réservée aux comptes admin général ou rôle CMS.',
+    };
   }
 
   const parse = schema.safeParse(donnees);

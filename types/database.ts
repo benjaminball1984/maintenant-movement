@@ -2673,6 +2673,38 @@ export type Database = {
           },
         ];
       };
+      abonnement_espace_reseau: {
+        Row: {
+          cree_le: string;
+          espace_id: string;
+          espace_type: string;
+          id: string;
+          suiveur_id: string;
+        };
+        Insert: {
+          cree_le?: string;
+          espace_id: string;
+          espace_type: string;
+          id?: string;
+          suiveur_id: string;
+        };
+        Update: {
+          cree_le?: string;
+          espace_id?: string;
+          espace_type?: string;
+          id?: string;
+          suiveur_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'abonnement_espace_reseau_suiveur_id_fkey';
+            columns: ['suiveur_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       relation_reseau: {
         Row: {
           created_at: string;

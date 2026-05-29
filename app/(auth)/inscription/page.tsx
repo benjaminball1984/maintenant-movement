@@ -2,7 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
-import { lireMessagesValidationAuth } from '@/lib/messages-validation';
+import { lireMessagesValidationAuth } from '@/lib/messages-validation-loaders';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FormulaireInscription } from './FormulaireInscription';

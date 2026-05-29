@@ -2,7 +2,7 @@
 
 import { publierAuNomDeLEspaceAction } from '@/app/actions/reseau-espace';
 import { Alert, Button, Label, Textarea } from '@/components/ui';
-import type { TypeEspacePostable } from '@/lib/reseau/espace';
+import type { TypeEspacePostable } from '@/lib/reseau/types-espace';
 import { Megaphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

@@ -1,5 +1,6 @@
 'use client';
 
+import { EditeurInlineCMS } from '@/components/contenu/EditeurInlineCMS';
 import { Badge, Input } from '@/components/ui';
 import { ChevronDown, ChevronRight, ExternalLink, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -61,6 +62,10 @@ function apercu(valeur: string, max = 60): string {
 export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenusCMSProps) {
   const [recherche, setRecherche] = useState('');
   const [ouverts, setOuverts] = useState<Record<string, boolean>>({});
+  /** V2.5.21 — surcharges locales après édition inline (le re-fetch
+   *  serveur viendra à la prochaine navigation, mais entre-temps on
+   *  affiche la nouvelle valeur localement). */
+  const [surcharges, setSurcharges] = useState<Record<string, string>>({});
 
   // Filtrage + regroupement mémoïsés.
   const groupes = useMemo(() => {
@@ -205,30 +210,43 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
                 </button>
                 {ouvert ? (
                   <ul className="divide-y divide-border border-t border-border">
-                    {items.map((c) => (
-                      <li key={c.cle} className="px-4 py-3">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <code className="break-all font-mono text-xs text-text-2">{c.cle}</code>
-                            <p className="mt-1 text-sm text-text-1">{apercu(c.valeurMd)}</p>
-                            <p className="mt-0.5 text-xs text-text-3">
-                              {c.valeurMd.length} caractères · modifié le{' '}
-                              {FORMATEUR_DATE.format(new Date(c.updatedAt))}
-                              {c.titrePage !== undefined ? ` · ${c.titrePage}` : ''}
-                            </p>
+                    {items.map((c) => {
+                      const valeurAffichee = surcharges[c.cle] ?? c.valeurMd;
+                      return (
+                        <li key={c.cle} className="px-4 py-3">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <code className="break-all font-mono text-xs text-text-2">
+                                {c.cle}
+                              </code>
+                              <p className="mt-1 text-sm text-text-1">{apercu(valeurAffichee)}</p>
+                              <p className="mt-0.5 text-xs text-text-3">
+                                {valeurAffichee.length} caractères · modifié le{' '}
+                                {FORMATEUR_DATE.format(new Date(c.updatedAt))}
+                                {c.titrePage !== undefined ? ` · ${c.titrePage}` : ''}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
+                              <EditeurInlineCMS
+                                cle={c.cle}
+                                valeurInitiale={valeurAffichee}
+                                cheminRevalidation={c.cheminPublic}
+                                onSauvegarde={(nv) => setSurcharges((s) => ({ ...s, [c.cle]: nv }))}
+                              />
+                              {c.cheminPublic !== undefined ? (
+                                <Link
+                                  href={c.cheminPublic}
+                                  className="inline-flex items-center gap-1 text-brand text-sm hover:underline"
+                                >
+                                  <ExternalLink size={12} aria-hidden="true" />
+                                  Voir
+                                </Link>
+                              ) : null}
+                            </div>
                           </div>
-                          {c.cheminPublic !== undefined ? (
-                            <Link
-                              href={c.cheminPublic}
-                              className="inline-flex shrink-0 items-center gap-1 text-brand text-sm hover:underline"
-                            >
-                              <ExternalLink size={12} aria-hidden="true" />
-                              Éditer en place
-                            </Link>
-                          ) : null}
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : null}
               </section>
