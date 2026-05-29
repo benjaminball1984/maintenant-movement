@@ -1,4 +1,5 @@
 import { acheterProduit, noterVendeureuse } from '@/app/(public)/s-entraider/marche/actions';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { DoubleAffichagePrix } from '@/components/marche/BadgesMonnaies';
 import { FormulaireAchat } from '@/components/marche/FormulaireAchat';
@@ -406,6 +407,12 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="produit_marche"
+          objetId={produit.id}
+          cheminRevalidation={`/s-entraider/marche/produits/${slug}`}
+        />
       </article>
     </>
   );

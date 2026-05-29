@@ -3,6 +3,7 @@ import { annulerMomentAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiperMoment } from '@/components/moments/BoutonParticiperMoment';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -503,6 +504,12 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
             )}
           </section>
         ) : null}
+
+        <FilCommentaires
+          objetType="moment_solidaire"
+          objetId={moment.id}
+          cheminRevalidation={`/agir/moments-solidaires/${slug}`}
+        />
       </article>
 
       {estAdmin ? (

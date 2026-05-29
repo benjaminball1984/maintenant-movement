@@ -3,6 +3,7 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -208,6 +209,12 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
             cheminRevalidation={`/mobiliser/campagnes/${slug}`}
           />
         ) : null}
+
+        <FilCommentaires
+          objetType="campagne"
+          objetId={campagne.id}
+          cheminRevalidation={`/mobiliser/campagnes/${slug}`}
+        />
       </article>
 
       {estAdmin ? (

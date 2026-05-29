@@ -1,3 +1,4 @@
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
@@ -417,6 +418,12 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="offre_entraide"
+          objetId={offre.id}
+          cheminRevalidation={`/s-entraider/offre/${slug}`}
+        />
       </article>
     </>
   );

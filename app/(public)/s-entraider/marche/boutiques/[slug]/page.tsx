@@ -1,3 +1,4 @@
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { CarteProduit } from '@/components/marche/CarteProduit';
 import { Alert, Badge, Heading } from '@/components/ui';
@@ -227,6 +228,12 @@ export default async function PageDetailBoutique({ params }: PageDetailProps) {
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="boutique_marche"
+          objetId={boutique.id}
+          cheminRevalidation={`/s-entraider/marche/boutiques/${slug}`}
+        />
       </article>
     </>
   );

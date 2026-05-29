@@ -6,6 +6,7 @@ import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
@@ -594,6 +595,12 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="cagnotte"
+          objetId={cagnotte.id}
+          cheminRevalidation={`/mobiliser/cagnottes/${slug}`}
+        />
       </article>
 
       {estAdmin ? (

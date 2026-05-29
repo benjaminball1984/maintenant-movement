@@ -1,3 +1,4 @@
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonReserverOffre } from '@/components/reservation/BoutonReserverOffre';
@@ -378,6 +379,12 @@ export default async function PageDetailService({ params }: PageDetailProps) {
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="service_sel"
+          objetId={service.id}
+          cheminRevalidation={`/s-entraider/sel/${slug}`}
+        />
       </article>
     </>
   );

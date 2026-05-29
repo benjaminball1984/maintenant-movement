@@ -3,6 +3,7 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
@@ -385,6 +386,12 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             </p>
           ) : null}
         </footer>
+
+        <FilCommentaires
+          objetType="mobilisation"
+          objetId={mobilisation.id}
+          cheminRevalidation={`/mobiliser/mobilisations/${slug}`}
+        />
       </article>
 
       {estAdmin ? (

@@ -4,6 +4,7 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
+import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -288,6 +289,12 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
             })}
           </ul>
         </section>
+
+        <FilCommentaires
+          objetType="sondage"
+          objetId={sondage.id}
+          cheminRevalidation={`/s-informer/sondages/${slug}`}
+        />
       </article>
 
       {estAdmin ? (
