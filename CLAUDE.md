@@ -501,8 +501,15 @@ Voir `docs/specs/03_VOCABULAIRE.md` §6 pour les règles complètes.
 
 ---
 
-**Dernière mise à jour** : 2026-05-29 (cycle V2.5.40→V2.5.46 : outillage rich text + démo admin + migration pages stub)
-**Dernier chantier terminé** : V2.5.46 (migration 2 dernières pages stub vers PageEditorialeCMS) — sur `main` (tip `2bbd46d`). `comprendre/doctrine` et `a-propos` étaient encore sur `PageEditorialeStub`. Migrés sur `PageEditorialeCMS` → mode rich text activé + édition admin inline + bascule Markdown/Riche. 100 % des pages éditoriales sur CMS.
+**Dernière mise à jour** : 2026-05-29 (cycle V2.5.48→V2.5.53 : rich text étendu à toutes les tables de contenu long)
+**Dernier chantier terminé** : V2.5.53 (rich text infrastructure pétitions + cagnottes) — sur `main` (tip `9ae43b3`). Migration `20260530920000_petition_cagnotte_texte_html.sql` (2 ALTER TABLE additifs). Server Actions + types + rendu pages enrichi. **Toutes les 6 tables avec texte long ont désormais une version HTML riche optionnelle**.
+**Dernier chantier terminé (antérieur)** : V2.5.52 (rich text infrastructure mobilisations) — sur `main` (tip `8767762`). Migration `20260530910000_mobilisation_description_html.sql`. Schema Zod + Server Action + types + rendu page priorise HTML.
+**Dernier chantier terminé (antérieur)** : V2.5.51 (UI rich text dans `FormulaireCreationCampagne`) — sur `main` (tip `7532ade`). Switch Riche/Markdown, pré-remplissage au bascule. Texte plat reste obligatoire (résumé/SEO) mais devient pliable en mode Riche.
+**Dernier chantier terminé (antérieur)** : V2.5.50 (rich text infrastructure campagne) — sur `main` (tip `fafaa75`). Migration `20260530900000_campagne_texte_html.sql`. Server Action + types + rendu page enrichi.
+**Dernier chantier terminé (antérieur)** : V2.5.49 (bio rich text profil personne) — sur `main` (tip `7a869e1`). 2 migrations (`20260530800000_personne_bio_html.sql` + `20260530810000_personne_affichage_bio_html.sql` qui étend la RPC `personne_affichage` avec `bio_html`). UI complète dans `FormulaireInformations` + rendu sur profil réseau.
+**Dernier chantier terminé (antérieur)** : V2.5.48 (recherche console CMS étendue à `valeur_html`) — sur `main` (tip `0fbf926`). Strip des balises HTML pour matching textuel sur la version riche.
+**Dernier chantier terminé (antérieur)** : V2.5.47 (maj CLAUDE.md cycle V2.5.40→V2.5.46) — sur `main` (tip `1a5b3be`).
+**Dernier chantier terminé (antérieur)** : V2.5.46 (migration 2 dernières pages stub vers PageEditorialeCMS) — sur `main` (tip `2bbd46d`). `comprendre/doctrine` et `a-propos` étaient encore sur `PageEditorialeStub`. Migrés sur `PageEditorialeCMS` → mode rich text activé + édition admin inline + bascule Markdown/Riche. 100 % des pages éditoriales sur CMS.
 **Dernier chantier terminé (antérieur)** : V2.5.45 (`RenduContenuAuto` Server Component) — sur `main` (tip `9d4672c`). Wrapper de commodité au-dessus de `RenduRiche` qui évite de dupliquer le pattern `lireContenuEditorial` + choix md/html. Permet de migrer progressivement les usages directs de `MarkdownLeger`.
 **Dernier chantier terminé (antérieur)** : V2.5.44 (page démo rich text `/admin/national/rich-text-demo`) — sur `main` (tip `01c6225`). 4 sections (rendu complet, sanitization anti-XSS, où c'est branché, allowlist). Lien ajouté dans la nav admin nationale.
 **Dernier chantier terminé (antérieur)** : V2.5.43 (barre de progression rich text dans console CMS) — sur `main` (tip `9ff6734`). Compte rich text vs markdown, ratio %, mini-barre avec aria. Permet à Lilou/Ben de suivre l'avancée de la migration.
