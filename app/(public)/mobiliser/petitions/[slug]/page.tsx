@@ -1,8 +1,10 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
+import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Alert, Card, Container, Heading } from '@/components/ui';
+import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -338,6 +340,19 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             {petition.texte}
           </div>
         </section>
+
+        {/* V2.5.7 Phase F : moteur d'invitation virale.
+            Affiché seulement quand la pétition est publiée (sinon rien
+            à partager). Le message pré-rempli reste sobre et factuel. */}
+        {estPubliee ? (
+          <BoutonsPartage
+            titre={petition.titre}
+            url={`${getSiteUrl()}/mobiliser/petitions/${petition.slug}`}
+            message={`Cette pétition mérite d'être vue : ${petition.titre}.`}
+            titreBloc="Faire signer aussi"
+            intro="Plus on est nombreuses et nombreux à signer, plus le message porte. Partage à celles et ceux que la cause peut toucher."
+          />
+        ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">
           {petition.createurice_prenom !== null || petition.createurice_nom !== null ? (
