@@ -216,7 +216,7 @@ export default async function PageSel({ searchParams }: PageSelProps) {
           </TexteEditableAdmin>
         </Alert>
       ) : (
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {services.map((service, index) => (
             <li key={service.id}>
               <CarteService service={service} enAvant={index === 0} />

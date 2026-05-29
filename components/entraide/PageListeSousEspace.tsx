@@ -173,7 +173,7 @@ export async function PageListeSousEspace({ type }: PageListeSousEspaceProps) {
             </TexteEditableAdmin>
           </Alert>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {offresProposees.map((offre, index) => (
               <li key={offre.id}>
                 <CarteOffre offre={offre} enAvant={index === 0} />
@@ -223,7 +223,7 @@ export async function PageListeSousEspace({ type }: PageListeSousEspaceProps) {
             </TexteEditableAdmin>
           </Alert>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {offresCherchees.map((offre) => (
               <li key={offre.id}>
                 <CarteOffre offre={offre} />

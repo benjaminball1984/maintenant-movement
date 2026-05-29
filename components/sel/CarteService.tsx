@@ -1,7 +1,7 @@
-import { Badge, Card } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import type { ServiceSelEnrichi } from '@/lib/sel/requetes';
 import { cn } from '@/lib/utils';
-import { Clock, MapPin } from 'lucide-react';
+import { MapPin, User } from 'lucide-react';
 import Link from 'next/link';
 
 interface CarteServiceProps {
@@ -9,46 +9,73 @@ interface CarteServiceProps {
   enAvant?: boolean;
 }
 
+/**
+ * `<CarteService>` — vignette d'un service ou volontariat SEL (V2.5.12).
+ *
+ * Le SEL n'a pas de photo associée à un service (c'est du temps + une
+ * compétence). On transpose donc la « grammaire visuelle des leaders »
+ * sans photo, en mettant la VALEUR centrale (durée + 99-coin attendus)
+ * en avant typographiquement, comme un prix sur Vinted ou un tarif horaire.
+ *
+ * Carte plus haute qu'large, dense en information, cliquable en entier.
+ */
 export function CarteService({ service, enAvant = false }: CarteServiceProps) {
-  const accroche =
-    service.description.length > 200
-      ? `${service.description.slice(0, 200).trimEnd()}...`
-      : service.description;
+  const lien = `/s-entraider/sel/${service.slug}`;
+  const auteurNom =
+    service.createurice_prenom !== null || service.createurice_nom !== null
+      ? [service.createurice_prenom, service.createurice_nom]
+          .filter((s) => s !== null && s.trim() !== '')
+          .join(' ')
+      : 'Anonyme';
+
   return (
-    <Card
-      variant={enAvant ? 'eleve' : 'ombre'}
-      className={cn('flex flex-col gap-3', enAvant && 'border-brand/40')}
+    <article
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-lg border bg-surface p-4 transition',
+        'hover:border-brand hover:shadow-md',
+        enAvant ? 'border-brand/50 shadow-brand/20 shadow-md' : 'border-border',
+      )}
     >
-      <header className="flex flex-wrap items-center justify-between gap-2">
+      {/* Badges en haut. */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <Badge variant={service.categorie === 'service' ? 'brand' : 'accent'}>
           {service.categorie === 'service' ? 'Service' : 'Volontariat'}
         </Badge>
         <Badge variant={service.sens === 'propose' ? 'success' : 'info'}>
           {service.sens === 'propose' ? 'Offre' : 'Demande'}
         </Badge>
-      </header>
-      <h3 className="text-lg font-bold leading-tight text-text-1">
-        <Link
-          href={`/s-entraider/sel/${service.slug}`}
-          className="underline-offset-4 hover:underline"
-        >
+      </div>
+
+      {/* Hero typographique : la VALEUR du service en gros. */}
+      <div className="mb-4 grid gap-1 rounded-md bg-surface-2 p-3 text-center">
+        <p className="font-display text-2xl font-extrabold text-text-1">
+          {service.duree_minutes_estimee} min
+        </p>
+        <p className="font-bold text-sm text-brand">
+          {service.duree_minutes_estimee} 99-coin attendus
+        </p>
+      </div>
+
+      <h3 className="mb-2 line-clamp-2 font-bold text-base leading-snug text-text-1">
+        <Link href={lien} className="hover:text-brand">
+          {/* Overlay invisible qui rend toute la carte cliquable. */}
+          <span aria-hidden="true" className="absolute inset-0" />
           {service.titre}
         </Link>
       </h3>
-      <dl className="grid gap-1 text-sm text-text-2">
-        <div className="flex items-start gap-2">
-          <Clock size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
-          <dd>
-            {service.duree_minutes_estimee} min ·{' '}
-            <span className="text-text-3">{service.duree_minutes_estimee} 99-coin attendus</span>
-          </dd>
+
+      <p className="mb-3 line-clamp-3 text-xs text-text-2 leading-relaxed">{service.description}</p>
+
+      <footer className="mt-auto grid gap-1 border-t border-border pt-2 text-xs text-text-3">
+        <div className="flex items-center gap-1.5">
+          <MapPin size={12} strokeWidth={1.5} />
+          <span className="line-clamp-1">{service.lieu}</span>
         </div>
-        <div className="flex items-start gap-2">
-          <MapPin size={14} strokeWidth={1.5} className="mt-0.5 text-text-3" />
-          <dd>{service.lieu}</dd>
+        <div className="flex items-center gap-1.5">
+          <User size={12} strokeWidth={1.5} />
+          <span className="line-clamp-1">{auteurNom}</span>
         </div>
-      </dl>
-      <p className="text-sm text-text-2">{accroche}</p>
-    </Card>
+      </footer>
+    </article>
   );
 }
