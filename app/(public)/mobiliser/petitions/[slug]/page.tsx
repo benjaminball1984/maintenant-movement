@@ -5,6 +5,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
@@ -393,11 +394,13 @@ export default async function PagePetition({ params }: PagePetitionProps) {
               >
                 {(t) => <>{t}</>}
               </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">
-                {[petition.createurice_prenom, petition.createurice_nom]
+              <LienAuteurReseau
+                personneId={petition.createurice_id}
+                nom={[petition.createurice_prenom, petition.createurice_nom]
                   .filter((s) => s !== null && s.trim() !== '')
                   .join(' ')}
-              </strong>{' '}
+                className="font-bold text-text-2"
+              />{' '}
               <TexteEditableAdmin
                 cle="petitions.fiche.footer_milieu"
                 valeurInitiale={footerMilieu.valeurMd}
