@@ -664,6 +664,8 @@ export type Database = {
           suspendue_le: string | null;
           suspendue_par: string | null;
           texte: string;
+          /** V2.5.53 — version HTML riche optionnelle. */
+          texte_html: string | null;
           titre: string;
           type: string;
           updated_at: string;
@@ -682,6 +684,7 @@ export type Database = {
           suspendue_le?: string | null;
           suspendue_par?: string | null;
           texte: string;
+          texte_html?: string | null;
           titre: string;
           type: string;
           updated_at?: string;
@@ -700,6 +703,7 @@ export type Database = {
           suspendue_le?: string | null;
           suspendue_par?: string | null;
           texte?: string;
+          texte_html?: string | null;
           titre?: string;
           type?: string;
           updated_at?: string;
@@ -2012,6 +2016,8 @@ export type Database = {
           slug: string;
           statut: string;
           texte: string;
+          /** V2.5.53 — version HTML riche optionnelle. */
+          texte_html: string | null;
           titre: string;
           updated_at: string;
         };
@@ -2030,6 +2036,7 @@ export type Database = {
           slug: string;
           statut?: string;
           texte: string;
+          texte_html?: string | null;
           titre: string;
           updated_at?: string;
         };
@@ -2048,6 +2055,7 @@ export type Database = {
           slug?: string;
           statut?: string;
           texte?: string;
+          texte_html?: string | null;
           titre?: string;
           updated_at?: string;
         };

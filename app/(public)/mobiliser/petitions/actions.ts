@@ -2,6 +2,7 @@
 
 import { getSession } from '@/lib/auth/session';
 import { getEmailService } from '@/lib/email';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -63,10 +64,17 @@ export async function creerPetition(
   const supabase = await getSupabaseServer();
   const slug = await genererSlugUnique(donnees.titre, supabase);
 
+  // V2.5.53 — sanitize HTML riche optionnel avant insertion.
+  const texteHtmlPropre =
+    donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
+      ? sanitizeRichHtml(donnees.texte_html)
+      : null;
+
   const { error } = await supabase.from('petition').insert({
     slug,
     titre: donnees.titre,
     texte: donnees.texte,
+    texte_html: texteHtmlPropre,
     destinataire: donnees.destinataire,
     image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
     objectif: donnees.objectif,

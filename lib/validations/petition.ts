@@ -71,6 +71,8 @@ function champsContenuPetition(messages: MessagesValidationPetition) {
   return {
     titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
     texte: z.string().trim().min(100, messages.texteMin).max(5000, messages.texteMax),
+    /** V2.5.53 — version HTML riche optionnelle (sanitizée au save). */
+    texte_html: z.string().max(50000).optional().or(z.literal('')),
     destinataire: z
       .string()
       .trim()

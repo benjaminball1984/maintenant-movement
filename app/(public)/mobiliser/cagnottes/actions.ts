@@ -3,6 +3,7 @@
 import { getSession } from '@/lib/auth/session';
 import { obtenirOuCreerCaisseCagnotte, poserEntreeCaisse } from '@/lib/caisse-flux';
 import { calculerFraisEuros, getPaymentService } from '@/lib/payments';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -82,10 +83,17 @@ export async function creerCagnotte(
   const wallet =
     donnees.wallet_t99cp === '' || donnees.wallet_t99cp === undefined ? null : donnees.wallet_t99cp;
 
+  // V2.5.53 — sanitize HTML riche optionnel avant insertion.
+  const texteHtmlPropre =
+    donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
+      ? sanitizeRichHtml(donnees.texte_html)
+      : null;
+
   const { error } = await supabase.from('cagnotte').insert({
     slug,
     titre: donnees.titre,
     texte: donnees.texte,
+    texte_html: texteHtmlPropre,
     type: donnees.type,
     image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
     objectif_euros: donnees.objectif_euros,
