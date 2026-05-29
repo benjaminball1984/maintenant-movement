@@ -2,6 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateCourte } from '@/lib/format-date';
 import { getSupabaseServer } from '@/lib/supabase';
 import { FileText, Plus } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -12,12 +13,6 @@ import { LigneEditionAdmin } from './LigneEditionAdmin';
 export const metadata: Metadata = {
   title: 'Maintenant Médias — Console admin',
 };
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
 
 /**
  * Console admin / Maintenant Médias (V2.4.13).
@@ -115,8 +110,8 @@ export default async function PageAdminJournal() {
                     ) : null}
                     <p className="text-text-3 text-xs">
                       {e.publie_le !== null
-                        ? `Publié le ${FORMATEUR.format(new Date(e.publie_le))}`
-                        : `Créé le ${FORMATEUR.format(new Date(e.created_at))}`}{' '}
+                        ? `Publié le ${formaterDateCourte(e.publie_le)}`
+                        : `Créé le ${formaterDateCourte(e.created_at)}`}{' '}
                       ·{' '}
                       <Link
                         href={`/s-informer/journal/${e.slug}`}

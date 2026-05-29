@@ -4,6 +4,7 @@ import { HistoriqueTransitions } from '@/components/reservation/HistoriqueTransi
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateLongueHeure } from '@/lib/format-date';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -120,9 +121,9 @@ export default async function PageModerationReservationsEnLitige() {
                   <div className="flex items-start gap-2 text-sm text-text-2">
                     <CalendarRange size={16} className="mt-0.5 text-text-3" aria-hidden="true" />
                     <span>
-                      {FORMATEUR.format(new Date(reservation.creneauDebut))}
+                      {formaterDateLongueHeure(reservation.creneauDebut)}
                       {reservation.creneauFin !== null
-                        ? ` → ${FORMATEUR.format(new Date(reservation.creneauFin))}`
+                        ? ` → ${formaterDateLongueHeure(reservation.creneauFin)}`
                         : ''}
                     </span>
                   </div>
@@ -186,12 +187,3 @@ const LIBELLE_TYPE_OFFRE = {
   location_mutualisee: 'Location mutualisée',
   autre: 'Offre',
 } as const;
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});

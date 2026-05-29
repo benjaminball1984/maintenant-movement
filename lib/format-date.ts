@@ -31,6 +31,21 @@ const FMT_DATE_HEURE = new Intl.DateTimeFormat('fr-FR', {
   minute: '2-digit',
 });
 
+const FMT_DATE_MOYENNE = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const FMT_DATE_LONGUE_HEURE = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const FMT_DATE_ISO_JOUR = (iso: string) => iso.slice(0, 10);
 
 /** « 23 mai 2026 ». */
@@ -46,6 +61,16 @@ export function formaterDateLongue(iso: string | Date): string {
 /** « 23 mai 2026, 14:00 ». */
 export function formaterDateHeure(iso: string | Date): string {
   return FMT_DATE_HEURE.format(toDate(iso));
+}
+
+/** « 23 mai 2026 » (mois en toutes lettres, sans jour de semaine). */
+export function formaterDateMoyenne(iso: string | Date): string {
+  return FMT_DATE_MOYENNE.format(toDate(iso));
+}
+
+/** « samedi 23 mai 2026, 14:00 » (jour de semaine + date longue + heure). */
+export function formaterDateLongueHeure(iso: string | Date): string {
+  return FMT_DATE_LONGUE_HEURE.format(toDate(iso));
 }
 
 /** « 2026-05-23 » (YYYY-MM-DD, utile pour noms de fichiers). */

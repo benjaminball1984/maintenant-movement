@@ -9,6 +9,7 @@ import {
   chargerSalleParSlug,
   listerReunionsSalle,
 } from '@/lib/decider';
+import { formaterDateLongueHeure } from '@/lib/format-date';
 import { CalendarRange, FileText, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -30,15 +31,6 @@ const FALLBACKS = {
 interface Props {
   params: Promise<{ slug: string }>;
 }
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -184,8 +176,8 @@ export default async function PageSalleDecider({ params }: Props) {
                     </div>
                     <h3 className="font-display font-bold text-lg text-text-1">{r.titre}</h3>
                     <p className="text-text-3 text-xs">
-                      {FORMATEUR.format(new Date(r.debutLe))}
-                      {r.finLe !== null ? ` → ${FORMATEUR.format(new Date(r.finLe))}` : ''}
+                      {formaterDateLongueHeure(r.debutLe)}
+                      {r.finLe !== null ? ` → ${formaterDateLongueHeure(r.finLe)}` : ''}
                     </p>
                   </Card>
                 </Link>
@@ -236,7 +228,7 @@ export default async function PageSalleDecider({ params }: Props) {
                         {LIBELLE_STATUT[r.statut]}
                       </Badge>
                       <span className="text-text-3 text-xs">
-                        {FORMATEUR.format(new Date(r.debutLe))}
+                        {formaterDateLongueHeure(r.debutLe)}
                       </span>
                     </div>
                     <h3 className="font-bold text-text-1">{r.titre}</h3>

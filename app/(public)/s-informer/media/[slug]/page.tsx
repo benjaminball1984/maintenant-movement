@@ -6,6 +6,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { formaterTempsLecture } from '@/lib/temps-lecture';
@@ -36,12 +37,6 @@ const LIBELLE_TYPE: Record<TypeMedia, string> = {
   live: 'Live',
   newsletter: 'Newsletter',
 };
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -131,7 +126,7 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
             {[media.auteurice_prenom, media.auteurice_nom]
               .filter((s) => s !== null && s.trim() !== '')
               .join(' ') || redactionFallback.valeurMd}
-            {media.publie_le !== null ? ` · ${FORMATEUR.format(new Date(media.publie_le))}` : ''}
+            {media.publie_le !== null ? ` · ${formaterDateMoyenne(media.publie_le)}` : ''}
             {media.corps.trim() !== '' ? ` · ${formaterTempsLecture(media.corps)}` : ''}
           </p>
         </header>

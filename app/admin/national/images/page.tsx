@@ -7,6 +7,7 @@ import {
 } from '@/lib/admin/bibliotheque-images';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateHeure } from '@/lib/format-date';
 import { formaterTailleOctets } from '@/lib/format-taille';
 import { Image as IconeImage } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -16,14 +17,6 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Bibliothèque d’images — Admin',
 };
-
-const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 interface Props {
   searchParams: Promise<{ prefixe?: string }>;
@@ -142,7 +135,7 @@ export default async function PageBibliothequeImages({ searchParams }: Props) {
                     </span>
                     {f.derniereMaj !== null ? (
                       <span className="text-text-3 text-xs">
-                        · {FORMATEUR_DATE.format(new Date(f.derniereMaj))}
+                        · {formaterDateHeure(f.derniereMaj)}
                       </span>
                     ) : null}
                   </div>

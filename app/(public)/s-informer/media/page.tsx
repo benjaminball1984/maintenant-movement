@@ -2,6 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import { listerMediasPublies } from '@/lib/media/requetes';
 import { cn } from '@/lib/utils';
 import type { TypeMedia } from '@/types/database';
@@ -57,12 +58,6 @@ const LISTE_TYPES: TypeMedia[] = [
 function estTypeValide(v: string | undefined): v is TypeMedia {
   return v !== undefined && (LISTE_TYPES as string[]).includes(v);
 }
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 export default async function PageMedia({ searchParams }: PageMediaProps) {
   const { type } = await searchParams;
@@ -217,9 +212,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
                       .filter((s) => s !== null && s.trim() !== '')
                       .join(' ') || 'Rédaction'}
                   </span>
-                  {m.publie_le !== null ? (
-                    <span>{FORMATEUR.format(new Date(m.publie_le))}</span>
-                  ) : null}
+                  {m.publie_le !== null ? <span>{formaterDateMoyenne(m.publie_le)}</span> : null}
                 </footer>
               </Card>
             </li>

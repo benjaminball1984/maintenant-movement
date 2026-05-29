@@ -3,6 +3,7 @@ import { Alert, Avatar, Badge, Card, Heading, Pagination } from '@/components/ui
 import { type OptionsListePersonnes, listerPersonnesAdminPagine } from '@/lib/admin/personnes';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateCourte } from '@/lib/format-date';
 import { lirePageDepuisParams, paginer } from '@/lib/pagination';
 import { compter } from '@/lib/pluriel';
 import { CheckCircle, Mail, ShieldOff, UserX, Users } from 'lucide-react';
@@ -12,12 +13,6 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Personnes — Admin',
 };
-
-const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
 
 const STATUTS: Array<{ value: NonNullable<OptionsListePersonnes['statut']>; label: string }> = [
   { value: 'tous', label: 'Tous' },
@@ -184,9 +179,9 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
                       <code className="font-mono">{p.id}</code>
                     </p>
                     <p className="mt-1 text-text-3 text-xs">
-                      Inscrit le {FORMATEUR_DATE.format(new Date(p.createdAt))}
+                      Inscrit le {formaterDateCourte(p.createdAt)}
                       {p.derniereConnexionLe !== null
-                        ? ` · dernière connexion ${FORMATEUR_DATE.format(new Date(p.derniereConnexionLe))}`
+                        ? ` · dernière connexion ${formaterDateCourte(p.derniereConnexionLe)}`
                         : ' · jamais connecté·e'}
                     </p>
                   </div>

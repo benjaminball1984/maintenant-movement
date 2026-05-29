@@ -3,6 +3,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import { getSupabaseServer } from '@/lib/supabase';
 import { FileText, Printer } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -26,12 +27,6 @@ const FALLBACKS = {
   bandeauModeleCorps:
     "Impression locale gratuite, impression à façon en T99CP ou euros (marge mutualisée), plafond à 100 affiches par commande. Coûts API estimés ~0,023 $ par affiche avec Claude Haiku 4.5 quand l'agent générateur sera branché.",
 };
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 /**
  * Page `/s-informer/journal` V2.4.11.
@@ -173,7 +168,7 @@ export default async function PageJournal() {
                     ) : null}
                     {e.publie_le !== null ? (
                       <p className="text-text-3 text-xs">
-                        Publié le {FORMATEUR.format(new Date(e.publie_le))}
+                        Publié le {formaterDateMoyenne(e.publie_le)}
                       </p>
                     ) : null}
                   </Card>

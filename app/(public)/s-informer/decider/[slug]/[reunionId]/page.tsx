@@ -10,6 +10,7 @@ import {
   chargerReunionParId,
   chargerSalleParSlug,
 } from '@/lib/decider';
+import { formaterDateLongueHeure } from '@/lib/format-date';
 import { ArrowLeft, CalendarRange, FileText } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,15 +20,6 @@ import { FormulaireMajReunion } from './FormulaireMajReunion';
 interface Props {
   params: Promise<{ slug: string; reunionId: string }>;
 }
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, reunionId } = await params;
@@ -119,8 +111,8 @@ export default async function PageReunion({ params }: Props) {
         </div>
         <p className="text-sm text-text-3">
           <CalendarRange size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
-          {FORMATEUR.format(new Date(reunion.debutLe))}
-          {reunion.finLe !== null ? ` → ${FORMATEUR.format(new Date(reunion.finLe))}` : ''}
+          {formaterDateLongueHeure(reunion.debutLe)}
+          {reunion.finLe !== null ? ` → ${formaterDateLongueHeure(reunion.finLe)}` : ''}
         </p>
       </header>
 

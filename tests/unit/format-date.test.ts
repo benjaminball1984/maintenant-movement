@@ -3,6 +3,8 @@ import {
   formaterDateHeure,
   formaterDateIso,
   formaterDateLongue,
+  formaterDateLongueHeure,
+  formaterDateMoyenne,
 } from '@/lib/format-date';
 import { describe, expect, it } from 'vitest';
 
@@ -38,6 +40,30 @@ describe('formaterDateHeure', () => {
     // 14:00 UTC = différent selon fuseau, mais doit contenir un format HH:MM
     expect(r).toMatch(/\d{2}:\d{2}/);
     expect(r).toContain('2026');
+  });
+});
+
+describe('formaterDateMoyenne', () => {
+  it('contient le mois en toutes lettres et l’année, sans jour de semaine', () => {
+    const r = formaterDateMoyenne(REF_ISO);
+    expect(r).toContain('mai');
+    expect(r).toContain('2026');
+    // Pas de jour de semaine en toutes lettres dans ce format.
+    expect(r.toLowerCase()).not.toMatch(/(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)/);
+  });
+
+  it('accepte un Date directement', () => {
+    expect(formaterDateMoyenne(REF_DATE)).toContain('2026');
+  });
+});
+
+describe('formaterDateLongueHeure', () => {
+  it('contient jour de semaine, mois en toutes lettres, année et heure', () => {
+    const r = formaterDateLongueHeure(REF_ISO);
+    expect(r.toLowerCase()).toMatch(/(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)/);
+    expect(r).toContain('mai');
+    expect(r).toContain('2026');
+    expect(r).toMatch(/\d{2}:\d{2}/);
   });
 });
 

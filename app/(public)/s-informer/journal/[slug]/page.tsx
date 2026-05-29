@@ -5,6 +5,7 @@ import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -44,12 +45,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: e.sous_titre ?? undefined,
   };
 }
-
-const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 /**
  * Page individuelle d'une édition de journal-affiche (V2.4.11).
@@ -104,7 +99,7 @@ export default async function PageEditionJournal({ params }: Props) {
             >
               {(t) => <>{t}</>}
             </TexteEditableAdmin>{' '}
-            {FORMATEUR.format(new Date(e.publie_le))}
+            {formaterDateMoyenne(e.publie_le)}
           </span>
         ) : null}
       </div>

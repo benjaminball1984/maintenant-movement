@@ -3,6 +3,7 @@ import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { listerMandatsActifs } from '@/lib/communes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import type { EntiteConfederal } from '@/types/database';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -45,12 +46,6 @@ const LIBELLE_TYPE: Record<EntiteConfederal, string> = {
   federation: 'Fédération',
   confederation: 'Confédération',
 };
-
-const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 export default async function PageAssemblee({ searchParams }: PageAssembleeProps) {
   const { entite } = await searchParams;
@@ -141,9 +136,7 @@ export default async function PageAssemblee({ searchParams }: PageAssembleeProps
                       .join(' ') || 'Personne tirée au sort'}
                   </p>
                 </div>
-                <p className="text-xs text-text-3">
-                  Tirée le {FORMATEUR_DATE.format(new Date(m.tire_le))}
-                </p>
+                <p className="text-xs text-text-3">Tirée le {formaterDateMoyenne(m.tire_le)}</p>
               </Card>
             </li>
           ))}

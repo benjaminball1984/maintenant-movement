@@ -4,6 +4,7 @@ import { LienJustificatif } from '@/components/admin/tresorerie/LienJustificatif
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
 import { calculerSoldeCaisse } from '@/lib/caisse-solde';
+import { formaterDateMoyenne } from '@/lib/format-date';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -86,10 +87,8 @@ export default async function PageDetailCaisse({
         ) : null}
       </div>
       <p className="mt-2 text-sm text-text-3">
-        Ouverte le {FORMATEUR_DATE.format(new Date(caisse.ouverteLe))}
-        {caisse.fermeeLe !== null
-          ? ` · fermée le ${FORMATEUR_DATE.format(new Date(caisse.fermeeLe))}`
-          : ''}
+        Ouverte le {formaterDateMoyenne(caisse.ouverteLe)}
+        {caisse.fermeeLe !== null ? ` · fermée le ${formaterDateMoyenne(caisse.fermeeLe)}` : ''}
       </p>
 
       <section className="mt-6 grid gap-3 rounded-md border border-border bg-surface p-4 sm:grid-cols-2">
@@ -147,10 +146,8 @@ export default async function PageDetailCaisse({
                       </Badge>
                     </div>
                     <span className="text-text-3 text-xs">
-                      Du {FORMATEUR_DATE.format(new Date(r.valideDu))}
-                      {r.valideAu !== null
-                        ? ` → au ${FORMATEUR_DATE.format(new Date(r.valideAu))}`
-                        : ''}
+                      Du {formaterDateMoyenne(r.valideDu)}
+                      {r.valideAu !== null ? ` → au ${formaterDateMoyenne(r.valideAu)}` : ''}
                     </span>
                   </div>
                   <p className="break-all font-mono text-sm text-text-1">
@@ -198,9 +195,7 @@ export default async function PageDetailCaisse({
                         (e.payeurExterneEmail !== null ? e.payeurExterneEmail : 'Anonyme'))}
                   </p>
                   {e.motif !== null ? <p className="text-sm text-text-3">{e.motif}</p> : null}
-                  <p className="text-text-3 text-xs">
-                    Reçue le {FORMATEUR_DATE.format(new Date(e.recueLe))}
-                  </p>
+                  <p className="text-text-3 text-xs">Reçue le {formaterDateMoyenne(e.recueLe)}</p>
                 </Card>
               </li>
             ))}
@@ -277,10 +272,10 @@ export default async function PageDetailCaisse({
                     <span className="text-text-3 text-xs">({t.justificatifMimeType})</span>
                   </p>
                   <p className="text-text-3 text-xs">
-                    Initiée le {FORMATEUR_DATE.format(new Date(t.initieLe))} par{' '}
+                    Initiée le {formaterDateMoyenne(t.initieLe)} par{' '}
                     {nomAffichageRespectantVisibilite(identitesParId.get(t.initiePersonneId))}
                     {t.confirmeLe !== null
-                      ? ` · confirmée le ${FORMATEUR_DATE.format(new Date(t.confirmeLe))}`
+                      ? ` · confirmée le ${formaterDateMoyenne(t.confirmeLe)}`
                       : ''}
                   </p>
                   {t.statut === 'initiee' ? (
@@ -345,12 +340,6 @@ const STATUT_TX_VARIANT = {
   annulee: 'default',
   litige: 'danger',
 } as const;
-
-const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
