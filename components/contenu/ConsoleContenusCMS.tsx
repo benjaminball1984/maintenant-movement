@@ -84,9 +84,17 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
     const requete = recherche.trim().toLowerCase();
     const filtres = contenus.filter((c) => {
       if (requete === '') return true;
+      // V2.5.48 : on cherche aussi dans valeur_html (texte stripé) pour ne pas
+      // rater les contenus qui ont basculé en rich text. Le strip naïf
+      // suffit (apercu HTML n'a pas besoin d'être structurel).
+      const htmlTexte =
+        c.valeurHtml !== null && c.valeurHtml !== undefined
+          ? c.valeurHtml.replace(/<[^>]+>/g, ' ').toLowerCase()
+          : '';
       return (
         c.cle.toLowerCase().includes(requete) ||
         c.valeurMd.toLowerCase().includes(requete) ||
+        htmlTexte.includes(requete) ||
         (c.titrePage?.toLowerCase().includes(requete) ?? false)
       );
     });
