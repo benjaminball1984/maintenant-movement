@@ -169,6 +169,7 @@ export function FormulaireCreationCampagne({
               }}
               placeholder={libelles.placeholderTexte}
               hauteurMin={280}
+              labelA11y="Présentation de la campagne (éditeur de texte riche)"
             />
             <p className="mt-1 text-text-3 text-xs">{libelles.hintTexte}</p>
             <input type="hidden" {...register('texte_html')} />

@@ -39,6 +39,12 @@ interface EditeurRicheProps {
   placeholder?: string;
   /** Hauteur min en pixels. */
   hauteurMin?: number;
+  /**
+   * Nom accessible de la zone d'édition (lu par les lecteurs d'écran).
+   * Sans ça, le `contenteditable` TipTap est un champ anonyme. À surcharger
+   * pour préciser ce qu'on édite (« Présentation de la campagne », etc.).
+   */
+  labelA11y?: string;
 }
 
 /**
@@ -50,6 +56,7 @@ export function EditeurRiche({
   onChange,
   placeholder = 'Commence à écrire…',
   hauteurMin = 200,
+  labelA11y = 'Zone d’édition de texte riche',
 }: EditeurRicheProps) {
   const editor = useEditor({
     extensions: [
@@ -85,6 +92,12 @@ export function EditeurRiche({
         class:
           'prose prose-sm max-w-none focus:outline-none p-3 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mt-2 [&_blockquote]:border-l-4 [&_blockquote]:border-brand [&_blockquote]:pl-3 [&_blockquote]:italic [&_a]:text-brand [&_a]:underline',
         style: `min-height: ${hauteurMin}px`,
+        // Accessibilité : nommer la zone d'édition et la déclarer comme
+        // champ texte multiligne pour les lecteurs d'écran (le
+        // `contenteditable` nu n'a aucun nom accessible par défaut).
+        role: 'textbox',
+        'aria-label': labelA11y,
+        'aria-multiline': 'true',
       },
     },
     onUpdate: ({ editor }) => {

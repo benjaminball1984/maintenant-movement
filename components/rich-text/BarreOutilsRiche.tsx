@@ -115,7 +115,14 @@ export function BarreOutilsRiche({ editor }: BarreOutilsRicheProps) {
   function ajouterImage() {
     const url = window.prompt("URL de l'image (https://...)");
     if (url === null || url === '') return;
-    editor?.chain().focus().setImage({ src: url }).run();
+    // Accessibilité : demander un texte alternatif pour ne pas insérer
+    // d'image muette pour les lecteurs d'écran. Vide autorisé = décorative.
+    const alt =
+      window.prompt(
+        "Texte alternatif de l'image (décrit l'image pour les personnes aveugles ; laisser vide si purement décorative)",
+        '',
+      ) ?? '';
+    editor?.chain().focus().setImage({ src: url, alt }).run();
   }
 
   function ajouterYoutube() {
@@ -240,7 +247,7 @@ export function BarreOutilsRiche({ editor }: BarreOutilsRicheProps) {
       </Bouton>
       <Bouton
         titre="Code"
-        actif={editor.isActive('code') || editor.isActive('codeBlock')}
+        actif={editor.isActive('code')}
         onClick={() => editor.chain().focus().toggleCode().run()}
       >
         <Code size={14} strokeWidth={2} />

@@ -168,6 +168,7 @@ export function EditeurInlineCMS({
           onChange={setValeurHtml}
           placeholder="Rédige ton contenu (couleurs, polices, listes, liens, images, YouTube…)"
           hauteurMin={220}
+          labelA11y={`Édition riche de ${cle}`}
         />
       ) : (
         <Textarea

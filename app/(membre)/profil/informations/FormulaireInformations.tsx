@@ -277,6 +277,7 @@ export function FormulaireInformations({
                 }}
                 placeholder="Présente-toi (couleurs, polices, listes, liens, images, YouTube…)"
                 hauteurMin={180}
+                labelA11y={libelles.labelBio}
               />
               {bioHtml !== '' ? (
                 <p className="mt-1 text-right text-text-3 text-xs">

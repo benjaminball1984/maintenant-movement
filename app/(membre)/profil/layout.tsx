@@ -1,3 +1,4 @@
+import { LienEvitement } from '@/components/layout/LienEvitement';
 import { SITE } from '@/config/site';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ export default async function LayoutProfil({ children }: { children: ReactNode }
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
+      <LienEvitement />
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link href="/" className="font-display text-xl font-bold text-text-1 hover:text-brand">
@@ -70,7 +72,13 @@ export default async function LayoutProfil({ children }: { children: ReactNode }
 
       <NavOnglets onglets={onglets} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 lg:px-8">{children}</main>
+      <main
+        id="contenu"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 lg:px-8"
+      >
+        {children}
+      </main>
     </div>
   );
 }

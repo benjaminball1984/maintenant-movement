@@ -180,6 +180,7 @@ export function FormulaireMajEdition({
               onChange={setContenuHtml}
               placeholder="Rédige ton article (couleurs, polices, listes, citations, lien, image, YouTube…)"
               hauteurMin={320}
+              labelA11y="Contenu de l’article (éditeur de texte riche)"
             />
             <p className="mt-1 flex items-center justify-between text-text-3 text-xs">
               <span>HTML sanitizé à l'enregistrement (anti-XSS).</span>

@@ -1,5 +1,6 @@
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
+import { LienEvitement } from '@/components/layout/LienEvitement';
 import type { ReactNode } from 'react';
 
 /**
@@ -11,8 +12,11 @@ import type { ReactNode } from 'react';
 export default function LayoutPublic({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-bg">
+      <LienEvitement />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main id="contenu" tabIndex={-1} className="flex-1">
+        {children}
+      </main>
       <Footer />
     </div>
   );

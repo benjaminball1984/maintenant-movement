@@ -168,6 +168,7 @@ export function FormulaireMajReunion({
               onChange={setOrdreJourHtml}
               placeholder="Liste des points à traiter, format libre…"
               hauteurMin={180}
+              labelA11y="Ordre du jour (éditeur de texte riche)"
             />
             {ordreJourHtml !== '' ? (
               <p className="mt-1 text-right text-text-3 text-xs">
@@ -207,6 +208,7 @@ export function FormulaireMajReunion({
               onChange={setPvHtml}
               placeholder="Rédige le compte-rendu (présent·es, décisions, prochaines étapes)…"
               hauteurMin={280}
+              labelA11y="Procès-verbal (éditeur de texte riche)"
             />
             {pvHtml !== '' ? (
               <p className="mt-1 text-right text-text-3 text-xs">

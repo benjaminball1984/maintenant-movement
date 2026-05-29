@@ -154,6 +154,7 @@ export function ContenuEditableAdmin({
               onChange={setValeurHtml}
               placeholder="Rédige ton contenu (couleurs, polices, listes, liens, images, YouTube…)"
               hauteurMin={300}
+              labelA11y={`Édition riche de ${cle}`}
             />
             <div className="flex items-center justify-between text-text-3 text-xs">
               <p>
@@ -178,6 +179,7 @@ export function ContenuEditableAdmin({
               onChange={(e) => setValeurMd(e.target.value)}
               rows={Math.max(8, valeurMd.split('\n').length + 2)}
               maxLength={50000}
+              aria-label={`Édition Markdown de ${cle}`}
               className="w-full rounded-md border border-border bg-surface p-2 font-mono text-sm text-text-1"
             />
             <p className="text-text-3 text-xs">

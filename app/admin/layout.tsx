@@ -1,3 +1,4 @@
+import { LienEvitement } from '@/components/layout/LienEvitement';
 import { SITE } from '@/config/site';
 import { estAdminNational } from '@/lib/admin/national/garde';
 import { estAdminCourant, peutEditerCmsCourant } from '@/lib/auth/admin';
@@ -33,6 +34,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
+      <LienEvitement />
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -159,7 +161,9 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
             ) : null}
           </nav>
         </aside>
-        <main className="flex-1">{children}</main>
+        <main id="contenu" tabIndex={-1} className="flex-1">
+          {children}
+        </main>
       </div>
     </div>
   );
