@@ -2,12 +2,14 @@ import { retirerMobilisationAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
@@ -165,6 +167,18 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             </div>
           </div>
           <Heading niveau={1}>{mobilisation.titre}</Heading>
+
+          {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur mobilisation. */}
+          {estAdmin ? (
+            <BoutonAttacherACampagne
+              typeModule="mobilisation"
+              cibleId={mobilisation.id}
+              campagnes={(await listerCampagnesPubliees()).map((c) => ({
+                id: c.id,
+                titre: c.titre,
+              }))}
+            />
+          ) : null}
 
           {mobilisation.image_url !== null ? (
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">

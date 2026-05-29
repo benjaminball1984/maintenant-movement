@@ -4079,7 +4079,8 @@ export type NiveauDroitAdmin =
   | 'moderation'
   | 'tresorerie'
   | 'animation'
-  | 'dpd';
+  | 'dpd'
+  | 'cms';
 
 export type StatutPetition = 'en_moderation' | 'publiee' | 'rejetee' | 'archivee';
 export type StatutMobilisation = 'publiee' | 'retiree';

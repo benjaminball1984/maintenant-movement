@@ -5,12 +5,14 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { FormulaireDonEuros } from '@/components/cagnottes/FormulaireDonEuros';
 import { FormulaireDonT99CP } from '@/components/cagnottes/FormulaireDonT99CP';
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
+import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
+import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
@@ -236,6 +238,18 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
             </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{cagnotte.titre}</Heading>
+
+          {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur cagnotte. */}
+          {estAdmin ? (
+            <BoutonAttacherACampagne
+              typeModule="cagnotte"
+              cibleId={cagnotte.id}
+              campagnes={(await listerCampagnesPubliees()).map((c) => ({
+                id: c.id,
+                titre: c.titre,
+              }))}
+            />
+          ) : null}
 
           {cagnotte.image_url !== null ? (
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">

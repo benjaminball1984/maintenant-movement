@@ -3,11 +3,13 @@ import { fermerSondageAction } from '@/app/actions/archivage';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
+import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
+import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { aVotePersonne, sondageParSlugAvecResultats } from '@/lib/sondages/requetes';
@@ -130,6 +132,18 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
           </div>
           <Heading niveau={1}>{sondage.titre}</Heading>
           <p className="text-text-2">{sondage.question}</p>
+
+          {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur sondage. */}
+          {estAdmin ? (
+            <BoutonAttacherACampagne
+              typeModule="sondage"
+              cibleId={sondage.id}
+              campagnes={(await listerCampagnesPubliees()).map((c) => ({
+                id: c.id,
+                titre: c.titre,
+              }))}
+            />
+          ) : null}
         </header>
 
         {session === null ? (

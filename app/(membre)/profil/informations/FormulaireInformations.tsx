@@ -1,6 +1,7 @@
 'use client';
 
 import { Alert, Button, Heading, Input, Label, Textarea } from '@/components/ui';
+import { ChampImageObjet } from '@/components/ui/ChampImageObjet';
 import {
   MESSAGES_VALIDATION_PROFIL_DEFAUT,
   type MessagesValidationProfil,
@@ -85,6 +86,7 @@ export function FormulaireInformations({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<DonneesMiseAJourProfil>({
     resolver: zodResolver(creerMettreAJourProfilSchema(messages)),
@@ -199,8 +201,21 @@ export function FormulaireInformations({
           ) : null}
         </div>
         <div className="mt-4">
-          <Label htmlFor="inf-cover">{libelles.labelCover}</Label>
-          <Input id="inf-cover" type="url" placeholder="https://..." {...register('cover_url')} />
+          {/* V2.5.14.a — téléversement direct via Supabase Storage au lieu
+              d'un champ URL nu. Synchronisation manuelle avec react-hook-form
+              via setValue. Le hidden input registered garde la valeur dans
+              le state du formulaire. */}
+          <ChampImageObjet
+            name="cover_url_uploader"
+            valeurInitiale={valeursInitiales.cover_url ?? null}
+            roleImage="couverture"
+            prefixeChemin="profil-cover"
+            libelle={libelles.labelCover}
+            onChange={(url) =>
+              setValue('cover_url', url ?? '', { shouldDirty: true, shouldValidate: true })
+            }
+          />
+          <input type="hidden" {...register('cover_url')} />
           {errors.cover_url !== undefined ? (
             <p className="mt-1 text-xs text-danger">{errors.cover_url.message}</p>
           ) : null}

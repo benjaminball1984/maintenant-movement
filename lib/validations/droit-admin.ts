@@ -95,6 +95,12 @@ export const NIVEAUX_DROIT: ReadonlyArray<{
     libelle: 'DPD',
     description: 'Délégué·e à la protection des données (RGPD), accès au journal d’audit.',
   },
+  {
+    valeur: 'cms',
+    libelle: 'Maintenance CMS',
+    description:
+      'Édition des libellés et contenus éditoriaux du site. Aucun pouvoir politique (cf. doctrine §4.2).',
+  },
 ];
 
 /** Libellé court d'un niveau, pour les badges et tableaux. */
