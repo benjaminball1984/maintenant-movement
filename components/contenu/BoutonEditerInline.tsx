@@ -120,18 +120,35 @@ export function BoutonEditerInline({
     );
   }
 
+  // On utilise <span role=button> plutôt que <button> parce que certains
+  // usages mettent TexteEditableAdmin à l'intérieur d'un autre <button>
+  // (déclencheur de modale, ex. ModaleSignaturePetition). HTML interdit
+  // l'imbrication button > button et React lève une erreur d'hydration.
+  // Le span avec role=button + tabIndex=0 + gestion clavier reste
+  // accessible et n'a pas cette contrainte d'imbrication. La règle
+  // useSemanticElements est désactivée localement parce qu'on a besoin
+  // de cette dérogation pour résoudre l'imbrication interdite.
   return (
-    <button
-      type="button"
+    // biome-ignore lint/a11y/useSemanticElements: voir commentaire au-dessus, on a besoin d'un span pour éviter button-dans-button
+    <span
+      role="button"
+      tabIndex={0}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         setEnEdition(true);
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          setEnEdition(true);
+        }
+      }}
       className="-top-2 -right-2 absolute z-20 inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-0.5 text-text-3 text-xs opacity-0 shadow-md transition-opacity hover:bg-surface-2 hover:text-text-1 group-hover:opacity-100"
       aria-label={`Modifier ${libelle ?? cle}`}
     >
       <Pencil size={12} aria-hidden="true" />
-    </button>
+    </span>
   );
 }

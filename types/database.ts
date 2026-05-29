@@ -276,6 +276,7 @@ export type Database = {
         Row: {
           cle: string;
           valeur_md: string;
+          valeur_html: string | null;
           titre: string | null;
           updated_at: string;
           updated_by: string | null;
@@ -283,6 +284,7 @@ export type Database = {
         Insert: {
           cle: string;
           valeur_md?: string;
+          valeur_html?: string | null;
           titre?: string | null;
           updated_at?: string;
           updated_by?: string | null;
@@ -290,6 +292,7 @@ export type Database = {
         Update: {
           cle?: string;
           valeur_md?: string;
+          valeur_html?: string | null;
           titre?: string | null;
           updated_at?: string;
           updated_by?: string | null;

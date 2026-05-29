@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -14,6 +15,8 @@ const schema = z.object({
   cle: z.string().min(1).max(200),
   titre: z.string().max(500).optional(),
   valeurMd: z.string().max(50000),
+  /** V2.5.23 rich text — HTML enrichi optionnel (sanitizé avant insertion). */
+  valeurHtml: z.string().max(200000).optional(),
   cheminRevalidation: z.string().optional(),
 });
 
@@ -41,13 +44,20 @@ export async function mettreAJourContenuEditorialAction(donnees: unknown): Promi
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
   }
-  const { cle, titre, valeurMd, cheminRevalidation } = parse.data;
+  const { cle, titre, valeurMd, valeurHtml, cheminRevalidation } = parse.data;
+
+  // V2.5.23 — sanitization du HTML riche avant insertion. Allowlist stricte
+  // de balises/attributs/CSS, cf. `lib/rich-text/sanitize.ts`. En base on
+  // stocke du HTML déjà propre, pas besoin de re-sanitize à la lecture.
+  const valeurHtmlPropre =
+    valeurHtml !== undefined && valeurHtml.trim() !== '' ? sanitizeRichHtml(valeurHtml) : null;
 
   const { error } = await supabase.from('contenu_editorial').upsert(
     {
       cle,
       titre: titre ?? null,
       valeur_md: valeurMd,
+      valeur_html: valeurHtmlPropre,
       updated_by: session.userId,
       updated_at: new Date().toISOString(),
     },

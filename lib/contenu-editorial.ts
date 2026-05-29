@@ -12,6 +12,11 @@ export interface ContenuEditorial {
   cle: string;
   titre: string | null;
   valeurMd: string;
+  /** V2.5.23 — HTML riche optionnel (couleurs, polices, images, embeds).
+   *  Si renseigné, le rendu doit l'utiliser en priorité via
+   *  `dangerouslySetInnerHTML` (déjà sanitizé au save). Sinon, fallback
+   *  sur `valeurMd`. */
+  valeurHtml: string | null;
   updatedAt: string;
   updatedBy: string | null;
 }
@@ -36,6 +41,7 @@ export async function lireContenuEditorial(
       cle,
       titre: fallback.titre ?? null,
       valeurMd: fallback.valeurMd,
+      valeurHtml: null,
       updatedAt: new Date().toISOString(),
       updatedBy: null,
     };
@@ -45,6 +51,7 @@ export async function lireContenuEditorial(
     cle: data.cle,
     titre: data.titre,
     valeurMd: data.valeur_md,
+    valeurHtml: (data as { valeur_html?: string | null }).valeur_html ?? null,
     updatedAt: data.updated_at,
     updatedBy: data.updated_by,
   };
@@ -65,6 +72,7 @@ export async function lireContenusEditoriaux(
       cle: c.cle,
       titre: c.titre,
       valeurMd: c.valeur_md,
+      valeurHtml: (c as { valeur_html?: string | null }).valeur_html ?? null,
       updatedAt: c.updated_at,
       updatedBy: c.updated_by,
     });
