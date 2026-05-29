@@ -6,6 +6,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiperMoment } from '@/components/moments/BoutonParticiperMoment';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -504,6 +505,19 @@ export default async function PageDetailMoment({ params }: PageDetailProps) {
             )}
           </section>
         ) : null}
+
+        <footer className="border-t border-border pt-4 text-sm text-text-3">
+          Organisé·e par{' '}
+          <LienAuteurReseau
+            personneId={moment.createurice_id}
+            nom={
+              [moment.createurice_prenom, moment.createurice_nom]
+                .filter((s) => s !== null && s.trim() !== '')
+                .join(' ') || 'un membre'
+            }
+            className="font-bold text-text-2"
+          />
+        </footer>
 
         <FilCommentaires
           objetType="moment_solidaire"

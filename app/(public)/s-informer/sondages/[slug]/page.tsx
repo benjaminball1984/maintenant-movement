@@ -6,6 +6,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -289,6 +290,21 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
             })}
           </ul>
         </section>
+
+        {sondage.createurice_id !== null ? (
+          <footer className="border-t border-border pt-4 text-sm text-text-3">
+            Proposé par{' '}
+            <LienAuteurReseau
+              personneId={sondage.createurice_id}
+              nom={
+                [sondage.createurice_prenom, sondage.createurice_nom]
+                  .filter((s) => s !== null && s.trim() !== '')
+                  .join(' ') || 'un membre'
+              }
+              className="font-bold text-text-2"
+            />
+          </footer>
+        ) : null}
 
         <FilCommentaires
           objetType="sondage"

@@ -18,6 +18,10 @@ export interface SondageAvecResultats extends Sondage {
   resultats_par_option: number[];
   /** Pour le mode pondéré, seuil 300 répondant·es de la spec. */
   pondere_disponible: boolean;
+  /** Prénom du créateur·ice (crédit auteur cliquable vers le réseau). */
+  createurice_prenom: string | null;
+  /** Nom du créateur·ice. */
+  createurice_nom: string | null;
 }
 
 export async function listerSondagesOuverts(limite = 50): Promise<Sondage[]> {
@@ -48,6 +52,19 @@ export async function sondageParSlugAvecResultats(
     .eq('sondage_id', sondage.id);
 
   const sondageNarrowed = sondage as Sondage;
+
+  // Crédit auteur·ice : prénom/nom du créateur·ice (pour le lien réseau).
+  let createuricePrenom: string | null = null;
+  let createuriceNom: string | null = null;
+  if (sondageNarrowed.createurice_id !== null) {
+    const { data: createurice } = await supabase
+      .from('personne')
+      .select('prenom, nom')
+      .eq('id', sondageNarrowed.createurice_id)
+      .maybeSingle();
+    createuricePrenom = createurice?.prenom ?? null;
+    createuriceNom = createurice?.nom ?? null;
+  }
   const compteurs = new Array(sondageNarrowed.options.length).fill(0) as number[];
   let total = 0;
   for (const r of (resultats ?? []) as SondageResultats[]) {
@@ -65,6 +82,8 @@ export async function sondageParSlugAvecResultats(
     total_votes: total,
     resultats_par_option: compteurs,
     pondere_disponible: sondageNarrowed.mode === 'pondere' && total >= 300,
+    createurice_prenom: createuricePrenom,
+    createurice_nom: createuriceNom,
   };
 }
 
