@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-05-29
 **Branche** : main
-**Commit final** : `__TIP__`
+**Commit final** : `1c732aa`
 **Durée approximative** : 1 session Claude Code (courte)
 
 ## Contexte
