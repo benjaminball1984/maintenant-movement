@@ -134,7 +134,7 @@ export async function UnePetition() {
         </TexteEditableAdmin>
       </header>
 
-      <Heading niveau={3} className="text-2xl">
+      <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
           href={`/mobiliser/petitions/${petition.slug}`}
           className="text-text-1 underline-offset-4 hover:underline"

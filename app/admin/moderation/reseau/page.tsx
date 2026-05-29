@@ -81,6 +81,7 @@ export default async function PageModerationReseau() {
                   </div>
                   {p.statut === 'publie' ? (
                     <ControleModeration
+                      libelleObjet={apercu(p.texte)}
                       actions={[
                         {
                           libelle: 'Retirer',
@@ -120,6 +121,7 @@ export default async function PageModerationReseau() {
                   </div>
                   {c.statut === 'publie' ? (
                     <ControleModeration
+                      libelleObjet={apercu(c.texte)}
                       actions={[
                         {
                           libelle: 'Retirer',

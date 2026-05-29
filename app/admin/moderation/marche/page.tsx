@@ -92,6 +92,7 @@ export default async function PageModerationMarche() {
                 </div>
                 {p.statut === 'disponible' || p.statut === 'reserve' ? (
                   <ControleModeration
+                    libelleObjet={p.titre}
                     actions={[
                       {
                         libelle: 'Retirer',

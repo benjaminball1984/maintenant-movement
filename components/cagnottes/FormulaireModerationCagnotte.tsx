@@ -51,6 +51,12 @@ interface FormulaireModerationCagnotteProps {
   retablirCagnotte: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   libelles?: LibellesModerationCagnotte;
   messages?: MessagesValidationCagnotte;
+  /**
+   * Titre de la cagnotte concernée. Si fourni, il enrichit l'`aria-label`
+   * des boutons « Suspendre » / « Rétablir ». Optionnel : sans lui,
+   * comportement inchangé.
+   */
+  libelleObjet?: string;
 }
 
 /**
@@ -67,6 +73,7 @@ export function FormulaireModerationCagnotte({
   retablirCagnotte,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
+  libelleObjet,
 }: FormulaireModerationCagnotteProps) {
   const [ouvert, setOuvert] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -128,11 +135,19 @@ export function FormulaireModerationCagnotte({
       ) : null}
 
       {estSuspendue ? (
-        <Button onClick={onRetablir} disabled={envoiEnCours}>
+        <Button
+          onClick={onRetablir}
+          disabled={envoiEnCours}
+          aria-label={libelleObjet ? `${libelles.ctaRetablir} : ${libelleObjet}` : undefined}
+        >
           {envoiEnCours ? libelles.ctaRetablirEnCours : libelles.ctaRetablir}
         </Button>
       ) : !ouvert ? (
-        <Button variant="ghost" onClick={() => setOuvert(true)}>
+        <Button
+          variant="ghost"
+          onClick={() => setOuvert(true)}
+          aria-label={libelleObjet ? `${libelles.ctaOuvrirSuspendre} : ${libelleObjet}` : undefined}
+        >
           {libelles.ctaOuvrirSuspendre}
         </Button>
       ) : (
@@ -145,10 +160,18 @@ export function FormulaireModerationCagnotte({
               id={`raison-cag-${cagnotteId}`}
               rows={3}
               placeholder={libelles.placeholderRaison}
+              aria-invalid={errors.raison_suspension !== undefined}
+              aria-describedby={
+                errors.raison_suspension !== undefined
+                  ? `raison-cag-erreur-${cagnotteId}`
+                  : undefined
+              }
               {...register('raison_suspension')}
             />
             {errors.raison_suspension !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.raison_suspension.message}</p>
+              <p id={`raison-cag-erreur-${cagnotteId}`} className="mt-1 text-xs text-danger">
+                {errors.raison_suspension.message}
+              </p>
             ) : null}
           </div>
           <div className="flex flex-wrap gap-3">

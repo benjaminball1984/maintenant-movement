@@ -1,9 +1,26 @@
 import { Alert, Button, Card, Container, Heading, Input, Label } from '@/components/ui';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import { MapPin, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+/** Classes communes à un `<Link>` stylé comme un bouton (apparence du composant Button). */
+const BASE_BOUTON =
+  'inline-flex items-center justify-center gap-2 font-body font-bold transition-[transform,box-shadow,filter,background-color] duration-fast active:scale-[0.97]';
+const BOUTON_OUTLINE = cn(
+  BASE_BOUTON,
+  'bg-transparent text-brand border border-brand hover:bg-brand-light',
+);
+/** Variante neutre (ghost) de lien-bouton. */
+const BOUTON_GHOST = cn(
+  BASE_BOUTON,
+  'bg-surface text-text-1 border border-border hover:bg-surface-2',
+);
+/** Tailles. */
+const TAILLE_MD = 'h-11 px-5 text-sm rounded-md';
+const TAILLE_SM = 'h-9 px-3 text-sm rounded-sm';
 
 export const metadata: Metadata = {
   title: 'Des gens près de chez moi',
@@ -127,10 +144,11 @@ export default async function PagePresDeChezMoi({ searchParams }: PageProps) {
                         </p>
                       </div>
                     </div>
-                    <Link href={`/agir/communes/${c.slug}`}>
-                      <Button variant="outline" taille="sm">
-                        Voir & rejoindre
-                      </Button>
+                    <Link
+                      href={`/agir/communes/${c.slug}`}
+                      className={cn(BOUTON_OUTLINE, TAILLE_SM)}
+                    >
+                      Voir & rejoindre
                     </Link>
                   </Card>
                 </li>
@@ -154,11 +172,11 @@ export default async function PagePresDeChezMoi({ searchParams }: PageProps) {
           Tu peux explorer par département, par région, ou par mot-clé.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/agir/communes">
-            <Button variant="outline">Voir toutes les communes libres</Button>
+          <Link href="/agir/communes" className={cn(BOUTON_OUTLINE, TAILLE_MD)}>
+            Voir toutes les communes libres
           </Link>
-          <Link href="/cartes">
-            <Button variant="ghost">Voir sur la carte</Button>
+          <Link href="/cartes" className={cn(BOUTON_GHOST, TAILLE_MD)}>
+            Voir sur la carte
           </Link>
         </div>
       </section>

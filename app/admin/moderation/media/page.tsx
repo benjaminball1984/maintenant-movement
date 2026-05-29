@@ -73,6 +73,7 @@ export default async function PageModerationMedia() {
 
                 {m.statut === 'brouillon' ? (
                   <ControleModeration
+                    libelleObjet={m.titre}
                     actions={[
                       {
                         libelle: 'Publier',
@@ -87,6 +88,7 @@ export default async function PageModerationMedia() {
                 ) : null}
                 {m.statut === 'publie' ? (
                   <ControleModeration
+                    libelleObjet={m.titre}
                     actions={[
                       {
                         libelle: 'Retirer',

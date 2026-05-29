@@ -141,6 +141,7 @@ export default async function PageModerationCagnottes() {
                     estSuspendue={cagnotte.statut === 'suspendue'}
                     suspendreCagnotte={suspendreCagnotte}
                     retablirCagnotte={retablirCagnotte}
+                    libelleObjet={cagnotte.titre}
                   />
                 </Card>
               </li>

@@ -47,7 +47,7 @@ export default function LayoutAuth({ children }: { children: ReactNode }) {
           <div className="mb-6 flex justify-center">
             <Image
               src="/logo/maintenant.png"
-              alt={`Logo ${SITE.nom}`}
+              alt=""
               width={120}
               height={134}
               priority

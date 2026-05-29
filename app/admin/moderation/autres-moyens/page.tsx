@@ -82,6 +82,7 @@ export default async function PageModerationAutresMoyens() {
                 </div>
                 {o.statut === 'affichee' ? (
                   <ControleModeration
+                    libelleObjet={o.nom}
                     actions={[
                       {
                         libelle: 'Retirer',
@@ -96,6 +97,7 @@ export default async function PageModerationAutresMoyens() {
                   />
                 ) : (
                   <ControleModeration
+                    libelleObjet={o.nom}
                     actions={[
                       {
                         libelle: 'Réafficher',

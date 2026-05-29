@@ -69,6 +69,7 @@ export default async function PageModerationSondages() {
                 </div>
                 {s.statut !== 'retire' ? (
                   <ControleModeration
+                    libelleObjet={s.titre}
                     actions={[
                       {
                         libelle: 'Retirer',

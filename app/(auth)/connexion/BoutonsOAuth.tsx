@@ -48,8 +48,14 @@ export function BoutonsOAuth() {
       ) : null}
 
       <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">OAuth GAFAM</p>
-        <div className="grid gap-2">
+        <p
+          id="oauth-gafam-titre"
+          className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3"
+        >
+          OAuth GAFAM
+        </p>
+        {/* biome-ignore lint/a11y/useSemanticElements: groupe de boutons relié à son titre via aria-labelledby ; un <fieldset> imposerait un <legend> et un style par défaut indésirables. */}
+        <div className="grid gap-2" role="group" aria-labelledby="oauth-gafam-titre">
           {PROVIDERS_GAFAM.map((provider) => (
             <Button
               key={provider}
@@ -67,10 +73,14 @@ export function BoutonsOAuth() {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
+        <p
+          id="oauth-ethique-titre"
+          className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3"
+        >
           OAuth éthique (à brancher au chantier dédié)
         </p>
-        <div className="grid gap-2">
+        {/* biome-ignore lint/a11y/useSemanticElements: groupe de boutons relié à son titre via aria-labelledby ; un <fieldset> imposerait un <legend> et un style par défaut indésirables. */}
+        <div className="grid gap-2" role="group" aria-labelledby="oauth-ethique-titre">
           {PROVIDERS_ETHIQUES.map((provider) => (
             <Button
               key={provider}

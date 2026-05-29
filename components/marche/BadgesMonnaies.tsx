@@ -51,7 +51,11 @@ export function BadgesMonnaies({ monnaies }: BadgesMonnaiesProps) {
         if (config === undefined) return null;
         return (
           <li key={code}>
-            <Badge variant={config.enLigne ? 'brand' : 'default'} title={config.aide}>
+            <Badge
+              variant={config.enLigne ? 'brand' : 'default'}
+              title={config.aide}
+              aria-label={config.aide}
+            >
               {config.libelle}
             </Badge>
           </li>

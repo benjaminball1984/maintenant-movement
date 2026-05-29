@@ -105,7 +105,7 @@ export function UneSection({
 
       {titre !== null && href !== undefined && cta !== undefined ? (
         <>
-          <Heading niveau={3} className="text-2xl">
+          <Heading niveau={2} apparenceComme={3} className="text-2xl">
             <Link href={href} className="text-text-1 underline-offset-4 hover:underline">
               {titre}
             </Link>

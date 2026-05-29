@@ -126,6 +126,7 @@ export default async function PageAdminJournal() {
                     statut={
                       e.statut === 'publie' || e.statut === 'archive' ? e.statut : 'brouillon'
                     }
+                    libelleObjet={`N°${e.numero} : ${e.titre}`}
                   />
                 </Card>
               </li>

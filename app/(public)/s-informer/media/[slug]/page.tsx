@@ -166,7 +166,7 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
                 rel="noopener noreferrer"
                 className="underline"
               >
-                {media.source_url} <ExternalLink size={12} className="inline" />
+                {media.source_url} <ExternalLink size={12} className="inline" aria-hidden="true" />
               </a>
             ) : (
               <TexteEditableAdmin
@@ -183,11 +183,7 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
         ) : null}
 
         {media.vignette_url !== null ? (
-          <img
-            src={media.vignette_url}
-            alt={media.titre}
-            className="w-full rounded-md border border-border"
-          />
+          <img src={media.vignette_url} alt="" className="w-full rounded-md border border-border" />
         ) : null}
 
         <section className="prose grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
@@ -207,9 +203,9 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
         ) : null}
 
         {media.media_url !== null && media.type === 'podcast' ? (
+          // biome-ignore lint/a11y/useMediaCaption: podcast audio externe sans piste de sous-titres disponible ; pas de <track> vide non fonctionnel.
           <audio controls className="w-full">
             <source src={media.media_url} />
-            <track kind="captions" />
           </audio>
         ) : null}
 

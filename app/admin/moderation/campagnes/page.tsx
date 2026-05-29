@@ -108,6 +108,7 @@ export default async function PageModerationCampagnes() {
                   <FormulaireModerationCampagne
                     campagneId={campagne.id}
                     modererCampagne={modererCampagne}
+                    libelleObjet={campagne.titre}
                   />
                 </Card>
               </li>

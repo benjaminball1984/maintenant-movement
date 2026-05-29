@@ -50,6 +50,12 @@ interface FormulaireModerationCampagneProps {
   modererCampagne: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   libelles?: LibellesModerationCampagne;
   messages?: MessagesValidationCampagne;
+  /**
+   * Titre de la campagne concernée. Si fourni, il enrichit l'`aria-label`
+   * des boutons « Publier » / « Rejeter ». Optionnel : sans lui,
+   * comportement inchangé.
+   */
+  libelleObjet?: string;
 }
 
 /**
@@ -65,6 +71,7 @@ export function FormulaireModerationCampagne({
   modererCampagne,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
+  libelleObjet,
 }: FormulaireModerationCampagneProps) {
   const [modeRejet, setModeRejet] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -138,10 +145,19 @@ export function FormulaireModerationCampagne({
 
       {!modeRejet ? (
         <div className="flex flex-wrap gap-3">
-          <Button onClick={publier} disabled={envoiEnCours}>
+          <Button
+            onClick={publier}
+            disabled={envoiEnCours}
+            aria-label={libelleObjet ? `${libelles.ctaPublier} : ${libelleObjet}` : undefined}
+          >
             {envoiEnCours ? libelles.ctaPublierEnCours : libelles.ctaPublier}
           </Button>
-          <Button variant="ghost" onClick={() => setModeRejet(true)} disabled={envoiEnCours}>
+          <Button
+            variant="ghost"
+            onClick={() => setModeRejet(true)}
+            disabled={envoiEnCours}
+            aria-label={libelleObjet ? `${libelles.ctaRejeterOuvrir} : ${libelleObjet}` : undefined}
+          >
             {libelles.ctaRejeterOuvrir}
           </Button>
         </div>
@@ -155,10 +171,16 @@ export function FormulaireModerationCampagne({
               id={`raison-camp-${campagneId}`}
               rows={3}
               placeholder={libelles.placeholderRaison}
+              aria-invalid={errors.raison_rejet !== undefined}
+              aria-describedby={
+                errors.raison_rejet !== undefined ? `raison-camp-erreur-${campagneId}` : undefined
+              }
               {...register('raison_rejet')}
             />
             {errors.raison_rejet !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.raison_rejet.message}</p>
+              <p id={`raison-camp-erreur-${campagneId}`} className="mt-1 text-xs text-danger">
+                {errors.raison_rejet.message}
+              </p>
             ) : null}
           </div>
           <div className="flex flex-wrap gap-3">

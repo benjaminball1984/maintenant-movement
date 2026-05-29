@@ -1,8 +1,18 @@
-import { Button, Card, Container, Heading } from '@/components/ui';
+import { Card, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { cn } from '@/lib/utils';
 import { Heart, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+/** Classes communes à un `<Link>` stylé comme un bouton (apparence du composant Button). */
+const BASE_BOUTON =
+  'inline-flex items-center justify-center gap-2 font-body font-bold transition-[transform,box-shadow,filter,background-color] duration-fast active:scale-[0.97] h-11 px-5 text-sm rounded-md';
+const BOUTON_PRIMARY = cn(BASE_BOUTON, 'bg-grad text-white shadow-brand hover:brightness-110');
+const BOUTON_OUTLINE = cn(
+  BASE_BOUTON,
+  'bg-transparent text-brand border border-brand hover:bg-brand-light',
+);
 
 export const metadata: Metadata = {
   title: 'Bienvenue dans le mouvement',
@@ -54,13 +64,13 @@ export default async function PageDepuisPetition() {
             pétitions et mobilisations.
           </p>
           {connecte ? (
-            <Link href="/agir/adherer">
-              <Button>Voir les 3 chemins d'adhésion</Button>
+            <Link href="/agir/adherer" className={BOUTON_PRIMARY}>
+              Voir les 3 chemins d'adhésion
             </Link>
           ) : (
             <div className="grid gap-2">
-              <Link href="/connexion?prochaine=/agir/adherer">
-                <Button>Me connecter pour adhérer</Button>
+              <Link href="/connexion?prochaine=/agir/adherer" className={BOUTON_PRIMARY}>
+                Me connecter pour adhérer
               </Link>
               <Link
                 href="/inscription?prochaine=/agir/adherer"
@@ -84,13 +94,16 @@ export default async function PageDepuisPetition() {
             existent.
           </p>
           {connecte ? (
-            <Link href="/agir/communes/pres-de-chez-moi">
-              <Button variant="outline">Trouver des gens près de chez moi</Button>
+            <Link href="/agir/communes/pres-de-chez-moi" className={BOUTON_OUTLINE}>
+              Trouver des gens près de chez moi
             </Link>
           ) : (
             <div className="grid gap-2">
-              <Link href="/connexion?prochaine=/agir/communes/pres-de-chez-moi">
-                <Button variant="outline">Me connecter pour rejoindre</Button>
+              <Link
+                href="/connexion?prochaine=/agir/communes/pres-de-chez-moi"
+                className={BOUTON_OUTLINE}
+              >
+                Me connecter pour rejoindre
               </Link>
               <Link
                 href="/agir/communes"

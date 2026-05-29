@@ -42,7 +42,19 @@ export interface ActionModeration {
   messageSucces: string;
 }
 
-export function ControleModeration({ actions }: { actions: ActionModeration[] }) {
+export function ControleModeration({
+  actions,
+  libelleObjet,
+}: {
+  actions: ActionModeration[];
+  /**
+   * Titre lisible de l'objet concerné (ex. « Annonce : Vélo à donner »).
+   * Si fourni, il enrichit l'`aria-label` de chaque bouton d'action pour
+   * que le lecteur d'écran distingue les boutons répétés ligne par ligne.
+   * Optionnel : sans lui, le comportement est inchangé.
+   */
+  libelleObjet?: string;
+}) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState<string | null>(null);
@@ -125,7 +137,16 @@ export function ControleModeration({ actions }: { actions: ActionModeration[] })
                 placeholder={action.placeholderRaison ?? 'Motif de la décision.'}
               />
               <div className="flex flex-wrap gap-2">
-                <Button type="submit" taille="sm" disabled={envoiEnCours}>
+                <Button
+                  type="submit"
+                  taille="sm"
+                  disabled={envoiEnCours}
+                  aria-label={
+                    libelleObjet
+                      ? `Confirmer ${action.libelle.toLowerCase()} : ${libelleObjet}`
+                      : undefined
+                  }
+                >
                   {envoiEnCours ? 'Envoi...' : `Confirmer : ${action.libelle.toLowerCase()}`}
                 </Button>
                 <Button
@@ -152,6 +173,7 @@ export function ControleModeration({ actions }: { actions: ActionModeration[] })
               taille="sm"
               onClick={() => cliquer(action, index)}
               disabled={envoiEnCours}
+              aria-label={libelleObjet ? `${action.libelle} : ${libelleObjet}` : undefined}
             >
               {action.libelle}
             </Button>

@@ -126,6 +126,7 @@ export default async function PageModerationPetitions() {
                   <FormulaireModeration
                     petitionId={petition.id}
                     modererPetition={modererPetition}
+                    libelleObjet={petition.titre}
                   />
                 </Card>
               </li>

@@ -115,7 +115,7 @@ export async function UneMobilisation() {
         </TexteEditableAdmin>
       </header>
 
-      <Heading niveau={3} className="text-2xl">
+      <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
           href={`/mobiliser/mobilisations/${mobilisation.slug}`}
           className="text-text-1 underline-offset-4 hover:underline"

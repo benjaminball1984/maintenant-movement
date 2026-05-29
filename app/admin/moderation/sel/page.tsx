@@ -94,6 +94,7 @@ export default async function PageModerationSel() {
                 </div>
                 {s.statut === 'publie' ? (
                   <ControleModeration
+                    libelleObjet={s.titre}
                     actions={[
                       {
                         libelle: 'Retirer',

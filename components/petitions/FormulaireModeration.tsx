@@ -50,6 +50,13 @@ interface FormulaireModerationProps {
   modererPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   libelles?: LibellesModerationPetition;
   messages?: MessagesValidationPetition;
+  /**
+   * Titre de la pétition concernée. Si fourni, il enrichit l'`aria-label`
+   * des boutons « Publier » / « Rejeter » pour que le lecteur d'écran
+   * distingue les formulaires répétés. Optionnel : sans lui, comportement
+   * inchangé.
+   */
+  libelleObjet?: string;
 }
 
 /**
@@ -67,6 +74,7 @@ export function FormulaireModeration({
   modererPetition,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
+  libelleObjet,
 }: FormulaireModerationProps) {
   const [modeRejet, setModeRejet] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -148,10 +156,19 @@ export function FormulaireModeration({
 
       {!modeRejet ? (
         <div className="flex flex-wrap gap-3">
-          <Button onClick={publier} disabled={envoiEnCours}>
+          <Button
+            onClick={publier}
+            disabled={envoiEnCours}
+            aria-label={libelleObjet ? `${libelles.ctaPublier} : ${libelleObjet}` : undefined}
+          >
             {envoiEnCours ? libelles.ctaPublierEnCours : libelles.ctaPublier}
           </Button>
-          <Button variant="ghost" onClick={() => setModeRejet(true)} disabled={envoiEnCours}>
+          <Button
+            variant="ghost"
+            onClick={() => setModeRejet(true)}
+            disabled={envoiEnCours}
+            aria-label={libelleObjet ? `${libelles.ctaRejeterOuvrir} : ${libelleObjet}` : undefined}
+          >
             {libelles.ctaRejeterOuvrir}
           </Button>
         </div>
@@ -165,10 +182,16 @@ export function FormulaireModeration({
               id={`raison-${petitionId}`}
               rows={3}
               placeholder={libelles.placeholderRaison}
+              aria-invalid={errors.raison_rejet !== undefined}
+              aria-describedby={
+                errors.raison_rejet !== undefined ? `raison-erreur-${petitionId}` : undefined
+              }
               {...register('raison_rejet')}
             />
             {errors.raison_rejet !== undefined ? (
-              <p className="mt-1 text-xs text-danger">{errors.raison_rejet.message}</p>
+              <p id={`raison-erreur-${petitionId}`} className="mt-1 text-xs text-danger">
+                {errors.raison_rejet.message}
+              </p>
             ) : null}
           </div>
           <div className="flex flex-wrap gap-3">

@@ -75,6 +75,7 @@ export default async function PageModerationMoments() {
                 </div>
                 {m.statut !== 'retire' ? (
                   <ControleModeration
+                    libelleObjet={m.titre}
                     actions={[
                       {
                         libelle: 'Retirer',
