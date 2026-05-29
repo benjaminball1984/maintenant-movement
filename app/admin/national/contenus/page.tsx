@@ -106,6 +106,10 @@ export default async function PageContenusEditoriaux() {
   const contenusListe: ContenuListe[] = (contenus ?? []).map((c) => ({
     cle: c.cle,
     valeurMd: c.valeur_md,
+    // V2.5.25 — valeur_html optionnelle, peut ne pas exister sur le distant
+    // si la migration 20260530500000 n'a pas encore été appliquée (Master
+    // Plan local strict). On caste defensivement.
+    valeurHtml: (c as { valeur_html?: string | null }).valeur_html ?? null,
     updatedAt: c.updated_at,
     cheminPublic: devinerCheminPublic(c.cle),
     titrePage: titresParCle.get(c.cle),

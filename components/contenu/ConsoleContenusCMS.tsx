@@ -28,6 +28,9 @@ import { useMemo, useState } from 'react';
 export interface ContenuListe {
   cle: string;
   valeurMd: string;
+  /** V2.5.25 — HTML riche (optionnel). Pris en charge par l'éditeur inline
+   *  (mode Riche pré-rempli, sinon mode Markdown). */
+  valeurHtml?: string | null;
   updatedAt: string;
   /** Chemin public connu pour cette clé (le cas échéant). */
   cheminPublic?: string;
@@ -230,6 +233,7 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
                               <EditeurInlineCMS
                                 cle={c.cle}
                                 valeurInitiale={valeurAffichee}
+                                valeurHtmlInitiale={c.valeurHtml ?? null}
                                 cheminRevalidation={c.cheminPublic}
                                 onSauvegarde={(nv) => setSurcharges((s) => ({ ...s, [c.cle]: nv }))}
                               />
