@@ -62,6 +62,15 @@ function apercu(valeur: string, max = 60): string {
   return propre.length <= max ? propre : `${propre.slice(0, max)}…`;
 }
 
+/** V2.5.32 : extrait le texte d'un fragment HTML (pour aperçu rich text).
+ *  Strippe les balises sans regexp dangereuse, garde uniquement le texte
+ *  brut. Pas de parsing HTML structurel : on cherche juste à montrer un
+ *  resume lisible. Si le contenu commence par une balise, on coupe avant. */
+function apercuHtml(html: string, max = 60): string {
+  const sansBalises = html.replace(/<[^>]+>/g, ' ');
+  return apercu(sansBalises, max);
+}
+
 export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenusCMSProps) {
   const [recherche, setRecherche] = useState('');
   const [ouverts, setOuverts] = useState<Record<string, boolean>>({});
@@ -215,16 +224,30 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
                   <ul className="divide-y divide-border border-t border-border">
                     {items.map((c) => {
                       const valeurAffichee = surcharges[c.cle] ?? c.valeurMd;
+                      const aHtmlRiche = c.valeurHtml !== null && c.valeurHtml !== '';
+                      // V2.5.32 : aperçu prioritaire sur le HTML riche si pose
+                      // (c'est lui qui est affiche cote visiteur), sinon Markdown.
+                      const apercuTexte = aHtmlRiche
+                        ? apercuHtml(c.valeurHtml ?? '')
+                        : apercu(valeurAffichee);
                       return (
                         <li key={c.cle} className="px-4 py-3">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="min-w-0 flex-1">
-                              <code className="break-all font-mono text-xs text-text-2">
-                                {c.cle}
-                              </code>
-                              <p className="mt-1 text-sm text-text-1">{apercu(valeurAffichee)}</p>
-                              <p className="mt-0.5 text-xs text-text-3">
-                                {valeurAffichee.length} caractères · modifié le{' '}
+                              <div className="flex items-center gap-2">
+                                <code className="break-all font-mono text-text-2 text-xs">
+                                  {c.cle}
+                                </code>
+                                {aHtmlRiche ? (
+                                  <Badge variant="default" className="bg-brand/15 text-brand">
+                                    Riche
+                                  </Badge>
+                                ) : null}
+                              </div>
+                              <p className="mt-1 text-sm text-text-1">{apercuTexte}</p>
+                              <p className="mt-0.5 text-text-3 text-xs">
+                                {aHtmlRiche ? (c.valeurHtml ?? '').length : valeurAffichee.length}{' '}
+                                caractères · modifié le{' '}
                                 {FORMATEUR_DATE.format(new Date(c.updatedAt))}
                                 {c.titrePage !== undefined ? ` · ${c.titrePage}` : ''}
                               </p>
