@@ -147,6 +147,12 @@ export function FormulaireAccorderDroit({
         {libelles.titre}
       </Heading>
 
+      {/* Région ARIA live persistante : annonce le succès aux lecteurs d'écran
+          même si l'Alert visuelle n'est pas relue (cf. accessibilité admin). */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {succes ? libelles.alertSuccesTitre : ''}
+      </span>
+
       {erreur !== null ? (
         <Alert variant="danger" titre={libelles.alertErreurTitre}>
           {erreur}
@@ -332,6 +338,10 @@ function RechercheBeneficiaire({
         autoComplete="off"
       />
       {enCours ? <p className="text-xs text-text-3">{enCoursRecherche}</p> : null}
+      {/* Région ARIA live : annonce le nombre de résultats du combobox. */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {resultats.length > 0 ? `${resultats.length} résultats` : ''}
+      </span>
       {resultats.length > 0 ? (
         <ul className="grid gap-1 rounded-md border border-border bg-surface p-1">
           {resultats.map((personne) => (
@@ -377,6 +387,10 @@ function RechercheCommune({
         autoComplete="off"
       />
       {enCours ? <p className="text-xs text-text-3">{enCoursRecherche}</p> : null}
+      {/* Région ARIA live : annonce le nombre de résultats du combobox. */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {resultats.length > 0 ? `${resultats.length} résultats` : ''}
+      </span>
       {resultats.length > 0 ? (
         <ul className="grid gap-1 rounded-md border border-border bg-surface p-1">
           {resultats.map((commune) => (

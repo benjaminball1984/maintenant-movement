@@ -40,6 +40,7 @@ export function BoutonsProprietaireReservation({
   const [enCours, setEnCours] = useState<'accepter' | 'refuser' | 'realiser' | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [confirmeRefus, setConfirmeRefus] = useState(false);
+  const [messageStatut, setMessageStatut] = useState('');
 
   if (statut === 'proposee') {
     return (
@@ -60,7 +61,10 @@ export function BoutonsProprietaireReservation({
                   });
                   setEnCours(null);
                   if (!r.ok) setErreur(r.message);
-                  else setConfirmeRefus(false);
+                  else {
+                    setConfirmeRefus(false);
+                    setMessageStatut('Demande refusée');
+                  }
                 }}
                 disabled={enCours !== null}
               >
@@ -90,6 +94,7 @@ export function BoutonsProprietaireReservation({
                 });
                 setEnCours(null);
                 if (!r.ok) setErreur(r.message);
+                else setMessageStatut('Demande acceptée');
               }}
               disabled={enCours !== null}
             >
@@ -112,6 +117,9 @@ export function BoutonsProprietaireReservation({
             {erreur}
           </p>
         )}
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {messageStatut}
+        </span>
       </div>
     );
   }
@@ -131,6 +139,7 @@ export function BoutonsProprietaireReservation({
             });
             setEnCours(null);
             if (!r.ok) setErreur(r.message);
+            else setMessageStatut('Marquée comme réalisée');
           }}
           disabled={enCours !== null}
         >
@@ -146,6 +155,9 @@ export function BoutonsProprietaireReservation({
             {erreur}
           </p>
         )}
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {messageStatut}
+        </span>
       </div>
     );
   }

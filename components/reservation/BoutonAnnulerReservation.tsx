@@ -28,6 +28,7 @@ export function BoutonAnnulerReservation({
   const [confirme, setConfirme] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surAnnuler = async () => {
     setEnCours(true);
@@ -35,6 +36,7 @@ export function BoutonAnnulerReservation({
     const r = await annulerReservationAction({ reservationId, cheminRevalidation });
     setEnCours(false);
     if (!r.ok) setErreur(r.message);
+    else setMessageStatut('Réservation annulée');
   };
 
   if (!confirme) {
@@ -64,6 +66,9 @@ export function BoutonAnnulerReservation({
           {erreur}
         </p>
       )}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
     </div>
   );
 }

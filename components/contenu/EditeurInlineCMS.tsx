@@ -56,6 +56,12 @@ export function EditeurInlineCMS({
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
+  /**
+   * Message d'état pour lecteur d'écran. L'Alert succès visuelle est démontée
+   * après 1,2 s donc non annoncée de façon fiable : on double d'une région
+   * live persistante masquée.
+   */
+  const [messageStatut, setMessageStatut] = useState('');
 
   function ouvrir() {
     setValeurMd(valeurInitiale);
@@ -88,6 +94,7 @@ export function EditeurInlineCMS({
       return;
     }
     setSucces(true);
+    setMessageStatut('Enregistré');
     // Le callback ne reçoit que le markdown pour préserver la signature
     // historique du composant. Si le mode est riche, on passe la version
     // markdown actuelle (inchangée) ; la liste parent fait son re-render
@@ -114,6 +121,9 @@ export function EditeurInlineCMS({
 
   return (
     <div className="mt-2 grid gap-2 rounded-md border border-brand/30 bg-brand-light/30 p-3">
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       <div className="flex items-center justify-end">
         <div className="inline-flex overflow-hidden rounded-md border border-border text-xs">
           <button

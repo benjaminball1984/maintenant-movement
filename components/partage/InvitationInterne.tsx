@@ -43,6 +43,11 @@ export function InvitationInterne({ messagePrerempli, url }: InvitationInternePr
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState<number | null>(null);
+  /**
+   * Message d'état pour lecteur d'écran (annonce du nombre d'invitations
+   * envoyées au succès, sinon muet).
+   */
+  const [messageStatut, setMessageStatut] = useState('');
 
   // Charge les suivis la première fois qu'on ouvre la modale.
   async function ouvrir() {
@@ -87,6 +92,9 @@ export function InvitationInterne({ messagePrerempli, url }: InvitationInternePr
       return;
     }
     setSucces(r.envoyes);
+    setMessageStatut(
+      `${r.envoyes} invitation${r.envoyes > 1 ? 's' : ''} envoyée${r.envoyes > 1 ? 's' : ''}`,
+    );
     setCoches(new Set());
   }
 
@@ -118,6 +126,9 @@ export function InvitationInterne({ messagePrerempli, url }: InvitationInternePr
         </header>
 
         <form onSubmit={envoyer} className="grid gap-4 p-5">
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {messageStatut}
+          </span>
           {erreur !== null ? (
             <Alert variant="danger" titre="Envoi impossible">
               {erreur}
@@ -131,9 +142,17 @@ export function InvitationInterne({ messagePrerempli, url }: InvitationInternePr
 
           {/* Liste des suivis */}
           <div className="grid gap-1.5">
-            <p className="font-bold text-sm text-text-1">Choisis qui inviter ({coches.size}/30)</p>
+            <p className="font-bold text-sm text-text-1">
+              Choisis qui inviter (
+              <span aria-live="polite" aria-atomic="true">
+                {coches.size}/30
+              </span>
+              )
+            </p>
             {suivis === null ? (
-              <p className="text-sm text-text-3">Chargement de tes contacts...</p>
+              <p className="text-sm text-text-3" aria-live="polite" aria-atomic="true">
+                Chargement de tes contacts...
+              </p>
             ) : suivis.length === 0 ? (
               <p className="text-sm text-text-3">
                 Tu ne suis encore personne sur le réseau Maintenant!. Va sur{' '}

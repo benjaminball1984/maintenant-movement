@@ -44,6 +44,7 @@ export function BoutonParticiper({
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [tokenTurnstile, setTokenTurnstile] = useState('');
+  const [messageStatut, setMessageStatut] = useState('');
 
   // Lecture du cookie anonyme au montage (seulement si la personne
   // n'est pas connectée — pour la connectée, la BDD est la source).
@@ -82,6 +83,7 @@ export function BoutonParticiper({
 
     setAParticipe(true);
     setCompteur((n) => n + 1);
+    setMessageStatut('Participation enregistrée');
     // Cookie anonyme : 90 jours (au-delà, la personne peut re-cliquer
     // sans contrainte technique, cela reste de l'« honor system »).
     if (typeof document !== 'undefined') {
@@ -92,6 +94,9 @@ export function BoutonParticiper({
 
   return (
     <div className="grid gap-3" data-testid="bouton-participer">
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       {erreur !== null ? (
         <Alert variant="danger" titre="Participation impossible">
           {erreur}

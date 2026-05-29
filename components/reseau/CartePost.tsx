@@ -46,6 +46,10 @@ export function CartePost({
   const [commentaires, setCommentaires] = useState<CommentaireAffiche[] | null>(null);
   const [nouveauCommentaire, setNouveauCommentaire] = useState('');
   const [enCours, setEnCours] = useState(false);
+  // Message d'état annoncé aux lecteurs d'écran (région live masquée).
+  const [messageStatut, setMessageStatut] = useState('');
+  // Identifiant de la zone commentaires (pour aria-controls / aria-expanded).
+  const idCommentaires = `commentaires-${post.id}`;
 
   const soutenir = async () => {
     if (!connecte) {
@@ -56,9 +60,12 @@ export function CartePost({
     setSoutenu(!avant);
     setNbSoutiens((n) => n + (avant ? -1 : 1));
     const resultat = await basculerSoutien({ cible_id: post.id });
-    if (!resultat.ok) {
+    if (resultat.ok) {
+      setMessageStatut(avant ? 'Soutien retiré' : 'Soutien ajouté');
+    } else {
       setSoutenu(avant);
       setNbSoutiens((n) => n + (avant ? 1 : -1));
+      setMessageStatut('Échec, réessaie');
     }
   };
 
@@ -78,6 +85,7 @@ export function CartePost({
     if (resultat.ok) {
       setNouveauCommentaire('');
       setCommentaires(await chargerCommentaires(post.id));
+      setMessageStatut('Commentaire publié');
       router.refresh();
     }
   };
@@ -85,7 +93,10 @@ export function CartePost({
   const supprimer = async () => {
     if (!confirm('Supprimer cette publication ?')) return;
     const resultat = await supprimerPost({ cible_id: post.id });
-    if (resultat.ok) router.refresh();
+    if (resultat.ok) {
+      setMessageStatut('Publication supprimée');
+      router.refresh();
+    }
   };
 
   // V2.5.10 Phase H — si le post est publié AU NOM d'un espace, on met
@@ -139,6 +150,7 @@ export function CartePost({
           onClick={soutenir}
           className={`group inline-flex items-center gap-1.5 transition ${soutenu ? 'text-danger' : 'text-text-3 hover:text-danger'}`}
           aria-pressed={soutenu}
+          aria-label={soutenu ? 'Retirer mon soutien' : 'Soutenir cette publication'}
         >
           <Heart
             size={18}
@@ -153,6 +165,8 @@ export function CartePost({
           type="button"
           onClick={basculerCommentaires}
           className="inline-flex items-center gap-1.5 text-text-3 transition hover:text-brand"
+          aria-expanded={ouvertCommentaires}
+          aria-controls={idCommentaires}
         >
           <MessageCircle size={18} strokeWidth={1.5} />
           <span className="font-medium">{post.nbCommentaires}</span>
@@ -170,7 +184,7 @@ export function CartePost({
       </footer>
 
       {ouvertCommentaires ? (
-        <div className="grid gap-3 border-t border-border pt-3">
+        <div id={idCommentaires} className="grid gap-3 border-t border-border pt-3">
           {commentaires === null ? (
             <p className="text-sm text-text-3">Chargement...</p>
           ) : commentaires.length === 0 ? (
@@ -222,6 +236,10 @@ export function CartePost({
           )}
         </div>
       ) : null}
+
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
     </article>
   );
 }

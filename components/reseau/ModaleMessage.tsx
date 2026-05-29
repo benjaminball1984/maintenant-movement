@@ -66,11 +66,14 @@ export function ModaleMessage({
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [envoye, setEnvoye] = useState(false);
+  // Message d'état annoncé aux lecteurs d'écran (région live masquée).
+  const [messageStatut, setMessageStatut] = useState('');
 
   const ouvrir = () => {
     setTexte('');
     setErreur(null);
     setEnvoye(false);
+    setMessageStatut('');
     refDialog.current?.showModal();
   };
   const fermer = () => refDialog.current?.close();
@@ -84,6 +87,7 @@ export function ModaleMessage({
     if (resultat.ok) {
       setEnvoye(true);
       setTexte('');
+      setMessageStatut(libelles.alertSuccesTitre);
     } else {
       setErreur(resultat.message);
     }
@@ -119,6 +123,10 @@ export function ModaleMessage({
             <X size={16} strokeWidth={1.5} />
           </IconButton>
         </header>
+
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {messageStatut}
+        </span>
 
         {envoye ? (
           <div className="grid gap-4 p-6 text-center">

@@ -42,6 +42,8 @@ export function BoutonArchiverEntite({
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
+  /** Message d'état pour lecteur d'écran (annonce du succès, sinon muet). */
+  const [messageStatut, setMessageStatut] = useState('');
 
   const executer = async () => {
     setEnCours(true);
@@ -56,15 +58,21 @@ export function BoutonArchiverEntite({
       return;
     }
     setSucces(true);
+    setMessageStatut('Action effectuée');
     setEtape('fermee');
     if (onSucces !== undefined) onSucces();
   };
 
   if (succes) {
     return (
-      <Alert variant="success" titre="Action effectuée">
-        {verbe} appliqué avec succès. L'entité est masquée de l'UI publique.
-      </Alert>
+      <>
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          {messageStatut}
+        </span>
+        <Alert variant="success" titre="Action effectuée">
+          {verbe} appliqué avec succès. L'entité est masquée de l'UI publique.
+        </Alert>
+      </>
     );
   }
 

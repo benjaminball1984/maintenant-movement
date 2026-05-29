@@ -19,6 +19,8 @@ export function FormulaireCreerEdition({ numeroSuggere }: { numeroSuggere: numbe
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState<string | null>(null);
+  /** Message d'état pour lecteur d'écran (annonce du succès, sinon muet). */
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surSoumettre = async () => {
     if (titre.trim().length === 0 || numero <= 0) return;
@@ -40,6 +42,7 @@ export function FormulaireCreerEdition({ numeroSuggere }: { numeroSuggere: numbe
       return;
     }
     setSucces(r.slug);
+    setMessageStatut('Édition créée');
     setTitre('');
     setSousTitre('');
     setContenuMd('');
@@ -50,6 +53,9 @@ export function FormulaireCreerEdition({ numeroSuggere }: { numeroSuggere: numbe
 
   return (
     <div className="grid gap-3 rounded-md border border-border bg-surface p-4">
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       {succes !== null ? (
         <Alert variant="success" titre="Édition créée">
           Slug : <code className="font-mono">{succes}</code>.

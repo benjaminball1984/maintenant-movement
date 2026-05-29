@@ -18,6 +18,8 @@ export function ComposerPost() {
   const [token, setToken] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  // Message d'état annoncé aux lecteurs d'écran (région live masquée).
+  const [messageStatut, setMessageStatut] = useState('');
 
   const publier = async (evenement: React.FormEvent) => {
     evenement.preventDefault();
@@ -32,9 +34,11 @@ export function ComposerPost() {
     if (resultat.ok) {
       setTexte('');
       setImageUrl('');
+      setMessageStatut('Publication envoyée');
       router.refresh();
     } else {
       setErreur(resultat.message);
+      setMessageStatut(resultat.message);
     }
   };
 
@@ -63,6 +67,9 @@ export function ComposerPost() {
         onChange={(url) => setImageUrl(url ?? '')}
       />
       {erreur !== null ? <Alert variant="danger">{erreur}</Alert> : null}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       <CaptchaTurnstile onChange={setToken} />
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-text-3">{texte.length}/5000 caractères</p>

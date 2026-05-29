@@ -30,6 +30,7 @@ export function BoutonConfirmerReservation({
 }: BoutonConfirmerReservationProps) {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surConfirmer = async () => {
     setEnCours(true);
@@ -37,6 +38,7 @@ export function BoutonConfirmerReservation({
     const r = await confirmerReservationAction({ reservationId, cheminRevalidation });
     setEnCours(false);
     if (!r.ok) setErreur(r.message);
+    else setMessageStatut('Réservation confirmée');
   };
 
   return (
@@ -50,6 +52,9 @@ export function BoutonConfirmerReservation({
           {erreur}
         </p>
       )}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
     </div>
   );
 }

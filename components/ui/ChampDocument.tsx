@@ -3,7 +3,7 @@
 import { televerserJustificatifAction } from '@/app/actions/justificatif';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, FileText, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 /**
  * Composant champ « Document justificatif » (cycle V2 V2.3.32).
@@ -55,8 +55,11 @@ export function ChampDocument({
   className,
 }: ChampDocumentProps) {
   const refInput = useRef<HTMLInputElement>(null);
+  const idTitre = useId();
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  /** Message d'état pour la région ARIA live (annonce lecteur d'écran). */
+  const [messageStatut, setMessageStatut] = useState('');
   const [resultat, setResultat] = useState<{
     chemin: string;
     urlSignee: string;
@@ -72,6 +75,7 @@ export function ChampDocument({
     setEnCours(true);
     setErreur(null);
     setResultat(null);
+    setMessageStatut('Téléversement en cours…');
 
     const formData = new FormData();
     formData.append('fichier', fichier);
@@ -82,8 +86,10 @@ export function ChampDocument({
 
     if (!r.ok) {
       setErreur(r.message);
+      setMessageStatut(`Erreur de téléversement : ${r.message}`);
       return;
     }
+    setMessageStatut('Document téléversé');
     setResultat({
       chemin: r.cheminBucket,
       urlSignee: r.urlSignee,
@@ -102,13 +108,21 @@ export function ChampDocument({
   const surRetirer = () => {
     setResultat(null);
     setErreur(null);
+    setMessageStatut('Document retiré');
     if (refInput.current !== null) refInput.current.value = '';
     onChange?.(null);
   };
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
-      <span className="font-medium text-sm text-text-1">{libelle}</span>
+    <div className={cn('flex flex-col gap-2', className)} aria-busy={enCours}>
+      <span id={idTitre} className="font-medium text-sm text-text-1">
+        {libelle}
+      </span>
+
+      {/* Région ARIA live : annonce l'état du téléversement aux lecteurs d'écran. */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
 
       {resultat === null ? (
         <label
@@ -128,6 +142,7 @@ export function ChampDocument({
             className="sr-only"
             onChange={surFichier}
             disabled={enCours}
+            aria-describedby={idTitre}
           />
         </label>
       ) : (

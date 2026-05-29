@@ -31,6 +31,7 @@ export function BoutonSignalerLitigeReservation({ reservationId, cheminRevalidat
   const [motif, setMotif] = useState('');
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surConfirmer = async () => {
     setEnCours(true);
@@ -42,6 +43,7 @@ export function BoutonSignalerLitigeReservation({ reservationId, cheminRevalidat
     });
     setEnCours(false);
     if (!r.ok) setErreur(r.message);
+    else setMessageStatut('Litige signalé');
   };
 
   if (!ouvert) {
@@ -106,6 +108,9 @@ export function BoutonSignalerLitigeReservation({ reservationId, cheminRevalidat
           {erreur}
         </p>
       )}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
     </div>
   );
 }

@@ -33,6 +33,8 @@ export function FormulaireCreerSalle() {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [succesSlug, setSuccesSlug] = useState<string | null>(null);
+  /** Message d'état pour lecteur d'écran (annonce du succès, sinon muet). */
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surSoumettre = async () => {
     if (nom.trim().length === 0) return;
@@ -52,6 +54,7 @@ export function FormulaireCreerSalle() {
       return;
     }
     setSuccesSlug(r.slug);
+    setMessageStatut('Salle créée');
     setNom('');
     setDescription('');
     setEspaceId('');
@@ -59,6 +62,9 @@ export function FormulaireCreerSalle() {
 
   return (
     <div className="grid gap-3 rounded-md border border-border bg-surface p-4">
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       {succesSlug !== null ? (
         <Alert variant="success" titre="Salle créée">
           Slug : <code className="font-mono">{succesSlug}</code>. Tu peux en créer une autre ou

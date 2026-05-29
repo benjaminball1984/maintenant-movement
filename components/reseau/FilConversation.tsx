@@ -42,7 +42,7 @@ export function FilConversation({
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-2">
+      <div className="grid gap-2" aria-live="polite">
         {messages.length === 0 ? (
           <p className="py-8 text-center text-text-3">
             Aucun message. Écris le premier à {autreNom}.
@@ -57,6 +57,8 @@ export function FilConversation({
                   : 'justify-self-start bg-surface-2 text-text-1'
               }`}
             >
+              {/* Émetteur lisible par lecteur d'écran : le sens ne dépend plus que de la couleur de bulle. */}
+              <span className="sr-only">{m.deMoi ? 'Toi : ' : `${autreNom} : `}</span>
               <p className="whitespace-pre-wrap break-words">{m.texte}</p>
             </div>
           ))

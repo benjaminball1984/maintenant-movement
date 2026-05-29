@@ -17,6 +17,8 @@ export function BoutonSuivre({
 }) {
   const [jeSuis, setJeSuis] = useState(jeSuisInitial);
   const [enCours, demarrer] = useTransition();
+  // Message d'état annoncé aux lecteurs d'écran (région live masquée).
+  const [messageStatut, setMessageStatut] = useState('');
 
   const basculer = () => {
     const avant = jeSuis;
@@ -24,20 +26,29 @@ export function BoutonSuivre({
     demarrer(async () => {
       const action = avant ? nePlusSuivre : suivre;
       const resultat = await action({ cible_id: cibleId });
-      if (!resultat.ok) {
+      if (resultat.ok) {
+        setMessageStatut(avant ? 'Abonnement retiré' : 'Abonnement ajouté');
+      } else {
         setJeSuis(avant); // retour arrière
+        setMessageStatut('Échec, réessaie');
       }
     });
   };
 
   return (
-    <Button
-      variant={jeSuis ? 'outline' : 'gradient'}
-      taille="sm"
-      onClick={basculer}
-      disabled={enCours}
-    >
-      {jeSuis ? 'Suivi·e' : 'Suivre'}
-    </Button>
+    <>
+      <Button
+        variant={jeSuis ? 'outline' : 'gradient'}
+        taille="sm"
+        onClick={basculer}
+        disabled={enCours}
+        aria-pressed={jeSuis}
+      >
+        {jeSuis ? 'Suivi·e' : 'Suivre'}
+      </Button>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
+    </>
   );
 }

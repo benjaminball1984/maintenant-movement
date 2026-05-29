@@ -42,6 +42,9 @@ export function BoutonParticiperMoment({
   if (succes) {
     return (
       <Alert variant="success" titre="Inscription enregistrée">
+        <span className="sr-only" aria-live="polite" aria-atomic="true">
+          Participation enregistrée
+        </span>
         Tes coordonnées sont visibles par l'organisateurice du moment uniquement.
       </Alert>
     );

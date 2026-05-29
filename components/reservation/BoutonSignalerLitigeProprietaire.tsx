@@ -30,6 +30,7 @@ export function BoutonSignalerLitigeProprietaire({ reservationId, cheminRevalida
   const [motif, setMotif] = useState('');
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surConfirmer = async () => {
     setEnCours(true);
@@ -41,6 +42,7 @@ export function BoutonSignalerLitigeProprietaire({ reservationId, cheminRevalida
     });
     setEnCours(false);
     if (!r.ok) setErreur(r.message);
+    else setMessageStatut('Litige signalé');
   };
 
   if (!ouvert) {
@@ -104,6 +106,9 @@ export function BoutonSignalerLitigeProprietaire({ reservationId, cheminRevalida
           {erreur}
         </p>
       )}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
     </div>
   );
 }

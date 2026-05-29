@@ -103,6 +103,8 @@ export function TeleverseurImage({
     enCours: false,
     erreur: null,
   });
+  /** Message d'état pour la région ARIA live (annonce lecteur d'écran). */
+  const [messageStatut, setMessageStatut] = useState('');
 
   /** Validation côté client AVANT envoi (UX : feedback instantané). */
   const validerCote = useCallback((fichier: File): string | null => {
@@ -123,12 +125,14 @@ export function TeleverseurImage({
       const erreurValidation = validerCote(fichier);
       if (erreurValidation !== null) {
         setEtat((prec) => ({ ...prec, erreur: erreurValidation }));
+        setMessageStatut(`Erreur : ${erreurValidation}`);
         // Reset l'input pour permettre de re-sélectionner le même fichier corrigé.
         if (refInput.current) refInput.current.value = '';
         return;
       }
 
       setEtat((prec) => ({ ...prec, enCours: true, erreur: null }));
+      setMessageStatut('Téléversement en cours…');
 
       const formData = new FormData();
       formData.append('fichier', fichier);
@@ -144,9 +148,11 @@ export function TeleverseurImage({
             enCours: false,
             erreur: null,
           });
+          setMessageStatut('Image téléversée');
           onChange?.(resultat.url, resultat.cheminBucket);
         } else {
           setEtat((prec) => ({ ...prec, enCours: false, erreur: resultat.message }));
+          setMessageStatut(`Erreur de téléversement : ${resultat.message}`);
         }
       } catch (_erreur) {
         setEtat((prec) => ({
@@ -154,6 +160,7 @@ export function TeleverseurImage({
           enCours: false,
           erreur: 'Téléversement impossible. Réessaie dans un instant.',
         }));
+        setMessageStatut('Erreur de téléversement. Réessaie dans un instant.');
       } finally {
         if (refInput.current) refInput.current.value = '';
       }
@@ -163,11 +170,17 @@ export function TeleverseurImage({
 
   const surSuppression = useCallback(() => {
     setEtat({ url: null, cheminBucket: null, enCours: false, erreur: null });
+    setMessageStatut('Image retirée');
     onChange?.(null, null);
   }, [onChange]);
 
   return (
-    <div className={cn('flex flex-col gap-3', className)}>
+    <div className={cn('flex flex-col gap-3', className)} aria-busy={etat.enCours}>
+      {/* Région ARIA live : annonce l'état du téléversement aux lecteurs d'écran. */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
+
       {etat.url !== null && (
         <div className="relative inline-block overflow-hidden rounded-md border border-border bg-surface-2">
           {/* Aperçu local sans next/image : peut être un data URL (mock storage). */}

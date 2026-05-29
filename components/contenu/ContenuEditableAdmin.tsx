@@ -65,6 +65,12 @@ export function ContenuEditableAdmin({
   const [htmlEnregistre, setHtmlEnregistre] = useState<string | null>(valeurHtmlInitiale);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  /**
+   * Message d'état pour lecteur d'écran : aucun feedback succès visuel
+   * n'existe ici (on referme l'éditeur au save), on annonce donc via une
+   * région live persistante masquée.
+   */
+  const [messageStatut, setMessageStatut] = useState('');
 
   const surEnregistrer = async (): Promise<void> => {
     setEnCours(true);
@@ -86,6 +92,7 @@ export function ContenuEditableAdmin({
     } else {
       setMdEnregistre(valeurMd);
     }
+    setMessageStatut('Contenu enregistré');
     setEnEdition(false);
   };
 
@@ -224,6 +231,9 @@ export function ContenuEditableAdmin({
 
   return (
     <div className={`group relative ${className ?? ''}`}>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
       {estAdmin ? (
         <button
           type="button"

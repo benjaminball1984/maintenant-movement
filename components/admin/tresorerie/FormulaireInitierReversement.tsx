@@ -101,6 +101,9 @@ export function FormulaireInitierReversement({
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
 
+  /** Message d'état pour la région ARIA live (annonce lecteur d'écran). */
+  const [messageStatut, setMessageStatut] = useState('');
+
   const receptacleSelectionne = receptaclesActifs.find((r) => r.id === receptacleId);
   const canal = receptacleSelectionne?.canal ?? 'euro';
 
@@ -138,9 +141,11 @@ export function FormulaireInitierReversement({
     setEnCours(false);
     if (!r.ok) {
       setErreur(r.message);
+      setMessageStatut(`Erreur : ${r.message}`);
       return;
     }
     setSucces(true);
+    setMessageStatut(libelles.alertSuccesTitre);
     // Reset pour permettre un autre reversement.
     setMontant('');
     setMotif('');
@@ -160,6 +165,11 @@ export function FormulaireInitierReversement({
 
   return (
     <div className="flex flex-col gap-4 rounded-md border border-border bg-surface p-4">
+      {/* Région ARIA live persistante : annonce le succès / l'erreur aux lecteurs d'écran. */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {messageStatut}
+      </span>
+
       <p className="text-sm text-text-2">{libelles.rappelD12bis}</p>
 
       {succes ? (
@@ -210,11 +220,13 @@ export function FormulaireInitierReversement({
           <div className="mt-2 flex flex-col gap-2">
             <Input
               placeholder={libelles.placeholderNomExterne}
+              aria-label={libelles.placeholderNomExterne}
               value={beneficiaireNom}
               onChange={(e) => setBeneficiaireNom(e.target.value)}
             />
             <Input
               placeholder={canal === 'euro' ? libelles.placeholderIban : libelles.placeholderWallet}
+              aria-label={canal === 'euro' ? libelles.placeholderIban : libelles.placeholderWallet}
               value={beneficiaireIban}
               onChange={(e) => setBeneficiaireIban(e.target.value)}
             />
@@ -223,6 +235,7 @@ export function FormulaireInitierReversement({
           <Input
             className="mt-2"
             placeholder={libelles.placeholderUuidInterne}
+            aria-label={libelles.optionInterne}
             value={beneficiairePersonneId}
             onChange={(e) => setBeneficiairePersonneId(e.target.value)}
           />
@@ -265,10 +278,18 @@ export function FormulaireInitierReversement({
       />
 
       <div className="flex items-center gap-2">
-        <Button onClick={surSoumettre} disabled={!peutSoumettre || enCours}>
+        <Button
+          onClick={surSoumettre}
+          disabled={!peutSoumettre || enCours}
+          aria-describedby={!peutSoumettre ? 'hint-reversement-incomplet' : undefined}
+        >
           {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
-        {!peutSoumettre && <p className="text-text-3 text-xs">{libelles.hintIncomplet}</p>}
+        {!peutSoumettre && (
+          <p id="hint-reversement-incomplet" className="text-text-3 text-xs">
+            {libelles.hintIncomplet}
+          </p>
+        )}
       </div>
 
       {erreur !== null && (

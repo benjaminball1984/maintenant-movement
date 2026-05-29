@@ -179,10 +179,13 @@ function CarteNotification({ notif }: { notif: Notification }) {
     <Card variant="ombre" className={notif.lue ? 'opacity-70' : 'border-brand border-l-4'}>
       <div className="flex items-start gap-3">
         {!notif.lue ? (
-          <span
-            aria-hidden="true"
-            className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand"
-          />
+          <>
+            <span className="sr-only">Non lue</span>
+            <span
+              aria-hidden="true"
+              className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-brand"
+            />
+          </>
         ) : null}
         <div className="flex-1">
           {notif.href !== null && notif.href !== '' ? (
