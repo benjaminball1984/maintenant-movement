@@ -142,26 +142,26 @@ export function ModaleSignaturePetition({
       token_turnstile: '',
     });
     refDialog.current?.showModal();
+    // Bloquer le scroll de fond DÈS l'ouverture. `<dialog>` n'émet pas
+    // d'événement `show` (seulement `close`/`cancel`), donc on le fait ici
+    // directement plutôt que via un listener qui ne se déclencherait jamais.
+    document.body.style.overflow = 'hidden';
   }
 
   function fermer() {
     refDialog.current?.close();
   }
 
-  // Restaurer le scroll quand la modale se ferme.
+  // Restaurer le scroll quand la modale se ferme (clic backdrop, Escape,
+  // bouton fermer : tous déclenchent l'événement natif `close`).
   useEffect(() => {
     const dialog = refDialog.current;
     if (dialog === null) return;
-    function bloquerScroll() {
-      document.body.style.overflow = 'hidden';
-    }
     function rendreScroll() {
       document.body.style.overflow = '';
     }
-    dialog.addEventListener('show', bloquerScroll);
     dialog.addEventListener('close', rendreScroll);
     return () => {
-      dialog.removeEventListener('show', bloquerScroll);
       dialog.removeEventListener('close', rendreScroll);
       rendreScroll();
     };
@@ -212,7 +212,7 @@ export function ModaleSignaturePetition({
         </header>
 
         {merci ? (
-          <div className="grid gap-5 p-6 text-center">
+          <div className="grid gap-5 p-6 text-center" aria-live="polite" aria-atomic="true">
             <p className="font-display text-2xl font-bold text-text-1">{libelles.merciTitre}</p>
             <p className="text-text-2">{libelles.merciMessage}</p>
 
@@ -228,7 +228,7 @@ export function ModaleSignaturePetition({
                 href="/agir/depuis-petition"
                 className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
               >
-                {libelles.tunnelCtaDecouvrir} →
+                {libelles.tunnelCtaDecouvrir} <span aria-hidden="true">→</span>
               </a>
             </div>
 
