@@ -82,7 +82,7 @@ export default async function PageProduits({ searchParams }: PageProduitsProps) 
           Publie un produit pour ouvrir la liste, ou élargis le filtre.
         </Alert>
       ) : (
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {produits.map((produit, index) => (
             <li key={produit.id}>
               <CarteProduit produit={produit} enAvant={index === 0} />

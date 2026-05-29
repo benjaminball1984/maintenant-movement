@@ -1,4 +1,9 @@
 import { getSession } from '@/lib/auth/session';
+import {
+  type AttributionEspace,
+  type TypeEspacePostable,
+  cheminPublicEspace,
+} from '@/lib/reseau/espace';
 import { getSupabaseServer } from '@/lib/supabase';
 
 /**
@@ -44,6 +49,12 @@ export interface PostAffiche {
   jaiSoutenu: boolean;
   /** Niveau dans le flux transparent : 0 = moi, 1 = suivi·e, 2 = reste. */
   palier: 0 | 1 | 2;
+  /**
+   * V2.5.10 Phase H — si renseigné, le post est publié AU NOM de cet espace.
+   * L'affichage met alors l'espace en avant (avatar + nom + lien) et garde
+   * l'`auteur` en sous-titre fin pour la transparence.
+   */
+  espacePublieur: AttributionEspace | null;
 }
 
 /** Commentaire enrichi. */
@@ -161,6 +172,141 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
 }
 
 /**
+ * Résout en parallèle les attributions d'espace pour un lot de posts.
+ * Une seule requête par TYPE d'espace présent dans le lot (et pas une
+ * requête par post). Retourne une Map id_espace → AttributionEspace.
+ *
+ * V2.5.10 Phase H — utilisé par `hydraterPosts` pour ramener le nom et
+ * le slug de l'espace dans chaque PostAffiche concerné.
+ */
+async function chargerAttributionsEspaces(
+  supabase: ClientSupabase,
+  posts: Array<{ espace_type: string | null; espace_id: string | null }>,
+): Promise<Map<string, AttributionEspace>> {
+  const map = new Map<string, AttributionEspace>();
+  // Grouper par type d'espace présent
+  const idsParType = new Map<TypeEspacePostable, Set<string>>();
+  for (const p of posts) {
+    if (p.espace_type === null || p.espace_id === null) continue;
+    const t = p.espace_type as TypeEspacePostable;
+    if (!idsParType.has(t)) idsParType.set(t, new Set());
+    idsParType.get(t)?.add(p.espace_id);
+  }
+  if (idsParType.size === 0) return map;
+
+  // Switch explicite par type pour préserver le typage Supabase
+  for (const [type, idsSet] of idsParType.entries()) {
+    const ids = Array.from(idsSet);
+    if (ids.length === 0) continue;
+    switch (type) {
+      case 'commune': {
+        const { data } = await supabase
+          .from('commune')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'commune',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('commune', r.slug),
+          });
+        }
+        break;
+      }
+      case 'federation': {
+        const { data } = await supabase
+          .from('federation')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'federation',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('federation', r.slug),
+          });
+        }
+        break;
+      }
+      case 'gt_thematique': {
+        const { data } = await supabase
+          .from('gt_thematique')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'gt_thematique',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('gt_thematique', r.slug),
+          });
+        }
+        break;
+      }
+      case 'groupe_entraide_local': {
+        const { data } = await supabase
+          .from('groupe_entraide_local')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'groupe_entraide_local',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('groupe_entraide_local', r.slug),
+          });
+        }
+        break;
+      }
+      case 'campagne': {
+        const { data } = await supabase
+          .from('campagne')
+          .select('id, titre, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'campagne',
+            id: r.id,
+            nom: r.titre,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('campagne', r.slug),
+          });
+        }
+        break;
+      }
+      case 'confederation': {
+        const { data } = await supabase
+          .from('confederation')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'confederation',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('confederation', r.slug),
+          });
+        }
+        break;
+      }
+    }
+  }
+  return map;
+}
+
+/**
  * Compteurs de soutiens/commentaires + « j'ai soutenu » pour un lot de posts,
  * en 3 requêtes groupées (et non N par post).
  */
@@ -172,6 +318,8 @@ async function hydraterPosts(
     texte: string;
     image_url: string | null;
     created_at: string;
+    espace_type?: string | null;
+    espace_id?: string | null;
   }>,
   viewerId: string | null,
   suivis: Set<string>,
@@ -179,21 +327,33 @@ async function hydraterPosts(
   if (posts.length === 0) return [];
   const ids = posts.map((p) => p.id);
 
-  const [identites, soutiensRes, commentairesRes, mesSoutiensRes] = await Promise.all([
-    chargerIdentites(
-      supabase,
-      posts.map((p) => p.auteurice_id),
-    ),
-    supabase.from('reaction_reseau').select('post_id').in('post_id', ids),
-    supabase.from('commentaire_reseau').select('post_id').in('post_id', ids).eq('statut', 'publie'),
-    viewerId !== null
-      ? supabase
-          .from('reaction_reseau')
-          .select('post_id')
-          .eq('personne_id', viewerId)
-          .in('post_id', ids)
-      : Promise.resolve({ data: [] as { post_id: string }[] }),
-  ]);
+  const [identites, soutiensRes, commentairesRes, mesSoutiensRes, attributionsEspaces] =
+    await Promise.all([
+      chargerIdentites(
+        supabase,
+        posts.map((p) => p.auteurice_id),
+      ),
+      supabase.from('reaction_reseau').select('post_id').in('post_id', ids),
+      supabase
+        .from('commentaire_reseau')
+        .select('post_id')
+        .in('post_id', ids)
+        .eq('statut', 'publie'),
+      viewerId !== null
+        ? supabase
+            .from('reaction_reseau')
+            .select('post_id')
+            .eq('personne_id', viewerId)
+            .in('post_id', ids)
+        : Promise.resolve({ data: [] as { post_id: string }[] }),
+      chargerAttributionsEspaces(
+        supabase,
+        posts.map((p) => ({
+          espace_type: p.espace_type ?? null,
+          espace_id: p.espace_id ?? null,
+        })),
+      ),
+    ]);
 
   const compter = (rows: { post_id: string }[] | null): Map<string, number> => {
     const m = new Map<string, number>();
@@ -214,6 +374,10 @@ async function hydraterPosts(
 
   return posts.map((p) => {
     const palier: 0 | 1 | 2 = p.auteurice_id === viewerId ? 0 : suivis.has(p.auteurice_id) ? 1 : 2;
+    const espacePublieur =
+      p.espace_id !== null && p.espace_id !== undefined
+        ? (attributionsEspaces.get(p.espace_id) ?? null)
+        : null;
     return {
       id: p.id,
       auteur: identites.get(p.auteurice_id) ?? identiteVide(p.auteurice_id),
@@ -224,6 +388,7 @@ async function hydraterPosts(
       nbCommentaires: commentaires.get(p.id) ?? 0,
       jaiSoutenu: mesSoutiens.has(p.id),
       palier,
+      espacePublieur,
     };
   });
 }
@@ -250,7 +415,7 @@ export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
 
   const { data, error } = await supabase
     .from('post_reseau')
-    .select('id, auteurice_id, texte, image_url, created_at')
+    .select('id, auteurice_id, texte, image_url, created_at, espace_type, espace_id')
     .eq('statut', 'publie')
     .order('created_at', { ascending: false })
     .limit(limite);
@@ -276,7 +441,7 @@ export async function listerPostsDePersonne(
   const session = await getSession();
   const { data, error } = await supabase
     .from('post_reseau')
-    .select('id, auteurice_id, texte, image_url, created_at')
+    .select('id, auteurice_id, texte, image_url, created_at, espace_type, espace_id')
     .eq('auteurice_id', personneId)
     .eq('statut', 'publie')
     .order('created_at', { ascending: false })
@@ -294,7 +459,7 @@ export async function getPost(postId: string): Promise<PostAffiche | null> {
   const session = await getSession();
   const { data, error } = await supabase
     .from('post_reseau')
-    .select('id, auteurice_id, texte, image_url, created_at, statut')
+    .select('id, auteurice_id, texte, image_url, created_at, statut, espace_type, espace_id')
     .eq('id', postId)
     .maybeSingle();
   if (error !== null || data === null || data.statut !== 'publie') return null;

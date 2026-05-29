@@ -1,4 +1,5 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
+import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
@@ -6,6 +7,7 @@ import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { petitionParSlug } from '@/lib/petitions/requetes';
@@ -174,6 +176,20 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>Admin</BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{petition.titre}</Heading>
+
+          {/* V2.5.11.b Phase G : bouton admin "Intégrer à une campagne".
+              Charge la liste des campagnes publiées côté serveur, passe au
+              composant client qui ouvre une modale select + Attacher. */}
+          {estAdmin ? (
+            <BoutonAttacherACampagne
+              typeModule="petition"
+              cibleId={petition.id}
+              campagnes={(await listerCampagnesPubliees()).map((c) => ({
+                id: c.id,
+                titre: c.titre,
+              }))}
+            />
+          ) : null}
 
           {petition.image_url !== null ? (
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">

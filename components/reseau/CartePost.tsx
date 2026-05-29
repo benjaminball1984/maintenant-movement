@@ -88,23 +88,44 @@ export function CartePost({
     if (resultat.ok) router.refresh();
   };
 
+  // V2.5.10 Phase H — si le post est publié AU NOM d'un espace, on met
+  // l'espace en avant (avatar/photo + nom cliquable) et l'auteurice
+  // personne devient un sous-titre fin « publié par X ».
+  const espace = post.espacePublieur;
+
   return (
     <article className="grid gap-3 rounded-lg border border-border bg-surface p-4">
       <header className="flex items-center gap-3">
-        <AvatarReseau nom={nom} photoUrl={post.auteur.photoUrl} taillePx={40} />
-        <div className="min-w-0">
-          {post.auteur.numero !== null ? (
-            <Link
-              href={`/s-informer/reseau/${post.auteur.numero}`}
-              className="font-bold text-text-1 hover:text-brand"
-            >
-              {nom}
-            </Link>
-          ) : (
-            <p className="font-bold text-text-1">{nom}</p>
-          )}
-          <p className="text-xs text-text-3">{formaterDate(post.createdAt)}</p>
-        </div>
+        {espace !== null ? (
+          <>
+            <AvatarReseau nom={espace.nom} photoUrl={espace.imageUrl} taillePx={40} />
+            <div className="min-w-0">
+              <Link href={espace.cheminPublic} className="font-bold text-text-1 hover:text-brand">
+                {espace.nom}
+              </Link>
+              <p className="text-xs text-text-3">
+                publié par {nom} · {formaterDate(post.createdAt)}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <AvatarReseau nom={nom} photoUrl={post.auteur.photoUrl} taillePx={40} />
+            <div className="min-w-0">
+              {post.auteur.numero !== null ? (
+                <Link
+                  href={`/s-informer/reseau/${post.auteur.numero}`}
+                  className="font-bold text-text-1 hover:text-brand"
+                >
+                  {nom}
+                </Link>
+              ) : (
+                <p className="font-bold text-text-1">{nom}</p>
+              )}
+              <p className="text-xs text-text-3">{formaterDate(post.createdAt)}</p>
+            </div>
+          </>
+        )}
       </header>
 
       <p className="whitespace-pre-wrap break-words text-text-1">{post.texte}</p>
