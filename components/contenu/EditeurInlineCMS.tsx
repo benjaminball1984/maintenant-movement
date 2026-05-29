@@ -3,6 +3,7 @@
 import { mettreAJourContenuEditorialAction } from '@/app/actions/contenu-editorial';
 import { EditeurRicheAvecToolbar } from '@/components/rich-text/EditeurRicheAvecToolbar';
 import { Alert, Button, Textarea } from '@/components/ui';
+import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
 import { Check, Edit2, FileText, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -118,6 +119,12 @@ export function EditeurInlineCMS({
           <button
             type="button"
             onClick={() => {
+              // V2.5.31 : si on bascule vers Riche et que le HTML est vide,
+              // pre-remplir avec la conversion du Markdown courant pour ne
+              // pas perdre le contenu de l'admin.
+              if (valeurHtml === '' && valeurMd.trim() !== '') {
+                setValeurHtml(markdownLegerEnHtml(valeurMd));
+              }
               setMode('riche');
               setErreur(null);
             }}

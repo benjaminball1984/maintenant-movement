@@ -3,6 +3,7 @@
 import { mettreAJourContenuEditorialAction } from '@/app/actions/contenu-editorial';
 import { EditeurRicheAvecToolbar } from '@/components/rich-text/EditeurRicheAvecToolbar';
 import { Button } from '@/components/ui';
+import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
 import { Check, FileText, Pencil, Sparkles, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -96,6 +97,15 @@ export function ContenuEditableAdmin({
   };
 
   const surBasculerMode = (nouveauMode: ModeEdition): void => {
+    // V2.5.31 : si on bascule Markdown → Riche et que le HTML est vide,
+    // on pré-remplit le Riche avec la conversion du Markdown actuel
+    // pour ne pas faire perdre le contenu a l'admin. Le sens inverse
+    // (Riche → Markdown) ne fait pas l'inverse : c'est intentionnel,
+    // on conserve les deux versions independamment quand l'admin a
+    // bascule (la sauvegarde n'envoie que le champ edite).
+    if (nouveauMode === 'riche' && valeurHtml === '' && valeurMd.trim() !== '') {
+      setValeurHtml(markdownLegerEnHtml(valeurMd));
+    }
     setMode(nouveauMode);
     setErreur(null);
   };
