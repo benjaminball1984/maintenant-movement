@@ -1,4 +1,5 @@
 import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -87,6 +88,38 @@ describe('markdownLegerEnHtml — échappement HTML', () => {
 
   it('échappe les balises dans les titres', () => {
     expect(markdownLegerEnHtml('## <img src=x>')).toBe('<h2>&lt;img src=x&gt;</h2>');
+  });
+});
+
+describe('markdownLegerEnHtml — intégration avec sanitizeRichHtml', () => {
+  /**
+   * Le pipeline réel est : MD → convertisseur → TipTap (édition) → save →
+   * sanitize → base. Donc la sortie du convertisseur DOIT passer par
+   * sanitize sans rien perdre des balises légitimes qu'il produit.
+   * (Anti-régression : si l'allowlist sanitize se durcit, on saura.)
+   */
+  it('sortie du convertisseur passe par sanitize sans perte', () => {
+    const md = 'Para **gras** et *ita*.\n\n## Titre\n\n- a\n- b';
+    const html = markdownLegerEnHtml(md);
+    const propre = sanitizeRichHtml(html);
+    // Toutes les balises produites sont allowlistées.
+    expect(propre).toContain('<p>');
+    expect(propre).toContain('<strong>');
+    expect(propre).toContain('<em>');
+    expect(propre).toContain('<h2>');
+    expect(propre).toContain('<ul>');
+    expect(propre).toContain('<li>');
+  });
+
+  it('échappement protège contre injection HTML dans Markdown', () => {
+    const md = 'texte avec <script>alert(1)</script> dedans';
+    const html = markdownLegerEnHtml(md);
+    const propre = sanitizeRichHtml(html);
+    // La balise <script> ne doit JAMAIS apparaître comme tag. Le texte
+    // littéral "alert(1)" reste visible (l'utilisateurice l'a tapé dans
+    // son Markdown), mais entre &lt;/&gt; donc inerte pour le navigateur.
+    expect(propre).not.toContain('<script');
+    expect(propre).toContain('&lt;script&gt;');
   });
 });
 
