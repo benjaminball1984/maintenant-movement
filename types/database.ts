@@ -73,6 +73,8 @@ export type Database = {
           numero: number;
           format: string;
           contenu_md: string;
+          /** V2.5.33 — HTML riche optionnel. */
+          contenu_html: string | null;
           image_couverture_url: string | null;
           statut: string;
           perimetre_type: string;
@@ -90,6 +92,7 @@ export type Database = {
           numero?: number;
           format?: string;
           contenu_md?: string;
+          contenu_html?: string | null;
           image_couverture_url?: string | null;
           statut?: string;
           perimetre_type?: string;
@@ -107,6 +110,7 @@ export type Database = {
           numero?: number;
           format?: string;
           contenu_md?: string;
+          contenu_html?: string | null;
           image_couverture_url?: string | null;
           statut?: string;
           perimetre_type?: string;

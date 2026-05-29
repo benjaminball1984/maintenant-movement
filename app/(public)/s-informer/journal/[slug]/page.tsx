@@ -27,7 +27,7 @@ async function chargerEdition(slug: string) {
   const { data } = await supabase
     .from('journal_affiche')
     .select(
-      'id, slug, titre, sous_titre, numero, format, contenu_md, image_couverture_url, publie_le, statut',
+      'id, slug, titre, sous_titre, numero, format, contenu_md, contenu_html, image_couverture_url, publie_le, statut',
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -124,19 +124,34 @@ export default async function PageEditionJournal({ params }: Props) {
       ) : null}
 
       <article className="prose-maintenant mt-8 font-body text-text-1">
-        {e.contenu_md === '' ? (
-          <TexteEditableAdmin
-            cle="journal.fiche.contenu_vide"
-            valeurInitiale={contenuVide.valeurMd}
-            estAdmin={estAdmin}
-            libelle="message contenu vide"
-            longueurMax={100}
-          >
-            {(t) => <p className="text-text-3 italic">{t}</p>}
-          </TexteEditableAdmin>
-        ) : (
-          <MarkdownLeger texte={e.contenu_md} />
-        )}
+        {(() => {
+          // V2.5.33 — priorité au HTML riche s'il est posé (déjà sanitizé
+          // au save côté Server Action via sanitizeRichHtml). Sinon
+          // fallback Markdown léger. Si les deux sont vides, message
+          // placeholder éditable.
+          const html = (e as { contenu_html?: string | null }).contenu_html ?? null;
+          if (html !== null && html.trim() !== '') {
+            return (
+              <div
+                className="prose prose-sm max-w-none [&_a]:text-brand [&_a]:underline [&_blockquote]:border-brand [&_blockquote]:border-l-4 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h1]:mt-4 [&_h1]:font-bold [&_h1]:text-2xl [&_h2]:mt-3 [&_h2]:font-bold [&_h2]:text-xl [&_h3]:mt-2 [&_h3]:font-bold [&_h3]:text-lg [&_img]:my-4 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-2 [&_ul]:list-disc [&_ul]:pl-6"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: déjà sanitizé côté Server Action via sanitizeRichHtml
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            );
+          }
+          if (e.contenu_md !== '') return <MarkdownLeger texte={e.contenu_md} />;
+          return (
+            <TexteEditableAdmin
+              cle="journal.fiche.contenu_vide"
+              valeurInitiale={contenuVide.valeurMd}
+              estAdmin={estAdmin}
+              libelle="message contenu vide"
+              longueurMax={100}
+            >
+              {(t) => <p className="text-text-3 italic">{t}</p>}
+            </TexteEditableAdmin>
+          );
+        })()}
       </article>
 
       {estAdmin ? (
@@ -159,6 +174,7 @@ export default async function PageEditionJournal({ params }: Props) {
             titreInitial={e.titre}
             sousTitreInitial={e.sous_titre ?? ''}
             contenuInitial={e.contenu_md}
+            contenuHtmlInitial={(e as { contenu_html?: string | null }).contenu_html ?? null}
             imageInitial={e.image_couverture_url ?? ''}
             numeroInitial={e.numero}
             formatInitial={e.format === 'A4' ? 'A4' : 'A3'}

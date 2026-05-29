@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -12,6 +13,8 @@ const schemaEdition = z.object({
   numero: z.number().int().positive(),
   format: z.enum(['A3', 'A4']),
   contenu_md: z.string().max(50000).optional(),
+  /** V2.5.33 — version HTML riche optionnelle (sanitizée avant insertion). */
+  contenu_html: z.string().max(200000).optional(),
   image_couverture_url: z.string().url().optional(),
   publier: z.boolean().optional(),
 });
@@ -47,6 +50,13 @@ export async function creerEditionJournalAction(donnees: unknown): Promise<Resul
     .maybeSingle();
   const slug = existant === null ? baseSlug : `${baseSlug}-${d.numero}`;
 
+  // V2.5.33 — sanitize HTML riche avant insertion. Allowlist stricte
+  // de balises/attributs/CSS, cf. `lib/rich-text/sanitize.ts`.
+  const contenuHtmlPropre =
+    d.contenu_html !== undefined && d.contenu_html.trim() !== ''
+      ? sanitizeRichHtml(d.contenu_html)
+      : null;
+
   const { error } = await supabase.from('journal_affiche').insert({
     slug,
     titre: d.titre,
@@ -54,6 +64,7 @@ export async function creerEditionJournalAction(donnees: unknown): Promise<Resul
     numero: d.numero,
     format: d.format,
     contenu_md: d.contenu_md ?? '',
+    contenu_html: contenuHtmlPropre,
     image_couverture_url: d.image_couverture_url ?? null,
     statut: d.publier === true ? 'publie' : 'brouillon',
     publie_le: d.publier === true ? new Date().toISOString() : null,
@@ -72,6 +83,8 @@ const schemaMaj = z.object({
   titre: z.string().min(1).max(300).optional(),
   sous_titre: z.string().max(500).nullable().optional(),
   contenu_md: z.string().max(50000).optional(),
+  /** V2.5.33 — HTML riche optionnel. Vide → efface (retour Markdown). */
+  contenu_html: z.string().max(200000).optional(),
   image_couverture_url: z.string().url().nullable().optional(),
   numero: z.number().int().positive().optional(),
   format: z.enum(['A3', 'A4']).optional(),
@@ -99,6 +112,7 @@ export async function mettreAJourEditionAction(
     titre?: string;
     sous_titre?: string | null;
     contenu_md?: string;
+    contenu_html?: string | null;
     image_couverture_url?: string | null;
     numero?: number;
     format?: 'A3' | 'A4';
@@ -106,6 +120,10 @@ export async function mettreAJourEditionAction(
   if (d.titre !== undefined) maj.titre = d.titre;
   if (d.sous_titre !== undefined) maj.sous_titre = d.sous_titre;
   if (d.contenu_md !== undefined) maj.contenu_md = d.contenu_md;
+  if (d.contenu_html !== undefined) {
+    // V2.5.33 — vide = effacer le HTML riche (retour Markdown).
+    maj.contenu_html = d.contenu_html.trim() === '' ? null : sanitizeRichHtml(d.contenu_html);
+  }
   if (d.image_couverture_url !== undefined) maj.image_couverture_url = d.image_couverture_url;
   if (d.numero !== undefined) maj.numero = d.numero;
   if (d.format !== undefined) maj.format = d.format;
