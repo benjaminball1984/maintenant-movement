@@ -79,6 +79,14 @@ const TEMPLATES_DEFAUT: Record<TypeNotification, { titre: string; message: strin
     titre: 'Nouveau soutien',
     message: '{auteur} soutient ta publication.',
   },
+  reseau_demande_ami: {
+    titre: 'Demande d’ami·e',
+    message: '{auteur} souhaite devenir ami·e avec toi.',
+  },
+  reseau_amitie_acceptee: {
+    titre: 'Demande d’ami·e acceptée',
+    message: '{auteur} a accepté ta demande d’ami·e.',
+  },
   moderation_me_concerne: {
     titre: 'Action de modération',
     message: 'Un contenu te concernant a été modéré. Motif : {motif}',

@@ -1,0 +1,245 @@
+389c03d 2026-05-28 fix - phase V2.4 - chantier V2.4.154 - mise a jour CLAUDE.md section etat courant
+9efa40f 2026-05-28 phase V2.4 - chantier V2.4.154 - libelles UI editables sur 3 formulaires hors-pattern
+45d1a99 2026-05-28 phase V2.4 - chantier V2.4.153 - libelles UI editables sur 2 formulaires admin
+23349c5 2026-05-28 phase V2.4 - chantier V2.4.152 - libelles UI editables sur 7 formulaires restants
+36a527b 2026-05-28 phase V2.4 - chantier V2.4.151 - libelles UI editables sur 2 formulaires marche/sondage
+98f9c7b 2026-05-28 phase V2.4 - chantier V2.4.150 - libelles UI editables sur 3 formulaires (achat marche + vote + SEL)
+c8b7fc5 2026-05-28 phase V2.4 - chantier V2.4.149 - libelles UI editables sur 6 formulaires publics majeurs
+e58d065 2026-05-28 phase V2.4 - chantier V2.4.148 - branchement messages CMS sur 7 formulaires UI restants
+15eb34c 2026-05-28 phase V2.4 - chantier V2.4.147 - branchement messages CMS sur 11 formulaires UI
+424447f 2026-05-28 phase V2.4 - chantier V2.4.146 - factories Zod + cles CMS pour les 12 schemas restants
+0fb0f6d 2026-05-28 phase V2.4 - chantier V2.4.145 - libelles + factories Zod sur les 4 formulaires cagnotte
+f4fcbf9 2026-05-28 phase V2.4 - chantier V2.4.144 - libelles + factories Zod sur les 3 formulaires adhesion
+36dc5ce 2026-05-28 phase V2.4 - chantier V2.4.143 - libelles FormulaireNotifications editables admin
+1ab85c2 2026-05-28 phase V2.4 - chantier V2.4.142 - libelles + factory Zod sur 2 formulaires auth restants
+7bde76b 2026-05-27 phase V2.4 - chantier V2.4.141 - libelles + validation editables admin sur signature petition
+84ffb3d 2026-05-27 phase V2.4 - chantier V2.4.140 - messages de validation profil editables admin (factory Zod)
+910b303 2026-05-27 phase V2.4 - chantier V2.4.139 - messages de validation auth editables admin (factory Zod)
+24319d3 2026-05-27 phase V2.4 - chantier V2.4.138 - libelles formulaire informations profil editables admin
+a4fc3d8 2026-05-27 phase V2.4 - chantier V2.4.137 - labels champs editables admin sur /connexion
+578decc 2026-05-27 phase V2.4 - chantier V2.4.136 - 18 labels du FormulaireInscription editables admin
+fb16e57 2026-05-27 phase V2.4 - chantier V2.4.135 - libelles CTAs des 3 formulaires auth editables admin
+9104fd2 2026-05-27 phase V2.4 - chantier V2.4.134 - cartes /carte et /communes editables
+53eca5c 2026-05-27 phase V2.4 - chantier V2.4.133 - templates d'emails transactionnels editables admin
+d1dd08f 2026-05-27 phase V2.4 - chantier V2.4.132 - migration des 6 call sites de notifs reservation
+b30a8ab 2026-05-27 phase V2.4 - chantier V2.4.131 - templates de notifications cloche editables admin
+b2911d9 2026-05-27 phase V2.4 - chantier V2.4.130 - 9 dernieres sous-pages /admin/national/* editables
+15ef072 2026-05-27 phase V2.4 - chantier V2.4.129 - 4 sous-pages /admin/national/* editables (personnes, communes, federations, medias)
+601d3c4 2026-05-27 phase V2.4 - chantier V2.4.128 - 9 sous-pages /admin/moderation/* editables
+bacc9fd 2026-05-27 phase V2.4 - chantier V2.4.127 - file de moderation hub /admin/moderation editable
+150f5cd 2026-05-27 phase V2.4 - chantier V2.4.126 - 3 pages utilitaires (/agenda, /recherche, /cartes)
+7e48bc6 2026-05-27 phase V2.4 - chantier V2.4.125 - 4 fiches restantes editables (marche × 3 + reunion individuelle)
+dff4e45 2026-05-27 phase V2.4 - chantier V2.4.124 - 8 dernieres pages /profil/* editables
+380d33e 2026-05-27 phase V2.4 - chantier V2.4.123 - 4 pages /profil/* editables (informations, mes-groupes, mes-creations, communes)
+ce01f07 2026-05-27 phase V2.4 - chantier V2.4.122 - /profil layout + dashboard entierement editables
+b6a5535 2026-05-27 phase V2.4 - chantier V2.4.121 - 3 fiches /s-entraider/* editables (offre, SEL, groupes-locaux)
+54c0a6b 2026-05-27 phase V2.4 - chantier V2.4.120 - 4 fiches /s-informer/* editables (media, sondages, journal, decider salle)
+f4aa00f 2026-05-27 phase V2.4 - chantier V2.4.119 - 3 fiches /agir/* editables (commune, federation, moment)
+9216207 2026-05-27 phase V2.4 - chantier V2.4.118 - 3 fiches mobiliser editables (petition, cagnotte, mobilisation)
+0af99d4 2026-05-27 phase V2.4 - chantier V2.4.117 - 7 sous-espaces /s-entraider/* editables
+83d017b 2026-05-27 phase V2.4 - chantier V2.4.116 - 6 index sous-espaces /s-informer/* editables
+fba74aa 2026-05-27 phase V2.4 - chantier V2.4.115 - 7 index sous-espaces /agir/* editables
+1c43454 2026-05-27 phase V2.4 - chantier V2.4.114 - 4 index sous-espaces /mobiliser/* editables
+fd5a106 2026-05-27 phase V2.4 - chantier V2.4.113 - /comprendre index editable
+3cc78ec 2026-05-27 phase V2.4 - chantier V2.4.112 - hub admin /admin/national entierement editable
+9fea846 2026-05-27 phase V2.4 - chantier V2.4.111 - pages auth /connexion + /inscription editables
+5c57215 2026-05-27 phase V2.4 - chantier V2.4.110 - 4 Unes home entierement editables admin
+449ada5 2026-05-27 phase V2.4 - chantier V2.4.109 - header CTAs editables admin
+7582298 2026-05-27 phase V2.4 - chantier V2.4.108 - prefooter, microcopy s-informer, preheader hub editables
+aea3a2a 2026-05-27 phase V2.4 - chantier V2.4.107 - descriptions des cards editables sur les 4 pages hub
+171f435 2026-05-27 fix - phase V2.3 - chantier V2.3.8 - backport fix est_membre_espace dans migrations source
+394bbe9 2026-05-27 phase V2.4 - chantier V2.4.106 - footer entierement editable admin (sections + liens)
+98566ce 2026-05-27 phase V2.4 - chantier V2.4.105 - textes editables admin sur footer + 4 pages hub
+313ba87 2026-05-27 phase V2.4 - chantier V2.4.104 - texte editable admin sur home (surtitre+titre+sous-titre)
+1d2c309 2026-05-27 phase V2.4 - chantier V2.4.103 - branchement archive/supprime sur 6 entites
+dddebf7 2026-05-27 phase V2.4 - chantier V2.4.101 - archivage et suppression admin generiques
+46ce991 2026-05-27 phase V2.4 - chantier V2.4.100 - archivage petition (admin)
+62ea2fb 2026-05-27 phase V2.4 - chantier V2.4.99 - menu profil : lien Console admin (si admin)
+932660c 2026-05-27 phase V2.4 - chantier V2.4.98 - fix carte communes : URL CARTO actuelle
+864bafe 2026-05-27 phase V2.4 - chantier V2.4.97 - fix compteurs home : service_role + retrait texte obsolete
+b383886 2026-05-27 phase V2.4 - chantier V2.4.96 - importer-membres-base44.ts (469 membres importes)
+2c06f57 2026-05-27 phase V2.4 - chantier V2.4.95 - carte communes : fond CARTO + clusters polis
+d13c0be 2026-05-27 phase V2.4 - chantier V2.4.94 - reseau social : televersement image au lieu URL
+764135c 2026-05-27 phase V2.4 - chantier V2.4.93 - retirer mentions obsoletes «  messagerie interne 7.5 »
+80992c8 2026-05-27 phase V2.4 - chantier V2.4.92 - fix compteurs home : signataires + newsletter
+4f1b793 2026-05-27 phase V2.4 - chantier V2.4.91 - refonte des 5 pages hub stubbed
+7793b32 2026-05-27 phase V2.4 - chantier V2.4.90 - maj CLAUDE.md (etat courant V2.4.89-V2.4.90)
+c3837f1 2026-05-27 phase V2.4 - chantier V2.4.90 - lib/helpers-purs.ts (index unifie)
+b419129 2026-05-27 phase V2.4 - chantier V2.4.89 - lib/timestamp.ts + tests
+006dab9 2026-05-27 phase V2.4 - chantier V2.4.88 - maj CLAUDE.md (etat courant V2.4.86-V2.4.88)
+5696000 2026-05-27 phase V2.4 - chantier V2.4.88 - lib/generer-password.ts + tests
+03f1c39 2026-05-27 phase V2.4 - chantier V2.4.87 - lib/validation-url.ts + tests
+c0a5899 2026-05-27 phase V2.4 - chantier V2.4.86 - lib/normaliser-recherche.ts + tests
+9ab1506 2026-05-27 phase V2.4 - chantier V2.4.85 - maj CLAUDE.md (etat courant V2.4.83-V2.4.85)
+f7e672a 2026-05-27 phase V2.4 - chantier V2.4.85 - composant Skeleton UI
+1e0b095 2026-05-27 phase V2.4 - chantier V2.4.84 - lib/force-password.ts + tests
+226ffed 2026-05-27 phase V2.4 - chantier V2.4.83 - lib/duree.ts + tests
+dc892c2 2026-05-27 phase V2.4 - chantier V2.4.82 - maj CLAUDE.md (etat courant V2.4.80-V2.4.82)
+0b7dcf8 2026-05-27 phase V2.4 - chantier V2.4.82 - lib/log-erreur.ts + tests
+9688c2f 2026-05-27 phase V2.4 - chantier V2.4.81 - lib/ago-compact.ts + tests
+2534b44 2026-05-27 phase V2.4 - chantier V2.4.80 - composant Avatar UI reutilisable + branchement
+768959f 2026-05-27 phase V2.4 - chantier V2.4.79 - maj CLAUDE.md (etat courant V2.4.77-V2.4.79)
+cf310a6 2026-05-27 phase V2.4 - chantier V2.4.79 - lib/sha256.ts + tests (Web Crypto API)
+10109a1 2026-05-27 phase V2.4 - chantier V2.4.78 - lib/avatar-couleur.ts + tests
+81fda8a 2026-05-27 phase V2.4 - chantier V2.4.77 - lib/group-by.ts + tests
+e1a957f 2026-05-27 phase V2.4 - chantier V2.4.76 - maj CLAUDE.md (etat courant V2.4.74-V2.4.76)
+51861ef 2026-05-27 phase V2.4 - chantier V2.4.76 - lib/siret.ts + tests (SIREN/SIRET Luhn)
+278cf65 2026-05-27 phase V2.4 - chantier V2.4.75 - lib/pourcentage.ts + tests
+bf3fa04 2026-05-27 phase V2.4 - chantier V2.4.74 - lib/chunk.ts + tests
+7c44a3f 2026-05-27 phase V2.4 - chantier V2.4.73 - maj CLAUDE.md (etat courant V2.4.71-V2.4.73)
+a28a0e1 2026-05-27 phase V2.4 - chantier V2.4.73 - lib/hash.ts FNV-1a + tests
+833d6db 2026-05-27 phase V2.4 - chantier V2.4.72 - lib/conversion-99coin.ts + tests
+8be7cce 2026-05-27 phase V2.4 - chantier V2.4.71 - lib/validation-fichier.ts + tests
+c13d3c1 2026-05-27 phase V2.4 - chantier V2.4.70 - maj CLAUDE.md (etat courant V2.4.68-V2.4.70)
+3a95160 2026-05-27 phase V2.4 - chantier V2.4.70 - lib/couleur-hex.ts + tests
+da35468 2026-05-27 phase V2.4 - chantier V2.4.69 - lib/iban.ts + tests
+84e6299 2026-05-27 phase V2.4 - chantier V2.4.68 - branchement Pagination sur admin communes
+e95426e 2026-05-27 phase V2.4 - chantier V2.4.67 - maj CLAUDE.md (etat courant V2.4.65-V2.4.67)
+641a62a 2026-05-27 phase V2.4 - chantier V2.4.67 - branchement Pagination sur admin personnes
+63bcaac 2026-05-27 phase V2.4 - chantier V2.4.66 - exports CSV moments + medias + sondages
+4a2e813 2026-05-27 phase V2.4 - chantier V2.4.65 - lib/capitalisation.ts + tests
+9044f04 2026-05-27 phase V2.4 - chantier V2.4.64 - maj CLAUDE.md (etat courant V2.4.62-V2.4.64)
+fbc5d4a 2026-05-27 phase V2.4 - chantier V2.4.64 - lib/uuid.ts + tests
+ebe82a2 2026-05-27 phase V2.4 - chantier V2.4.63 - lib/code-postal-fr.ts + tests
+2c5d7f9 2026-05-27 phase V2.4 - chantier V2.4.62 - lib/age.ts + tests
+cb89bfe 2026-05-27 phase V2.4 - chantier V2.4.61 - maj CLAUDE.md (etat courant V2.4.60-V2.4.61)
+4aca486 2026-05-27 phase V2.4 - chantier V2.4.61 - lib/telephone-fr.ts + tests
+9eab993 2026-05-27 phase V2.4 - chantier V2.4.60 - admin reservations : liste filtrable
+de6b085 2026-05-27 phase V2.4 - chantier V2.4.59 - maj CLAUDE.md (etat courant V2.4.57-V2.4.59)
+99a16ea 2026-05-27 phase V2.4 - chantier V2.4.59 - lib/url.ts + tests
+a82ffc6 2026-05-27 phase V2.4 - chantier V2.4.58 - composant Pagination UI reutilisable
+f88cc9e 2026-05-27 phase V2.4 - chantier V2.4.57 - admin campagnes : liste filtrable
+6c1a324 2026-05-27 phase V2.4 - chantier V2.4.56 - maj CLAUDE.md (etat courant V2.4.54-V2.4.56)
+ea7afea 2026-05-27 phase V2.4 - chantier V2.4.56 - estSlugValide + 8 tests
+2c9391f 2026-05-27 phase V2.4 - chantier V2.4.55 - lib/pagination.ts + tests
+9345164 2026-05-27 phase V2.4 - chantier V2.4.54 - admin medias : liste filtrable
+e5b0a8c 2026-05-27 phase V2.4 - chantier V2.4.53 - maj CLAUDE.md (etat courant V2.4.51-V2.4.53)
+d13b115 2026-05-27 phase V2.4 - chantier V2.4.53 - lib/distance-gps.ts + tests (haversine)
+9fb68f3 2026-05-27 phase V2.4 - chantier V2.4.52 - RSS feed du journal-affiche
+fe6eca5 2026-05-27 phase V2.4 - chantier V2.4.51 - admin moments solidaires
+4704a2f 2026-05-27 phase V2.4 - chantier V2.4.50 - maj CLAUDE.md (etat courant V2.4.48-V2.4.50)
+4b26879 2026-05-27 phase V2.4 - chantier V2.4.50 - lib/email-valide.ts + tests
+be9f190 2026-05-27 phase V2.4 - chantier V2.4.49 - lib/temps-lecture.ts + tests + branchement media
+29015d2 2026-05-27 phase V2.4 - chantier V2.4.48 - admin sondages : liste filtrable
+1f028a3 2026-05-27 phase V2.4 - chantier V2.4.47 - maj CLAUDE.md (etat courant V2.4.45-V2.4.47)
+349a285 2026-05-27 phase V2.4 - chantier V2.4.47 - lib/format-date.ts + tests
+fbdf253 2026-05-27 phase V2.4 - chantier V2.4.46 - healthcheck /api/health
+07d51b4 2026-05-27 phase V2.4 - chantier V2.4.45 - admin groupes d'entraide locaux
+7b3f918 2026-05-27 phase V2.4 - chantier V2.4.44 - maj CLAUDE.md (etat courant V2.4.42-V2.4.44)
+03a6d54 2026-05-27 phase V2.4 - chantier V2.4.44 - lib/format-t99cp.ts + tests
+8cb29ed 2026-05-27 phase V2.4 - chantier V2.4.42 - RSS feed /feed.xml + auto-discovery
+a979dd8 2026-05-27 phase V2.4 - chantier V2.4.43 - lib/texte-apercu.ts + tests
+a6b8228 2026-05-27 phase V2.4 - chantier V2.4.41 - maj CLAUDE.md (etat courant V2.4.39-V2.4.41)
+654dc4e 2026-05-27 phase V2.4 - chantier V2.4.41 - lib/pluriel.ts + tests
+c3e17b7 2026-05-27 phase V2.4 - chantier V2.4.40 - sitemap.xml dynamique + robots.txt
+ac95df1 2026-05-27 phase V2.4 - chantier V2.4.39 - exports CSV cagnottes + mobilisations
+13a9007 2026-05-27 phase V2.4 - chantier V2.4.38 - maj CLAUDE.md (etat courant V2.4.35-V2.4.38)
+11a6bbf 2026-05-27 phase V2.4 - chantier V2.4.38 - export CSV petitions admin
+fd84beb 2026-05-27 phase V2.4 - chantier V2.4.37 - export CSV communes + federations
+cf6ac54 2026-05-27 phase V2.4 - chantier V2.4.36 - lib/export-csv.ts + endpoint export personnes
+afb1bb3 2026-05-27 phase V2.4 - chantier V2.4.35 - admin federations : liste filtrable + compteur communes
+fe24849 2026-05-27 phase V2.4 - chantier V2.4.34 - maj CLAUDE.md (etat courant V2.4.32-V2.4.34)
+4024f63 2026-05-27 phase V2.4 - chantier V2.4.34 - lib/format-euros.ts + tests
+c61a651 2026-05-27 phase V2.4 - chantier V2.4.33 - admin communes : liste filtrable + compteurs
+708dd82 2026-05-27 phase V2.4 - chantier V2.4.32 - formaterRelativePassee + tests + branchement
+69a5560 2026-05-27 phase V2.4 - chantier V2.4.31 - maj CLAUDE.md (etat courant V2.4.28-V2.4.31)
+718b29c 2026-05-27 phase V2.4 - chantier V2.4.31 - extraire formaterTailleOctets + tests
+4a54cd1 2026-05-27 phase V2.4 - chantier V2.4.30 - extraire trierParPertinence + tests
+6ab2bf8 2026-05-27 phase V2.4 - chantier V2.4.29 - admin personnes : liste filtrable
+91a7506 2026-05-27 phase V2.4 - chantier V2.4.28 - helper slug commun + tests
+3c453df 2026-05-27 phase V2.4 - chantier V2.4.27 - maj CLAUDE.md (etat courant V2.4.24-V2.4.27)
+e813175 2026-05-27 phase V2.4 - chantier V2.4.27 - dashboard admin enrichi : etat moderation en tete
+23a5bb5 2026-05-27 phase V2.4 - chantier V2.4.26 - footer enrichi : colonne Explorer
+d0c0d58 2026-05-27 phase V2.4 - chantier V2.4.25 - bibliotheque images admin
+494a47d 2026-05-27 phase V2.4 - chantier V2.4.24 - recherche globale /recherche
+a6ec1db 2026-05-27 phase V2.4 - chantier V2.4.23 - maj CLAUDE.md (etat courant V2.4.18-V2.4.23)
+9cd163f 2026-05-27 phase V2.4 - chantier V2.4.23 - compteur reunions a venir dans dashboard membre
+69a76c4 2026-05-27 phase V2.4 - chantier V2.4.22 - page Mes reunions Decider + raccourcis dashboard
+77b990a 2026-05-27 phase V2.4 - chantier V2.4.21 - decisions recentes sur index Decider
+b9eb4f5 2026-05-27 phase V2.4 - chantier V2.4.20 - prochaines reunions aggregees sur index Decider
+dc0effe 2026-05-27 phase V2.4 - chantier V2.4.19 - edition d'une edition journal existante (admin)
+592c6f8 2026-05-27 phase V2.4 - chantier V2.4.18 - page individuelle de reunion Decider + admin
+9fc980d 2026-05-27 phase V2.4 - chantier V2.4.17 - maj CLAUDE.md (etat courant V2.4.14-V2.4.17)
+e56e905 2026-05-27 phase V2.4 - chantier V2.4.17 - televersement image dans formulaire journal
+3eea44f 2026-05-27 phase V2.4 - chantier V2.4.16 - extraire MarkdownLeger en module reutilisable
+bfdf714 2026-05-27 phase V2.4 - chantier V2.4.15 - planifier reunion Decider inline (admin)
+1e04f0f 2026-05-27 phase V2.4 - chantier V2.4.14 - file de moderation globale /admin/moderation
+00670c3 2026-05-27 phase V2.4 - chantier V2.4.13 - maj CLAUDE.md (etat courant : V2.4 demarree)
+1b51896 2026-05-27 phase V2.4 - chantier V2.4.13 - BoutonAdminEditer sur 9 pages d'espaces
+5579c6f 2026-05-27 phase V2.4 - chantier V2.4.12 - consoles admin Decider + Journal-affiche
+c9b82a3 2026-05-27 phase V2.4 - chantier V2.4.11 - journal-affiche MVP (7.3 partiel)
+b6db375 2026-05-27 phase V2.4 - chantier V2.4.10 - Decider MVP (salles + reunions + votes)
+9317af4 2026-05-27 phase V2.4 - chantier V2.4.8 - bouton 'Admin' universel sur espaces
+a9ee6db 2026-05-27 phase V2.4 - chantier V2.4.7 - page Mes creations (14 axes)
+899ea05 2026-05-27 phase V2.4 - chantier V2.4.6 - console admin contenus editoriaux
+0dd1e90 2026-05-27 phase V2.4 - chantier V2.4.5 - dashboard membre profond
+dc9dac7 2026-05-27 phase V2.4 - chantier V2.4.4 - agenda etendu (sondages + pages par type)
+be7636d 2026-05-27 phase V2.4 - chantier V2.4.3 - cartes etendues (sondages + groupes + carte hebergements + index)
+107f554 2026-05-27 phase V2.4 - chantier V2.4.2 - 10 pages editoriales migrees vers CMS + lorem ipsum
+c9b8a63 2026-05-27 phase V2.4 - chantier V2.4.1 - CMS minimal (table + helpers + composant edit admin)
+aab175e 2026-05-27 phase V2.3 - chantier 10.1 - acter V2.3.38 a V2.3.46 + section migration Base44
+c992748 2026-05-27 phase V2.3 - chantier V2.3.46 - tests helpers purs filtres + compter-membres
+8766b33 2026-05-27 phase V2.3 - chantier V2.3.45 - lien recherche depuis header reseau
+555c494 2026-05-27 phase V2.3 - chantier V2.3.44 - page recherche reseau social
+1927923 2026-05-27 phase V2.3 - chantier V2.3.43 - page admin audit journal D8bis
+b94df20 2026-05-27 phase V2.3 - chantier V2.3.42 - stats admin etendues V2
+b4f0afc 2026-05-27 phase V2.3 - chantier V2.3.41 - helper compterMembresEspace
+8f6787a 2026-05-27 phase V2.3 - chantier V2.3.40 - filtre par type d'offre dashboards reservation
+f45388d 2026-05-27 phase V2.3 - chantier V2.3.39 - page index /co-construire (liste GT)
+dbc0157 2026-05-27 phase V2.3 - chantier V2.3.38 - page GT thematique + Rejoindre/Quitter
+bc553ab 2026-05-27 phase V2.3 - chantier V2.3.37 - doc finale A-FAIRE-LILOU-BEN
+d9f5a06 2026-05-27 phase V2.3 - chantier V2.3.37 - acter V2.3.25 a V2.3.37 dans CLAUDE.md
+1d2af67 2026-05-27 phase V2.3 - chantier V2.3.37 - notif moderation_me_concerne sur retrait
+e5c6914 2026-05-27 phase V2.3 - chantier V2.3.36 - confirmer/annuler transaction sortante
+7208f5b 2026-05-27 phase V2.3 - chantier V2.3.35 - telechargement justificatif URL signee
+4562d6c 2026-05-27 phase V2.3 - chantier V2.3.34 - bouton Rejoindre/Quitter campagne
+1a5d3c2 2026-05-27 phase V2.3 - chantier V2.3.33 - UI initier reversement (D12bis)
+e0f353f 2026-05-27 phase V2.3 - chantier V2.3.32 - ChampDocument + adapter Storage justificatifs
+a801f43 2026-05-27 phase V2.3 - chantier V2.3.31 - section mes contributions financieres
+58951d3 2026-05-27 phase V2.3 - chantier V2.3.30 - brancher notifs reseau
+f717480 2026-05-27 phase V2.3 - chantier V2.3.29 - appartenance_campagne + Mes groupes 6 axes
+cd94e43 2026-05-27 phase V2.3 - chantier V2.3.28 - liste entrees detail caisse + script backfill
+6ff2f4e 2026-05-27 phase V2.3 - chantier V2.3.27 - brancher don/adhesion aux caisses
+48fd83d 2026-05-27 phase V2.3 - chantier V2.3.26 - transaction_entrante + helper solde caisse
+0a6813a 2026-05-27 phase V2.3 - chantier V2.3.25 - cloche in-app + branchement notifs D8
+1e67f81 2026-05-27 phase V2.3 - chantier V2.3.24 - acter V2.3.23 et V2.3.24 dans CLAUDE.md
+d8c524f 2026-05-27 phase V2.3 - chantier V2.3.24 - filtres statut cote demandeur + refactor partage
+5e283c2 2026-05-27 phase V2.3 - chantier V2.3.23 - filtres par statut sur dashboard proprietaire
+e7d21f4 2026-05-27 phase V2.3 - chantier V2.3.22 - acter V2.3.17 a V2.3.22 dans CLAUDE.md
+7abd237 2026-05-27 phase V2.3 - chantier V2.3.22 - page Mes groupes cote profil
+74f8dca 2026-05-27 phase V2.3 - chantier V2.3.21 - bouton signaler litige cote proprietaire
+96eebf2 2026-05-27 phase V2.3 - chantier V2.3.20 - identites caisse + tests helper
+ec425cd 2026-05-27 phase V2.3 - chantier V2.3.19 - helper nomAffichageRespectantVisibilite
+be13877 2026-05-27 phase V2.3 - chantier V2.3.18 - page de detail caisse (admin tresorerie)
+189130a 2026-05-27 phase V2.3 - chantier V2.3.17 - console admin reservations en litige
+eee8584 2026-05-27 phase V2.3 - chantier V2.3.16 - acter VAGUE 3 finitions dans CLAUDE.md (V2.3.13 a V2.3.16)
+a2c0552 2026-05-27 phase V2.3 - chantier V2.3.16 - bouton 'signaler un litige' cote demandeur
+d5ca24f 2026-05-27 phase V2.3 - chantier V2.3.15 - journal des transitions D8 sur reservation
+7fcaa91 2026-05-27 phase V2.3 - chantier V2.3.14 - confirmation reservation cote demandeur + fix branchement Annuler V2.3.11
+d68b4fd 2026-05-27 phase V2.3 - chantier V2.3.13 - dashboard proprietaire d'offre (demandes recues)
+fe96dd0 2026-05-27 phase V2.3 - chantier V2.3.12 - message d'amorce envoye dans messagerie interne
+91db11a 2026-05-27 phase V2.3 - chantier V2.3.11 - Annulation d'une reservation cote demandeur
+d3820d6 2026-05-27 phase V2.3 - chantier V2.3.10 - Dashboard tresorerie en lecture
+5a0ce61 2026-05-27 phase V2.3 - chantier V2.3.9 - Page Mes reservations cote profil
+7f6cccd 2026-05-27 phase V2.3 - chantier V2.3.8 - FilDeGroupe sur federations + fix helper est_membre_espace
+da0fa40 2026-05-27 phase V2.3 - chantier V2.3.7 - ChampImageObjet sur 5 formulaires restants
+b301045 2026-05-27 phase V2.3 - chantier V2.3.6 - doc : acter la cloture de la VAGUE 3
+930eabf 2026-05-27 phase V2.3 - chantier V2.3.6 - FilDeGroupe sur commune + campagne
+0a5657a 2026-05-27 phase V2.3 - chantier V2.3.5 - Branchement Reservation sur offres entraide + SEL
+e0d18e8 2026-05-27 phase V2.3 - chantier V2.3.4 - ChampImageObjet + branchement 5 formulaires
+e85d9ca 2026-05-27 phase V2.3 - chantier V2.3.3 - Location mutualisee (section 12 socle backend)
+4be2c67 2026-05-27 phase V2.3 - chantier V2.3.2 - Groupe d'entraide local (porte d'entree non-politique)
+0634a65 2026-05-27 phase V2.3 - chantier V2.3.1 - Open Graph sur les 10 pages detail restantes
+c6bed79 2026-05-27 phase V2.2 - chantier V2.2.4 - doc : acter la cloture de la VAGUE 2
+c1bcf22 2026-05-27 phase V2.2 - chantier V2.2.4 - Open Graph cote serveur (section 10)
+0a7f9ec 2026-05-27 phase V2.2 - chantier V2.2.3 - Caisse + reversements (D7 D12 D12bis)
+6dfe8c2 2026-05-26 phase V2.2 - chantier V2.2.2 - Reservation (composant transversal D8)
+7106fd0 2026-05-26 phase V2.2 - chantier V2.2.1 - FilDeGroupe (composant transversal section 18)
+adb7329 2026-05-26 phase V2.1 - chantier V2.1.3 - doc : acter la cloture de la VAGUE 1
+1e477e7 2026-05-26 phase V2.1 - chantier V2.1.3 - table droit atomique + presets + backfill
+c25d78c 2026-05-26 phase V2.1 - chantier V2.1.2 - entite Consentement + backfill
+f218e35 2026-05-26 phase V2.1 - chantier V2.1.1 - retrait du wallet integre (section 19)
+f99fd73 2026-05-26 phase V2.0 - chantier V2.0.3 - doc : acter la cloture de la VAGUE 0
+88a0f26 2026-05-26 phase V2.0 - chantier V2.0.3 - fondations UI transversales (ET1 ET2 ET3 ET4)
+1862e8c 2026-05-26 phase V2.0 - chantier V2.0.2 - CSP nominative + README app/auth
+78416a1 2026-05-26 phase V2.0 - chantier V2.0.1 - preseance + depot CDC V2 + coquilles + hook V2

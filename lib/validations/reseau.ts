@@ -60,6 +60,17 @@ export function creerCibleUuidSchema(
 export const cibleUuidSchema = creerCibleUuidSchema();
 export type DonneesCibleUuid = z.infer<typeof cibleUuidSchema>;
 
+/** Action sur une ligne d'amitié identifiée par UUID (accepter, refuser, retirer). */
+export function creerAmitieIdSchema(
+  messages: MessagesValidationReseau = MESSAGES_VALIDATION_RESEAU_DEFAUT,
+) {
+  return z.object({
+    amitie_id: z.string().uuid(messages.cibleUuid),
+  });
+}
+export const amitieIdSchema = creerAmitieIdSchema();
+export type DonneesAmitieId = z.infer<typeof amitieIdSchema>;
+
 /** Retrait de modération (a posteriori) : cible + motif obligatoire. */
 export function creerRetraitReseauSchema(
   messages: MessagesValidationReseau = MESSAGES_VALIDATION_RESEAU_DEFAUT,

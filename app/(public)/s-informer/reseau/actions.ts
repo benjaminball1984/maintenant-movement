@@ -3,6 +3,10 @@
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { poserNotificationTemplee } from '@/lib/notification-templates';
+import {
+  chargerIdentitesAffichables,
+  nomAffichageRespectantVisibilite,
+} from '@/lib/reseau/identite';
 import { type CommentaireAffiche, listerCommentaires } from '@/lib/reseau/requetes';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -11,6 +15,7 @@ import {
   type DonneesCreerPost,
   type DonneesEnvoyerMessage,
   type DonneesRetraitReseau,
+  amitieIdSchema,
   cibleUuidSchema,
   creerCommentaireSchema,
   creerPostSchema,
@@ -238,6 +243,163 @@ export async function nePlusSuivre(donneesBrutes: unknown): Promise<ResultatActi
     .delete()
     .eq('suiveur_id', session.userId)
     .eq('suivi_id', parse.data.cible_id);
+  if (error !== null) {
+    return { ok: false, message: `Action impossible : ${error.message}` };
+  }
+  revalidatePath('/s-informer/reseau');
+  return { ok: true };
+}
+
+// ============================================================
+// Amitié (épopée réseau V2, chantier D.1)
+// ============================================================
+// L'amitié est une relation stockée (table `amitie`) avec un cycle
+// demande → acceptation, distincte du suivi. Accepter force le suivi mutuel
+// (via la RPC SECURITY DEFINER `accepter_amitie`) et débloque la messagerie.
+
+/** Étiquette humaine de l'acteur courant, pour les notifications d'amitié. */
+async function nomActeurCourant(personneId: string): Promise<string> {
+  const identites = await chargerIdentitesAffichables([personneId]);
+  return nomAffichageRespectantVisibilite(identites.get(personneId));
+}
+
+/** Envoie une demande d'ami·e à une personne. */
+export async function demanderAmi(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = cibleUuidSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Tu dois être connecté·e pour demander quelqu’un en ami·e.' };
+  }
+  if (parse.data.cible_id === session.userId) {
+    return { ok: false, message: 'On ne se demande pas soi-même en ami·e.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.from('amitie').insert({
+    demandeur_id: session.userId,
+    destinataire_id: parse.data.cible_id,
+    statut: 'en_attente',
+  });
+  if (error !== null) {
+    // 23505 : une amitié active existe déjà (demande en cours ou déjà ami·es).
+    if (error.code === '23505') {
+      return { ok: false, message: 'Une demande est déjà en cours, ou vous êtes déjà ami·es.' };
+    }
+    // 42501 : la RLS a refusé (la cible n'autorise pas les demandes ouvertes
+    // et ne te suit pas). Message clair plutôt que l'erreur brute.
+    if (error.code === '42501') {
+      return {
+        ok: false,
+        message: 'Cette personne n’accepte pas les demandes d’ami·e pour l’instant.',
+      };
+    }
+    return { ok: false, message: `Action impossible : ${error.message}` };
+  }
+
+  await poserNotificationTemplee(
+    'reseau_demande_ami',
+    { auteur: await nomActeurCourant(session.userId) },
+    {
+      destinatairePersonneId: parse.data.cible_id,
+      href: '/s-informer/reseau/amis',
+      cibleTable: 'amitie',
+    },
+    session.userId,
+  );
+
+  revalidatePath('/s-informer/reseau');
+  return { ok: true };
+}
+
+/** Accepte une demande d'ami·e reçue (force le suivi mutuel). */
+export async function accepterAmi(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = amitieIdSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+
+  // On lit le demandeur AVANT (pour la notification) : la RLS select autorise
+  // le destinataire à voir sa propre demande.
+  const { data: ligne } = await supabase
+    .from('amitie')
+    .select('demandeur_id')
+    .eq('id', parse.data.amitie_id)
+    .maybeSingle();
+
+  const { data: ok, error } = await supabase.rpc('accepter_amitie', {
+    amitie_id: parse.data.amitie_id,
+  });
+  if (error !== null) {
+    return { ok: false, message: `Action impossible : ${error.message}` };
+  }
+  if (ok !== true) {
+    return { ok: false, message: 'Demande introuvable ou déjà traitée.' };
+  }
+
+  if (ligne !== null) {
+    await poserNotificationTemplee(
+      'reseau_amitie_acceptee',
+      { auteur: await nomActeurCourant(session.userId) },
+      {
+        destinatairePersonneId: ligne.demandeur_id,
+        href: '/s-informer/reseau/amis',
+        cibleTable: 'amitie',
+      },
+      session.userId,
+    );
+  }
+
+  revalidatePath('/s-informer/reseau');
+  return { ok: true };
+}
+
+/** Refuse une demande d'ami·e reçue (le demandeur n'est pas notifié). */
+export async function refuserAmi(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = amitieIdSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase
+    .from('amitie')
+    .update({ statut: 'refusee', repondu_le: new Date().toISOString() })
+    .eq('id', parse.data.amitie_id)
+    .eq('destinataire_id', session.userId)
+    .eq('statut', 'en_attente');
+  if (error !== null) {
+    return { ok: false, message: `Action impossible : ${error.message}` };
+  }
+  revalidatePath('/s-informer/reseau');
+  return { ok: true };
+}
+
+/**
+ * Retire une amitié, ou annule une demande envoyée (un seul geste : supprimer
+ * la ligne). Le suivi éventuel n'est PAS touché : on peut rester abonné·e sans
+ * être ami·es (spec §3).
+ */
+export async function retirerAmi(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = amitieIdSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.from('amitie').delete().eq('id', parse.data.amitie_id);
   if (error !== null) {
     return { ok: false, message: `Action impossible : ${error.message}` };
   }

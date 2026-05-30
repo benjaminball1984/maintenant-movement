@@ -1,10 +1,12 @@
 import { AvatarReseau } from '@/components/reseau/AvatarReseau';
+import { BoutonAmitie } from '@/components/reseau/BoutonAmitie';
 import { BoutonSuivre } from '@/components/reseau/BoutonSuivre';
 import { CartePost } from '@/components/reseau/CartePost';
 import { ModaleMessage } from '@/components/reseau/ModaleMessage';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Button, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { etatAmitieAvec } from '@/lib/reseau/amitie';
 import { getProfilReseauParNumero, listerPostsDePersonne, nomAffiche } from '@/lib/reseau/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -38,6 +40,8 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
   const moi = session?.userId ?? null;
   const nom = nomAffiche(profil.prenom, profil.nom);
   const posts = await listerPostsDePersonne(profil.personneId);
+  // Chantier D.1 : état d'amitié (demande/accept) entre le lecteur et la cible.
+  const etatAmitie = connecte && !profil.estMoi ? await etatAmitieAvec(profil.personneId) : null;
 
   return (
     <Container taille="md" className="pb-12">
@@ -94,6 +98,9 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
             ) : connecte ? (
               <>
                 <BoutonSuivre cibleId={profil.personneId} jeSuisInitial={profil.jeSuis} />
+                {etatAmitie !== null ? (
+                  <BoutonAmitie cibleId={profil.personneId} etat={etatAmitie} />
+                ) : null}
                 <ModaleMessage destinataireId={profil.personneId} destinataireNom={nom} />
               </>
             ) : (

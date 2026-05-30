@@ -5,14 +5,16 @@ import { Alert, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { compterDemandesAmiRecues } from '@/lib/reseau/amitie';
 import { compterMessagesNonLus, getFluxReseau } from '@/lib/reseau/requetes';
-import { Heart, MessageCircle, Search } from 'lucide-react';
+import { Heart, MessageCircle, Search, UserPlus } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 const FALLBACKS = {
   ctaRechercher: 'Rechercher',
   ctaMesMessages: 'Mes messages',
+  ctaAmis: 'Demandes d’ami·e',
   alertTriTitre: 'Comment ce flux est trié',
   alertTriCorps:
     'Ordre strictement transparent : d’abord tes publications, puis celles des personnes que tu suis, puis le reste, du plus récent au plus ancien. Pas de publicité, pas de pondération cachée, pas d’autoplay.',
@@ -43,9 +45,11 @@ export default async function PageReseau() {
   const [
     flux,
     nonLus,
+    nbDemandesAmi,
     estAdmin,
     ctaRechercher,
     ctaMesMessages,
+    ctaAmis,
     alertTriTitre,
     alertTriCorps,
     financementTexte,
@@ -57,12 +61,16 @@ export default async function PageReseau() {
   ] = await Promise.all([
     getFluxReseau(),
     connecte ? compterMessagesNonLus() : Promise.resolve(0),
+    connecte ? compterDemandesAmiRecues() : Promise.resolve(0),
     estAdminCourant(),
     lireContenuEditorial('s-informer.reseau.cta_rechercher', {
       valeurMd: FALLBACKS.ctaRechercher,
     }),
     lireContenuEditorial('s-informer.reseau.cta_mes_messages', {
       valeurMd: FALLBACKS.ctaMesMessages,
+    }),
+    lireContenuEditorial('s-informer.reseau.cta_amis', {
+      valeurMd: FALLBACKS.ctaAmis,
     }),
     lireContenuEditorial('s-informer.reseau.alert_tri_titre', {
       valeurMd: FALLBACKS.alertTriTitre,
@@ -133,6 +141,28 @@ export default async function PageReseau() {
                   {nonLus > 0 ? (
                     <span className="-top-1.5 -right-1.5 absolute inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-danger px-1 font-bold text-white text-xs">
                       {nonLus}
+                    </span>
+                  ) : null}
+                </Link>
+              )}
+            </TexteEditableAdmin>
+            <TexteEditableAdmin
+              cle="s-informer.reseau.cta_amis"
+              valeurInitiale={ctaAmis.valeurMd}
+              estAdmin={estAdmin}
+              libelle="CTA Demandes d'ami dans reseau (le compteur s'ajoute automatiquement)"
+              longueurMax={40}
+            >
+              {(t) => (
+                <Link
+                  href="/s-informer/reseau/amis"
+                  className="relative inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-bold text-text-1 transition hover:border-brand hover:text-brand"
+                >
+                  <UserPlus size={14} strokeWidth={1.5} />
+                  {t}
+                  {nbDemandesAmi > 0 ? (
+                    <span className="-top-1.5 -right-1.5 absolute inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-danger px-1 font-bold text-white text-xs">
+                      {nbDemandesAmi}
                     </span>
                   ) : null}
                 </Link>

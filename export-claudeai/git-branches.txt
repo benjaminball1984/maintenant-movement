@@ -1,0 +1,27 @@
+  fix/ci-playwright-multi-browser
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/feature/v2-0-1-preseance-cdc-pack
+  remotes/origin/feature/v2-0-2-csp-hygiene
+  remotes/origin/feature/v2-0-3-fondations-ui-transversales
+  remotes/origin/feature/v2-1-1-retrait-wallet-integre
+  remotes/origin/feature/v2-1-2-consentement
+  remotes/origin/feature/v2-1-3-droit-atomique
+  remotes/origin/feature/v2-2-1-fil-groupe
+  remotes/origin/feature/v2-2-2-reservation
+  remotes/origin/feature/v2-2-3-caisse-reversements
+  remotes/origin/feature/v2-2-4-open-graph
+  remotes/origin/feature/v2-3-1-og-pages-restantes
+  remotes/origin/feature/v2-3-10-dashboard-tresorerie
+  remotes/origin/feature/v2-3-11-annulation-reservation
+  remotes/origin/feature/v2-3-12-message-amorce-reseau
+  remotes/origin/feature/v2-3-2-groupe-entraide-local
+  remotes/origin/feature/v2-3-3-location-mutualisee
+  remotes/origin/feature/v2-3-4-televerseur-image-formulaires
+  remotes/origin/feature/v2-3-5-reservation-offres
+  remotes/origin/feature/v2-3-6-fil-groupe-espaces
+  remotes/origin/feature/v2-3-7-televerseur-image-suite
+  remotes/origin/feature/v2-3-8-fil-groupe-federations-gt
+  remotes/origin/feature/v2-3-9-page-mes-reservations
+  remotes/origin/fix/ci-playwright-multi-browser
+  remotes/origin/main

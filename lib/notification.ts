@@ -29,6 +29,8 @@ export type TypeNotification =
   | 'reseau_message_recu'
   | 'reseau_post_commente'
   | 'reseau_post_soutenu'
+  | 'reseau_demande_ami'
+  | 'reseau_amitie_acceptee'
   | 'moderation_me_concerne'
   | 'info_groupe'
   | 'autre';

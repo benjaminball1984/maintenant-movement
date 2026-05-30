@@ -2740,6 +2740,48 @@ export type Database = {
           },
         ];
       };
+      amitie: {
+        Row: {
+          id: string;
+          demandeur_id: string;
+          destinataire_id: string;
+          statut: string;
+          created_at: string;
+          repondu_le: string | null;
+        };
+        Insert: {
+          id?: string;
+          demandeur_id: string;
+          destinataire_id: string;
+          statut?: string;
+          created_at?: string;
+          repondu_le?: string | null;
+        };
+        Update: {
+          id?: string;
+          demandeur_id?: string;
+          destinataire_id?: string;
+          statut?: string;
+          created_at?: string;
+          repondu_le?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'amitie_demandeur_id_fkey';
+            columns: ['demandeur_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'amitie_destinataire_id_fkey';
+            columns: ['destinataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       relation_reseau: {
         Row: {
           created_at: string;
@@ -4004,6 +4046,14 @@ export type Database = {
         Args: { cible: string };
         Returns: boolean;
       };
+      peut_demander_ami: {
+        Args: { cible: string };
+        Returns: boolean;
+      };
+      accepter_amitie: {
+        Args: { amitie_id: string };
+        Returns: boolean;
+      };
       personne_id_par_numero: {
         Args: { numero_cible: string };
         Returns: string;
@@ -4310,6 +4360,7 @@ export type Petition = Omit<RowOf<'petition'>, 'statut'> & {
 export type SignaturePetition = RowOf<'signature_petition'>;
 export type ProfilUnifie = RowOf<'profil_unifie'>;
 export type RelationReseau = RowOf<'relation_reseau'>;
+export type Amitie = RowOf<'amitie'>;
 export type PostReseau = RowOf<'post_reseau'>;
 export type CommentaireReseau = RowOf<'commentaire_reseau'>;
 export type ReactionReseau = RowOf<'reaction_reseau'>;
