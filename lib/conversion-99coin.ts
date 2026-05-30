@@ -6,24 +6,24 @@
  * Mais pour l'affichage des cagnottes mixtes (« 50 € + 100 99-coin »
  * → afficher un total équivalent), on a besoin d'un taux indicatif.
  *
- * Convention V1 : 1 T99CP = 0,10 € (10 centimes). Configurable via
- * env `TAUX_T99CP_EN_CENTIMES` (entier centimes par 99-coin). Défaut
- * 10 si non défini. Pur, testable (le taux est en paramètre).
+ * Parité (décision Lilou/Ben du 30/05/2026) : 1 99-coin (T99CP) = 1 € =
+ * 1 minute, soit 100 centimes par 99-coin. Le taux reste un paramètre pour
+ * rester pur et testable, mais le défaut suit cette parité.
  */
 
-/** Taux par défaut : 1 T99CP = 10 centimes (0,10 €). */
-export const TAUX_PAR_DEFAUT_CENTIMES = 10;
+/** Taux par défaut : 1 99-coin = 100 centimes (1 €), parité 1:1. */
+export const TAUX_PAR_DEFAUT_CENTIMES = 100;
 
 /**
  * Convertit un montant en 99-coin vers son équivalent en centimes
  * d'euros (entier).
  *
  * @param coins - nombre de 99-coin (peut être décimal)
- * @param tauxCentimes - taux 1 coin = X centimes (default 10)
+ * @param tauxCentimes - taux 1 coin = X centimes (default 100, soit 1 €)
  *
- * @example coinsEnCentimes(100) → 1000 (10 €)
- * @example coinsEnCentimes(50.5) → 505 (5,05 €)
- * @example coinsEnCentimes(100, 5) → 500 (taux moitié)
+ * @example coinsEnCentimes(100) → 10000 (100 €)
+ * @example coinsEnCentimes(50.5) → 5050 (50,50 €)
+ * @example coinsEnCentimes(100, 5) → 500 (taux custom)
  */
 export function coinsEnCentimes(
   coins: number,
@@ -36,8 +36,8 @@ export function coinsEnCentimes(
  * Convertit un montant en centimes vers son équivalent en 99-coin
  * (décimal arrondi au 0.01 près).
  *
- * @example centimesEnCoins(1000) → 100
- * @example centimesEnCoins(505) → 50.5
+ * @example centimesEnCoins(1000) → 10
+ * @example centimesEnCoins(505) → 5.05
  */
 export function centimesEnCoins(
   centimes: number,
@@ -55,7 +55,7 @@ export function centimesEnCoins(
  * Polygon. Ici on convertit déjà en nombre de 99-coin (la division par
  * 10^18 se fait en amont, cf. lib/format-t99cp.ts).
  *
- * @example totalCentimes(500, 100) → 1500 (5 € + 100×10 cts = 10 €, total 15 €)
+ * @example totalCentimes(500, 100) → 10500 (5 € + 100 coins = 100 €, total 105 €)
  */
 export function totalCentimes(
   centimesEuros: number,
