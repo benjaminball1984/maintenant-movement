@@ -4,7 +4,9 @@ import { Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteAlaUne } from '@/lib/cagnottes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { getImageObjet } from '@/lib/images';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import Link from 'next/link';
 import { UneSection } from './UneSection';
 
@@ -103,6 +105,20 @@ export async function UneCagnotte() {
         </TexteEditableAdmin>
       </header>
 
+      <Link
+        href={`/mobiliser/cagnottes/${cagnotte.slug}`}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={getImageObjet({ image_url: cagnotte.image_url, type_objet: 'cagnotte' })}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 896px) 100vw, 800px"
+          className="object-cover"
+        />
+      </Link>
+
       <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
           href={`/mobiliser/cagnottes/${cagnotte.slug}`}
@@ -111,6 +127,12 @@ export async function UneCagnotte() {
           {cagnotte.titre}
         </Link>
       </Heading>
+
+      <p className="line-clamp-2 text-sm text-text-2">
+        {cagnotte.texte.length > 200
+          ? `${cagnotte.texte.slice(0, 200).trimEnd()}...`
+          : cagnotte.texte}
+      </p>
 
       <JaugeT99CPEuros
         totalEurosCentimes={cagnotte.total_euros_centimes}

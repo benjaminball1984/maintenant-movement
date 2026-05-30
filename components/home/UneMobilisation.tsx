@@ -2,11 +2,13 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { getImageObjet } from '@/lib/images';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { mobilisationAlaUne } from '@/lib/mobilisations/requetes';
 import { compter } from '@/lib/pluriel';
 import { cn } from '@/lib/utils';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { UneSection } from './UneSection';
 
@@ -115,6 +117,20 @@ export async function UneMobilisation() {
         </TexteEditableAdmin>
       </header>
 
+      <Link
+        href={`/mobiliser/mobilisations/${mobilisation.slug}`}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={getImageObjet({ image_url: mobilisation.image_url, type_objet: 'mobilisation' })}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 896px) 100vw, 800px"
+          className="object-cover"
+        />
+      </Link>
+
       <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
           href={`/mobiliser/mobilisations/${mobilisation.slug}`}
@@ -123,6 +139,12 @@ export async function UneMobilisation() {
           {mobilisation.titre}
         </Link>
       </Heading>
+
+      <p className="line-clamp-2 text-sm text-text-2">
+        {mobilisation.description.length > 200
+          ? `${mobilisation.description.slice(0, 200).trimEnd()}...`
+          : mobilisation.description}
+      </p>
 
       <dl className="grid gap-1 text-sm text-text-2">
         <div className="flex items-start gap-2">

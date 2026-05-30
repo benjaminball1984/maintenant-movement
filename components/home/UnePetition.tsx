@@ -5,8 +5,10 @@ import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { getImageObjet } from '@/lib/images';
 import { petitionAlaUne } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import Link from 'next/link';
 import { UneSection } from './UneSection';
 
@@ -134,6 +136,20 @@ export async function UnePetition() {
         </TexteEditableAdmin>
       </header>
 
+      <Link
+        href={`/mobiliser/petitions/${petition.slug}`}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={getImageObjet({ image_url: petition.image_url, type_objet: 'petition' })}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 896px) 100vw, 800px"
+          className="object-cover"
+        />
+      </Link>
+
       <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
           href={`/mobiliser/petitions/${petition.slug}`}
@@ -154,6 +170,12 @@ export async function UnePetition() {
           {(t) => <>{t}</>}
         </TexteEditableAdmin>{' '}
         <strong className="text-text-2">{petition.destinataire}</strong>
+      </p>
+
+      <p className="line-clamp-2 text-sm text-text-2">
+        {petition.texte.length > 200
+          ? `${petition.texte.slice(0, 200).trimEnd()}...`
+          : petition.texte}
       </p>
 
       <CompteurStretch
