@@ -1,7 +1,9 @@
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { Badge, Card } from '@/components/ui';
 import type { CagnotteEnrichie } from '@/lib/cagnottes/requetes';
+import { getImageObjet } from '@/lib/images';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteCagnotteProps {
@@ -18,12 +20,28 @@ const LIBELLE_TYPE: Record<string, string> = {
 export function CarteCagnotte({ cagnotte, enAvant = false }: CarteCagnotteProps) {
   const accroche = extraireAccroche(cagnotte.texte, 200);
   const estSuspendue = cagnotte.statut === 'suspendue';
+  const lien = `/mobiliser/cagnottes/${cagnotte.slug}`;
+  const imageSrc = getImageObjet({ image_url: cagnotte.image_url, type_objet: 'cagnotte' });
 
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-success/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
           {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}

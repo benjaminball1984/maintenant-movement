@@ -1,8 +1,10 @@
 import { BadgesMonnaies } from '@/components/marche/BadgesMonnaies';
 import { Badge, Card } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import type { MinimarcheSolidaireEnrichi } from '@/lib/marche/requetes';
 import { cn } from '@/lib/utils';
 import { CalendarRange, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteMinimarcheProps {
@@ -28,11 +30,30 @@ export function CarteMinimarche({ minimarche, enAvant = false }: CarteMinimarche
     minimarche.description.length > 180
       ? `${minimarche.description.slice(0, 180).trimEnd()}...`
       : minimarche.description;
+  const lien = `/s-entraider/marche/minimarches/${minimarche.slug}`;
+  const imageSrc = getImageObjet({
+    image_url: minimarche.image_url,
+    type_objet: 'minimarche_solidaire',
+  });
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-accent/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={minimarche.statut === 'en_cours' ? 'success' : 'brand'}>
           {minimarche.statut === 'en_cours'

@@ -1,8 +1,10 @@
 import { Badge, Card } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import { TYPES_MOMENTS } from '@/lib/moments/config';
 import type { MomentSolidaireEnrichi } from '@/lib/moments/requetes';
 import { cn } from '@/lib/utils';
 import { CalendarRange, MapPin, Users } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteMomentProps {
@@ -24,11 +26,28 @@ export function CarteMomentSolidaire({ moment, enAvant = false }: CarteMomentPro
     moment.description.length > 200
       ? `${moment.description.slice(0, 200).trimEnd()}...`
       : moment.description;
+  const lien = `/agir/moments-solidaires/${moment.slug}`;
+  // La table `moment_solidaire` n'a pas de colonne image : visuel par défaut du type.
+  const imageSrc = getImageObjet({ image_url: null, type_objet: 'moment_solidaire' });
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-brand/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={moment.type === 'porte_a_porte' ? 'brand' : 'accent'}>
           {config.libelle}

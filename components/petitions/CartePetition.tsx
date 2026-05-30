@@ -1,7 +1,9 @@
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Card } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import type { PetitionAvecCompteur } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CartePetitionProps {
@@ -27,12 +29,28 @@ interface CartePetitionProps {
 export function CartePetition({ petition, enAvant = false }: CartePetitionProps) {
   const accroche = extraireAccroche(petition.texte, 220);
   const nomCreaturice = formerNomCreaturice(petition.createurice_prenom, petition.createurice_nom);
+  const lien = `/mobiliser/petitions/${petition.slug}`;
+  const imageSrc = getImageObjet({ image_url: petition.image_url, type_objet: 'petition' });
 
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-4', enAvant && 'border-brand/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex flex-col gap-1">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
           Pétition à {petition.destinataire}

@@ -1,8 +1,10 @@
 import { Badge, Card } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import type { MobilisationEnrichie } from '@/lib/mobilisations/requetes';
 import { cn } from '@/lib/utils';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteMobilisationProps {
@@ -18,12 +20,28 @@ interface CarteMobilisationProps {
 export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobilisationProps) {
   const accroche = extraireAccroche(mobilisation.description, 180);
   const relative = formaterRelativeAVenir(mobilisation.date_debut);
+  const lien = `/mobiliser/mobilisations/${mobilisation.slug}`;
+  const imageSrc = getImageObjet({ image_url: mobilisation.image_url, type_objet: 'mobilisation' });
 
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-brand/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex items-center justify-between gap-2">
         <Badge variant="brand">Mobilisation</Badge>
         <span className="text-xs font-bold uppercase tracking-cap text-text-3">{relative}</span>

@@ -1,7 +1,9 @@
 import { Badge, Card } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import type { BoutiqueMarcheEnrichie } from '@/lib/marche/requetes';
 import { cn } from '@/lib/utils';
 import { CalendarRange, MapPin, Store } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteBoutiqueProps {
@@ -31,11 +33,27 @@ export function CarteBoutique({ boutique, enAvant = false }: CarteBoutiqueProps)
     boutique.description.length > 180
       ? `${boutique.description.slice(0, 180).trimEnd()}...`
       : boutique.description;
+  const lien = `/s-entraider/marche/boutiques/${boutique.slug}`;
+  const imageSrc = getImageObjet({ image_url: boutique.image_url, type_objet: 'boutique_marche' });
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-accent/40')}
     >
+      <Link
+        href={lien}
+        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
+      >
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover"
+        />
+      </Link>
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={boutique.sens === 'propose' ? 'brand' : 'info'}>
           {boutique.sens === 'propose' ? 'Boutique' : 'Cherche à co-créer'}

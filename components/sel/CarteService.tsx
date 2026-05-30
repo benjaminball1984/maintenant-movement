@@ -1,7 +1,9 @@
 import { Badge } from '@/components/ui';
+import { getImageObjet } from '@/lib/images';
 import type { ServiceSelEnrichi } from '@/lib/sel/requetes';
 import { cn } from '@/lib/utils';
 import { MapPin, User } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteServiceProps {
@@ -21,6 +23,9 @@ interface CarteServiceProps {
  */
 export function CarteService({ service, enAvant = false }: CarteServiceProps) {
   const lien = `/s-entraider/sel/${service.slug}`;
+  // La table `service_sel` n'a pas de colonne image : on affiche le visuel par
+  // défaut du type (curé par l'admin), pour que la carte ait toujours une image.
+  const imageSrc = getImageObjet({ image_url: null, type_objet: 'service_sel' });
   const auteurNom =
     service.createurice_prenom !== null || service.createurice_nom !== null
       ? [service.createurice_prenom, service.createurice_nom]
@@ -36,6 +41,18 @@ export function CarteService({ service, enAvant = false }: CarteServiceProps) {
         enAvant ? 'border-brand/50 shadow-brand/20 shadow-md' : 'border-border',
       )}
     >
+      {/* Image en hero (B.4 : images sur toutes les cartes). */}
+      <div className="-m-4 mb-3 relative block aspect-[16/9] overflow-hidden bg-surface-2">
+        <Image
+          src={imageSrc}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 100vw, 25vw"
+          className="object-cover"
+        />
+      </div>
+
       {/* Badges en haut. */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <Badge variant={service.categorie === 'service' ? 'brand' : 'accent'}>
