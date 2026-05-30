@@ -34,6 +34,7 @@ const publierSchema = z.object({
     'gt_thematique',
     'groupe_entraide_local',
     'campagne',
+    'organisation',
   ]),
   espaceId: z.string().uuid(),
   texte: z.string().trim().min(5, 'Le message doit faire au moins 5 caractères.').max(5000),

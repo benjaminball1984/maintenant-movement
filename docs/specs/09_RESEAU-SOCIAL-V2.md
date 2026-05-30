@@ -67,19 +67,62 @@ reste**. (Affine l'actuel soi → suivis → reste.)
   moments, sondages, offres d'entraide, services SEL, produits, boutiques.
 - Pseudo de l'auteurice **cliquable → profil réseau** + suivable.
 
-## 7. Organisations + mandat (chantier B — porte droits/gouvernance)
+## 7. Organisations + mandat (chantier B)
 
-- Nouveau **type d'espace « organisation »** (réutilise tout le mécanisme
-  espace : page, abonnement, publications au nom de, appairage).
-- **Création auto** : si une personne lance une pétition (ou tout contenu) en
-  déclarant une organisation initiatrice, une page d'organisation est créée
-  (ou reliée si elle existe).
-- **Anti-usurpation (attestation + officialisation validée)** : la personne
-  déclare le mandat et peut commencer à gérer la page, MAIS le badge
-  « officiel » / la fusion avec une organisation déjà revendiquée passe par une
-  **validation** (admin, ou gestionnaire existant). Cf. décision Lilou/Ben.
-- Gestion de l'espace organisation = rôle de gestionnaire (table
-  d'appartenance avec rôle, à concevoir au chantier B).
+> Arbitré avec Lilou/Ben le 30/05/2026. Décisions ci-dessous = source de vérité.
+
+### 7.0 Principe : « organisation » est un concept ombrelle
+
+Tout collectif est une **organisation** : les espaces internes du mouvement
+(commune libre, fédération, GT, groupe d'entraide) ET les structures externes
+(association, syndicat, ONG, coopérative, entreprise, fondation, mouvement,
+collectif…). **Conceptuellement, tout est organisation.**
+
+**Techniquement, on NE FUSIONNE PAS** (doctrine de greffe §0.3.3 : pas de
+migration lourde du modèle sans décision nominative dédiée). « Organisation »
+devient un **`espace_type` de plus**, à côté des tables existantes (intactes).
+Le mécanisme gestionnaire / badge / mandat est **polymorphe** `(espace_type,
+espace_id)` : il s'applique d'abord aux nouvelles organisations externes, et
+pourra plus tard couvrir les espaces internes sans rien casser.
+
+### 7.1 Taxonomie (type_organisation, liste fermée + « autre »)
+
+`collectif`, `association`, `syndicat`, `mouvement`, `fondation`, `ong`,
+`cooperative`, `entreprise`, `groupe`, `autre`. (Éditable/extensible plus tard.)
+
+### 7.2 Décisions de gouvernance (arbitrées)
+
+- **Badge « officiel » (anti-usurpation) — voie 2** : l'**admin** accorde le
+  PREMIER badge d'une organisation, après vérification. Ensuite, un·e
+  gestionnaire déjà officialisé·e peut **coopter** d'autres gestionnaires sans
+  repasser par l'admin. Tant que le badge n'est pas accordé, la page existe
+  mais reste **non officielle** (gestion provisoire possible).
+- **Droits du·de la gestionnaire — les trois** : (a) **tenir la page**
+  (publier au nom de l'organisation, éditer nom/logo/description, répondre) ;
+  (b) **initier des contenus rattachés** (pétitions, cagnottes, mobilisations
+  affichées comme portées par l'organisation, soumises à la même modération
+  que les autres) ; (c) **gérer les autres gestionnaires** (coopter / retirer).
+- **Revendication concurrente — file d'attente, l'admin tranche** : la première
+  personne attestée gère à titre provisoire ; toute revendication concurrente
+  est mise **en attente** et c'est l'**admin** qui désigne le·la gestionnaire
+  officiel·le. Pas de fusion automatique.
+
+### 7.3 Création
+
+- **Manuelle** : une personne crée une organisation (nom, type, description,
+  logo) et en devient gestionnaire provisoire (avec attestation sur l'honneur).
+- **Auto (à la déclaration d'un contenu initiateur)** : si une personne lance
+  un contenu en déclarant une organisation initiatrice, la page est créée (ou
+  reliée si elle existe). Branché après l'infra (sous-chantier B.4).
+
+### 7.4 Découpage des sous-chantiers B
+
+| Sous-chantier | Contenu |
+|---|---|
+| **B.1** | Table `organisation` (+ `espace_type` 'organisation' dans les CHECK existants), page publique `/organisations/[slug]` suivable + index, création manuelle. |
+| **B.2** | Rôle `gestionnaire_espace` polymorphe + attestation + badge officiel (admin) + cooptation entre gestionnaires + publier/éditer au nom de l'organisation. |
+| **B.3** | File d'attente des revendications concurrentes + console admin d'arbitrage (accorder le badge, désigner le·la gestionnaire). |
+| **B.4** | Contenus rattachés à une organisation (déclaration d'organisation initiatrice + création auto). |
 
 ## 8. Découpage et ordre des chantiers
 

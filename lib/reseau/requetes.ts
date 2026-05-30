@@ -315,6 +315,23 @@ async function chargerAttributionsEspaces(
         }
         break;
       }
+      case 'organisation': {
+        const { data } = await supabase
+          .from('organisation')
+          .select('id, nom, slug, image_url')
+          .in('id', ids);
+        for (const r of data ?? []) {
+          map.set(r.id, {
+            type: 'organisation',
+            id: r.id,
+            nom: r.nom,
+            slug: r.slug,
+            imageUrl: r.image_url,
+            cheminPublic: cheminPublicEspace('organisation', r.slug),
+          });
+        }
+        break;
+      }
     }
   }
   return map;

@@ -2782,6 +2782,56 @@ export type Database = {
           },
         ];
       };
+      organisation: {
+        Row: {
+          id: string;
+          slug: string;
+          nom: string;
+          type_organisation: string;
+          description: string | null;
+          image_url: string | null;
+          badge_officiel: boolean;
+          statut: string;
+          cree_par: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          nom: string;
+          type_organisation?: string;
+          description?: string | null;
+          image_url?: string | null;
+          badge_officiel?: boolean;
+          statut?: string;
+          cree_par?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          nom?: string;
+          type_organisation?: string;
+          description?: string | null;
+          image_url?: string | null;
+          badge_officiel?: boolean;
+          statut?: string;
+          cree_par?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'organisation_cree_par_fkey';
+            columns: ['cree_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       relation_reseau: {
         Row: {
           created_at: string;
@@ -4369,6 +4419,7 @@ export type SignaturePetition = RowOf<'signature_petition'>;
 export type ProfilUnifie = RowOf<'profil_unifie'>;
 export type RelationReseau = RowOf<'relation_reseau'>;
 export type Amitie = RowOf<'amitie'>;
+export type Organisation = RowOf<'organisation'>;
 export type PostReseau = RowOf<'post_reseau'>;
 export type CommentaireReseau = RowOf<'commentaire_reseau'>;
 export type ReactionReseau = RowOf<'reaction_reseau'>;

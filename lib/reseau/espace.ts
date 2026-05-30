@@ -107,6 +107,11 @@ export async function estMembreActifEspace(
     }
     case 'confederation':
       return false; // pas de table d'appartenance V1
+    case 'organisation':
+      // B.1 : l'appartenance d'une organisation = ses gestionnaires. La table
+      // `gestionnaire_espace` est posée au sous-chantier B.2, qui élargira
+      // cette branche. En attendant : refusé (pas de publication au nom de).
+      return false;
   }
   if (error !== null) return false;
   return (count ?? 0) > 0;
@@ -172,5 +177,7 @@ export function cheminPublicEspace(type: TypeEspacePostable, slug: string): stri
       return `/s-entraider/groupes-locaux/${slug}`;
     case 'campagne':
       return `/mobiliser/campagnes/${slug}`;
+    case 'organisation':
+      return `/organisations/${slug}`;
   }
 }

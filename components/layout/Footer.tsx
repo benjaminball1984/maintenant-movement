@@ -39,6 +39,7 @@ const SECTION_EXPLORER = {
     { cle: 'footer.lien.cartes', href: '/cartes', fallback: 'Cartes' },
     { cle: 'footer.lien.decider', href: '/s-informer/decider', fallback: 'Décider (réunions)' },
     { cle: 'footer.lien.journal', href: '/s-informer/journal', fallback: 'Maintenant Médias' },
+    { cle: 'footer.lien.organisations', href: '/organisations', fallback: 'Organisations' },
   ],
 };
 

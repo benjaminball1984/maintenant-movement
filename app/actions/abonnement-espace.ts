@@ -18,6 +18,7 @@ const schema = z.object({
     'gt_thematique',
     'groupe_entraide_local',
     'campagne',
+    'organisation',
   ]),
   espaceId: z.string().uuid(),
   cheminRevalidation: z.string().optional(),

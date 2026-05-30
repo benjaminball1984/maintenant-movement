@@ -17,7 +17,8 @@ export type TypeEspacePostable =
   | 'confederation'
   | 'gt_thematique'
   | 'groupe_entraide_local'
-  | 'campagne';
+  | 'campagne'
+  | 'organisation';
 
 /** Informations d'un espace nécessaires à l'affichage d'un post publié en son nom. */
 export interface AttributionEspace {
