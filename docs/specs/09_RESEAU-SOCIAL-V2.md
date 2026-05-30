@@ -86,9 +86,9 @@ reste**. (Affine l'actuel soi → suivis → reste.)
 | Chantier | Contenu | Risque | État |
 |---|---|---|---|
 | A.1/A.2 | Commentaires polymorphes sur tous les contenus | additif | ✅ FAIT (V2.6.1/2) |
-| **A.2b** | Auteurs/proposeurs **cliquables → profil réseau** (public) sur les fiches | additif | en cours |
-| **C** | Espaces communautaires (communes, fédérations, GT, groupes) **cliquables/suivables** ; pousser le lien réseau à la création | additif | en cours |
-| **D** | Amitié stockée + demandes + messagerie verrouillée + flux re-classé | additif (table + prefs) + 2 comportements ajustés | à faire |
+| **A.2b** | Auteurs/proposeurs **cliquables → profil réseau** (public) sur les fiches | additif | ✅ FAIT (V2.6.3/4/5) |
+| **C** | Espaces communautaires (communes, fédérations, GT, groupes) **cliquables/suivables** ; pousser le lien réseau à la création | additif | ✅ FAIT (V2.6.6) |
+| **D** | Amitié stockée + demandes + messagerie verrouillée + flux re-classé | additif (table + prefs) + 2 comportements ajustés | ✅ FAIT (V2.6.7→11) |
 | **B** | Pages organisation + mandat (attestation + officialisation validée) | porte droits/gouvernance | à concevoir avec Lilou/Ben |
 
 ## 9. Garde-fous
