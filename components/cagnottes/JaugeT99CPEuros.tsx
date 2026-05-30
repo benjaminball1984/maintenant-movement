@@ -47,10 +47,15 @@ export function JaugeT99CPEuros({
     <div className={cn('grid gap-2', className)} data-testid="jauge-cagnotte">
       <div className="flex items-baseline justify-between gap-3">
         <p className={cn('font-bold text-text-1', taille === 'sm' ? 'text-base' : 'text-2xl')}>
+          {/* 1 99-coin = 1 € = 1 minute : on affiche les deux monnaies. */}
           {FORMAT_EURO.format(totalCumuleEuros)}
+          <span className="ml-1 font-normal text-brand">
+            / {FORMAT_NOMBRE.format(Math.round(totalCumuleEuros))} 99-coin
+          </span>
           {objectifEuros > 0 ? (
             <span className="ml-1 text-sm font-normal text-text-3">
-              / {FORMAT_EURO.format(objectifEuros)}
+              sur {FORMAT_EURO.format(objectifEuros)} / {FORMAT_NOMBRE.format(objectifEuros)}{' '}
+              99-coin
             </span>
           ) : null}
         </p>
