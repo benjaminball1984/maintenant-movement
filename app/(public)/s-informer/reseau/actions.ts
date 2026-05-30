@@ -427,11 +427,14 @@ export async function envoyerMessage(donneesBrutes: unknown): Promise<ResultatAc
   const supabase = await getSupabaseServer();
 
   // Chantier D.3 : messagerie verrouillée. Verrou applicatif pour un message
-  // clair (la RLS d'insertion est la barrière réelle).
-  const { data: autorise } = await supabase.rpc('peut_envoyer_message_reseau', {
+  // clair (la RLS d'insertion est la barrière réelle). Dégradation propre :
+  // si la RPC n'existe pas encore (migration pas appliquée au distant), on ne
+  // bloque pas ici et on laisse la RLS décider ; on ne refuse que sur un
+  // refus EXPLICITE (`false`).
+  const { data: autorise, error: errAutorise } = await supabase.rpc('peut_envoyer_message_reseau', {
     destinataire: donnees.destinataire_id,
   });
-  if (autorise !== true) {
+  if (errAutorise === null && autorise === false) {
     return {
       ok: false,
       message:

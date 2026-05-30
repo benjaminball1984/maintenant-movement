@@ -153,8 +153,14 @@ export async function peutEnvoyerMessageA(cibleId: string): Promise<boolean> {
   const session = await getSession();
   if (session === null || session.userId === cibleId) return false;
   const supabase = await getSupabaseServer();
-  const { data } = await supabase.rpc('peut_envoyer_message_reseau', { destinataire: cibleId });
-  return data === true;
+  const { data, error } = await supabase.rpc('peut_envoyer_message_reseau', {
+    destinataire: cibleId,
+  });
+  // Dégradation propre : si la RPC n'existe pas encore au distant, on n'empêche
+  // pas l'affichage du bouton (la RLS reste la barrière). On ne masque que sur
+  // un refus EXPLICITE (`false`).
+  if (error !== null) return true;
+  return data !== false;
 }
 
 /** Compte les demandes d'ami en attente reçues (pour un badge de navigation). */
