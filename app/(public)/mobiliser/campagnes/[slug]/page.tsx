@@ -5,6 +5,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
@@ -109,6 +110,7 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
             <BoutonAdminEditer href="/admin/moderation/campagnes">Admin</BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{campagne.titre}</Heading>
+          <BlocOrganisationPorteuse objetType="campagne" objetId={campagne.id} />
 
           {campagne.image_url !== null ? (
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">

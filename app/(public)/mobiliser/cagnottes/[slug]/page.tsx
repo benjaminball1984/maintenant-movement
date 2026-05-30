@@ -8,6 +8,7 @@ import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
@@ -241,6 +242,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
             </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{cagnotte.titre}</Heading>
+          <BlocOrganisationPorteuse objetType="cagnotte" objetId={cagnotte.id} />
 
           {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur cagnotte. */}
           {estAdmin ? (

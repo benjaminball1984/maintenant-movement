@@ -2782,6 +2782,41 @@ export type Database = {
           },
         ];
       };
+      contenu_organisation: {
+        Row: {
+          id: string;
+          objet_type: string;
+          objet_id: string;
+          organisation_id: string;
+          declare_par: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          objet_type: string;
+          objet_id: string;
+          organisation_id: string;
+          declare_par?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          objet_type?: string;
+          objet_id?: string;
+          organisation_id?: string;
+          declare_par?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'contenu_organisation_organisation_id_fkey';
+            columns: ['organisation_id'];
+            isOneToOne: false;
+            referencedRelation: 'organisation';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       revendication_organisation: {
         Row: {
           id: string;
@@ -4226,6 +4261,14 @@ export type Database = {
         Args: { p_revendication_id: string; p_accepter: boolean };
         Returns: boolean;
       };
+      declarer_contenu_organisation: {
+        Args: { p_objet_type: string; p_objet_id: string; p_org_id: string };
+        Returns: boolean;
+      };
+      retirer_contenu_organisation: {
+        Args: { p_objet_type: string; p_objet_id: string };
+        Returns: boolean;
+      };
       personne_id_par_numero: {
         Args: { numero_cible: string };
         Returns: string;
@@ -4536,6 +4579,7 @@ export type Amitie = RowOf<'amitie'>;
 export type Organisation = RowOf<'organisation'>;
 export type GestionnaireEspace = RowOf<'gestionnaire_espace'>;
 export type RevendicationOrganisation = RowOf<'revendication_organisation'>;
+export type ContenuOrganisation = RowOf<'contenu_organisation'>;
 export type PostReseau = RowOf<'post_reseau'>;
 export type CommentaireReseau = RowOf<'commentaire_reseau'>;
 export type ReactionReseau = RowOf<'reaction_reseau'>;

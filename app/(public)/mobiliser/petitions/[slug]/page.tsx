@@ -3,6 +3,7 @@ import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherAC
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
+import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
@@ -179,6 +180,7 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>Admin</BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{petition.titre}</Heading>
+          <BlocOrganisationPorteuse objetType="petition" objetId={petition.id} />
 
           {/* V2.5.11.b Phase G : bouton admin "Intégrer à une campagne".
               Charge la liste des campagnes publiées côté serveur, passe au

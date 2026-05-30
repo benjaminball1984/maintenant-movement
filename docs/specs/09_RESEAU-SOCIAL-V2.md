@@ -132,7 +132,16 @@ pourra plus tard couvrir les espaces internes sans rien casser.
 | **A.2b** | Auteurs/proposeurs **cliquables → profil réseau** (public) sur les fiches | additif | ✅ FAIT (V2.6.3/4/5) |
 | **C** | Espaces communautaires (communes, fédérations, GT, groupes) **cliquables/suivables** ; pousser le lien réseau à la création | additif | ✅ FAIT (V2.6.6) |
 | **D** | Amitié stockée + demandes + messagerie verrouillée + flux re-classé | additif (table + prefs) + 2 comportements ajustés | ✅ FAIT (V2.6.7→11) |
-| **B** | Pages organisation + mandat (attestation + officialisation validée) | porte droits/gouvernance | à concevoir avec Lilou/Ben |
+| **B** | Pages organisation + mandat (attestation + officialisation validée) | porte droits/gouvernance | ✅ FAIT (V2.6.13→16) |
+
+### 7.5 État de réalisation du chantier B
+
+- **B.1 (V2.6.13)** : table `organisation` + page `/organisations/[slug]` suivable + index + création manuelle. ✅
+- **B.2 (V2.6.14)** : rôle `gestionnaire_espace` polymorphe + attestation + badge officiel (admin) + cooptation (orga officielle) + publier/éditer au nom de + panneau de gestion. ✅
+- **B.3 (V2.6.15)** : revendications concurrentes (file d'attente) + console admin d'arbitrage `/admin/national/organisations`. ✅
+- **B.4 (V2.6.16)** : contenus portés par une organisation (table polymorphe `contenu_organisation`, bloc « Porté par » + rattachement gestionnaire sur pétition/cagnotte/mobilisation/campagne). ✅
+
+**Refinement laissé pour plus tard** (signalé, non bloquant) : la création-auto d'une organisation à la *déclaration au lancement* d'un contenu (§7.3). En l'état, le rattachement se fait après coup par un·e gestionnaire (plus flexible, additif), pas dans les formulaires de création. Les types `sondage` et `moment` sont prévus dans le schéma mais pas encore câblés en UI.
 
 ## 9. Garde-fous
 

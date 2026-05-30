@@ -236,6 +236,69 @@ export async function revendiquerOrganisationAction(
   return { ok: true };
 }
 
+/**
+ * Déclare qu'une organisation (gérée par le lecteur) porte un contenu
+ * (chantier B.4). La RPC vérifie que le lecteur est gestionnaire de l'orga.
+ */
+export async function declarerContenuOrganisationAction(
+  donneesBrutes: unknown,
+): Promise<ResultatSimple> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const o =
+    typeof donneesBrutes === 'object' && donneesBrutes !== null
+      ? (donneesBrutes as { objet_type?: unknown; objet_id?: unknown; org_id?: unknown })
+      : {};
+  if (
+    typeof o.objet_type !== 'string' ||
+    typeof o.objet_id !== 'string' ||
+    typeof o.org_id !== 'string'
+  ) {
+    return { ok: false, message: 'Données invalides.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { data: ok } = await supabase.rpc('declarer_contenu_organisation', {
+    p_objet_type: o.objet_type,
+    p_objet_id: o.objet_id,
+    p_org_id: o.org_id,
+  });
+  if (ok !== true) {
+    return {
+      ok: false,
+      message: 'Rattachement impossible : tu dois être gestionnaire de cette organisation.',
+    };
+  }
+  return { ok: true };
+}
+
+/** Retire le rattachement d'un contenu à son organisation porteuse (B.4). */
+export async function retirerContenuOrganisationAction(
+  donneesBrutes: unknown,
+): Promise<ResultatSimple> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const o =
+    typeof donneesBrutes === 'object' && donneesBrutes !== null
+      ? (donneesBrutes as { objet_type?: unknown; objet_id?: unknown })
+      : {};
+  if (typeof o.objet_type !== 'string' || typeof o.objet_id !== 'string') {
+    return { ok: false, message: 'Données invalides.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { data: ok } = await supabase.rpc('retirer_contenu_organisation', {
+    p_objet_type: o.objet_type,
+    p_objet_id: o.objet_id,
+  });
+  if (ok !== true) {
+    return { ok: false, message: 'Retrait impossible (droits insuffisants).' };
+  }
+  return { ok: true };
+}
+
 /** Admin : accepte (→ gestionnaire) ou refuse une revendication (chantier B.3). */
 export async function traiterRevendicationAction(donneesBrutes: unknown): Promise<ResultatSimple> {
   const session = await getSession();

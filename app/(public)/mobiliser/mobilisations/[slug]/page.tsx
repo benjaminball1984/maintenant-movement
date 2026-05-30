@@ -6,6 +6,7 @@ import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherAC
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
+import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
@@ -170,6 +171,7 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             </div>
           </div>
           <Heading niveau={1}>{mobilisation.titre}</Heading>
+          <BlocOrganisationPorteuse objetType="mobilisation" objetId={mobilisation.id} />
 
           {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur mobilisation. */}
           {estAdmin ? (
