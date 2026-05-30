@@ -1,3 +1,4 @@
+import { choisirALaUne, idEpingleUneHome } from '@/lib/home/une';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Cagnotte, TypeCagnotte } from '@/types/database';
 
@@ -105,6 +106,8 @@ export async function cagnotteAlaUne(): Promise<CagnotteEnrichie | null> {
   // Pour la home : la plus récente cagnotte « lutte » ou « ouverte » publiée.
   // Les cotisations sont des cagnottes permanentes, on ne les met pas en
   // une (elles ont leur propre page d'agir).
+  // V2.6.19 : épinglage admin prioritaire, sinon la plus récente. On charge
+  // les 60 dernières publiées (ouverte/lutte) comme bassin de candidates.
   const supabase = await getSupabaseServer();
   const { data, error } = await supabase
     .from('cagnotte')
@@ -112,10 +115,13 @@ export async function cagnotteAlaUne(): Promise<CagnotteEnrichie | null> {
     .eq('statut', 'publiee')
     .in('type', ['ouverte', 'lutte'])
     .order('created_at', { ascending: false })
-    .limit(1);
+    .limit(60);
   if (error !== null || data === null || data.length === 0) return null;
-  const liste = await hydraterCagnottes(supabase, data as Cagnotte[]);
-  return liste[0] ?? null;
+  const [liste, idEpingle] = await Promise.all([
+    hydraterCagnottes(supabase, data as Cagnotte[]),
+    idEpingleUneHome('cagnotte'),
+  ]);
+  return choisirALaUne(liste, idEpingle, (c) => c.id);
 }
 
 export async function cagnotteParSlug(slug: string): Promise<CagnotteEnrichie | null> {

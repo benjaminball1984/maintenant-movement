@@ -58,7 +58,7 @@ export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
  *
  * Limites :
  *   - titre 5-200 chars (court mais explicite)
- *   - texte 100-5000 chars (argumentaire substantiel)
+ *   - texte 100-10000 chars (argumentaire substantiel)
  *   - destinataire 5-200 chars (institution, élu·e, entreprise...)
  *   - objectif 100 à 1 000 000 signataires (pas de pétition d'1 signature ou trop pharaonique)
  */
@@ -70,7 +70,7 @@ export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
 function champsContenuPetition(messages: MessagesValidationPetition) {
   return {
     titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
-    texte: z.string().trim().min(100, messages.texteMin).max(5000, messages.texteMax),
+    texte: z.string().trim().min(100, messages.texteMin).max(10000, messages.texteMax),
     /** V2.5.53 — version HTML riche optionnelle (sanitizée au save). */
     texte_html: z.string().max(50000).optional().or(z.literal('')),
     destinataire: z

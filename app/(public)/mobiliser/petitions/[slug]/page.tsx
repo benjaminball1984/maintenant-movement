@@ -2,6 +2,7 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
@@ -13,6 +14,7 @@ import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { petitionParSlug } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
@@ -139,6 +141,9 @@ export default async function PagePetition({ params }: PagePetitionProps) {
   // créatrice (RLS) : on adapte le rendu pour qu'elles voient l'état.
   const estPubliee = petition.statut === 'publiee';
 
+  // V2.6.19 : épinglage « à la une » (admin seulement).
+  const estEpingleUne = estAdmin ? (await idEpingleUneHome('petition')) === petition.id : false;
+
   const createuricePrenomAffiche =
     petition.createurice_prenom !== null && petition.createurice_prenom.trim() !== ''
       ? petition.createurice_prenom
@@ -177,7 +182,18 @@ export default async function PagePetition({ params }: PagePetitionProps) {
               </TexteEditableAdmin>{' '}
               <strong className="text-text-2">{petition.destinataire}</strong>
             </p>
-            <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>Admin</BoutonAdminEditer>
+            <span className="flex flex-wrap items-center gap-2">
+              {estAdmin && estPubliee ? (
+                <BoutonMettreALaUne
+                  emplacement="petition"
+                  objetId={petition.id}
+                  estEpingleInitial={estEpingleUne}
+                />
+              ) : null}
+              <BoutonAdminEditer href={`/admin/petitions?id=${petition.id}`}>
+                Admin
+              </BoutonAdminEditer>
+            </span>
           </div>
           <Heading niveau={1}>{petition.titre}</Heading>
           <BlocOrganisationPorteuse objetType="petition" objetId={petition.id} />

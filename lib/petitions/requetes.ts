@@ -1,3 +1,4 @@
+import { choisirALaUne, idEpingleUneHome } from '@/lib/home/une';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Petition } from '@/types/database';
 
@@ -105,8 +106,13 @@ export async function listerPetitionsPubliees(limite = 50): Promise<PetitionAvec
  * Retourne null s'il n'y en a aucune.
  */
 export async function petitionAlaUne(): Promise<PetitionAvecCompteur | null> {
-  const liste = await listerPetitionsPubliees(1);
-  return liste[0] ?? null;
+  // V2.6.19 : l'admin peut épingler une pétition précise ; sinon, la plus
+  // récente. On charge les 60 dernières publiées comme bassin de candidates.
+  const [liste, idEpingle] = await Promise.all([
+    listerPetitionsPubliees(60),
+    idEpingleUneHome('petition'),
+  ]);
+  return choisirALaUne(liste, idEpingle, (p) => p.id);
 }
 
 /**

@@ -5,6 +5,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
@@ -15,6 +16,7 @@ import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
@@ -130,6 +132,9 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
 
   const dejaInscrite = await dejaParticipante(mobilisation.id);
   const estPubliee = mobilisation.statut === 'publiee';
+  const estEpingleUne = estAdmin
+    ? (await idEpingleUneHome('mobilisation')) === mobilisation.id
+    : false;
 
   return (
     <Container taille="md" className="py-12">
@@ -165,6 +170,13 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
               <p className="text-xs font-bold uppercase tracking-cap text-brand">
                 {formaterRelativeAVenir(mobilisation.date_debut)}
               </p>
+              {estAdmin && estPubliee ? (
+                <BoutonMettreALaUne
+                  emplacement="mobilisation"
+                  objetId={mobilisation.id}
+                  estEpingleInitial={estEpingleUne}
+                />
+              ) : null}
               <BoutonAdminEditer href={`/admin/moderation/mobilisations?id=${mobilisation.id}`}>
                 Admin
               </BoutonAdminEditer>

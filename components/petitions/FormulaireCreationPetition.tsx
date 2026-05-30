@@ -45,7 +45,7 @@ const LIBELLES_DEFAUT: LibellesCreationPetition = {
   hintDestinataire: "À qui s'adresse cette pétition (institution, élu·e, entreprise).",
   labelImage: 'Image illustrative (optionnelle)',
   labelTexte: 'Texte de la pétition',
-  placeholderTexte: 'Décris le problème et la demande. Argumente. 100 à 5000 caractères.',
+  placeholderTexte: 'Décris le problème et la demande. Argumente. 100 à 10000 caractères.',
   labelObjectif: 'Objectif chiffré (nombre de signataires)',
   hintObjectif: "Entre 100 et 1 000 000. Au franchissement de 90 %, l'objectif sera étiré ×1,5.",
   ctaSubmit: 'Soumettre pour modération',

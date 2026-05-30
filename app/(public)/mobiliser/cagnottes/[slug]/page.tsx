@@ -8,6 +8,7 @@ import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
@@ -18,6 +19,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -186,6 +188,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
   }
 
   const estPubliee = cagnotte.statut === 'publiee';
+  const estEpingleUne = estAdmin ? (await idEpingleUneHome('cagnotte')) === cagnotte.id : false;
   const peutRecevoirEuros = cagnotte.stripe_account_id !== null;
   const peutRecevoirT99CP = cagnotte.wallet_t99cp !== null;
 
@@ -237,6 +240,13 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
                 </TexteEditableAdmin>
               ) : null}
             </div>
+            {estAdmin && estPubliee ? (
+              <BoutonMettreALaUne
+                emplacement="cagnotte"
+                objetId={cagnotte.id}
+                estEpingleInitial={estEpingleUne}
+              />
+            ) : null}
             <BoutonAdminEditer href={`/admin/moderation/cagnottes?id=${cagnotte.id}`}>
               Admin
             </BoutonAdminEditer>

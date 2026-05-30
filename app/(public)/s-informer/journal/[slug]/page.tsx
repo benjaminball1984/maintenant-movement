@@ -1,11 +1,13 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -63,6 +65,10 @@ export default async function PageEditionJournal({ params }: Props) {
   ]);
   if (e === null) notFound();
 
+  // V2.6.19 : épinglage « à la une » de la home (admin, éditions publiées).
+  const estEpingleUne =
+    estAdmin && e.statut === 'publie' ? (await idEpingleUneHome('article')) === e.id : false;
+
   return (
     <Container taille="md" className="py-12">
       <p className="text-xs font-bold uppercase tracking-cap text-text-3">
@@ -82,7 +88,16 @@ export default async function PageEditionJournal({ params }: Props) {
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <Heading niveau={1}>{e.titre}</Heading>
-        <BoutonAdminEditer href="/admin/national">Admin</BoutonAdminEditer>
+        <span className="flex flex-wrap items-center gap-2">
+          {estAdmin && e.statut === 'publie' ? (
+            <BoutonMettreALaUne
+              emplacement="article"
+              objetId={e.id}
+              estEpingleInitial={estEpingleUne}
+            />
+          ) : null}
+          <BoutonAdminEditer href="/admin/national">Admin</BoutonAdminEditer>
+        </span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

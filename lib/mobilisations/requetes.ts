@@ -1,3 +1,4 @@
+import { choisirALaUne, idEpingleUneHome } from '@/lib/home/une';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Mobilisation } from '@/types/database';
 
@@ -117,8 +118,12 @@ export async function listerMobilisationsPassees(limite = 20): Promise<Mobilisat
  * publiées à venir). Retourne null s'il n'y en a aucune.
  */
 export async function mobilisationAlaUne(): Promise<MobilisationEnrichie | null> {
-  const liste = await listerMobilisationsAVenir(1);
-  return liste[0] ?? null;
+  // V2.6.19 : épinglage admin prioritaire, sinon la plus proche à venir.
+  const [liste, idEpingle] = await Promise.all([
+    listerMobilisationsAVenir(60),
+    idEpingleUneHome('mobilisation'),
+  ]);
+  return choisirALaUne(liste, idEpingle, (m) => m.id);
 }
 
 /**

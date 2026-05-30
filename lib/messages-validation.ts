@@ -130,7 +130,7 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
   titreMin: 'Le titre doit comporter au moins 5 caractères.',
   titreMax: 'Le titre doit faire 200 caractères maximum.',
   texteMin: 'Le texte doit comporter au moins 100 caractères (argumenter clairement).',
-  texteMax: 'Le texte doit faire 5000 caractères maximum.',
+  texteMax: 'Le texte doit faire 10000 caractères maximum.',
   destinataireMin: 'Le destinataire est requis (institution, élu·e, entreprise...).',
   destinataireMax: 'Le destinataire doit faire 200 caractères maximum.',
   imageUrl: "URL d'image invalide.",

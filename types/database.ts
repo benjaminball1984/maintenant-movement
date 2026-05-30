@@ -2782,6 +2782,27 @@ export type Database = {
           },
         ];
       };
+      une_home: {
+        Row: {
+          emplacement: string;
+          objet_id: string;
+          defini_par: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          emplacement: string;
+          objet_id: string;
+          defini_par?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          emplacement?: string;
+          objet_id?: string;
+          defini_par?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       contenu_organisation: {
         Row: {
           id: string;
@@ -4263,6 +4284,14 @@ export type Database = {
       };
       declarer_contenu_organisation: {
         Args: { p_objet_type: string; p_objet_id: string; p_org_id: string };
+        Returns: boolean;
+      };
+      definir_une_home: {
+        Args: { p_emplacement: string; p_objet_id: string };
+        Returns: boolean;
+      };
+      retirer_une_home: {
+        Args: { p_emplacement: string };
         Returns: boolean;
       };
       retirer_contenu_organisation: {
