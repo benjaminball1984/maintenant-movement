@@ -75,3 +75,7 @@ V2/
 # correspondances communes). Jamais commitees (RGPD). Les fichiers restent en
 # local pour alimenter les scripts d'import ; seuls les scripts sont versionnes.
 data-migration/
+
+# Exports ponctuels et doublons (hors depot)
+export-claudeai/
+docs/logo maintenant.png
