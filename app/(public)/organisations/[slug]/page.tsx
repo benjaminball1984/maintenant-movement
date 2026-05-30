@@ -1,8 +1,14 @@
 import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
+import { ComposerPostEspace } from '@/components/reseau/ComposerPostEspace';
 import { FilEspacePublic } from '@/components/reseau/FilEspacePublic';
 import { Badge, Container, Heading } from '@/components/ui';
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import {
+  estGestionnaireOrganisation,
+  listerGestionnairesOrganisation,
+} from '@/lib/organisations/gestion';
 import { organisationParSlug } from '@/lib/organisations/requetes';
 import { LIBELLE_TYPE_ORGANISATION, type TypeOrganisation } from '@/lib/organisations/validation';
 import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
@@ -11,6 +17,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { PanneauGestionOrganisation } from './PanneauGestionOrganisation';
 
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
@@ -49,6 +56,14 @@ export default async function PageDetailOrganisation({ params }: PageDetailProps
   const typeLabel =
     LIBELLE_TYPE_ORGANISATION[organisation.typeOrganisation as TypeOrganisation] ??
     organisation.typeOrganisation;
+
+  // Chantier B.2 : droits de gestion (gestionnaire ou admin).
+  const [estGestionnaire, estAdmin] =
+    session !== null
+      ? await Promise.all([estGestionnaireOrganisation(organisation.id), estAdminCourant()])
+      : [false, false];
+  const peutGerer = estGestionnaire || estAdmin;
+  const gestionnaires = peutGerer ? await listerGestionnairesOrganisation(organisation.id) : [];
 
   return (
     <Container taille="md" className="py-12">
@@ -101,12 +116,38 @@ export default async function PageDetailOrganisation({ params }: PageDetailProps
           ) : null}
         </header>
 
+        {/* B.2 : composer de publication au nom de l'organisation (gestionnaires). */}
+        {peutGerer ? (
+          <ComposerPostEspace
+            espaceType="organisation"
+            espaceId={organisation.id}
+            espaceNom={organisation.nom}
+            cheminRevalidation={`/organisations/${slug}`}
+          />
+        ) : null}
+
         {/* Fil des publications faites au nom de l'organisation. */}
         <FilEspacePublic
           espaceType="organisation"
           espaceId={organisation.id}
           titre={`Publications de ${organisation.nom}`}
         />
+
+        {/* B.2 : panneau de gestion (édition, co-gestionnaires, badge admin). */}
+        {peutGerer ? (
+          <PanneauGestionOrganisation
+            org={{
+              id: organisation.id,
+              nom: organisation.nom,
+              typeOrganisation: organisation.typeOrganisation,
+              description: organisation.description,
+              imageUrl: organisation.imageUrl,
+              badgeOfficiel: organisation.badgeOfficiel,
+            }}
+            gestionnaires={gestionnaires}
+            estAdmin={estAdmin}
+          />
+        ) : null}
       </article>
     </Container>
   );

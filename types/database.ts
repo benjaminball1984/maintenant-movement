@@ -2782,6 +2782,44 @@ export type Database = {
           },
         ];
       };
+      gestionnaire_espace: {
+        Row: {
+          id: string;
+          espace_type: string;
+          espace_id: string;
+          personne_id: string;
+          statut: string;
+          attestation: boolean;
+          cree_le: string;
+        };
+        Insert: {
+          id?: string;
+          espace_type: string;
+          espace_id: string;
+          personne_id: string;
+          statut?: string;
+          attestation?: boolean;
+          cree_le?: string;
+        };
+        Update: {
+          id?: string;
+          espace_type?: string;
+          espace_id?: string;
+          personne_id?: string;
+          statut?: string;
+          attestation?: boolean;
+          cree_le?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'gestionnaire_espace_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       organisation: {
         Row: {
           id: string;
@@ -4112,6 +4150,26 @@ export type Database = {
         Args: { amitie_id: string };
         Returns: boolean;
       };
+      est_gestionnaire_espace: {
+        Args: { p_espace_type: string; p_espace_id: string };
+        Returns: boolean;
+      };
+      bootstrap_gestionnaire_organisation: {
+        Args: { p_org_id: string };
+        Returns: boolean;
+      };
+      coopter_gestionnaire_organisation: {
+        Args: { p_org_id: string; p_personne_cible: string };
+        Returns: boolean;
+      };
+      retirer_gestionnaire: {
+        Args: { p_gestionnaire_id: string };
+        Returns: boolean;
+      };
+      definir_badge_officiel_organisation: {
+        Args: { p_org_id: string; p_officiel: boolean };
+        Returns: boolean;
+      };
       personne_id_par_numero: {
         Args: { numero_cible: string };
         Returns: string;
@@ -4420,6 +4478,7 @@ export type ProfilUnifie = RowOf<'profil_unifie'>;
 export type RelationReseau = RowOf<'relation_reseau'>;
 export type Amitie = RowOf<'amitie'>;
 export type Organisation = RowOf<'organisation'>;
+export type GestionnaireEspace = RowOf<'gestionnaire_espace'>;
 export type PostReseau = RowOf<'post_reseau'>;
 export type CommentaireReseau = RowOf<'commentaire_reseau'>;
 export type ReactionReseau = RowOf<'reaction_reseau'>;

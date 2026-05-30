@@ -107,11 +107,21 @@ export async function estMembreActifEspace(
     }
     case 'confederation':
       return false; // pas de table d'appartenance V1
-    case 'organisation':
-      // B.1 : l'appartenance d'une organisation = ses gestionnaires. La table
-      // `gestionnaire_espace` est posée au sous-chantier B.2, qui élargira
-      // cette branche. En attendant : refusé (pas de publication au nom de).
-      return false;
+    case 'organisation': {
+      // B.2 : « membre actif » d'une organisation = gestionnaire actif. On lit
+      // directement la table (service_role) : un gestionnaire peut publier au
+      // nom de l'organisation.
+      const r = await supabase
+        .from('gestionnaire_espace')
+        .select('*', { count: 'exact', head: true })
+        .eq('espace_type', 'organisation')
+        .eq('espace_id', espaceId)
+        .eq('personne_id', personneId)
+        .eq('statut', 'actif');
+      count = r.count;
+      error = r.error;
+      break;
+    }
   }
   if (error !== null) return false;
   return (count ?? 0) > 0;

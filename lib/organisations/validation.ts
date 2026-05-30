@@ -69,3 +69,31 @@ export const creerOrganisationSchema = z.object({
 });
 
 export type DonneesCreerOrganisation = z.infer<typeof creerOrganisationSchema>;
+
+/** Mise à jour de la page d'une organisation (gestionnaire ou admin). */
+export const mettreAJourOrganisationSchema = z.object({
+  id: z.string().uuid(),
+  nom: z.string().trim().min(2, 'Le nom doit faire au moins 2 caractères.').max(120),
+  type_organisation: z.enum(TYPES_ORGANISATION),
+  description: z.string().trim().max(2000).optional().or(z.literal('')),
+  image_url: z
+    .string()
+    .trim()
+    .url('Le lien de l’image semble invalide.')
+    .max(2048)
+    .optional()
+    .or(z.literal('')),
+});
+
+export type DonneesMettreAJourOrganisation = z.infer<typeof mettreAJourOrganisationSchema>;
+
+/** Cooptation d'un·e gestionnaire par son numéro réseau M+7. */
+export const coopterGestionnaireSchema = z.object({
+  org_id: z.string().uuid(),
+  numero: z
+    .string()
+    .trim()
+    .regex(/^M[A-Z]{7}$/, 'Le numéro réseau doit ressembler à « MABCDEFG ».'),
+});
+
+export type DonneesCoopterGestionnaire = z.infer<typeof coopterGestionnaireSchema>;
