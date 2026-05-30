@@ -5,6 +5,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAppartenanceCampagne } from '@/components/campagnes/BoutonAppartenanceCampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
@@ -13,6 +14,7 @@ import { getSession } from '@/lib/auth/session';
 import { type ModuleResolu, campagneParSlug } from '@/lib/campagnes/requetes';
 import { compterMembresEspace, formaterMembres } from '@/lib/compter-membres';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -123,6 +125,18 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
 
           {session !== null && estPubliee ? (
             <BoutonAppartenanceCampagne campagneId={campagne.id} estMembreInitial={estMembre} />
+          ) : null}
+
+          {/* Chantier C : suivre la campagne dans le réseau social, distinct de
+              l'appartenance (suivre ses publications sans la rejoindre). */}
+          {session !== null && estPubliee ? (
+            <BoutonSuivreEspace
+              espaceType="campagne"
+              espaceId={campagne.id}
+              espaceNom={campagne.titre}
+              jeSuisInitial={await jeSuisCetEspace('campagne', campagne.id)}
+              cheminRevalidation={`/mobiliser/campagnes/${slug}`}
+            />
           ) : null}
         </header>
 

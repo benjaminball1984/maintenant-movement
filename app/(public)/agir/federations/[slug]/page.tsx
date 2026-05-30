@@ -1,12 +1,14 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { federationParSlug } from '@/lib/communes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -139,6 +141,21 @@ export default async function PageDetailFederation({ params }: PageDetailProps) 
           .
         </p>
       </Card>
+
+      {/* Chantier C : suivre la fédération dans le réseau social. Distinct de
+          l'appartenance (une fédération n'a pas d'adhésion personne directe) :
+          on suit ses publications dans son flux réseau. */}
+      {session !== null ? (
+        <div className="mt-4">
+          <BoutonSuivreEspace
+            espaceType="federation"
+            espaceId={federation.id}
+            espaceNom={federation.nom}
+            jeSuisInitial={await jeSuisCetEspace('federation', federation.id)}
+            cheminRevalidation={`/agir/federations/${slug}`}
+          />
+        </div>
+      ) : null}
 
       {/* Fil de discussion de la fédération (cycle V2 §18, V2.2.1 + V2.3.8).
           Visible aux comptes authentifiés en attendant le helper SQL corrigé. */}

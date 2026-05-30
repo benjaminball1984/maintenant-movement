@@ -1,6 +1,7 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
+import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -12,6 +13,7 @@ import {
 } from '@/lib/groupe-entraide-local';
 import { getImageObjet } from '@/lib/images';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import { MapPin, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -171,6 +173,18 @@ export default async function PageDetailGroupeEntraide({ params }: PageDetailPro
             estMembre={estMembre}
             estConnecte={session !== null}
           />
+
+          {/* Chantier C : suivre le groupe dans le réseau social, distinct de
+              l'adhésion (suivre ses publications sans forcément le rejoindre). */}
+          {session !== null ? (
+            <BoutonSuivreEspace
+              espaceType="groupe_entraide_local"
+              espaceId={groupe.id}
+              espaceNom={groupe.nom}
+              jeSuisInitial={await jeSuisCetEspace('groupe_entraide_local', groupe.id)}
+              cheminRevalidation={`/s-entraider/groupes-locaux/${groupe.slug}`}
+            />
+          ) : null}
         </div>
       </header>
 

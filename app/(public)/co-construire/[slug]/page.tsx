@@ -1,10 +1,12 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { FilDeGroupe } from '@/components/fil-groupe/FilDeGroupe';
 import { BoutonAppartenanceGT } from '@/components/gt/BoutonAppartenanceGT';
+import { BoutonSuivreEspace } from '@/components/reseau/BoutonSuivreEspace';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { compterMembresEspace, formaterMembres } from '@/lib/compter-membres';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -118,6 +120,19 @@ export default async function PageGTDetail({ params }: PageDetailProps) {
               pour rejoindre ce GT.
             </Alert>
           )}
+
+          {/* Chantier C : suivre le GT dans le réseau social, indépendamment
+              de l'appartenance (on peut suivre ses publications sans en être
+              membre). */}
+          {session !== null ? (
+            <BoutonSuivreEspace
+              espaceType="gt_thematique"
+              espaceId={gt.id}
+              espaceNom={gt.nom}
+              jeSuisInitial={await jeSuisCetEspace('gt_thematique', gt.id)}
+              cheminRevalidation={`/co-construire/${slug}`}
+            />
+          ) : null}
         </header>
 
         {gt.description !== null ? (
