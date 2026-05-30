@@ -143,6 +143,20 @@ export async function listerDemandesAmiRecues(): Promise<DemandeAmiRecue[]> {
   });
 }
 
+/**
+ * Indique si le lecteur courant peut envoyer un message à `cibleId` (chantier
+ * D.3 : messagerie verrouillée). Vrai si ami·es, si la cible a ouvert sa
+ * messagerie, ou si elle a déjà écrit au lecteur. Sert à afficher (ou non) le
+ * bouton d'envoi ; la RLS reste la barrière réelle côté insertion.
+ */
+export async function peutEnvoyerMessageA(cibleId: string): Promise<boolean> {
+  const session = await getSession();
+  if (session === null || session.userId === cibleId) return false;
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase.rpc('peut_envoyer_message_reseau', { destinataire: cibleId });
+  return data === true;
+}
+
 /** Compte les demandes d'ami en attente reçues (pour un badge de navigation). */
 export async function compterDemandesAmiRecues(): Promise<number> {
   const session = await getSession();

@@ -426,6 +426,19 @@ export async function envoyerMessage(donneesBrutes: unknown): Promise<ResultatAc
   }
   const supabase = await getSupabaseServer();
 
+  // Chantier D.3 : messagerie verrouillée. Verrou applicatif pour un message
+  // clair (la RLS d'insertion est la barrière réelle).
+  const { data: autorise } = await supabase.rpc('peut_envoyer_message_reseau', {
+    destinataire: donnees.destinataire_id,
+  });
+  if (autorise !== true) {
+    return {
+      ok: false,
+      message:
+        'Tu ne peux écrire qu’à tes ami·es (ou aux personnes qui ont ouvert leur messagerie). Demande d’abord cette personne en ami·e.',
+    };
+  }
+
   const { error } = await supabase.from('message_reseau').insert({
     expediteur_id: session.userId,
     destinataire_id: donnees.destinataire_id,

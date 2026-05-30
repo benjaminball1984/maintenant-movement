@@ -6,7 +6,7 @@ import { ModaleMessage } from '@/components/reseau/ModaleMessage';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Button, Container, Heading } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
-import { etatAmitieAvec } from '@/lib/reseau/amitie';
+import { etatAmitieAvec, peutEnvoyerMessageA } from '@/lib/reseau/amitie';
 import { getProfilReseauParNumero, listerPostsDePersonne, nomAffiche } from '@/lib/reseau/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -42,6 +42,9 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
   const posts = await listerPostsDePersonne(profil.personneId);
   // Chantier D.1 : état d'amitié (demande/accept) entre le lecteur et la cible.
   const etatAmitie = connecte && !profil.estMoi ? await etatAmitieAvec(profil.personneId) : null;
+  // Chantier D.3 : la messagerie n'est ouverte qu'aux ami·es (ou cible ouverte).
+  const peutMessage =
+    connecte && !profil.estMoi ? await peutEnvoyerMessageA(profil.personneId) : false;
 
   return (
     <Container taille="md" className="pb-12">
@@ -101,7 +104,9 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
                 {etatAmitie !== null ? (
                   <BoutonAmitie cibleId={profil.personneId} etat={etatAmitie} />
                 ) : null}
-                <ModaleMessage destinataireId={profil.personneId} destinataireNom={nom} />
+                {peutMessage ? (
+                  <ModaleMessage destinataireId={profil.personneId} destinataireNom={nom} />
+                ) : null}
               </>
             ) : (
               <Link href={`/connexion?prochaine=/s-informer/reseau/${profil.numero}`}>

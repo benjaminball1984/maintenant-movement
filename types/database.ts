@@ -4050,6 +4050,10 @@ export type Database = {
         Args: { cible: string };
         Returns: boolean;
       };
+      peut_envoyer_message_reseau: {
+        Args: { destinataire: string };
+        Returns: boolean;
+      };
       accepter_amitie: {
         Args: { amitie_id: string };
         Returns: boolean;
