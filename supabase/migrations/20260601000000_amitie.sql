@@ -72,42 +72,13 @@ where a.suiveur_id < a.suivi_id
 on conflict do nothing;
 
 -- ============================================================
--- RLS
--- ============================================================
-alter table public.amitie enable row level security;
-
--- Lecture : les deux personnes concernées (pour voir ses demandes/amitiés) + admin.
-create policy "amitie_select" on public.amitie for select
-  using (
-    demandeur_id = auth.uid()
-    or destinataire_id = auth.uid()
-    or public.est_admin_general()
-  );
-
--- Insertion : on ne crée une demande qu'en son nom, et seulement si la cible
--- nous suit déjà OU autorise les demandes de n'importe qui (cf. peut_demander_ami).
-create policy "amitie_insert" on public.amitie for insert
-  with check (
-    demandeur_id = auth.uid()
-    and public.peut_demander_ami(destinataire_id)
-  );
-
--- Réponse (accepter/refuser) : seul le destinataire met à jour la demande.
-create policy "amitie_update" on public.amitie for update
-  using (destinataire_id = auth.uid())
-  with check (destinataire_id = auth.uid());
-
--- Retrait : le demandeur annule sa demande, ou l'un·e des deux retire l'amitié.
-create policy "amitie_delete" on public.amitie for delete
-  using (demandeur_id = auth.uid() or destinataire_id = auth.uid());
-
--- ============================================================
 -- Helper : peut-on demander cette personne en ami·e ?
 -- ============================================================
--- Vrai si la cible me suit déjà en retour, OU si elle a activé le réglage
--- « n'importe qui peut me demander en ami » (défaut : non). SECURITY DEFINER
--- pour lire relation_reseau et personne.preferences_visibilite sans buter sur
--- la RLS (la réponse, elle, est juste un booléen).
+-- DÉFINI AVANT la RLS car la policy d'insertion l'utilise (sinon : « function
+-- does not exist »). Vrai si la cible me suit déjà en retour, OU si elle a
+-- activé le réglage « n'importe qui peut me demander en ami » (défaut : non).
+-- SECURITY DEFINER pour lire relation_reseau et personne.preferences_visibilite
+-- sans buter sur la RLS (la réponse, elle, est juste un booléen).
 create or replace function public.peut_demander_ami(cible uuid)
 returns boolean
 language sql
@@ -136,6 +107,41 @@ comment on function public.peut_demander_ami(uuid) is
 
 revoke execute on function public.peut_demander_ami(uuid) from public;
 grant execute on function public.peut_demander_ami(uuid) to authenticated, service_role;
+
+-- ============================================================
+-- RLS (policies idempotentes : drop if exists puis create, pour pouvoir
+-- ré-appliquer la migration sur un état partiel sans « policy already exists »)
+-- ============================================================
+alter table public.amitie enable row level security;
+
+-- Lecture : les deux personnes concernées (pour voir ses demandes/amitiés) + admin.
+drop policy if exists "amitie_select" on public.amitie;
+create policy "amitie_select" on public.amitie for select
+  using (
+    demandeur_id = auth.uid()
+    or destinataire_id = auth.uid()
+    or public.est_admin_general()
+  );
+
+-- Insertion : on ne crée une demande qu'en son nom, et seulement si la cible
+-- nous suit déjà OU autorise les demandes de n'importe qui (cf. peut_demander_ami).
+drop policy if exists "amitie_insert" on public.amitie;
+create policy "amitie_insert" on public.amitie for insert
+  with check (
+    demandeur_id = auth.uid()
+    and public.peut_demander_ami(destinataire_id)
+  );
+
+-- Réponse (accepter/refuser) : seul le destinataire met à jour la demande.
+drop policy if exists "amitie_update" on public.amitie;
+create policy "amitie_update" on public.amitie for update
+  using (destinataire_id = auth.uid())
+  with check (destinataire_id = auth.uid());
+
+-- Retrait : le demandeur annule sa demande, ou l'un·e des deux retire l'amitié.
+drop policy if exists "amitie_delete" on public.amitie;
+create policy "amitie_delete" on public.amitie for delete
+  using (demandeur_id = auth.uid() or destinataire_id = auth.uid());
 
 -- ============================================================
 -- Helper : est_ami_reseau réimplémenté sur la table amitie

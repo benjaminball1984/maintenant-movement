@@ -71,8 +71,11 @@ create trigger organisation_set_updated_at
 -- ============================================================
 alter table public.organisation enable row level security;
 
+-- Policies idempotentes (drop if exists puis create) pour permettre la
+-- ré-application sur un état partiel.
 -- Lecture : pages publiques (statut active). Les pages suspendues ne sont
 -- visibles que de l'admin et de leur créateur·ice.
+drop policy if exists "organisation_select" on public.organisation;
 create policy "organisation_select" on public.organisation for select
   using (
     statut = 'active'
@@ -81,16 +84,19 @@ create policy "organisation_select" on public.organisation for select
   );
 
 -- Création : toute personne connectée crée une organisation en son nom.
+drop policy if exists "organisation_insert" on public.organisation;
 create policy "organisation_insert" on public.organisation for insert
   with check (cree_par = auth.uid());
 
 -- Mise à jour : le·la créateur·ice (gestion provisoire) ou l'admin. La gestion
 -- fine par gestionnaire viendra en B.2 (élargira cette policy).
+drop policy if exists "organisation_update" on public.organisation;
 create policy "organisation_update" on public.organisation for update
   using (cree_par = auth.uid() or public.est_admin_general())
   with check (cree_par = auth.uid() or public.est_admin_general());
 
 -- Suppression : admin seulement (les organisations ont des abonnés/contenus).
+drop policy if exists "organisation_delete" on public.organisation;
 create policy "organisation_delete" on public.organisation for delete
   using (public.est_admin_general());
 
