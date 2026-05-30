@@ -200,3 +200,63 @@ export async function definirBadgeOfficielAction(donneesBrutes: unknown): Promis
   revalidatePath('/organisations');
   return { ok: true };
 }
+
+/**
+ * Revendique la gestion d'une organisation existante (chantier B.3). Crée une
+ * demande en file d'attente, arbitrée par l'admin. La RPC vérifie qu'on n'est
+ * pas déjà gestionnaire et qu'il n'y a pas déjà une demande en attente.
+ */
+export async function revendiquerOrganisationAction(
+  donneesBrutes: unknown,
+): Promise<ResultatSimple> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Tu dois être connecté·e pour revendiquer une organisation.' };
+  }
+  const o =
+    typeof donneesBrutes === 'object' && donneesBrutes !== null
+      ? (donneesBrutes as { org_id?: unknown; message?: unknown })
+      : {};
+  if (typeof o.org_id !== 'string') {
+    return { ok: false, message: 'Organisation invalide.' };
+  }
+  const message = typeof o.message === 'string' ? o.message.slice(0, 1000) : '';
+  const supabase = await getSupabaseServer();
+  const { data: ok } = await supabase.rpc('revendiquer_organisation', {
+    p_org_id: o.org_id,
+    p_message: message,
+  });
+  if (ok !== true) {
+    return {
+      ok: false,
+      message: 'Revendication impossible (déjà gestionnaire, ou organisation introuvable).',
+    };
+  }
+  revalidatePath('/organisations');
+  return { ok: true };
+}
+
+/** Admin : accepte (→ gestionnaire) ou refuse une revendication (chantier B.3). */
+export async function traiterRevendicationAction(donneesBrutes: unknown): Promise<ResultatSimple> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const o =
+    typeof donneesBrutes === 'object' && donneesBrutes !== null
+      ? (donneesBrutes as { revendication_id?: unknown; accepter?: unknown })
+      : {};
+  if (typeof o.revendication_id !== 'string' || typeof o.accepter !== 'boolean') {
+    return { ok: false, message: 'Données invalides.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { data: ok } = await supabase.rpc('traiter_revendication_organisation', {
+    p_revendication_id: o.revendication_id,
+    p_accepter: o.accepter,
+  });
+  if (ok !== true) {
+    return { ok: false, message: 'Action réservée à l’administration.' };
+  }
+  revalidatePath('/admin/national/organisations');
+  return { ok: true };
+}

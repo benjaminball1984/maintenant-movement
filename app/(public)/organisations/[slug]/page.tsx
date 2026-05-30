@@ -10,6 +10,7 @@ import {
   listerGestionnairesOrganisation,
 } from '@/lib/organisations/gestion';
 import { organisationParSlug } from '@/lib/organisations/requetes';
+import { statutRevendicationCourante } from '@/lib/organisations/revendications';
 import { LIBELLE_TYPE_ORGANISATION, type TypeOrganisation } from '@/lib/organisations/validation';
 import { jeSuisCetEspace } from '@/lib/reseau/abonnement';
 import { BadgeCheck } from 'lucide-react';
@@ -17,6 +18,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { BoutonRevendiquer } from './BoutonRevendiquer';
 import { PanneauGestionOrganisation } from './PanneauGestionOrganisation';
 
 interface PageDetailProps {
@@ -64,6 +66,11 @@ export default async function PageDetailOrganisation({ params }: PageDetailProps
       : [false, false];
   const peutGerer = estGestionnaire || estAdmin;
   const gestionnaires = peutGerer ? await listerGestionnairesOrganisation(organisation.id) : [];
+  // B.3 : état de revendication pour une personne connectée non-gestionnaire.
+  const statutRevendication =
+    session !== null && !peutGerer
+      ? await statutRevendicationCourante(organisation.id, estGestionnaire)
+      : 'gestionnaire';
 
   return (
     <Container taille="md" className="py-12">
@@ -113,6 +120,11 @@ export default async function PageDetailOrganisation({ params }: PageDetailProps
               jeSuisInitial={await jeSuisCetEspace('organisation', organisation.id)}
               cheminRevalidation={`/organisations/${slug}`}
             />
+          ) : null}
+
+          {/* B.3 : revendiquer la gestion (connecté·e non-gestionnaire). */}
+          {session !== null && !peutGerer ? (
+            <BoutonRevendiquer orgId={organisation.id} statut={statutRevendication} />
           ) : null}
         </header>
 

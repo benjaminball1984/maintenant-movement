@@ -191,6 +191,13 @@ const MODULES: ReadonlyArray<ModuleAdmin> = [
     href: '/admin/national/groupes-entraide',
   },
   {
+    slug: 'organisations',
+    titre: 'Organisations',
+    description:
+      'Pages d’organisation : accorder le badge officiel, arbitrer les revendications de gestion concurrentes.',
+    href: '/admin/national/organisations',
+  },
+  {
     slug: 'sondages',
     titre: 'Sondages',
     description: 'Liste tous statuts, filtres mode + statut. Export CSV.',

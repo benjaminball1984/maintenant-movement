@@ -2782,6 +2782,54 @@ export type Database = {
           },
         ];
       };
+      revendication_organisation: {
+        Row: {
+          id: string;
+          organisation_id: string;
+          personne_id: string;
+          message: string | null;
+          statut: string;
+          created_at: string;
+          traite_le: string | null;
+          traite_par: string | null;
+        };
+        Insert: {
+          id?: string;
+          organisation_id: string;
+          personne_id: string;
+          message?: string | null;
+          statut?: string;
+          created_at?: string;
+          traite_le?: string | null;
+          traite_par?: string | null;
+        };
+        Update: {
+          id?: string;
+          organisation_id?: string;
+          personne_id?: string;
+          message?: string | null;
+          statut?: string;
+          created_at?: string;
+          traite_le?: string | null;
+          traite_par?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'revendication_organisation_organisation_id_fkey';
+            columns: ['organisation_id'];
+            isOneToOne: false;
+            referencedRelation: 'organisation';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'revendication_organisation_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       gestionnaire_espace: {
         Row: {
           id: string;
@@ -4170,6 +4218,14 @@ export type Database = {
         Args: { p_org_id: string; p_officiel: boolean };
         Returns: boolean;
       };
+      revendiquer_organisation: {
+        Args: { p_org_id: string; p_message: string };
+        Returns: boolean;
+      };
+      traiter_revendication_organisation: {
+        Args: { p_revendication_id: string; p_accepter: boolean };
+        Returns: boolean;
+      };
       personne_id_par_numero: {
         Args: { numero_cible: string };
         Returns: string;
@@ -4479,6 +4535,7 @@ export type RelationReseau = RowOf<'relation_reseau'>;
 export type Amitie = RowOf<'amitie'>;
 export type Organisation = RowOf<'organisation'>;
 export type GestionnaireEspace = RowOf<'gestionnaire_espace'>;
+export type RevendicationOrganisation = RowOf<'revendication_organisation'>;
 export type PostReseau = RowOf<'post_reseau'>;
 export type CommentaireReseau = RowOf<'commentaire_reseau'>;
 export type ReactionReseau = RowOf<'reaction_reseau'>;
