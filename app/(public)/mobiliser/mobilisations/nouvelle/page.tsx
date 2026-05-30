@@ -1,6 +1,7 @@
 import { FormulaireCreationMobilisation } from '@/components/mobilisations/FormulaireCreationMobilisation';
 import { Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { listerOrganisationsGereesPar } from '@/lib/organisations/liaisons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { creerMobilisation } from '../actions';
@@ -18,7 +19,8 @@ export const metadata: Metadata = {
  * `publiee` (modération a posteriori côté équipe Maintenant!).
  */
 export default async function PageCreationMobilisation() {
-  await getSessionOuRediriger('/mobiliser/mobilisations/nouvelle');
+  const session = await getSessionOuRediriger('/mobiliser/mobilisations/nouvelle');
+  const mesOrganisations = await listerOrganisationsGereesPar(session.userId);
 
   return (
     <Container taille="md" className="py-12">
@@ -38,7 +40,10 @@ export default async function PageCreationMobilisation() {
         </p>
       </header>
 
-      <FormulaireCreationMobilisation creerMobilisation={creerMobilisation} />
+      <FormulaireCreationMobilisation
+        creerMobilisation={creerMobilisation}
+        mesOrganisations={mesOrganisations}
+      />
     </Container>
   );
 }

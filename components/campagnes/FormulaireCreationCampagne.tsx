@@ -1,12 +1,19 @@
 'use client';
 
+import { declarerOrganisationInitiatriceAction } from '@/app/actions/organisation';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import {
+  ChampOrganisationInitiatrice,
+  DECLARATION_ORG_DEFAUT,
+  type DeclarationOrgInitiatrice,
+} from '@/components/organisations/ChampOrganisationInitiatrice';
 import { EditeurRicheAvecToolbar } from '@/components/rich-text/EditeurRicheAvecToolbar';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
   type MessagesValidationCampagne,
 } from '@/lib/messages-validation';
+import type { OrganisationGeree } from '@/lib/organisations/liaisons';
 import { markdownLegerEnHtml } from '@/lib/rich-text/markdown-vers-html';
 import { type DonneesCreerCampagne, creerCampagneFactory } from '@/lib/validations/campagne';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,6 +53,8 @@ interface FormulaireCreationCampagneProps {
   creerCampagne: (
     donnees: unknown,
   ) => Promise<{ ok: true; slug: string; campagne_id: string } | { ok: false; message: string }>;
+  /** Organisations gérées par la personne (B.4 : déclarer une orga porteuse). */
+  mesOrganisations?: OrganisationGeree[];
   libelles?: LibellesCreationCampagne;
   messages?: MessagesValidationCampagne;
 }
@@ -61,12 +70,15 @@ interface FormulaireCreationCampagneProps {
  */
 export function FormulaireCreationCampagne({
   creerCampagne,
+  mesOrganisations = [],
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_CAMPAGNE_DEFAUT,
 }: FormulaireCreationCampagneProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [declarationOrg, setDeclarationOrg] =
+    useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
   // V2.5.51 — switch Riche/Markdown pour la presentation.
   const [texteHtml, setTexteHtml] = useState('');
   const [modeTexte, setModeTexte] = useState<'markdown' | 'riche'>('markdown');
@@ -92,12 +104,23 @@ export function FormulaireCreationCampagne({
     setErreur(null);
     setEnvoiEnCours(true);
     const resultat = await creerCampagne(donnees);
-    setEnvoiEnCours(false);
 
     if (!resultat.ok) {
+      setEnvoiEnCours(false);
       setErreur(resultat.message);
       return;
     }
+    if (declarationOrg.mode !== 'aucune') {
+      await declarerOrganisationInitiatriceAction({
+        objet_type: 'campagne',
+        objet_id: resultat.campagne_id,
+        mode: declarationOrg.mode,
+        org_id: declarationOrg.orgId === '' ? undefined : declarationOrg.orgId,
+        nom: declarationOrg.nom === '' ? undefined : declarationOrg.nom,
+        type_organisation: declarationOrg.typeOrganisation,
+      });
+    }
+    setEnvoiEnCours(false);
     router.push(`/mobiliser/campagnes/${resultat.slug}`);
   }
 
@@ -216,6 +239,12 @@ export function FormulaireCreationCampagne({
       {errors.image_url !== undefined ? (
         <p className="-mt-2 text-xs text-danger">{errors.image_url.message}</p>
       ) : null}
+
+      <ChampOrganisationInitiatrice
+        mesOrganisations={mesOrganisations}
+        value={declarationOrg}
+        onChange={setDeclarationOrg}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

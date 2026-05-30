@@ -44,7 +44,7 @@ type ClientSupabase = Awaited<ReturnType<typeof getSupabaseServer>>;
 // ============================================================
 export async function creerCagnotte(
   donneesBrutes: unknown,
-): Promise<ResultatAction<{ slug: string }>> {
+): Promise<ResultatAction<{ slug: string; id: string }>> {
   const parse = creerCagnotteSchema.safeParse(donneesBrutes);
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
@@ -89,27 +89,31 @@ export async function creerCagnotte(
       ? sanitizeRichHtml(donnees.texte_html)
       : null;
 
-  const { error } = await supabase.from('cagnotte').insert({
-    slug,
-    titre: donnees.titre,
-    texte: donnees.texte,
-    texte_html: texteHtmlPropre,
-    type: donnees.type,
-    image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
-    objectif_euros: donnees.objectif_euros,
-    createurice_id: session.userId,
-    wallet_t99cp: wallet,
-    // stripe_account_id reste null jusqu'à KYC ; les dons euros seront
-    // bloqués tant que ce champ n'est pas rempli (cf. faireDonEuros).
-  });
+  const { data: creee, error } = await supabase
+    .from('cagnotte')
+    .insert({
+      slug,
+      titre: donnees.titre,
+      texte: donnees.texte,
+      texte_html: texteHtmlPropre,
+      type: donnees.type,
+      image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
+      objectif_euros: donnees.objectif_euros,
+      createurice_id: session.userId,
+      wallet_t99cp: wallet,
+      // stripe_account_id reste null jusqu'à KYC ; les dons euros seront
+      // bloqués tant que ce champ n'est pas rempli (cf. faireDonEuros).
+    })
+    .select('id')
+    .single();
 
-  if (error !== null) {
-    return { ok: false, message: `Création impossible : ${error.message}` };
+  if (error !== null || creee === null) {
+    return { ok: false, message: `Création impossible : ${error?.message ?? ''}` };
   }
 
   revalidatePath('/mobiliser/cagnottes');
   revalidatePath('/');
-  return { ok: true, slug };
+  return { ok: true, slug, id: creee.id };
 }
 
 // ============================================================

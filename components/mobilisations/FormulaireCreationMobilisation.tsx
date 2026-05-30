@@ -1,11 +1,18 @@
 'use client';
 
+import { declarerOrganisationInitiatriceAction } from '@/app/actions/organisation';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import {
+  ChampOrganisationInitiatrice,
+  DECLARATION_ORG_DEFAUT,
+  type DeclarationOrgInitiatrice,
+} from '@/components/organisations/ChampOrganisationInitiatrice';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
   type MessagesValidationMobilisation,
 } from '@/lib/messages-validation';
+import type { OrganisationGeree } from '@/lib/organisations/liaisons';
 import {
   type DonneesCreerMobilisation,
   creerMobilisationFactory,
@@ -64,7 +71,9 @@ const LIBELLES_DEFAUT: LibellesCreationMobilisation = {
 interface FormulaireCreationMobilisationProps {
   creerMobilisation: (
     donnees: unknown,
-  ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  ) => Promise<{ ok: true; slug: string; id: string } | { ok: false; message: string }>;
+  /** Organisations gérées par la personne (B.4 : déclarer une orga porteuse). */
+  mesOrganisations?: OrganisationGeree[];
   /** Libelles UI surchargeables admin via CMS. */
   libelles?: LibellesCreationMobilisation;
   /** Messages de validation Zod surchargeables admin via CMS. */
@@ -83,12 +92,15 @@ interface FormulaireCreationMobilisationProps {
  */
 export function FormulaireCreationMobilisation({
   creerMobilisation,
+  mesOrganisations = [],
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
 }: FormulaireCreationMobilisationProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [declarationOrg, setDeclarationOrg] =
+    useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
 
   const {
     register,
@@ -114,12 +126,23 @@ export function FormulaireCreationMobilisation({
     setErreur(null);
     setEnvoiEnCours(true);
     const resultat = await creerMobilisation(donnees);
-    setEnvoiEnCours(false);
 
     if (!resultat.ok) {
+      setEnvoiEnCours(false);
       setErreur(resultat.message);
       return;
     }
+    if (declarationOrg.mode !== 'aucune') {
+      await declarerOrganisationInitiatriceAction({
+        objet_type: 'mobilisation',
+        objet_id: resultat.id,
+        mode: declarationOrg.mode,
+        org_id: declarationOrg.orgId === '' ? undefined : declarationOrg.orgId,
+        nom: declarationOrg.nom === '' ? undefined : declarationOrg.nom,
+        type_organisation: declarationOrg.typeOrganisation,
+      });
+    }
+    setEnvoiEnCours(false);
     router.push(`/mobiliser/mobilisations/${resultat.slug}`);
   }
 
@@ -260,6 +283,12 @@ export function FormulaireCreationMobilisation({
       {errors.image_url !== undefined ? (
         <p className="-mt-2 text-xs text-danger">{errors.image_url.message}</p>
       ) : null}
+
+      <ChampOrganisationInitiatrice
+        mesOrganisations={mesOrganisations}
+        value={declarationOrg}
+        onChange={setDeclarationOrg}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

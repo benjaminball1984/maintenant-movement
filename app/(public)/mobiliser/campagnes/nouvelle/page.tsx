@@ -1,6 +1,7 @@
 import { FormulaireCreationCampagne } from '@/components/campagnes/FormulaireCreationCampagne';
 import { Alert, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { listerOrganisationsGereesPar } from '@/lib/organisations/liaisons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { creerCampagne } from '../actions';
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PageCreationCampagne() {
-  await getSessionOuRediriger('/mobiliser/campagnes/nouvelle');
+  const session = await getSessionOuRediriger('/mobiliser/campagnes/nouvelle');
+  const mesOrganisations = await listerOrganisationsGereesPar(session.userId);
 
   return (
     <Container taille="md" className="py-12">
@@ -36,7 +38,10 @@ export default async function PageCreationCampagne() {
       </Alert>
 
       <div className="mt-8">
-        <FormulaireCreationCampagne creerCampagne={creerCampagne} />
+        <FormulaireCreationCampagne
+          creerCampagne={creerCampagne}
+          mesOrganisations={mesOrganisations}
+        />
       </div>
     </Container>
   );

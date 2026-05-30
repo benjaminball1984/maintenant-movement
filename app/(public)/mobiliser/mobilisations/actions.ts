@@ -33,7 +33,7 @@ type ClientSupabase = Awaited<ReturnType<typeof getSupabaseServer>>;
 // ============================================================
 export async function creerMobilisation(
   donneesBrutes: unknown,
-): Promise<ResultatAction<{ slug: string }>> {
+): Promise<ResultatAction<{ slug: string; id: string }>> {
   const parse = creerMobilisationSchema.safeParse(donneesBrutes);
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
@@ -65,29 +65,33 @@ export async function creerMobilisation(
       ? sanitizeRichHtml(donnees.description_html)
       : null;
 
-  const { error } = await supabase.from('mobilisation').insert({
-    slug,
-    titre: donnees.titre,
-    description: donnees.description,
-    description_html: descriptionHtmlPropre,
-    lieu: donnees.lieu,
-    latitude: donnees.latitude ?? null,
-    longitude: donnees.longitude ?? null,
-    image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
-    date_debut: donnees.date_debut,
-    date_fin: dateFin,
-    createurice_id: session.userId,
-    // statut default = 'publiee' (modération a posteriori, cf. migration 014)
-  });
+  const { data: creee, error } = await supabase
+    .from('mobilisation')
+    .insert({
+      slug,
+      titre: donnees.titre,
+      description: donnees.description,
+      description_html: descriptionHtmlPropre,
+      lieu: donnees.lieu,
+      latitude: donnees.latitude ?? null,
+      longitude: donnees.longitude ?? null,
+      image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
+      date_debut: donnees.date_debut,
+      date_fin: dateFin,
+      createurice_id: session.userId,
+      // statut default = 'publiee' (modération a posteriori, cf. migration 014)
+    })
+    .select('id')
+    .single();
 
-  if (error !== null) {
-    return { ok: false, message: `Création impossible : ${error.message}` };
+  if (error !== null || creee === null) {
+    return { ok: false, message: `Création impossible : ${error?.message ?? ''}` };
   }
 
   revalidatePath('/mobiliser/mobilisations');
   revalidatePath('/carte');
   revalidatePath('/');
-  return { ok: true, slug };
+  return { ok: true, slug, id: creee.id };
 }
 
 // ============================================================

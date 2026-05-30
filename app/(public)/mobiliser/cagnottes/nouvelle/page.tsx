@@ -1,6 +1,7 @@
 import { FormulaireCreationCagnotte } from '@/components/cagnottes/FormulaireCreationCagnotte';
 import { Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { listerOrganisationsGereesPar } from '@/lib/organisations/liaisons';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -11,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function PageCreationCagnotte() {
-  await getSessionOuRediriger('/mobiliser/cagnottes/nouvelle');
+  const session = await getSessionOuRediriger('/mobiliser/cagnottes/nouvelle');
   const supabase = await getSupabaseServer();
   const { data: estNational } = await supabase.rpc('est_admin_national');
   const peutCreerCotisation = estNational === true;
+  const mesOrganisations = await listerOrganisationsGereesPar(session.userId);
 
   return (
     <Container taille="md" className="py-12">
@@ -37,6 +39,7 @@ export default async function PageCreationCagnotte() {
       <FormulaireCreationCagnotte
         creerCagnotte={creerCagnotte}
         peutCreerCotisation={peutCreerCotisation}
+        mesOrganisations={mesOrganisations}
       />
     </Container>
   );

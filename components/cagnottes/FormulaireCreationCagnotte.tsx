@@ -1,11 +1,18 @@
 'use client';
 
+import { declarerOrganisationInitiatriceAction } from '@/app/actions/organisation';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import {
+  ChampOrganisationInitiatrice,
+  DECLARATION_ORG_DEFAUT,
+  type DeclarationOrgInitiatrice,
+} from '@/components/organisations/ChampOrganisationInitiatrice';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
   type MessagesValidationCagnotte,
 } from '@/lib/messages-validation';
+import type { OrganisationGeree } from '@/lib/organisations/liaisons';
 import { type DonneesCreerCagnotte, creerCagnotteFactory } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -68,9 +75,11 @@ const LIBELLES_DEFAUT: LibellesCreationCagnotte = {
 interface FormulaireCreationCagnotteProps {
   creerCagnotte: (
     donnees: unknown,
-  ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  ) => Promise<{ ok: true; slug: string; id: string } | { ok: false; message: string }>;
   /** True si la personne connectée peut créer une cotisation (admin national). */
   peutCreerCotisation: boolean;
+  /** Organisations gérées par la personne (B.4 : déclarer une orga porteuse). */
+  mesOrganisations?: OrganisationGeree[];
   libelles?: LibellesCreationCagnotte;
   messages?: MessagesValidationCagnotte;
 }
@@ -78,12 +87,15 @@ interface FormulaireCreationCagnotteProps {
 export function FormulaireCreationCagnotte({
   creerCagnotte,
   peutCreerCotisation,
+  mesOrganisations = [],
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
 }: FormulaireCreationCagnotteProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [declarationOrg, setDeclarationOrg] =
+    useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
 
   const {
     register,
@@ -107,11 +119,22 @@ export function FormulaireCreationCagnotte({
     setErreur(null);
     setEnvoiEnCours(true);
     const resultat = await creerCagnotte(donnees);
-    setEnvoiEnCours(false);
     if (!resultat.ok) {
+      setEnvoiEnCours(false);
       setErreur(resultat.message);
       return;
     }
+    if (declarationOrg.mode !== 'aucune') {
+      await declarerOrganisationInitiatriceAction({
+        objet_type: 'cagnotte',
+        objet_id: resultat.id,
+        mode: declarationOrg.mode,
+        org_id: declarationOrg.orgId === '' ? undefined : declarationOrg.orgId,
+        nom: declarationOrg.nom === '' ? undefined : declarationOrg.nom,
+        type_organisation: declarationOrg.typeOrganisation,
+      });
+    }
+    setEnvoiEnCours(false);
     router.push(`/mobiliser/cagnottes/${resultat.slug}`);
   }
 
@@ -236,6 +259,12 @@ export function FormulaireCreationCagnotte({
       <Alert variant="info" titre={libelles.alertKycTitre}>
         {libelles.alertKycMessage}
       </Alert>
+
+      <ChampOrganisationInitiatrice
+        mesOrganisations={mesOrganisations}
+        value={declarationOrg}
+        onChange={setDeclarationOrg}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
