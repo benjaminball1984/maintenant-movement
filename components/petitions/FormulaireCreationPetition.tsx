@@ -1,11 +1,18 @@
 'use client';
 
+import { declarerOrganisationInitiatriceAction } from '@/app/actions/organisation';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import {
+  ChampOrganisationInitiatrice,
+  DECLARATION_ORG_DEFAUT,
+  type DeclarationOrgInitiatrice,
+} from '@/components/organisations/ChampOrganisationInitiatrice';
 import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_PETITION_DEFAUT,
   type MessagesValidationPetition,
 } from '@/lib/messages-validation';
+import type { OrganisationGeree } from '@/lib/organisations/liaisons';
 import { type DonneesCreerPetition, creerPetitionFactory } from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -53,7 +60,9 @@ interface FormulaireCreationPetitionProps {
    */
   creerPetition: (
     donnees: unknown,
-  ) => Promise<{ ok: true; slug: string } | { ok: false; message: string }>;
+  ) => Promise<{ ok: true; slug: string; id: string } | { ok: false; message: string }>;
+  /** Organisations gérées par la personne (B.4 : déclarer une orga porteuse). */
+  mesOrganisations?: OrganisationGeree[];
   libelles?: LibellesCreationPetition;
   messages?: MessagesValidationPetition;
 }
@@ -74,12 +83,15 @@ interface FormulaireCreationPetitionProps {
  */
 export function FormulaireCreationPetition({
   creerPetition,
+  mesOrganisations = [],
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
 }: FormulaireCreationPetitionProps) {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [declarationOrg, setDeclarationOrg] =
+    useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
 
   const {
     register,
@@ -104,12 +116,27 @@ export function FormulaireCreationPetition({
     setErreur(null);
     setEnvoiEnCours(true);
     const resultat = await creerPetition(donnees);
-    setEnvoiEnCours(false);
 
     if (!resultat.ok) {
+      setEnvoiEnCours(false);
       setErreur(resultat.message);
       return;
     }
+
+    // B.4 §7.3 : déclarer l'organisation initiatrice (best-effort : un échec
+    // n'empêche pas la redirection, le rattachement reste possible après coup).
+    if (declarationOrg.mode !== 'aucune') {
+      await declarerOrganisationInitiatriceAction({
+        objet_type: 'petition',
+        objet_id: resultat.id,
+        mode: declarationOrg.mode,
+        org_id: declarationOrg.orgId === '' ? undefined : declarationOrg.orgId,
+        nom: declarationOrg.nom === '' ? undefined : declarationOrg.nom,
+        type_organisation: declarationOrg.typeOrganisation,
+      });
+    }
+
+    setEnvoiEnCours(false);
     router.push(`/mobiliser/petitions/${resultat.slug}`);
   }
 
@@ -190,6 +217,12 @@ export function FormulaireCreationPetition({
           <p className="mt-1 text-xs text-danger">{errors.objectif.message}</p>
         ) : null}
       </div>
+
+      <ChampOrganisationInitiatrice
+        mesOrganisations={mesOrganisations}
+        value={declarationOrg}
+        onChange={setDeclarationOrg}
+      />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

@@ -41,7 +41,7 @@ type ClientSupabase = Awaited<ReturnType<typeof getSupabaseServer>>;
 // ============================================================
 export async function creerPetition(
   donneesBrutes: unknown,
-): Promise<ResultatAction<{ slug: string }>> {
+): Promise<ResultatAction<{ slug: string; id: string }>> {
   const parse = creerPetitionSchema.safeParse(donneesBrutes);
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
@@ -70,24 +70,28 @@ export async function creerPetition(
       ? sanitizeRichHtml(donnees.texte_html)
       : null;
 
-  const { error } = await supabase.from('petition').insert({
-    slug,
-    titre: donnees.titre,
-    texte: donnees.texte,
-    texte_html: texteHtmlPropre,
-    destinataire: donnees.destinataire,
-    image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
-    objectif: donnees.objectif,
-    createurice_id: session.userId,
-    statut: 'en_moderation',
-  });
+  const { data: creee, error } = await supabase
+    .from('petition')
+    .insert({
+      slug,
+      titre: donnees.titre,
+      texte: donnees.texte,
+      texte_html: texteHtmlPropre,
+      destinataire: donnees.destinataire,
+      image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
+      objectif: donnees.objectif,
+      createurice_id: session.userId,
+      statut: 'en_moderation',
+    })
+    .select('id')
+    .single();
 
-  if (error !== null) {
-    return { ok: false, message: `Création impossible : ${error.message}` };
+  if (error !== null || creee === null) {
+    return { ok: false, message: `Création impossible : ${error?.message ?? ''}` };
   }
 
   revalidatePath('/mobiliser/petitions');
-  return { ok: true, slug };
+  return { ok: true, slug, id: creee.id };
 }
 
 // ============================================================

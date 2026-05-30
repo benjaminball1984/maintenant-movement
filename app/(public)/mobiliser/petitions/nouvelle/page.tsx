@@ -1,6 +1,7 @@
 import { FormulaireCreationPetition } from '@/components/petitions/FormulaireCreationPetition';
 import { Alert, Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { listerOrganisationsGereesPar } from '@/lib/organisations/liaisons';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { creerPetition } from '../actions';
@@ -20,7 +21,9 @@ export const metadata: Metadata = {
  */
 export default async function PageCreationPetition() {
   // Force l'auth ; redirige vers /connexion si besoin.
-  await getSessionOuRediriger('/mobiliser/petitions/nouvelle');
+  const session = await getSessionOuRediriger('/mobiliser/petitions/nouvelle');
+  // B.4 §7.3 : organisations gérées par la personne (pour déclarer une orga porteuse).
+  const mesOrganisations = await listerOrganisationsGereesPar(session.userId);
 
   return (
     <Container taille="md" className="py-12">
@@ -51,7 +54,10 @@ export default async function PageCreationPetition() {
       </Alert>
 
       <div className="mt-8">
-        <FormulaireCreationPetition creerPetition={creerPetition} />
+        <FormulaireCreationPetition
+          creerPetition={creerPetition}
+          mesOrganisations={mesOrganisations}
+        />
       </div>
     </Container>
   );

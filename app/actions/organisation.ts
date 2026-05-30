@@ -1,7 +1,9 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { TYPES_CONTENU_ORGANISATION } from '@/lib/organisations/liaisons';
 import {
+  TYPES_ORGANISATION,
   coopterGestionnaireSchema,
   creerOrganisationSchema,
   mettreAJourOrganisationSchema,
@@ -9,6 +11,7 @@ import {
 import { slugifier, slugifierAvecSuffixeTemps } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 
 type Resultat = { ok: true; slug: string } | { ok: false; message: string };
 type ResultatSimple = { ok: true } | { ok: false; message: string };
@@ -296,6 +299,95 @@ export async function retirerContenuOrganisationAction(
   if (ok !== true) {
     return { ok: false, message: 'Retrait impossible (droits insuffisants).' };
   }
+  return { ok: true };
+}
+
+/**
+ * Déclare l'organisation initiatrice AU MOMENT de créer un contenu (chantier
+ * B.4, refinement §7.3). Trois modes :
+ * - `aucune` : aucun rattachement (no-op).
+ * - `existante` : rattache à une organisation que je gère déjà.
+ * - `nouvelle` : crée l'organisation (j'en deviens gestionnaire) puis rattache.
+ *
+ * À appeler juste après la création du contenu (qui fournit son `objet_id`).
+ * Best-effort : un échec ne casse pas la création du contenu (le rattachement
+ * reste possible après coup via la page du contenu).
+ */
+const declarerInitiatriceSchema = z.object({
+  objet_type: z.enum(TYPES_CONTENU_ORGANISATION),
+  objet_id: z.string().uuid(),
+  mode: z.enum(['aucune', 'existante', 'nouvelle']),
+  org_id: z.string().uuid().optional(),
+  nom: z.string().trim().min(2).max(120).optional(),
+  type_organisation: z.enum(TYPES_ORGANISATION).optional(),
+});
+
+export async function declarerOrganisationInitiatriceAction(
+  donneesBrutes: unknown,
+): Promise<ResultatSimple> {
+  const parse = declarerInitiatriceSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const d = parse.data;
+  if (d.mode === 'aucune') return { ok: true };
+
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message: 'Authentification requise.' };
+  }
+  const supabase = await getSupabaseServer();
+
+  let orgId: string;
+  if (d.mode === 'existante') {
+    if (d.org_id === undefined) {
+      return { ok: false, message: 'Organisation manquante.' };
+    }
+    orgId = d.org_id;
+  } else {
+    // mode 'nouvelle' : on crée l'organisation, le·la créateur·ice devient gestionnaire.
+    if (d.nom === undefined || d.nom.trim() === '') {
+      return { ok: false, message: 'Nom de l’organisation manquant.' };
+    }
+    const slugBase = slugifier(d.nom);
+    const { data: existant } = await supabase
+      .from('organisation')
+      .select('id')
+      .eq('slug', slugBase)
+      .maybeSingle();
+    const slug = existant === null ? slugBase : slugifierAvecSuffixeTemps(d.nom);
+    const { data: orgCreee, error } = await supabase
+      .from('organisation')
+      .insert({
+        slug,
+        nom: d.nom,
+        type_organisation: d.type_organisation ?? 'autre',
+        cree_par: session.userId,
+      })
+      .select('id')
+      .single();
+    if (error !== null || orgCreee === null) {
+      return {
+        ok: false,
+        message: `Création de l’organisation impossible : ${error?.message ?? ''}`,
+      };
+    }
+    await supabase.rpc('bootstrap_gestionnaire_organisation', { p_org_id: orgCreee.id });
+    orgId = orgCreee.id;
+  }
+
+  const { data: ok } = await supabase.rpc('declarer_contenu_organisation', {
+    p_objet_type: d.objet_type,
+    p_objet_id: d.objet_id,
+    p_org_id: orgId,
+  });
+  if (ok !== true) {
+    return {
+      ok: false,
+      message: 'Rattachement impossible : tu dois être gestionnaire de cette organisation.',
+    };
+  }
+  revalidatePath('/organisations');
   return { ok: true };
 }
 
