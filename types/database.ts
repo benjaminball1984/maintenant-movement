@@ -4054,6 +4054,10 @@ export type Database = {
         Args: { destinataire: string };
         Returns: boolean;
       };
+      cercle_amical_reseau: {
+        Args: Record<string, never>;
+        Returns: { personne_id: string; niveau: number }[];
+      };
       accepter_amitie: {
         Args: { amitie_id: string };
         Returns: boolean;

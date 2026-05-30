@@ -51,8 +51,12 @@ export interface PostAffiche {
   nbSoutiens: number;
   nbCommentaires: number;
   jaiSoutenu: boolean;
-  /** Niveau dans le flux transparent : 0 = moi, 1 = suivi·e, 2 = reste. */
-  palier: 0 | 1 | 2;
+  /**
+   * Niveau dans le flux transparent (chantier D.4) :
+   * 0 = moi, 1 = ami·es, 2 = ami·es d'ami·es, 3 = suivi·es (personnes/espaces),
+   * 4 = reste. Plus le palier est bas, plus la publication remonte.
+   */
+  palier: 0 | 1 | 2 | 3 | 4;
   /**
    * V2.5.10 Phase H — si renseigné, le post est publié AU NOM de cet espace.
    * L'affichage met alors l'espace en avant (avatar + nom + lien) et garde
@@ -335,6 +339,10 @@ async function hydraterPosts(
   suivis: Set<string>,
   /** V2.5.22 — espaces suivis (clé "type:id"). Optionnel pour compat. */
   espacesSuivis: Set<string> = new Set(),
+  /** D.4 — ami·es directs (palier 1). */
+  amis: Set<string> = new Set(),
+  /** D.4 — ami·es d'ami·es (palier 2). */
+  amisDamis: Set<string> = new Set(),
 ): Promise<PostAffiche[]> {
   if (posts.length === 0) return [];
   const ids = posts.map((p) => p.id);
@@ -396,8 +404,22 @@ async function hydraterPosts(
         ? `${p.espace_type}:${p.espace_id}`
         : null;
     const espaceEstSuivi = espaceSuiviClef !== null && espacesSuivis.has(espaceSuiviClef);
-    const palier: 0 | 1 | 2 =
-      p.auteurice_id === viewerId ? 0 : suivis.has(p.auteurice_id) || espaceEstSuivi ? 1 : 2;
+    // D.4 — classement affiné : moi → ami·es → ami·es d'ami·es → suivi·es
+    // (personnes ou espaces) → reste. Le test sur l'auteurice prime sur
+    // l'espace (un post d'ami·e reste palier 1 même via un espace suivi).
+    const auteur = p.auteurice_id;
+    let palier: 0 | 1 | 2 | 3 | 4;
+    if (auteur === viewerId) {
+      palier = 0;
+    } else if (amis.has(auteur)) {
+      palier = 1;
+    } else if (amisDamis.has(auteur)) {
+      palier = 2;
+    } else if (suivis.has(auteur) || espaceEstSuivi) {
+      palier = 3;
+    } else {
+      palier = 4;
+    }
     const espacePublieur =
       p.espace_id !== null && p.espace_id !== undefined
         ? (attributionsEspaces.get(p.espace_id) ?? null)
@@ -443,10 +465,31 @@ async function chargerEspacesSuivis(
 }
 
 /**
- * Flux hiérarchisé TRANSPARENT (spec §4E) :
- *   1. mes publications (palier 0)
- *   2. publications des personnes suivies (palier 1)
- *   3. le reste (palier 2)
+ * Charge le cercle amical du lecteur (chantier D.4) via la RPC
+ * `cercle_amical_reseau` (SECURITY DEFINER, car la RLS de `amitie` ne laisse
+ * pas lire l'amitié d'autrui). Retourne deux ensembles : ami·es directs
+ * (niveau 1) et ami·es d'ami·es (niveau 2).
+ */
+async function chargerCercleAmical(
+  supabase: ClientSupabase,
+): Promise<{ amis: Set<string>; amisDamis: Set<string> }> {
+  const { data } = await supabase.rpc('cercle_amical_reseau');
+  const amis = new Set<string>();
+  const amisDamis = new Set<string>();
+  for (const r of data ?? []) {
+    if (r.niveau === 1) amis.add(r.personne_id);
+    else if (r.niveau === 2) amisDamis.add(r.personne_id);
+  }
+  return { amis, amisDamis };
+}
+
+/**
+ * Flux hiérarchisé TRANSPARENT (spec §4E + §5, chantier D.4) :
+ *   0. mes publications
+ *   1. mes ami·es
+ *   2. mes ami·es d'ami·es
+ *   3. les personnes / espaces que je suis
+ *   4. le reste
  * Tri : palier croissant, puis date décroissante. Aucune pondération cachée.
  */
 export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
@@ -464,14 +507,27 @@ export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
   }
 
   const viewerId = session?.userId ?? null;
-  const [suivis, espacesSuivis] =
+  const [suivis, espacesSuivis, cercle] =
     viewerId !== null
       ? await Promise.all([
           chargerSuivis(supabase, viewerId),
           chargerEspacesSuivis(supabase, viewerId),
+          chargerCercleAmical(supabase),
         ])
-      : [new Set<string>(), new Set<string>()];
-  const hydratees = await hydraterPosts(supabase, data, viewerId, suivis, espacesSuivis);
+      : [
+          new Set<string>(),
+          new Set<string>(),
+          { amis: new Set<string>(), amisDamis: new Set<string>() },
+        ];
+  const hydratees = await hydraterPosts(
+    supabase,
+    data,
+    viewerId,
+    suivis,
+    espacesSuivis,
+    cercle.amis,
+    cercle.amisDamis,
+  );
 
   return hydratees.sort((a, b) =>
     a.palier !== b.palier ? a.palier - b.palier : b.createdAt.localeCompare(a.createdAt),

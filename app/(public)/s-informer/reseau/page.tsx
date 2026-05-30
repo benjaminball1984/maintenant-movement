@@ -17,7 +17,7 @@ const FALLBACKS = {
   ctaAmis: 'Demandes d’ami·e',
   alertTriTitre: 'Comment ce flux est trié',
   alertTriCorps:
-    'Ordre strictement transparent : d’abord tes publications, puis celles des personnes que tu suis, puis le reste, du plus récent au plus ancien. Pas de publicité, pas de pondération cachée, pas d’autoplay.',
+    'Ordre strictement transparent : d’abord tes publications, puis celles de tes ami·es, puis de tes ami·es d’ami·es, puis des personnes et espaces que tu suis, puis le reste, du plus récent au plus ancien. Pas de publicité, pas de pondération cachée, pas d’autoplay.',
   financementTexte: 'Ce réseau n’a pas de publicité. Il vit grâce aux cotisations et aux dons.',
   financementCta: 'Soutenir le fonctionnement',
   deconnecteAmorce: 'pour publier, soutenir et commenter.',
