@@ -189,7 +189,7 @@ export function FormulaireEditionPetition({
           type="number"
           inputMode="numeric"
           min={100}
-          max={1_000_000}
+          max={10_000_000}
           step={100}
           {...register('objectif', { valueAsNumber: true })}
         />

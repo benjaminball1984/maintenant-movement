@@ -136,7 +136,7 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
   imageUrl: "URL d'image invalide.",
   objectifEntier: 'L’objectif doit être un nombre entier.',
   objectifMin: 'L’objectif minimum est 100 signataires.',
-  objectifMax: 'L’objectif maximum est 1 000 000 signataires.',
+  objectifMax: 'L’objectif maximum est 10 000 000 signataires.',
   dateFormat: 'Date invalide (format attendu : AAAA-MM-JJ).',
   dateCoherence: "L'échéance ne peut pas précéder la date de lancement.",
   raisonRejetRequise:

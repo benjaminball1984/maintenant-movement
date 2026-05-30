@@ -83,7 +83,7 @@ function champsContenuPetition(messages: MessagesValidationPetition) {
       .number()
       .int(messages.objectifEntier)
       .min(100, messages.objectifMin)
-      .max(1_000_000, messages.objectifMax),
+      .max(10_000_000, messages.objectifMax),
   } as const;
 }
 

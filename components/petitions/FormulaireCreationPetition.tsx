@@ -47,7 +47,7 @@ const LIBELLES_DEFAUT: LibellesCreationPetition = {
   labelTexte: 'Texte de la pétition',
   placeholderTexte: 'Décris le problème et la demande. Argumente. 100 à 10000 caractères.',
   labelObjectif: 'Objectif chiffré (nombre de signataires)',
-  hintObjectif: "Entre 100 et 1 000 000. Au franchissement de 90 %, l'objectif sera étiré ×1,5.",
+  hintObjectif: "Entre 100 et 10 000 000. Au franchissement de 90 %, l'objectif sera étiré ×1,5.",
   ctaSubmit: 'Soumettre pour modération',
   ctaEnCours: 'Envoi en cours...',
 };
@@ -72,10 +72,10 @@ interface FormulaireCreationPetitionProps {
  *
  * Champs (cf. `lib/validations/petition.ts`) :
  *   - titre (5-200)
- *   - texte (100-5000)
+ *   - texte (100-10000)
  *   - destinataire (5-200)
  *   - image_url (optionnel)
- *   - objectif (entier 100-1 000 000)
+ *   - objectif (entier 100-10 000 000)
  *
  * Sur succès, redirige vers la fiche détail. La pétition apparaîtra en
  * attente de modération : la créatrice la voit grâce à la RLS, le reste
@@ -206,7 +206,7 @@ export function FormulaireCreationPetition({
           type="number"
           inputMode="numeric"
           min={100}
-          max={1_000_000}
+          max={10_000_000}
           step={100}
           // valueAsNumber : sans cela RHF renvoie une string et Zod
           // refuse au lieu de coercer.
