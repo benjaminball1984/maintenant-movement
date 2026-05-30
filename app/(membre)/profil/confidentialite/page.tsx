@@ -4,9 +4,15 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getSupabaseServer } from '@/lib/supabase';
-import { type PreferencesVisibilite, preferencesVisibiliteSchema } from '@/lib/validations/profil';
+import {
+  CHAMPS_VISIBILITE,
+  type PreferencesReseau,
+  type PreferencesVisibilite,
+  preferencesVisibiliteSchema,
+} from '@/lib/validations/profil';
 import type { Metadata } from 'next';
 import { BoutonExportZip } from './BoutonExportZip';
+import { FormulaireReseauPrefs } from './FormulaireReseauPrefs';
 import { FormulaireVisibilite } from './FormulaireVisibilite';
 import { SectionDeuxFA } from './SectionDeuxFA';
 import { SectionSuppression } from './SectionSuppression';
@@ -22,6 +28,9 @@ const FALLBACKS = {
   sectionVisibiliteTitre: 'Visibilité par champ',
   sectionVisibiliteHint:
     'Pour chaque information de ton profil, choisis qui peut la voir. Défaut : visible aux membres connecté·es.',
+  sectionReseauTitre: 'Ouverture du réseau social',
+  sectionReseauHint:
+    'Qui peut te contacter sur le réseau. Par défaut, on resserre : seules les personnes que tu suis peuvent te demander en ami·e, et seul·es tes ami·es peuvent t’écrire.',
   sectionExportTitre: 'Export de mes données',
   sectionExportHint:
     'Droit à la portabilité : récupère un ZIP avec ton profil, tes contributions, tes paiements, tes messages, et tes médias. Lien envoyé par mail sous 24h.',
@@ -53,9 +62,21 @@ export default async function PageConfidentialite({
       ? (personne.preferences_visibilite as Record<string, unknown>)
       : {};
   // On ne passe à FormulaireVisibilite que les clés connues (les autres,
-  // comme `notifications`, restent dans le jsonb mais pas dans ce form).
-  const parse = preferencesVisibiliteSchema.safeParse(prefs);
+  // comme `notifications` ou les verrous réseau, restent dans le jsonb mais
+  // pas dans ce form). V2.6.8 : on isole les clés de visibilité AVANT le parse
+  // strict, sinon la présence d'une autre sous-clé faisait échouer tout le
+  // parse et réinitialisait l'affichage du formulaire.
+  const prefsVisibiliteSeules = Object.fromEntries(
+    CHAMPS_VISIBILITE.filter((champ) => champ in prefs).map((champ) => [champ, prefs[champ]]),
+  );
+  const parse = preferencesVisibiliteSchema.safeParse(prefsVisibiliteSeules);
   const valeursInitialesVisibilite: PreferencesVisibilite = parse.success ? parse.data : {};
+
+  // V2.6.8 : verrous d'ouverture du réseau (top-level du jsonb), défaut false.
+  const valeursInitialesReseau: PreferencesReseau = {
+    demande_ami_ouverte: prefs.demande_ami_ouverte === true,
+    messagerie_ouverte: prefs.messagerie_ouverte === true,
+  };
 
   // 2FA : on liste les facteurs TOTP actifs.
   const { data: facteurs } = await supabase.auth.mfa.listFactors();
@@ -70,6 +91,8 @@ export default async function PageConfidentialite({
     intro,
     sectionVisibiliteTitre,
     sectionVisibiliteHint,
+    sectionReseauTitre,
+    sectionReseauHint,
     sectionExportTitre,
     sectionExportHint,
     section2faTitre,
@@ -84,6 +107,12 @@ export default async function PageConfidentialite({
     }),
     lireContenuEditorial('profil.confidentialite.section_visibilite_hint', {
       valeurMd: FALLBACKS.sectionVisibiliteHint,
+    }),
+    lireContenuEditorial('profil.confidentialite.section_reseau_titre', {
+      valeurMd: FALLBACKS.sectionReseauTitre,
+    }),
+    lireContenuEditorial('profil.confidentialite.section_reseau_hint', {
+      valeurMd: FALLBACKS.sectionReseauHint,
     }),
     lireContenuEditorial('profil.confidentialite.section_export_titre', {
       valeurMd: FALLBACKS.sectionExportTitre,
@@ -151,6 +180,33 @@ export default async function PageConfidentialite({
           {(t) => <p className="mb-4 text-sm text-text-2">{t}</p>}
         </TexteEditableAdmin>
         <FormulaireVisibilite valeursInitiales={valeursInitialesVisibilite} />
+      </Card>
+
+      <Card variant="ombre">
+        <TexteEditableAdmin
+          cle="profil.confidentialite.section_reseau_titre"
+          valeurInitiale={sectionReseauTitre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre section ouverture reseau social"
+          longueurMax={40}
+        >
+          {(t) => (
+            <Heading niveau={3} className="mb-4 text-lg">
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="profil.confidentialite.section_reseau_hint"
+          valeurInitiale={sectionReseauHint.valeurMd}
+          estAdmin={estAdmin}
+          libelle="hint section ouverture reseau social"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="mb-4 text-sm text-text-2">{t}</p>}
+        </TexteEditableAdmin>
+        <FormulaireReseauPrefs valeursInitiales={valeursInitialesReseau} />
       </Card>
 
       <Card variant="ombre">

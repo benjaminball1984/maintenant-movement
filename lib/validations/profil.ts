@@ -59,6 +59,36 @@ export const preferencesVisibiliteSchema = z
 export type PreferencesVisibilite = z.infer<typeof preferencesVisibiliteSchema>;
 
 // ============================================================
+// Préférences réseau social (épopée réseau V2, chantier D.2)
+// ============================================================
+
+/**
+ * Deux verrous d'ouverture, stockés au TOP-LEVEL de
+ * `personne.preferences_visibilite` (les helpers SQL `peut_demander_ami` et
+ * `peut_envoyer_message_reseau` les lisent directement à cet emplacement).
+ *
+ * - `demande_ami_ouverte` : si vrai, n'importe qui peut t'envoyer une demande
+ *   d'ami·e (par défaut : seules les personnes que tu suis le peuvent).
+ * - `messagerie_ouverte` : si vrai, n'importe qui peut t'écrire un message
+ *   (par défaut : seul·es tes ami·es le peuvent).
+ *
+ * Défaut des deux : `false` (on resserre par défaut, cf. spec §3 et §4).
+ */
+export const preferencesReseauSchema = z
+  .object({
+    demande_ami_ouverte: z.boolean(),
+    messagerie_ouverte: z.boolean(),
+  })
+  .strict();
+
+export type PreferencesReseau = z.infer<typeof preferencesReseauSchema>;
+
+export const PREFERENCES_RESEAU_DEFAUT: PreferencesReseau = {
+  demande_ami_ouverte: false,
+  messagerie_ouverte: false,
+};
+
+// ============================================================
 // Préférences de notifications (cf. 01_ARCHITECTURE.md §10)
 // ============================================================
 

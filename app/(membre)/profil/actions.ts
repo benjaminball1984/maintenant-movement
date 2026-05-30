@@ -9,10 +9,12 @@ import {
   type DonneesMiseAJourProfil,
   type DonneesVerifierTotp,
   type PreferencesNotifications,
+  type PreferencesReseau,
   type PreferencesVisibilite,
   demanderSuppressionSchema,
   mettreAJourProfilSchema,
   preferencesNotificationsSchema,
+  preferencesReseauSchema,
   preferencesVisibiliteSchema,
   verifierTotpSchema,
 } from '@/lib/validations/profil';
@@ -93,9 +95,62 @@ export async function mettreAJourPreferencesVisibilite(
   const { userId } = await getPersonneOuRediriger('/profil/confidentialite');
   const supabase = await getSupabaseServer();
 
+  // V2.6.8 : on FUSIONNE au lieu d'écraser le jsonb. Sans ça, enregistrer la
+  // visibilité effaçait les autres sous-clés (notifications, verrous réseau).
+  const prefsExistantes = await lirePrefsExistantes(supabase, userId);
   const { error } = await supabase
     .from('personne')
-    .update({ preferences_visibilite: donnees })
+    .update({ preferences_visibilite: { ...prefsExistantes, ...donnees } })
+    .eq('id', userId);
+
+  if (error !== null) {
+    return { ok: false, message: `Sauvegarde impossible : ${error.message}` };
+  }
+
+  revalidatePath('/profil/confidentialite');
+  return { ok: true };
+}
+
+/**
+ * Lit le jsonb `preferences_visibilite` existant d'une personne, ou un objet
+ * vide. Évite d'écraser des sous-clés non gérées par le formulaire courant.
+ */
+async function lirePrefsExistantes(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+  userId: string,
+): Promise<Record<string, unknown>> {
+  const { data: ligne } = await supabase
+    .from('personne')
+    .select('preferences_visibilite')
+    .eq('id', userId)
+    .single();
+  return typeof ligne?.preferences_visibilite === 'object' && ligne.preferences_visibilite !== null
+    ? (ligne.preferences_visibilite as Record<string, unknown>)
+    : {};
+}
+
+// ============================================================
+// Préférences réseau social (verrous demande d'ami / messagerie)
+// ============================================================
+export async function mettreAJourPreferencesReseau(
+  donneesBrutes: unknown,
+): Promise<ResultatAction> {
+  const parse = preferencesReseauSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: PreferencesReseau = parse.data;
+
+  const { userId } = await getPersonneOuRediriger('/profil/confidentialite');
+  const supabase = await getSupabaseServer();
+
+  // Stockage au TOP-LEVEL du jsonb (les helpers SQL `peut_demander_ami` et
+  // `peut_envoyer_message_reseau` lisent ces clés directement). Fusion pour
+  // préserver les sous-clés visibilité / notifications.
+  const prefsExistantes = await lirePrefsExistantes(supabase, userId);
+  const { error } = await supabase
+    .from('personne')
+    .update({ preferences_visibilite: { ...prefsExistantes, ...donnees } })
     .eq('id', userId);
 
   if (error !== null) {
