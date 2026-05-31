@@ -4,6 +4,7 @@ import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { LIBELLE_TYPE_CAGNOTTE } from '@/lib/cagnottes/libelles';
 import { listerCagnottesAVerifier } from '@/lib/cagnottes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import type { Metadata } from 'next';
@@ -11,12 +12,6 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Modération des cagnottes',
-};
-
-const LIBELLE_TYPE: Record<string, string> = {
-  ouverte: 'Cagnotte ouverte',
-  lutte: 'Caisse de lutte',
-  cotisation: 'Cotisation',
 };
 
 /**
@@ -101,7 +96,7 @@ export default async function PageModerationCagnottes() {
                       </Heading>
                       <p className="mt-1 flex flex-wrap items-center gap-2">
                         <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
-                          {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
+                          {LIBELLE_TYPE_CAGNOTTE[cagnotte.type] ?? cagnotte.type}
                         </Badge>
                         {cagnotte.statut === 'suspendue' ? (
                           <Badge variant="warning">Suspendue</Badge>

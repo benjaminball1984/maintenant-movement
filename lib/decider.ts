@@ -241,3 +241,16 @@ export const LIBELLE_STATUT: Record<StatutReunion, string> = {
   terminee: 'Terminée',
   annulee: 'Annulée',
 };
+
+/**
+ * Libellés humains de la visibilité d'une salle Décider (badge).
+ * Centralisé V2.6 polish Q2 : la console admin affichait une forme courte
+ * (« Membres », « Fédéré »), divergente de la page publique et du formulaire
+ * de création qui utilisaient la forme longue. Forme longue retenue comme
+ * canonique (la plus explicite, déjà majoritaire).
+ */
+export const LIBELLE_VISIBILITE_SALLE: Record<string, string> = {
+  membres: 'Membres uniquement',
+  fedeere: 'Périmètre fédéré',
+  public: 'Public (enregistré)',
+};

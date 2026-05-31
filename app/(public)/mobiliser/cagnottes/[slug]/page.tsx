@@ -16,6 +16,7 @@ import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { LIBELLE_TYPE_CAGNOTTE } from '@/lib/cagnottes/libelles';
 import { cagnotteParSlug } from '@/lib/cagnottes/requetes';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -61,12 +62,6 @@ interface PageDetailProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ annule?: string; succes?: string }>;
 }
-
-const LIBELLE_TYPE: Record<string, string> = {
-  ouverte: 'Cagnotte ouverte',
-  lutte: 'Caisse de lutte',
-  cotisation: 'Cotisation',
-};
 
 export async function generateMetadata({ params }: PageDetailProps): Promise<Metadata> {
   const { slug } = await params;
@@ -215,7 +210,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
-                {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
+                {LIBELLE_TYPE_CAGNOTTE[cagnotte.type] ?? cagnotte.type}
               </Badge>
               {cagnotte.statut === 'suspendue' ? (
                 <TexteEditableAdmin
