@@ -580,6 +580,9 @@ export interface MessagesValidationMarche {
   prixEurosEntier: string;
   prixEurosMin: string;
   prixEurosMax: string;
+  fraisPortEntier: string;
+  fraisPortMax: string;
+  fraisPortSansEnvoi: string;
   categorieSlugInvalide: string;
   imageUrl: string;
   lieuRequis: string;
@@ -619,6 +622,9 @@ export const MESSAGES_VALIDATION_MARCHE_DEFAUT: MessagesValidationMarche = {
   prixEurosEntier: 'Le prix doit être un nombre entier de centimes.',
   prixEurosMin: 'Le prix ne peut pas être négatif.',
   prixEurosMax: 'Prix maximum : 1 000 000 € en une transaction.',
+  fraisPortEntier: 'Les frais de port doivent être un nombre entier de centimes.',
+  fraisPortMax: 'Frais de port maximum : 1 000 €.',
+  fraisPortSansEnvoi: 'Pour facturer des frais de port, active la remise par envoi postal.',
   categorieSlugInvalide: 'Slug de catégorie invalide.',
   imageUrl: "URL d'image invalide.",
   lieuRequis: 'Le lieu de retrait est requis.',

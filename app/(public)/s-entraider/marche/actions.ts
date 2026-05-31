@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/lib/auth/session';
+import { portFactureCentimes } from '@/lib/marche/port';
 import { calculerFraisEuros, getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getT99CPService } from '@/lib/t99cp';
@@ -95,6 +96,8 @@ export async function creerProduitMarche(
     longitude: donnees.longitude ?? null,
     remise_main_propre: donnees.remise_main_propre,
     envoi_postal: donnees.envoi_postal,
+    // D5 : frais de port (centimes euros). Forcés à 0 sans envoi postal.
+    frais_port_centimes: donnees.envoi_postal === true ? (donnees.frais_port_centimes ?? 0) : 0,
     vendeureuse_id: session.userId,
   });
 
@@ -325,7 +328,9 @@ export async function acheterProduit(
   const supabase = await getSupabaseServer();
   const { data: produit } = await supabase
     .from('produit_marche')
-    .select('id, slug, titre, mode, statut, prix_euros_centimes, prix_t99cp_unites, vendeureuse_id')
+    .select(
+      'id, slug, titre, mode, statut, prix_euros_centimes, prix_t99cp_unites, vendeureuse_id, frais_port_centimes, remise_main_propre, envoi_postal',
+    )
     .eq('id', donnees.produit_id)
     .maybeSingle();
 
@@ -345,6 +350,15 @@ export async function acheterProduit(
     };
   }
 
+  // D5 : frais de port (helper pur partagé avec le formulaire d'achat). Nul si
+  // la personne n'a pas choisi l'envoi ou si la vendeureuse ne le propose pas
+  // (rétro-compatibilité totale : un produit sans port se comporte comme avant).
+  const portCentimes = portFactureCentimes({
+    modeRemise: donnees.mode_remise,
+    envoiPostal: produit.envoi_postal,
+    fraisPortCentimes: produit.frais_port_centimes,
+  });
+
   if (donnees.monnaie === 'EUR') {
     if (produit.prix_euros_centimes <= 0) {
       return { ok: false, message: 'Ce produit n’a pas de prix en euros.' };
@@ -356,7 +370,10 @@ export async function acheterProduit(
     const stripeAccountId =
       process.env.STRIPE_MARCHE_ACCOUNT_ID ??
       `acct_mock_marche_${produit.vendeureuse_id.slice(0, 8)}`;
+    // Frais plateforme calculés sur le prix du produit seul : pas de
+    // commission Maintenant! sur le port (CDC marché §Commission).
     const fraisCentimes = calculerFraisEuros(produit.prix_euros_centimes);
+    const montantTotalCentimes = produit.prix_euros_centimes + portCentimes;
     const origine = await urlOrigine();
 
     // Réserve immédiatement pour bloquer les double-achats.
@@ -370,14 +387,18 @@ export async function acheterProduit(
       .eq('statut', 'disponible');
 
     const checkout = await getPaymentService().demarrerCheckout({
-      montantTotalCentimes: produit.prix_euros_centimes,
+      montantTotalCentimes,
       devise: 'EUR',
       email: null,
       urlSucces: `${origine}/s-entraider/marche/produits/${produit.slug}?achat=succes`,
       urlAnnulation: `${origine}/s-entraider/marche/produits/${produit.slug}?achat=annule`,
       stripeAccountId,
       fraisPlateformeCentimes: fraisCentimes,
-      metadonnees: { produit_id: produit.id, acheteureuse_id: session.userId },
+      metadonnees: {
+        produit_id: produit.id,
+        acheteureuse_id: session.userId,
+        frais_port_centimes: String(portCentimes),
+      },
     });
 
     return { ok: true, urlRedirection: checkout.urlRedirection };
@@ -409,7 +430,15 @@ export async function acheterProduit(
   if (errUpdate !== null) {
     return { ok: false, message: `Mise à jour impossible : ${errUpdate.message}` };
   }
-  console.info('[acheterProduit T99CP] tx_hash :', donnees.tx_hash);
+  // Le port (s'il s'applique) se règle en POL au taux du moment, hors de cette
+  // transaction T99CP (CDC marché §Frais de port). On le journalise pour la
+  // réconciliation Polygon à venir ; le montant du jeton reste le prix seul.
+  console.info(
+    '[acheterProduit T99CP] tx_hash :',
+    donnees.tx_hash,
+    '| port (centimes euros, à régler en POL) :',
+    portCentimes,
+  );
 
   revalidatePath(`/s-entraider/marche/produits/${produit.slug}`);
   return { ok: true };

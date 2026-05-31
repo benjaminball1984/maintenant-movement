@@ -39,6 +39,8 @@ export interface LibellesCreationProduit {
   legendeRetrait: string;
   retraitMainPropre: string;
   retraitEnvoiPostal: string;
+  labelFraisPort: string;
+  hintFraisPort: string;
   labelImage: string;
   ctaSubmit: string;
   ctaEnCours: string;
@@ -67,6 +69,9 @@ const LIBELLES_DEFAUT: LibellesCreationProduit = {
   legendeRetrait: 'Modes de retrait acceptés',
   retraitMainPropre: 'Main propre (rencontre physique)',
   retraitEnvoiPostal: 'Envoi postal (port à la charge acheteureuse)',
+  labelFraisPort: 'Frais de port en euros (centimes)',
+  hintFraisPort:
+    'Saisir en centimes : 600 = 6 €. Facturés en sus du prix si la personne acheteuse choisit l’envoi. Pour un achat en 99-coin, ce montant est réglé en POL (Polygon) au taux du moment.',
   labelImage: 'Image illustrative (optionnelle)',
   ctaSubmit: 'Publier le produit',
   ctaEnCours: 'Publication...',
@@ -117,21 +122,26 @@ export function FormulaireCreationProduit({
       longitude: null,
       remise_main_propre: true,
       envoi_postal: false,
+      frais_port_centimes: 0,
       token_turnstile: '',
     },
   });
 
   const mode = watch('mode');
+  const envoiPostal = watch('envoi_postal');
 
   async function onSubmit(donnees: DonneesCreerProduitMarche) {
     setErreur(null);
     setEnvoiEnCours(true);
     // Si le mode est `don`, on s'assure que les prix sont à 0 avant
     // envoi (l'UI le force, mais une double sécurité ne coûte rien).
-    const a_envoyer: DonneesCreerProduitMarche =
-      donnees.mode === 'don'
-        ? { ...donnees, prix_euros_centimes: 0, prix_t99cp_unites: '0' }
-        : donnees;
+    // De même, des frais de port sans envoi postal n'ont pas de sens : on
+    // les remet à 0 (le champ est masqué si l'envoi n'est pas coché).
+    const a_envoyer: DonneesCreerProduitMarche = {
+      ...donnees,
+      ...(donnees.mode === 'don' ? { prix_euros_centimes: 0, prix_t99cp_unites: '0' } : {}),
+      frais_port_centimes: donnees.envoi_postal === true ? (donnees.frais_port_centimes ?? 0) : 0,
+    };
     const resultat = await creerProduitMarche(a_envoyer);
     setEnvoiEnCours(false);
     if (!resultat.ok) {
@@ -268,6 +278,27 @@ export function FormulaireCreationProduit({
           <p className="mt-1 text-xs text-danger">{errors.remise_main_propre.message}</p>
         ) : null}
       </fieldset>
+
+      {/* Frais de port : visibles uniquement si l'envoi postal est proposé (D5). */}
+      {envoiPostal === true ? (
+        <div>
+          <Label htmlFor="marche-frais-port">{libelles.labelFraisPort}</Label>
+          <Input
+            id="marche-frais-port"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100_000}
+            step={50}
+            className="w-full sm:max-w-[220px]"
+            {...register('frais_port_centimes', { valueAsNumber: true })}
+          />
+          <p className="mt-1 text-xs text-text-3">{libelles.hintFraisPort}</p>
+          {errors.frais_port_centimes !== undefined ? (
+            <p className="mt-1 text-xs text-danger">{errors.frais_port_centimes.message}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <ChampImageObjet
         name="image_url"

@@ -2243,6 +2243,7 @@ export type Database = {
           derniere_activite_le: string;
           description: string;
           envoi_postal: boolean;
+          frais_port_centimes: number;
           id: string;
           image_url: string | null;
           latitude: number | null;
@@ -2264,6 +2265,7 @@ export type Database = {
           derniere_activite_le?: string;
           description: string;
           envoi_postal?: boolean;
+          frais_port_centimes?: number;
           id?: string;
           image_url?: string | null;
           latitude?: number | null;
@@ -2285,6 +2287,7 @@ export type Database = {
           derniere_activite_le?: string;
           description?: string;
           envoi_postal?: boolean;
+          frais_port_centimes?: number;
           id?: string;
           image_url?: string | null;
           latitude?: number | null;

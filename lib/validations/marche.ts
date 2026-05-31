@@ -54,64 +54,83 @@ function refineGeo<T extends { latitude?: number | null; longitude?: number | nu
 export function creerProduitMarcheFactory(
   messages: MessagesValidationMarche = MESSAGES_VALIDATION_MARCHE_DEFAUT,
 ) {
-  return z
-    .object({
-      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
-      description: z
-        .string()
-        .trim()
-        .min(30, messages.descriptionMin)
-        .max(3000, messages.descriptionMax),
-      mode: z.enum(['vente', 'don']),
-      prix_euros_centimes: z
-        .number()
-        .int(messages.prixEurosEntier)
-        .min(0, messages.prixEurosMin)
-        .max(1_000_000_00, messages.prixEurosMax),
-      prix_t99cp_unites: prixT99CPFactory(messages),
-      categorie_slug: z
-        .string()
-        .trim()
-        .max(60)
-        .regex(/^[a-z0-9-]+$/, messages.categorieSlugInvalide)
-        .optional()
-        .or(z.literal('')),
-      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
-      lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
-      latitude: z.number().min(-90).max(90).nullable().optional(),
-      longitude: z.number().min(-180).max(180).nullable().optional(),
-      remise_main_propre: z.boolean(),
-      envoi_postal: z.boolean(),
-      token_turnstile: z.string().min(1, messages.turnstileRequis),
-    })
-    .strict()
-    .refine(refineGeo, {
-      message: messages.latLngEnsemble,
-      path: ['latitude'],
-    })
-    .refine((d) => d.remise_main_propre === true || d.envoi_postal === true, {
-      message: messages.retraitChoix,
-      path: ['remise_main_propre'],
-    })
-    .refine(
-      (d) => {
-        if (d.mode === 'don') {
-          return d.prix_euros_centimes === 0 && d.prix_t99cp_unites === '0';
-        }
-        const aEur = d.prix_euros_centimes > 0;
-        let aT99CP = false;
-        try {
-          aT99CP = BigInt(d.prix_t99cp_unites) > 0n;
-        } catch {
-          aT99CP = false;
-        }
-        return aEur || aT99CP;
-      },
-      {
-        message: messages.modeCoherent,
-        path: ['prix_euros_centimes'],
-      },
-    );
+  return (
+    z
+      .object({
+        titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+        description: z
+          .string()
+          .trim()
+          .min(30, messages.descriptionMin)
+          .max(3000, messages.descriptionMax),
+        mode: z.enum(['vente', 'don']),
+        prix_euros_centimes: z
+          .number()
+          .int(messages.prixEurosEntier)
+          .min(0, messages.prixEurosMin)
+          .max(1_000_000_00, messages.prixEurosMax),
+        prix_t99cp_unites: prixT99CPFactory(messages),
+        // Frais de port en euros (centimes), fixés par la vendeureuse (D5, cf.
+        // CDC marché §"Frais de port"). 0 = pas de frais. Optionnel : un produit
+        // créé sans ce champ garde un port nul (rétro-compatibilité totale).
+        // `.optional()` sans `.default()` : on évite la divergence input/output
+        // de Zod (RHF type le formulaire sur l'entrée). L'absence vaut 0, gérée
+        // par `?? 0` côté action et refine.
+        frais_port_centimes: z
+          .number()
+          .int(messages.fraisPortEntier)
+          .min(0, messages.fraisPortEntier)
+          .max(100_000, messages.fraisPortMax)
+          .optional(),
+        categorie_slug: z
+          .string()
+          .trim()
+          .max(60)
+          .regex(/^[a-z0-9-]+$/, messages.categorieSlugInvalide)
+          .optional()
+          .or(z.literal('')),
+        image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+        lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
+        latitude: z.number().min(-90).max(90).nullable().optional(),
+        longitude: z.number().min(-180).max(180).nullable().optional(),
+        remise_main_propre: z.boolean(),
+        envoi_postal: z.boolean(),
+        token_turnstile: z.string().min(1, messages.turnstileRequis),
+      })
+      .strict()
+      .refine(refineGeo, {
+        message: messages.latLngEnsemble,
+        path: ['latitude'],
+      })
+      .refine((d) => d.remise_main_propre === true || d.envoi_postal === true, {
+        message: messages.retraitChoix,
+        path: ['remise_main_propre'],
+      })
+      // D5 : des frais de port ne sont facturables que si l'envoi postal est proposé.
+      .refine((d) => (d.frais_port_centimes ?? 0) === 0 || d.envoi_postal === true, {
+        message: messages.fraisPortSansEnvoi,
+        path: ['frais_port_centimes'],
+      })
+      .refine(
+        (d) => {
+          if (d.mode === 'don') {
+            return d.prix_euros_centimes === 0 && d.prix_t99cp_unites === '0';
+          }
+          const aEur = d.prix_euros_centimes > 0;
+          let aT99CP = false;
+          try {
+            aT99CP = BigInt(d.prix_t99cp_unites) > 0n;
+          } catch {
+            aT99CP = false;
+          }
+          return aEur || aT99CP;
+        },
+        {
+          message: messages.modeCoherent,
+          path: ['prix_euros_centimes'],
+        },
+      )
+  );
 }
 export const creerProduitMarcheSchema = creerProduitMarcheFactory();
 
@@ -307,6 +326,10 @@ export function creerAcheterProduitSchema(
     .object({
       produit_id: z.string().uuid(),
       monnaie: z.enum(['EUR', 'T99CP']),
+      // D5 : mode de remise choisi par la personne acheteuse. 'envoi' ajoute
+      // les frais de port. Optionnel (absence = pas de port, comme avant) :
+      // le formulaire envoie toujours la valeur calculée explicitement.
+      mode_remise: z.enum(['main_propre', 'envoi']).optional(),
       tx_hash: z
         .string()
         .regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat)

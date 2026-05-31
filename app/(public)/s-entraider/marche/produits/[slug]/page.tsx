@@ -10,6 +10,7 @@ import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterEuros } from '@/lib/marche/config';
 import { listerNotationsProduit, produitParSlug } from '@/lib/marche/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { MapPin, Package, Truck } from 'lucide-react';
@@ -38,6 +39,7 @@ const FALLBACKS = {
   sectionNotations: 'Notations',
   acheteureuseFallback: 'Acheteureuse',
   footerAmorce: 'Publié par',
+  labelFraisPort: 'Frais de port',
 };
 
 interface PageDetailProps {
@@ -94,6 +96,7 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
     sectionNotations,
     acheteureuseFallback,
     footerAmorce,
+    labelFraisPort,
   ] = await Promise.all([
     getSession(),
     listerNotationsProduit(produit.id),
@@ -130,6 +133,9 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
       valeurMd: FALLBACKS.acheteureuseFallback,
     }),
     lireContenuEditorial('produit.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
+    lireContenuEditorial('produit.fiche.label_frais_port', {
+      valeurMd: FALLBACKS.labelFraisPort,
+    }),
   ]);
 
   const statutLibelles: Record<string, string> = {
@@ -228,6 +234,12 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
                   </span>
                 ) : null}
               </p>
+              {/* D5 : frais de port affichés quand l'envoi a un coût fixé. */}
+              {produit.envoi_postal && produit.frais_port_centimes > 0 ? (
+                <p className="mt-1 text-xs text-text-2">
+                  {labelFraisPort.valeurMd} : {formaterEuros(produit.frais_port_centimes)}
+                </p>
+              ) : null}
             </div>
           </div>
         </Card>
@@ -270,6 +282,9 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
               produitId={produit.id}
               prixEurosCentimes={produit.prix_euros_centimes}
               prixT99CPUnites={produit.prix_t99cp_unites}
+              fraisPortCentimes={produit.frais_port_centimes}
+              remiseMainPropre={produit.remise_main_propre}
+              envoiPostal={produit.envoi_postal}
               acheterProduit={acheterProduit}
             />
           </Card>
