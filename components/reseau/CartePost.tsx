@@ -229,6 +229,7 @@ export function CartePost({
                 value={nouveauCommentaire}
                 onChange={(e) => setNouveauCommentaire(e.target.value)}
                 placeholder="Écrire un commentaire..."
+                aria-label="Écrire un commentaire"
                 maxLength={2000}
               />
               <div className="flex justify-end">

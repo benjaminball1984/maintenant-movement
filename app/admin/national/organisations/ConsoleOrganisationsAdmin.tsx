@@ -73,6 +73,7 @@ export function ConsoleOrganisationsAdmin({ revendications, organisations }: Pro
                       <Button
                         taille="sm"
                         disabled={enCours}
+                        aria-label={`Accepter la revendication de ${r.organisationNom} par ${r.nom}`}
                         onClick={() =>
                           agir(() =>
                             traiterRevendicationAction({ revendication_id: r.id, accepter: true }),
@@ -85,6 +86,7 @@ export function ConsoleOrganisationsAdmin({ revendications, organisations }: Pro
                         variant="ghost"
                         taille="sm"
                         disabled={enCours}
+                        aria-label={`Refuser la revendication de ${r.organisationNom} par ${r.nom}`}
                         onClick={() =>
                           agir(() =>
                             traiterRevendicationAction({ revendication_id: r.id, accepter: false }),

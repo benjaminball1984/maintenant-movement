@@ -45,6 +45,7 @@ export async function BlocOrganisationPorteuse({ objetType, objetId }: Props) {
             <BadgeCheck
               size={14}
               strokeWidth={2}
+              role="img"
               aria-label="Organisation officielle"
               className="text-brand"
             />

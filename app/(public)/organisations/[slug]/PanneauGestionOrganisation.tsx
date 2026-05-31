@@ -176,6 +176,7 @@ export function PanneauGestionOrganisation({ org, gestionnaires, estAdmin }: Pan
                 <button
                   type="button"
                   onClick={() => retirer(g.gestionnaireId)}
+                  aria-label={`Retirer ${g.nom} de la gestion`}
                   className="text-danger text-xs hover:underline"
                 >
                   Retirer
