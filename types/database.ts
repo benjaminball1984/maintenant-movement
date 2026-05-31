@@ -4170,6 +4170,7 @@ export type Database = {
           total_t99cp_unites: number;
         }[];
       };
+      compter_membres_actifs: { Args: never; Returns: number };
       est_admin_general: { Args: never; Returns: boolean };
       est_admin_national: { Args: never; Returns: boolean };
       est_animation_commune: {

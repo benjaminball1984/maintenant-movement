@@ -9,7 +9,11 @@ export interface CompteursHome {
 /**
  * Compteurs du pré-footer de la page d'accueil (cf. spec §3).
  *
- * - membres = count(personne where statut = 'actif')
+ * - membres = nombre de membres ACTIFS au sens de la décision D1 (revue 2026) :
+ *   personnes DISTINCTES ayant une adhésion en cours de validité (statut
+ *   'active', non expirée). Calculé par la fonction SQL `compter_membres_actifs`
+ *   (SECURITY DEFINER, agrégat public). Ne compte plus les comptes sans
+ *   adhésion ni les profils silencieux.
  * - signataires = count(signature_petition) total (incluant les 17 746
  *   importés depuis Base44 V1, déjà en base depuis le chantier 10.1)
  * - newsletter = count(signature_petition where accepte_newsletter = true)
@@ -32,7 +36,7 @@ export async function getCompteursHome(): Promise<CompteursHome> {
   try {
     const supabase = getSupabaseAdmin();
     const [membresRes, signataresRes, newsletterRes] = await Promise.all([
-      supabase.from('personne').select('id', { count: 'exact', head: true }).eq('statut', 'actif'),
+      supabase.rpc('compter_membres_actifs'),
       supabase.from('signature_petition').select('id', { count: 'exact', head: true }),
       supabase
         .from('signature_petition')
@@ -40,9 +44,13 @@ export async function getCompteursHome(): Promise<CompteursHome> {
         .eq('accepte_newsletter', true),
     ]);
 
+    // La fonction renvoie un `bigint`, sérialisé par PostgREST tantôt en number,
+    // tantôt en string : on gère les deux, et on retombe sur 0 en cas d'erreur.
+    const membres = membresRes.error !== null ? 0 : Number(membresRes.data ?? 0);
+
     return {
       newsletter: newsletterRes.count ?? 0,
-      membres: membresRes.count ?? 0,
+      membres: Number.isFinite(membres) ? membres : 0,
       signataires: signataresRes.count ?? 0,
     };
   } catch (_erreur) {
