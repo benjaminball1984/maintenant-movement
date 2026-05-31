@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Marché solidaire — Boutiques' };
+export const metadata: Metadata = { title: 'Marché solidaire : Boutiques' };
 
 export default async function PageBoutiques() {
   const [boutiques, session] = await Promise.all([listerBoutiques(), getSession()]);

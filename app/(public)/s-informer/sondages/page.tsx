@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Sondages',
-  description: 'Sondages Maintenant! — vote connecté obligatoire, 2 modes (classique + pondéré).',
+  description: 'Sondages Maintenant! : vote connecté obligatoire, 2 modes (classique + pondéré).',
 };
 
 const FALLBACKS = {

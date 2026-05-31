@@ -15,7 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Bibliothèque d’images — Admin',
+  title: 'Bibliothèque d’images : Admin',
 };
 
 interface Props {

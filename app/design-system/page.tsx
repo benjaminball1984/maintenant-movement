@@ -149,7 +149,7 @@ export default function PageDesignSystem() {
         </p>
 
         <div className="space-y-6">
-          <ExempleLigne titre="Primary — CTA principal (dégradé signature)">
+          <ExempleLigne titre="Primary : CTA principal (dégradé signature)">
             <Button taille="sm">Signer (sm)</Button>
             <Button>Signer la pétition</Button>
             <Button taille="lg">Adhérer maintenant</Button>

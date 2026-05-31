@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Médias — Admin',
+  title: 'Médias : Admin',
 };
 
 const STATUTS: Array<{ value: NonNullable<OptionsListeMedias['statut']>; label: string }> = [

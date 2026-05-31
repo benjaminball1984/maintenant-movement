@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Campagnes — Admin',
+  title: 'Campagnes : Admin',
 };
 
 const STATUTS: Array<{ value: NonNullable<OptionsListeCampagnes['statut']>; label: string }> = [

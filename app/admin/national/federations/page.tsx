@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Fédérations — Admin',
+  title: 'Fédérations : Admin',
 };
 
 const TYPES: Array<{ value: NonNullable<OptionsListeFederations['type']>; label: string }> = [

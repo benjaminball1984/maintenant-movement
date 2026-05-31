@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Co-construire — Groupes de travail thématiques',
+  title: 'Co-construire : Groupes de travail thématiques',
   description: 'Tous les groupes de travail thématiques (GT) du mouvement Maintenant!.',
 };
 

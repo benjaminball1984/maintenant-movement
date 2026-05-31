@@ -29,7 +29,7 @@ const FALLBACKS = {
 };
 
 export const metadata: Metadata = {
-  title: 'SEL — Système d’échange local',
+  title: 'SEL : Système d’échange local',
   description:
     'Reconnaître le temps de chacun·e, libérer du temps pour tous et toutes. Service entre particulier·ères, volontariat pour les collectifs. 1 minute = 1 99-coin.',
 };

@@ -5,7 +5,7 @@ import { getSessionOuRediriger } from '@/lib/auth/session';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Publier une offre — hébergement' };
+export const metadata: Metadata = { title: 'Publier une offre : hébergement' };
 
 export default async function PageNouvelleHebergement() {
   await getSessionOuRediriger('/s-entraider/hebergement/nouvelle');

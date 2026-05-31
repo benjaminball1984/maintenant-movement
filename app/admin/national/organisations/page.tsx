@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ConsoleOrganisationsAdmin } from './ConsoleOrganisationsAdmin';
 
-export const metadata: Metadata = { title: 'Organisations — Admin' };
+export const metadata: Metadata = { title: 'Organisations : Admin' };
 
 /**
  * Console admin des organisations (épopée réseau V2, chantier B.3).

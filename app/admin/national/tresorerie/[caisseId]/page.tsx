@@ -38,7 +38,7 @@ export async function generateMetadata({
   const { caisseId } = await params;
   const detail = await chargerCaissePourDetail(caisseId);
   return {
-    title: detail !== null ? `Caisse — ${detail.caisse.libelle}` : 'Caisse introuvable',
+    title: detail !== null ? `Caisse : ${detail.caisse.libelle}` : 'Caisse introuvable',
     description: 'Détail d’une caisse de trésorerie : réceptacles + transactions sortantes.',
   };
 }

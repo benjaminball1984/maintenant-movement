@@ -80,7 +80,7 @@ ${ctaEmail('Renouveler mon adhésion', 'https://maintenant-le-mouvement.org/agir
   // utilisateurice decidera quand basculer cloche → email.
   {
     titre: 'Tu as reçu un nouveau message',
-    description: 'Exemple : email de notification reseau social — message direct.',
+    description: 'Exemple : email de notification reseau social : message direct.',
     preheader: "Camille t'a envoyé un message",
     contenu: `
 <p>Bonjour,</p>
@@ -91,7 +91,7 @@ ${ctaEmail('Lire le message', 'https://maintenant-le-mouvement.org/s-informer/re
   },
   {
     titre: 'Ta publication a un nouveau commentaire',
-    description: 'Exemple : email de notification reseau social — commentaire.',
+    description: 'Exemple : email de notification reseau social : commentaire.',
     preheader: 'Camille a commenté ta publication',
     contenu: `
 <p>Bonjour,</p>
@@ -102,7 +102,7 @@ ${ctaEmail('Voir la conversation', 'https://maintenant-le-mouvement.org/s-inform
   },
   {
     titre: 'Ta publication a un nouveau soutien',
-    description: 'Exemple : email de notification reseau social — soutien.',
+    description: 'Exemple : email de notification reseau social : soutien.',
     preheader: 'Camille soutient ta publication',
     contenu: `
 <p>Bonjour,</p>

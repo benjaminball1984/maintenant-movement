@@ -10,7 +10,7 @@ import { CalendarRange, Inbox } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Réservations — Admin',
+  title: 'Réservations : Admin',
 };
 
 const STATUTS: Array<{

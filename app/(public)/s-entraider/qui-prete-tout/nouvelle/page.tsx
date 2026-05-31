@@ -5,7 +5,7 @@ import { getSessionOuRediriger } from '@/lib/auth/session';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Publier une offre — qui prête tout' };
+export const metadata: Metadata = { title: 'Publier une offre : qui prête tout' };
 
 export default async function PageNouvelleQuiPreteTout() {
   await getSessionOuRediriger('/s-entraider/qui-prete-tout/nouvelle');

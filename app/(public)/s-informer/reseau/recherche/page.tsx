@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Recherche — Réseau',
+  title: 'Recherche : Réseau',
   description: 'Recherche dans les publications et les personnes du réseau social.',
 };
 

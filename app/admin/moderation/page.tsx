@@ -23,7 +23,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Modération — File d’attente',
+  title: 'Modération : File d’attente',
 };
 
 const FORMATEUR_NB = new Intl.NumberFormat('fr-FR');

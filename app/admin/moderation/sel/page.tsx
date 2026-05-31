@@ -22,7 +22,7 @@ export default async function PageModerationSel() {
       .order('declaree_realisee_le', { ascending: false })
       .limit(50),
     estAdminCourant(),
-    lireContenuEditorial('admin.moderation.sel.titre', { valeurMd: 'Modération — SEL' }),
+    lireContenuEditorial('admin.moderation.sel.titre', { valeurMd: 'Modération : SEL' }),
     lireContenuEditorial('admin.moderation.sel.intro', {
       valeurMd:
         'Services publiés + prestations en attente de crédit (modération 2 h) ou contestées.',

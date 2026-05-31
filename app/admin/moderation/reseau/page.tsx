@@ -32,7 +32,7 @@ export default async function PageModerationReseau() {
       .limit(50),
     estAdminCourant(),
     lireContenuEditorial('admin.moderation.reseau.titre', {
-      valeurMd: 'Modération — Réseau social',
+      valeurMd: 'Modération : Réseau social',
     }),
     lireContenuEditorial('admin.moderation.reseau.intro', {
       valeurMd:

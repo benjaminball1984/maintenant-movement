@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { type } = await params;
   if (!estTypeRoute(type)) return { title: 'Agenda introuvable' };
   return {
-    title: `Agenda — ${MAPPING_TYPE[type].libelle}`,
+    title: `Agenda : ${MAPPING_TYPE[type].libelle}`,
     description: `Agenda dédié aux ${MAPPING_TYPE[type].libelle.toLowerCase()}.`,
   };
 }

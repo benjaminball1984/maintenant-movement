@@ -11,7 +11,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Personnes — Admin',
+  title: 'Personnes : Admin',
 };
 
 const STATUTS: Array<{ value: NonNullable<OptionsListePersonnes['statut']>; label: string }> = [

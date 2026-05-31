@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ]);
   if (salle === null || reunion === null) return { title: 'Réunion introuvable' };
   return {
-    title: `${reunion.titre} — ${salle.nom}`,
+    title: `${reunion.titre} : ${salle.nom}`,
     description: reunion.ordreJourMd.slice(0, 200),
   };
 }

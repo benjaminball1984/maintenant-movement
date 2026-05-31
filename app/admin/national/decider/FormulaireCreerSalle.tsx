@@ -80,7 +80,7 @@ export function FormulaireCreerSalle() {
           id="salle-nom"
           value={nom}
           onChange={(e) => setNom(e.target.value)}
-          placeholder="Ex. Assemblée Confédérale — décembre"
+          placeholder="Ex. Assemblée Confédérale : décembre"
           maxLength={200}
         />
       </div>

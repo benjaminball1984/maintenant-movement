@@ -5,7 +5,7 @@ import { getSessionOuRediriger } from '@/lib/auth/session';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Publier une offre — transport' };
+export const metadata: Metadata = { title: 'Publier une offre : transport' };
 
 export default async function PageNouvelleTransport() {
   await getSessionOuRediriger('/s-entraider/transport/nouvelle');

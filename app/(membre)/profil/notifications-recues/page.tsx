@@ -40,7 +40,7 @@ export default async function PageNotificationsRecues() {
         valeurMd: 'Mes notifications',
       }),
       lireContenuEditorial('profil.notifications_recues.intro_amorce', {
-        valeurMd: 'Cloche in-app — 50 dernières notifications.',
+        valeurMd: 'Cloche in-app : 50 dernières notifications.',
       }),
       lireContenuEditorial('profil.notifications_recues.intro_lien', {
         valeurMd: 'Gérer mes préférences (mail, push)',

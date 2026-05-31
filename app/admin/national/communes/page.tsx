@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Communes — Admin',
+  title: 'Communes : Admin',
 };
 
 const FORMAT_NB = new Intl.NumberFormat('fr-FR');

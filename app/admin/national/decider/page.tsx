@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { FormulaireCreerSalle } from './FormulaireCreerSalle';
 
 export const metadata: Metadata = {
-  title: 'Décider — Console admin',
+  title: 'Décider : Console admin',
 };
 
 const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
@@ -61,7 +61,7 @@ export default async function PageAdminDecider() {
 
   const [estAdmin, titre, intro] = await Promise.all([
     estAdminCourant(),
-    lireContenuEditorial('admin.national.decider.titre', { valeurMd: 'Décider — Console admin' }),
+    lireContenuEditorial('admin.national.decider.titre', { valeurMd: 'Décider : Console admin' }),
     lireContenuEditorial('admin.national.decider.intro', {
       valeurMd:
         "Gestion des salles de décision et des réunions. LiveKit pas encore branché ; l'infrastructure stocke salles + ordres du jour + PV.",

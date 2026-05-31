@@ -23,7 +23,7 @@ export default async function PageModerationMarche() {
       .limit(50),
     estAdminCourant(),
     lireContenuEditorial('admin.moderation.marche.titre', {
-      valeurMd: 'Modération — Marché solidaire',
+      valeurMd: 'Modération : Marché solidaire',
     }),
     lireContenuEditorial('admin.moderation.marche.intro', {
       valeurMd: 'Produits récents et notations 1-2 étoiles (à examiner en priorité).',

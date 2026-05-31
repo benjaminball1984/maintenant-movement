@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const salle = await chargerSalleParSlug(slug);
   return {
-    title: salle !== null ? `Décider — ${salle.nom}` : 'Salle introuvable',
+    title: salle !== null ? `Décider : ${salle.nom}` : 'Salle introuvable',
     description: salle?.description ?? undefined,
   };
 }

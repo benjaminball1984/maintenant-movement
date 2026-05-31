@@ -11,7 +11,7 @@ import { FormulaireCreerEdition } from './FormulaireCreerEdition';
 import { LigneEditionAdmin } from './LigneEditionAdmin';
 
 export const metadata: Metadata = {
-  title: 'Maintenant Médias — Console admin',
+  title: 'Maintenant Médias : Console admin',
 };
 
 /**
@@ -34,7 +34,7 @@ export default async function PageAdminJournal() {
   const [estAdmin, titre, intro] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('admin.national.journal.titre', {
-      valeurMd: 'Maintenant Médias — Console admin',
+      valeurMd: 'Maintenant Médias : Console admin',
     }),
     lireContenuEditorial('admin.national.journal.intro', {
       valeurMd: 'Gestion des éditions du journal-affiche. Création, publication, archivage.',

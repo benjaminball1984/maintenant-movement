@@ -16,7 +16,7 @@ export default async function PageModerationSondages() {
       .order('created_at', { ascending: false })
       .limit(100),
     estAdminCourant(),
-    lireContenuEditorial('admin.moderation.sondages.titre', { valeurMd: 'Modération — Sondages' }),
+    lireContenuEditorial('admin.moderation.sondages.titre', { valeurMd: 'Modération : Sondages' }),
     lireContenuEditorial('admin.moderation.sondages.intro', {
       valeurMd:
         "Sondages publiés. Retire un sondage problématique (un motif est demandé et tracé au journal d'audit).",

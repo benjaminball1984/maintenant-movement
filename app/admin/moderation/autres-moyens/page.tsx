@@ -19,7 +19,7 @@ export default async function PageModerationAutresMoyens() {
       .limit(200),
     estAdminCourant(),
     lireContenuEditorial('admin.moderation.autres_moyens.titre', {
-      valeurMd: "Modération — Autres moyens d'agir",
+      valeurMd: "Modération : Autres moyens d'agir",
     }),
     lireContenuEditorial('admin.moderation.autres_moyens.intro', {
       valeurMd:

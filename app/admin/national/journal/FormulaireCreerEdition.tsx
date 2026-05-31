@@ -70,7 +70,7 @@ export function FormulaireCreerEdition({ numeroSuggere }: { numeroSuggere: numbe
           id="ed-titre"
           value={titre}
           onChange={(e) => setTitre(e.target.value)}
-          placeholder="Ex. Maintenant n°1 — automne 2026"
+          placeholder="Ex. Maintenant n°1 : automne 2026"
           maxLength={300}
         />
       </div>

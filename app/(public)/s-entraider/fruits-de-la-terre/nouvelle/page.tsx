@@ -5,7 +5,7 @@ import { getSessionOuRediriger } from '@/lib/auth/session';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Publier une offre — fruits de la terre' };
+export const metadata: Metadata = { title: 'Publier une offre : fruits de la terre' };
 
 export default async function PageNouvelleFruitsTerre() {
   await getSessionOuRediriger('/s-entraider/fruits-de-la-terre/nouvelle');

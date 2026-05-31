@@ -16,7 +16,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Modération — Réservations en litige',
+  title: 'Modération : Réservations en litige',
   description: 'Liste des réservations signalées en litige par les demandeurs. Arbitrage à rendre.',
 };
 
@@ -39,7 +39,7 @@ export default async function PageModerationReservationsEnLitige() {
     listerJournauxReservations(reservations.map((r) => r.id)),
     estAdminCourant(),
     lireContenuEditorial('admin.moderation.reservations.titre', {
-      valeurMd: 'Modération — Réservations en litige',
+      valeurMd: 'Modération : Réservations en litige',
     }),
     lireContenuEditorial('admin.moderation.reservations.intro', {
       valeurMd:

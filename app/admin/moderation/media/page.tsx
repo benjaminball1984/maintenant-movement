@@ -16,7 +16,7 @@ export default async function PageModerationMedia() {
       .order('created_at', { ascending: false })
       .limit(100),
     estAdminCourant(),
-    lireContenuEditorial('admin.moderation.media.titre', { valeurMd: 'Modération — Médias' }),
+    lireContenuEditorial('admin.moderation.media.titre', { valeurMd: 'Modération : Médias' }),
     lireContenuEditorial('admin.moderation.media.intro', {
       valeurMd:
         'Liste des médias avec leur statut. Publie les brouillons prêts ou retire un média problématique (un motif est demandé au retrait).',

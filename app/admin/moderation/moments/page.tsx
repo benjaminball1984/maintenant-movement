@@ -18,7 +18,7 @@ export default async function PageModerationMoments() {
       .limit(100),
     estAdminCourant(),
     lireContenuEditorial('admin.moderation.moments.titre', {
-      valeurMd: 'Modération — Moments solidaires',
+      valeurMd: 'Modération : Moments solidaires',
     }),
     lireContenuEditorial('admin.moderation.moments.intro', {
       valeurMd:

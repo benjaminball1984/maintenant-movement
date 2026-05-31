@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Marché solidaire — Produits' };
+export const metadata: Metadata = { title: 'Marché solidaire : Produits' };
 
 type FiltreMode = 'tous' | 'vente' | 'don';
 

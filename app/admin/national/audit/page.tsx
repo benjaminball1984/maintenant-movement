@@ -12,7 +12,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Audit — Journal D8bis',
+  title: 'Audit : Journal D8bis',
   description: 'Toutes les transitions de réservation (D8bis V2.3.15) consultables par les admins.',
 };
 
@@ -42,7 +42,7 @@ export default async function PageAuditJournal() {
   const [estAdmin, titre, intro] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('admin.national.audit.titre', {
-      valeurMd: 'Audit — Journal des transitions D8',
+      valeurMd: 'Audit : Journal des transitions D8',
     }),
     lireContenuEditorial('admin.national.audit.intro', {
       valeurMd:

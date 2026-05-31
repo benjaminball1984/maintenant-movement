@@ -22,7 +22,7 @@ const FALLBACK_INTRO =
 const CARTES_HORS_CONFIG: ReadonlyArray<{ slug: string; titre: string; fallback: string }> = [
   {
     slug: 'sel',
-    titre: "SEL — Système d'échange local",
+    titre: "SEL : Système d'échange local",
     fallback:
       'Échange de services entre membres. 1 T99CP = 1 € = 1 minute. Volontariat et services proposés/cherchés.',
   },

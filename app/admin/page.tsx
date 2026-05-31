@@ -5,7 +5,7 @@ import { CheckCircle, Flag } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Console — Vue d’ensemble' };
+export const metadata: Metadata = { title: 'Console : Vue d’ensemble' };
 
 const FORMAT_NB = new Intl.NumberFormat('fr-FR');
 const FORMAT_EUR = new Intl.NumberFormat('fr-FR', {

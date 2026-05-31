@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Maintenant Médias — journal-affiche',
+  title: 'Maintenant Médias : journal-affiche',
   description:
     'Édition locale d’un journal-affiche imprimable. Patchwork de modules existants. Format A3/A4.',
 };

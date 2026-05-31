@@ -118,7 +118,7 @@ export async function creerMomentSolidaire(
       const slugRdv = await genererSlugUniqueMoment(`${donnees.titre} ${rdv.libelle}`, supabase);
       await supabase.from('moment_solidaire').insert({
         slug: slugRdv,
-        titre: `${rdv.libelle} — ${donnees.titre}`,
+        titre: `${rdv.libelle} : ${donnees.titre}`,
         description: rdv.description,
         type: 'porte_a_porte',
         sous_type: rdv.sous_type,
