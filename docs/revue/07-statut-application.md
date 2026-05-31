@@ -49,3 +49,16 @@ D1 statuts §13 + compteur public ; D2 anonymat votes Décider ; D3 tronc Objet/
 ---
 
 *Le Bloc 8 (audit post-correctifs : sécurité + lisibilité + élégance + architecture) est mené sur cet état (13 correctifs appliqués, tests verts).*
+
+---
+
+## Mise à jour (suite de la même session)
+
+Après le Bloc 8, sur décision Lilou/Ben :
+
+- **Sécurité appliquée** : **S1** (anti open-redirect du callback auth) et **S2** (échappement des 6 recherches admin en `.or()`) corrigés et commités (V2.6.40). **S3** (révocation du jeton Management Supabase) reste une action manuelle de Lilou/Ben.
+- **Nettoyage écriture (option B, textes affichés d'abord)** : **53 tirets cadratins** retirés des titres / libellés / placeholders affichés (V2.6.41) ; **4 flèches** retirées des liens « voir » (V2.6.42). Cible stricte (chaînes affichées seulement) ; cahiers des charges intacts ; 1013 tests verts.
+- **Décisions tranchées et enregistrées** (mémoire projet) : **D1** (membre actif = adhésion en cours de validité ; compteur public = adhérent·es à jour) et **D2** (Décider = émargement + bulletin secret).
+
+**Reste pour une prochaine passe** : liens « retour » (`← X`, ≈40, formulation « Retour à/au/aux X » au cas par cas) ; tirets/flèches dans les commentaires et la doc interne (le gros volume, invisible au public) ; implémentation du compteur D1 ; décisions D3-D5 ; correctifs C16/C17/C24/C6 + migrations additives C5/C13/C14/C15/C31.
+
