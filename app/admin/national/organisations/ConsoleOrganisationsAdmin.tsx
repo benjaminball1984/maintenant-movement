@@ -135,6 +135,11 @@ export function ConsoleOrganisationsAdmin({ revendications, organisations }: Pro
                   variant="outline"
                   taille="sm"
                   disabled={enCours}
+                  aria-label={
+                    o.badgeOfficiel
+                      ? `Retirer le badge officiel de ${o.nom}`
+                      : `Accorder le badge officiel à ${o.nom}`
+                  }
                   onClick={() =>
                     agir(() =>
                       definirBadgeOfficielAction({ org_id: o.id, officiel: !o.badgeOfficiel }),

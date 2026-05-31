@@ -231,7 +231,7 @@ function renduPopup(point: PointCarte): string {
       <p style="margin: 0.25rem 0; font-weight: 700; color: var(--text-1);">${titre}</p>
       ${sousTitre !== '' ? `<p style="margin: 0; font-size: 0.85rem; color: var(--text-2);">${sousTitre}</p>` : ''}
       <a href="${point.href}" style="display: inline-block; margin-top: 0.5rem; color: var(--brand); text-decoration: underline;">
-        Voir la fiche →
+        Voir la fiche
       </a>
     </div>
   `;

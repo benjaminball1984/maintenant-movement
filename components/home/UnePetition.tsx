@@ -130,7 +130,7 @@ export async function UnePetition() {
         >
           {(t) => (
             <Link href="/mobiliser/petitions" className="text-xs text-text-3 hover:text-brand">
-              {t} →
+              {t}
             </Link>
           )}
         </TexteEditableAdmin>
@@ -223,7 +223,7 @@ export async function UnePetition() {
               href={`/mobiliser/petitions/${petition.slug}`}
               className="text-sm text-brand underline-offset-4 hover:underline"
             >
-              {t} →
+              {t}
             </Link>
           )}
         </TexteEditableAdmin>

@@ -3,9 +3,12 @@
 import { posterDansFilGroupe } from '@/app/actions/fil-groupe';
 import { Button } from '@/components/ui';
 import type { EspaceTypeFil } from '@/lib/fil-groupe';
-import { LONGUEUR_MAX_MESSAGE } from '@/lib/fil-groupe-validation';
+import { LONGUEUR_MAX_MESSAGE, LONGUEUR_MIN_MESSAGE } from '@/lib/fil-groupe-validation';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Send } from 'lucide-react';
-import { type FormEvent, useCallback, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 /**
  * Formulaire de saisie d'un message dans le fil de groupe (cycle V2 §18,
@@ -57,61 +60,74 @@ export function FormulairePosterMessage({
   cheminRevalidation,
   libelles = LIBELLES_DEFAUT,
 }: FormulairePosterMessageProps) {
-  const [contenu, setContenu] = useState('');
-  const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
-  const soumettre = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const valeur = contenu.trim();
-      if (valeur.length === 0) {
-        setErreur(libelles.erreurVide);
-        return;
-      }
-      if (valeur.length > LONGUEUR_MAX_MESSAGE) {
-        setErreur(libelles.erreurTropLong.replace('{n}', String(LONGUEUR_MAX_MESSAGE)));
-        return;
-      }
-      setEnCours(true);
-      setErreur(null);
-      try {
-        const resultat = await posterDansFilGroupe({
-          espaceType,
-          espaceId,
-          contenu: valeur,
-          cheminRevalidation,
-        });
-        if (resultat.ok) {
-          setContenu('');
-        } else {
-          setErreur(resultat.message);
-        }
-      } catch (_erreur) {
-        setErreur(libelles.erreurEnvoiImpossible);
-      } finally {
-        setEnCours(false);
-      }
-    },
-    [contenu, espaceType, espaceId, cheminRevalidation, libelles],
+  // Schéma construit à partir des libellés CMS : la validation client passe par
+  // zodResolver (C24) tout en gardant les messages éditables (§0bis.8).
+  const schema = useMemo(
+    () =>
+      z.object({
+        contenu: z
+          .string()
+          .trim()
+          .min(LONGUEUR_MIN_MESSAGE, libelles.erreurVide)
+          .max(
+            LONGUEUR_MAX_MESSAGE,
+            libelles.erreurTropLong.replace('{n}', String(LONGUEUR_MAX_MESSAGE)),
+          ),
+      }),
+    [libelles.erreurVide, libelles.erreurTropLong],
   );
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<{ contenu: string }>({
+    resolver: zodResolver(schema),
+    defaultValues: { contenu: '' },
+  });
+  const contenu = watch('contenu') ?? '';
+
+  async function onSubmit(donnees: { contenu: string }) {
+    setErreur(null);
+    try {
+      const resultat = await posterDansFilGroupe({
+        espaceType,
+        espaceId,
+        contenu: donnees.contenu.trim(),
+        cheminRevalidation,
+      });
+      if (resultat.ok) {
+        reset({ contenu: '' });
+      } else {
+        setErreur(resultat.message);
+      }
+    } catch (_erreur) {
+      setErreur(libelles.erreurEnvoiImpossible);
+    }
+  }
+
+  // Erreur affichée : validation client (Zod) d'abord, sinon le message serveur/réseau.
+  const messageErreur = errors.contenu?.message ?? erreur;
   const compteurRestant = LONGUEUR_MAX_MESSAGE - contenu.length;
 
   return (
-    <form onSubmit={soumettre} className="flex flex-col gap-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
       <label htmlFor="fil-groupe-contenu" className="sr-only">
         {libelles.labelMessage}
       </label>
       <textarea
         id="fil-groupe-contenu"
-        value={contenu}
-        onChange={(e) => setContenu(e.target.value)}
         rows={3}
-        disabled={enCours}
+        disabled={isSubmitting}
         placeholder={libelles.placeholderMessage}
         maxLength={LONGUEUR_MAX_MESSAGE + 100}
+        aria-invalid={messageErreur !== null && messageErreur !== undefined ? true : undefined}
         className="resize-y rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-4 focus:border-brand focus:outline-none"
+        {...register('contenu')}
       />
       <div className="flex items-center justify-between gap-3">
         <span
@@ -126,15 +142,17 @@ export function FormulairePosterMessage({
           type="submit"
           variant="primary"
           taille="sm"
-          disabled={enCours || contenu.trim().length === 0 || contenu.length > LONGUEUR_MAX_MESSAGE}
+          disabled={
+            isSubmitting || contenu.trim().length === 0 || contenu.length > LONGUEUR_MAX_MESSAGE
+          }
         >
           <Send size={16} aria-hidden="true" />
-          {enCours ? libelles.ctaEnCours : libelles.ctaSubmit}
+          {isSubmitting ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>
-      {erreur !== null && (
+      {messageErreur !== null && messageErreur !== undefined && (
         <p role="alert" className="text-danger text-sm">
-          {erreur}
+          {messageErreur}
         </p>
       )}
     </form>

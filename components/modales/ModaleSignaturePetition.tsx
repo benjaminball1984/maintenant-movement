@@ -228,7 +228,7 @@ export function ModaleSignaturePetition({
                 href="/agir/depuis-petition"
                 className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
               >
-                {libelles.tunnelCtaDecouvrir} <span aria-hidden="true">→</span>
+                {libelles.tunnelCtaDecouvrir}
               </a>
             </div>
 

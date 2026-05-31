@@ -99,7 +99,7 @@ export async function UneCagnotte() {
         >
           {(t) => (
             <Link href="/mobiliser/cagnottes" className="text-xs text-text-3 hover:text-brand">
-              {t} →
+              {t}
             </Link>
           )}
         </TexteEditableAdmin>

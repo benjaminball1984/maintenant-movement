@@ -93,7 +93,7 @@ export async function UneArticle() {
         >
           {(t) => (
             <Link href="/s-informer/journal" className="text-xs text-text-3 hover:text-brand">
-              {t} →
+              {t}
             </Link>
           )}
         </TexteEditableAdmin>

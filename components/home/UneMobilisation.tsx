@@ -111,7 +111,7 @@ export async function UneMobilisation() {
         >
           {(t) => (
             <Link href="/mobiliser/mobilisations" className="text-xs text-text-3 hover:text-brand">
-              {t} →
+              {t}
             </Link>
           )}
         </TexteEditableAdmin>

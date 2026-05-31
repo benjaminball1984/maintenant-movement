@@ -92,13 +92,13 @@ export function UneSection({
           >
             {(t) => (
               <Link href={voirTousHref} className="text-xs text-text-3 hover:text-brand">
-                {t} →
+                {t}
               </Link>
             )}
           </TexteEditableAdmin>
         ) : (
           <Link href={voirTousHref} className="text-xs text-text-3 hover:text-brand">
-            {voirTousLibelle} →
+            {voirTousLibelle}
           </Link>
         )}
       </header>

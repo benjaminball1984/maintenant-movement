@@ -293,7 +293,7 @@ function RenduModule({ module }: { module: ModuleResolu }) {
         <h4 className="text-base font-bold text-text-1">
           {route !== undefined && module.slug_cible !== null ? (
             <Link href={route(module.slug_cible)} className="underline-offset-4 hover:underline">
-              {module.titre_cible} →
+              {module.titre_cible}
             </Link>
           ) : (
             module.titre_cible

@@ -184,8 +184,8 @@ export default async function PagePresDeChezMoi({ searchParams }: PageProps) {
       {/* Note V2.5.6.b.bis : 2 blocs manquants documentés */}
       <p className="mt-8 text-xs text-text-3 border-t border-border pt-4">
         Le Master Plan §E prévoit aussi des blocs « sous-préfecture la plus proche » et « préfecture
-        la plus proche ». Ils nécessitent un référentiel CP→préfecture qui sera ajouté quand
-        Lilou/Ben le fournira. Reporté à V2.5.6.b.bis.
+        la plus proche ». Ils nécessitent un référentiel reliant code postal et préfecture, qui sera
+        ajouté quand Lilou/Ben le fournira. Reporté à V2.5.6.b.bis.
       </p>
     </Container>
   );
