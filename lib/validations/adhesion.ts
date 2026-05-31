@@ -77,16 +77,12 @@ export function creerAdhererT99CPSchema(
   return z
     .object({
       /**
-       * Hash de transaction Polygon. Pour 5.1 v1, on accepte un tx_hash
-       * facultatif côté UI (le wallet réel n'est pas encore branché,
-       * cohérent avec 3.3 et 4.3) : la Server Action mockera le hash si
-       * vide. Quand un tx_hash est fourni, il doit respecter le format.
+       * Hash de transaction Polygon, OBLIGATOIRE (C17, doctrine §19 : la
+       * plateforme ne signe aucune transaction). La personne paie depuis son
+       * propre wallet sur the99coinproject.org puis recopie ici le hash
+       * retourné. Format Polygon : `0x` + 64 caractères hexadécimaux.
        */
-      tx_hash: z
-        .string()
-        .regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat)
-        .optional()
-        .or(z.literal('')),
+      tx_hash: z.string().regex(/^0x[a-fA-F0-9]{64}$/, messages.txHashFormat),
       token_turnstile: z.string().min(1, messages.turnstileRequis),
     })
     .strict();

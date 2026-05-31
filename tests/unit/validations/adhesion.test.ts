@@ -40,10 +40,18 @@ describe('adhererEurosSchema', () => {
 });
 
 describe('adhererT99CPSchema', () => {
-  it('accepte sans tx_hash (mode mock)', () => {
+  // C17 / doctrine §19 : la plateforme ne signe aucune transaction, donc le
+  // tx_hash payé par la personne depuis son propre wallet est OBLIGATOIRE.
+  it('refuse sans tx_hash (désormais obligatoire)', () => {
     expect(adhererT99CPSchema.safeParse({ token_turnstile: 'mock-valid-token' }).success).toBe(
-      true,
+      false,
     );
+  });
+
+  it('refuse un tx_hash vide', () => {
+    expect(
+      adhererT99CPSchema.safeParse({ tx_hash: '', token_turnstile: 'mock-valid-token' }).success,
+    ).toBe(false);
   });
 
   it('accepte avec un tx_hash valide', () => {

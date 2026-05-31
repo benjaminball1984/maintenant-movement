@@ -129,6 +129,17 @@ footer et la signature des emails sortants :
 - **Préalable RGPD** : la politique de confidentialité v3 est publiée
   (point 1.8 ci-dessus). Cf. `docs/specs/05_RGPD.md §13`.
 
+### 3.3 Adresse du wallet de trésorerie 99-coin (chantier C17)
+- [ ] **Adresse du wallet de trésorerie** où les adhérent·es envoient
+  leurs 12 99-coin (Polygon). Affichée sur la page d'adhésion en 99-coin
+  (`/agir/adherer/t99cp`). Tant qu'elle n'est pas fournie, la page montre
+  le placeholder `[ADRESSE WALLET TRÉSORERIE À FOURNIR]`.
+- **Comment la fournir** : éditer via le CMS la clé
+  `adhesion.t99cp.wallet_tresorerie` (aucune intervention de dev requise).
+- **Doctrine §19** : la plateforme n'intègre aucun wallet ; la personne
+  paie depuis son propre wallet via the99coinproject.org, puis recopie le
+  hash de transaction (vérifié unique côté serveur).
+
 ---
 
 ## 4. Clés et accès externes

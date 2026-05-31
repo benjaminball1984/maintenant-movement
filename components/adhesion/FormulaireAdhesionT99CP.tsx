@@ -12,12 +12,16 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-/** Libelles surchargeables admin via CMS (V2.4.144). */
+/** Libelles surchargeables admin via CMS (V2.4.144 ; C17). */
 export interface LibellesAdhesionT99CP {
   alertErreurTitre: string;
   alertSuccesTitre: string;
   alertSuccesMessage: string;
   description: string;
+  etape1Titre: string;
+  etape1Avant: string;
+  etape1Apres: string;
+  ctaOuvrirWallet: string;
   labelTxHash: string;
   placeholderTxHash: string;
   hintTxHash: string;
@@ -30,22 +34,30 @@ const LIBELLES_DEFAUT: LibellesAdhesionT99CP = {
   alertSuccesTitre: 'Adhésion T99CP enregistrée',
   alertSuccesMessage: 'Ton adhésion est active pour 365 jours. Merci.',
   description: 'Adhésion annuelle : **12 99-coin** (12 T99CP). Frais 0 %.',
-  labelTxHash: 'Hash de transaction (optionnel en mock)',
-  placeholderTxHash: '0x... (64 hex)',
+  etape1Titre: 'Étape 1 : envoie depuis ton wallet',
+  etape1Avant: "Envoie 12 99-coin depuis ton propre wallet vers l'adresse de la trésorerie :",
+  etape1Apres:
+    'Une fois la transaction confirmée sur Polygon, recopie ci-dessous le hash retourné par ton wallet.',
+  ctaOuvrirWallet: 'Ouvrir the99coinproject.org pour payer',
+  labelTxHash: 'Hash de transaction (tx_hash)',
+  placeholderTxHash: '0x... (64 caractères hexadécimaux)',
   hintTxHash:
-    'En mock, laisser vide : un hash factice sera généré. En prod, le wallet T99CP le fournit.',
-  ctaSubmit: 'Adhérer en 12 99-coin',
-  ctaEnCours: 'Transaction en cours...',
+    'Le hash retourné par ton wallet après l’envoi des 12 99-coin. Format : 0x suivi de 64 caractères.',
+  ctaSubmit: 'Valider mon adhésion en 12 99-coin',
+  ctaEnCours: 'Enregistrement...',
 };
 
 interface FormulaireAdhesionT99CPProps {
   adhererT99CP: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
+  /** Adresse du wallet de trésorerie où envoyer les 12 99-coin (donnée réelle, éditable CMS). */
+  walletTresorerie: string;
   libelles?: LibellesAdhesionT99CP;
   messages?: MessagesValidationAdhesion;
 }
 
 export function FormulaireAdhesionT99CP({
   adhererT99CP,
+  walletTresorerie,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_ADHESION_DEFAUT,
 }: FormulaireAdhesionT99CPProps) {
@@ -106,8 +118,30 @@ export function FormulaireAdhesionT99CP({
           ),
         )}
       </p>
+      <Alert variant="info" titre={libelles.etape1Titre}>
+        {libelles.etape1Avant}
+        <code className="ml-1 inline-block break-all rounded-sm bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
+          {walletTresorerie}
+        </code>
+        . {libelles.etape1Apres}
+      </Alert>
+
+      {/* Doctrine §19 : toujours la HOME du site officiel, jamais une URL profonde,
+          en nouvelle fenêtre. La plateforme n'intègre aucun wallet. */}
+      <a
+        href="https://the99coinproject.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-fit text-sm font-bold text-brand hover:underline"
+      >
+        {libelles.ctaOuvrirWallet}
+        <span className="sr-only"> (nouvelle fenêtre)</span>
+      </a>
+
       <div>
-        <Label htmlFor="adhesion-txhash">{libelles.labelTxHash}</Label>
+        <Label htmlFor="adhesion-txhash" obligatoire>
+          {libelles.labelTxHash}
+        </Label>
         <input
           id="adhesion-txhash"
           type="text"

@@ -5,7 +5,7 @@ import { obtenirOuCreerCaisseGlobale, poserEntreeCaisse } from '@/lib/caisse-flu
 import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
-import { getT99CPService } from '@/lib/t99cp';
+import { enregistrerHashConsomme } from '@/lib/t99cp/hashes-consommes';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesAdhererEuros,
@@ -162,21 +162,11 @@ export async function adhererT99CP(donneesBrutes: unknown): Promise<ResultatActi
     return { ok: false, message: 'Tu dois être connecté·e pour adhérer.' };
   }
 
-  // En attendant le wallet réel (chantier T99CP), on simule la
-  // transaction via le service abstrait. Cohérent avec dons 3.3 et
-  // achats marché 4.3.
-  const t99cp = getT99CPService();
-  const adresseSource = `0xperso_${session.userId.slice(0, 32)}`;
-  const adresseDestination =
-    process.env.T99CP_TRESORERIE_WALLET_ADRESSE ?? '0xtresorerie_mock_maintenant_mouvement';
-  const tx = await t99cp.envoyerTransaction(
-    adresseSource,
-    adresseDestination,
-    BigInt(MONTANT_ADHESION_T99CP_UNITES),
-  );
-
-  const txHash =
-    donnees.tx_hash === '' || donnees.tx_hash === undefined ? tx.txHash : donnees.tx_hash;
+  // C17 / doctrine §19 : la plateforme ne signe AUCUNE transaction. La personne
+  // a payé depuis son propre wallet (the99coinproject.org) et recopie le hash
+  // retourné, désormais OBLIGATOIRE (validé par le schéma). On ne génère plus
+  // aucun hash factice.
+  const txHash = donnees.tx_hash;
 
   const supabase = await getSupabaseServer();
   const { data: adhesionInseree, error } = await supabase
@@ -193,21 +183,46 @@ export async function adhererT99CP(donneesBrutes: unknown): Promise<ResultatActi
     return { ok: false, message: `Adhésion impossible : ${error.message}` };
   }
 
-  // V2.3.27 : poser l'entrée dans la caisse globale adhésion (canal 99-coin).
-  if (adhesionInseree !== null) {
-    const c = await obtenirOuCreerCaisseGlobale('adhesion');
-    if (c.ok) {
-      await poserEntreeCaisse({
-        caisseId: c.caisseId,
-        sourceType: 'adhesion',
-        sourceId: adhesionInseree.id,
-        montant: Number(MONTANT_ADHESION_T99CP_UNITES),
-        canal: '99_coin',
-        motif: 'Adhésion annuelle (chemin 99-coin)',
-        payeurPersonneId: session.userId,
-        metadata: { tx_hash: txHash },
-      });
+  // Garde-fou anti-réutilisation (doctrine §19, table t99cp_hash_consomme) :
+  // un même hash de paiement ne peut servir qu'une fois, tous flux confondus
+  // (adhésion, don, marché…). Premier vrai usage du garde-fou V2.1.1. Si le
+  // hash a déjà été consommé, on annule l'adhésion qu'on vient de créer.
+  const consommation = await enregistrerHashConsomme({
+    txHash,
+    type: 'adhesion',
+    cibleId: adhesionInseree.id,
+    profilId: session.userId,
+    metadata: { montant_t99cp_unites: MONTANT_ADHESION_T99CP_UNITES },
+  });
+  if (!consommation.ok) {
+    await supabase.from('adhesion').delete().eq('id', adhesionInseree.id);
+    if (consommation.raison === 'deja_consomme') {
+      return {
+        ok: false,
+        message:
+          'Ce hash de transaction a déjà été utilisé. Chaque paiement en 99-coin ne peut servir qu’une seule fois.',
+      };
     }
+    return {
+      ok: false,
+      message: 'Vérification du paiement impossible pour le moment. Réessaie dans un instant.',
+    };
+  }
+
+  // V2.3.27 : poser l'entrée dans la caisse globale adhésion (canal 99-coin),
+  // une fois le hash confirmé comme consommé.
+  const c = await obtenirOuCreerCaisseGlobale('adhesion');
+  if (c.ok) {
+    await poserEntreeCaisse({
+      caisseId: c.caisseId,
+      sourceType: 'adhesion',
+      sourceId: adhesionInseree.id,
+      montant: Number(MONTANT_ADHESION_T99CP_UNITES),
+      canal: '99_coin',
+      motif: 'Adhésion annuelle (chemin 99-coin)',
+      payeurPersonneId: session.userId,
+      metadata: { tx_hash: txHash },
+    });
   }
 
   revalidatePath('/profil');
