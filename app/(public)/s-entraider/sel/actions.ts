@@ -3,7 +3,6 @@
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
-import { getT99CPService } from '@/lib/t99cp';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
 import { retirerServiceSelSchema } from '@/lib/validations/moderation';
@@ -311,79 +310,16 @@ export async function annulerPrestation(donneesBrutes: unknown): Promise<Resulta
 }
 
 // ============================================================
-// Cron applicatif : crédite les prestations en attente depuis > 2 h.
-//
-// Pour 4.2 v1 :
-//   - cette fonction est exportée comme Server Action mais sans
-//     déclencheur automatique en BDD ; elle peut être appelée manuellement
-//     par un·e admin ou par un cron Cloudflare Worker.
-//   - utilise `MockT99CPService` en mode mock (T99CP_NETWORK=mock).
+// Note (C17, 2026-05-31) : l'ancien `crediterPrestationsEnAttente` a été retiré.
+// Il simulait un versement de la trésorerie vers la prestataire via
+// `envoyerTransaction` (méthode deprecated, doctrine §19 : la plateforme ne
+// signe AUCUNE transaction), et n'était appelé par aucune UI (flux
+// `prestation_sel` superseded par le système de réservation générique V2.2.2).
+// Le paiement SEL réel est entre membres (bénéficiaire vers prestataire, via la
+// référence wallet du profil) : à intégrer au flux de réservation générique,
+// comme une fonctionnalité dédiée. La RPC `prestations_a_crediter` reste en base
+// (doctrine de greffe : on ne supprime pas), simplement plus appelée.
 // ============================================================
-export async function crediterPrestationsEnAttente(): Promise<
-  ResultatAction<{ traitees: number }>
-> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
-
-  const supabase = await getSupabaseServer();
-
-  // Garde-fou : seul·e un·e admin national peut déclencher manuellement
-  // le crédit en masse (en attendant le cron).
-  const { data: estNational } = await supabase.rpc('est_admin_national');
-  if (estNational !== true) {
-    return { ok: false, message: 'Seul l’admin national peut déclencher le crédit.' };
-  }
-
-  const { data: prestations, error } = await supabase.rpc('prestations_a_crediter', {
-    seuil_minutes: 120,
-  });
-
-  if (error !== null || prestations === null) {
-    return { ok: false, message: `Lecture impossible : ${error?.message ?? ''}` };
-  }
-
-  const t99cp = getT99CPService();
-  // Adresse source : wallet trésorerie du mouvement (lu depuis env, mock OK).
-  const adresseSource =
-    process.env.T99CP_TRESORERIE_WALLET_ADRESSE ?? '0xtresorerie_mock_maintenant_mouvement';
-
-  let traitees = 0;
-  for (const presta of prestations) {
-    if (presta.duree_minutes_reelle === null) continue;
-    const { data: prestaPersonne } = await supabase
-      .from('personne')
-      .select('id')
-      .eq('id', presta.prestataire_id)
-      .maybeSingle();
-    if (prestaPersonne === null) continue;
-
-    // Adresse wallet de la prestataire : v1, on suppose une convention
-    // « wallet par défaut = id personne ». Quand la table `wallet_t99cp`
-    // existera (chantier T99CP), on l'utilisera proprement.
-    const adresseDestination = `0xperso_${prestaPersonne.id.slice(0, 32)}`;
-
-    const tx = await t99cp.envoyerTransaction(
-      adresseSource,
-      adresseDestination,
-      BigInt(presta.duree_minutes_reelle),
-    );
-
-    await supabase
-      .from('prestation_sel')
-      .update({
-        statut: 'creditee',
-        creditee_le: new Date().toISOString(),
-        tx_hash_credit: tx.txHash,
-      })
-      .eq('id', presta.id);
-
-    traitees += 1;
-  }
-
-  return { ok: true, traitees };
-}
 
 // ============================================================
 // Retrait d'un service SEL (modération a posteriori, admin)
