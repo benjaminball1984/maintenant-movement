@@ -68,3 +68,13 @@ Après le Bloc 8, sur décision Lilou/Ben :
 - **D4 implémenté** (V2.6.46) : nouveau helper `peutPublierAuNomEspace` (gestionnaire actif OU `createurice_id` de l'espace). Publier au nom d'un espace n'est plus ouvert à tout membre actif. **Testé en local** (le créateur n'est jamais bloqué ; un non-créateur non-mandataire l'est). 1013 tests verts.
 - **D3** : plan écrit (`09-plan-convergence-tronc.md`), exécution NON commencée (chantier séparé, `pg_dump` d'abord).
 
+## Mise à jour (C6 + nettoyage + migrations additives)
+
+- **Nettoyage écriture (option B) quasi complet** : 53 tirets affichés (V2.6.41) + 4 flèches « voir » (V2.6.42) + **718 tirets** dans commentaires/doc interne (V2.6.48) + **56 liens « ← X » → « Retour »** (V2.6.49). Cahiers des charges vérifiés intacts. Reste : quelques flèches « → » dans des affichages de plage et commentaires (mineur).
+- **C6** (V2.6.50) : `journaliser()` branché sur modération pétition + export/suppression RGPD. Additif, best-effort.
+- **C5** (afficher_nom) + **C14** (compte_immediatement + snapshot) : migrations additives **appliquées et vérifiées au LOCAL** (V2.6.51).
+- **C13** (organisation ORM+5) : migration écrite et correcte, **non appliquée au local** (la table `organisation` du chantier B n'est pas dans la base de démo locale) ; s'appliquera au distant en Phase M.
+- **Découverte** : la base de démo LOCALE n'a pas les tables du chantier B (organisation, gestionnaire_espace, contenu_organisation, revendication_organisation) — elles sont sur le distant. Conséquence : D4 (gestionnaire) et C13/C15 ne sont pleinement testables que là où ces tables existent.
+- **C15** (soft-delete contenu_organisation) : **reportée** (table absente en local + nécessite un changement du chemin de lecture).
+- **Reste** : C16 (5 formulaires), C17 (flux paiement), C24 (mineur), C15 ; décision D5 ; flèches « → » résiduelles ; push au distant en Phase M.
+
