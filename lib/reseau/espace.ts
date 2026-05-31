@@ -128,6 +128,82 @@ export async function estMembreActifEspace(
 }
 
 /**
+ * Vérifie qu'une personne peut publier AU NOM d'un espace (décision D4, revue
+ * 2026) : réservé au **créateur·ice de l'espace** ou à ses **mandataires**
+ * (gestionnaires actifs), conformément au CDC §7 (« mini-blog : écriture
+ * réservée au créateur·ice + mandataires »). Plus permissif que la simple
+ * appartenance : un membre actif lambda ne peut PAS publier au nom du collectif
+ * (il garde le droit de publier en son nom propre).
+ *
+ * Deux sources de droit, dans cet ordre :
+ *   1. un `gestionnaire_espace` actif (table polymorphe, tous types ; couvre
+ *      aussi le créateur d'une organisation, bootstrapé comme gestionnaire) ;
+ *   2. la colonne `createurice_id` de l'espace (preset créateur MD4).
+ *
+ * `federation` / `confederation` : pas de créateur·ice ici → `false` (la Server
+ * Action les restreint déjà aux admins de plateforme).
+ */
+export async function peutPublierAuNomEspace(
+  espaceType: TypeEspacePostable,
+  espaceId: string,
+  personneId: string,
+): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+
+  // 1. Mandataire / gestionnaire actif (polymorphe, tous types).
+  const g = await supabase
+    .from('gestionnaire_espace')
+    .select('*', { count: 'exact', head: true })
+    .eq('espace_type', espaceType)
+    .eq('espace_id', espaceId)
+    .eq('personne_id', personneId)
+    .eq('statut', 'actif');
+  if ((g.count ?? 0) > 0) return true;
+
+  // 2. Créateur·ice de l'espace, selon le type.
+  switch (espaceType) {
+    case 'commune': {
+      const r = await supabase
+        .from('commune')
+        .select('createurice_id')
+        .eq('id', espaceId)
+        .maybeSingle();
+      return r.data?.createurice_id === personneId;
+    }
+    case 'campagne': {
+      const r = await supabase
+        .from('campagne')
+        .select('createurice_id')
+        .eq('id', espaceId)
+        .maybeSingle();
+      return r.data?.createurice_id === personneId;
+    }
+    case 'gt_thematique': {
+      const r = await supabase
+        .from('gt_thematique')
+        .select('createurice_id')
+        .eq('id', espaceId)
+        .maybeSingle();
+      return r.data?.createurice_id === personneId;
+    }
+    case 'groupe_entraide_local': {
+      const r = await supabase
+        .from('groupe_entraide_local')
+        .select('createurice_id')
+        .eq('id', espaceId)
+        .maybeSingle();
+      return r.data?.createurice_id === personneId;
+    }
+    case 'federation':
+    case 'confederation':
+    case 'organisation':
+      // federation/confederation : admin-only (géré dans la Server Action).
+      // organisation : pas de colonne créateur·ice ; couvert par le gestionnaire ci-dessus.
+      return false;
+  }
+}
+
+/**
  * Crée un post `post_reseau` attribué à un espace collectif.
  *
  * Appelée par :

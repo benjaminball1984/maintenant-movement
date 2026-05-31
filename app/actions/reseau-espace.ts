@@ -4,12 +4,14 @@
  * Server Actions pour publier dans le flux du réseau social au nom d'un
  * espace collectif (V2.5.18 — finition Phase H, sous-chantier V2.5.10.b).
  *
- * Permissions :
+ * Permissions (décision D4, revue 2026) :
  *   - L'utilisateur·rice doit être connecté·e.
- *   - L'utilisateur·rice doit être membre actif·ve de l'espace (vérifié
- *     via `estMembreActifEspace`), OU être admin général de plateforme.
+ *   - Publier AU NOM de l'espace est réservé au créateur·ice de l'espace ou à
+ *     ses mandataires/gestionnaires actifs (vérifié via `peutPublierAuNomEspace`),
+ *     OU à un admin général. Pas à tout membre actif (chacun·e garde le droit de
+ *     publier en son nom propre).
  *   - Federation et confederation : restreints aux admins de plateforme
- *     (pas de table d'appartenance personne ↔ espace en V1).
+ *     (pas de créateur·ice ni de table d'appartenance personne en V1).
  *
  * Modération : la publication créée a `statut = 'publie'` directement (pas
  * de modération a priori), cohérent avec la doctrine V1 des posts réseau.
@@ -21,7 +23,7 @@ import { getSession } from '@/lib/auth/session';
 import {
   type TypeEspacePostable,
   creerPostEspace,
-  estMembreActifEspace,
+  peutPublierAuNomEspace,
 } from '@/lib/reseau/espace';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -77,13 +79,15 @@ export async function publierAuNomDeLEspaceAction(donneesBrutes: unknown): Promi
       };
     }
   } else if (!estAdmin) {
-    // 4 autres types : vérifier l'appartenance active.
-    const estMembre = await estMembreActifEspace(espaceType, donnees.espaceId, session.userId);
-    if (!estMembre) {
+    // D4 (revue 2026) : publier AU NOM de l'espace est réservé au créateur·ice
+    // de l'espace et à ses mandataires (gestionnaires actifs), pas à tout membre
+    // actif. Chacun·e garde le droit de publier en son nom propre.
+    const peutPublier = await peutPublierAuNomEspace(espaceType, donnees.espaceId, session.userId);
+    if (!peutPublier) {
       return {
         ok: false,
         message:
-          'Tu dois être membre actif·ve de cet espace pour publier en son nom (ou être admin général).',
+          'Publier au nom de cet espace est réservé à son créateur·ice et à ses mandataires (ou à un admin général).',
       };
     }
   }
