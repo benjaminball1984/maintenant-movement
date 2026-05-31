@@ -10,6 +10,9 @@ out/
 build/
 dist/
 
+# Livrables de revue (zip volumineux, hors dépôt)
+dossier-revue-*.zip
+
 # Données générées au build
 next-env.d.ts
 
