@@ -6,6 +6,7 @@ import { ModaleMessage } from '@/components/reseau/ModaleMessage';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Container, Heading, classesBouton } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { etatAmitieAvec, peutEnvoyerMessageA } from '@/lib/reseau/amitie';
 import { getProfilReseauParNumero, listerPostsDePersonne, nomAffiche } from '@/lib/reseau/requetes';
 import { cn } from '@/lib/utils';
@@ -21,7 +22,16 @@ export async function generateMetadata({ params }: PageProfilProps): Promise<Met
   const { numero } = await params;
   const profil = await getProfilReseauParNumero(numero);
   if (profil === null) return { title: 'Profil introuvable' };
-  return { title: `${nomAffiche(profil.prenom, profil.nom)} sur le réseau` };
+  const nom = nomAffiche(profil.prenom, profil.nom);
+  return metadataPourPartage({
+    objet: {
+      titre: `${nom} sur le réseau`,
+      description: `Profil de ${nom} sur le réseau social de Maintenant!.`,
+      image_url: profil.photoUrl,
+      type_objet: 'profil',
+    },
+    cheminPage: `/s-informer/reseau/${numero}`,
+  });
 }
 
 /**

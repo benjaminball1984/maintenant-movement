@@ -8,6 +8,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
 import { idEpingleUneHome } from '@/lib/home/une';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -16,7 +17,7 @@ import { notFound } from 'next/navigation';
 import { FormulaireMajEdition } from './FormulaireMajEdition';
 
 const FALLBACKS = {
-  retour: '← Tous les numéros',
+  retour: 'Retour aux numéros',
   publieLePrefix: 'Publié le',
   contenuVide: 'Contenu non encore rédigé.',
   adminSection: 'Administration (réservé admins)',
@@ -42,10 +43,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const e = await chargerEdition(slug);
   if (e === null) return { title: 'Édition introuvable' };
-  return {
-    title: `${e.titre} (n°${e.numero}) — Maintenant Médias`,
-    description: e.sous_titre ?? undefined,
-  };
+  return metadataPourPartage({
+    objet: {
+      titre: `${e.titre} (n°${e.numero}) · Maintenant Médias`,
+      description: e.sous_titre ?? 'Le journal-affiche de Maintenant Médias.',
+      image_url: e.image_couverture_url,
+      type_objet: 'article',
+    },
+    cheminPage: `/s-informer/journal/${e.slug}`,
+  });
 }
 
 /**

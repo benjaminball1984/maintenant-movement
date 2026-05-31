@@ -4,6 +4,7 @@ import {
   getCommuneReference,
   getCompteursCommune,
 } from '@/lib/communes/reference';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -15,9 +16,16 @@ interface PageFicheCommuneProps {
 export async function generateMetadata({ params }: PageFicheCommuneProps): Promise<Metadata> {
   const { code_insee } = await params;
   const commune = await getCommuneReference(code_insee);
-  return {
-    title: commune === null ? 'Commune introuvable' : `${commune.nom} — fiche commune`,
-  };
+  if (commune === null) return { title: 'Commune introuvable' };
+  return metadataPourPartage({
+    objet: {
+      titre: `${commune.nom}, fiche commune`,
+      description: `La commune de ${commune.nom} sur Maintenant! : signataires, inscrit·es et commune libre.`,
+      image_url: null,
+      type_objet: 'commune',
+    },
+    cheminPage: `/communes/${code_insee}`,
+  });
 }
 
 /**
