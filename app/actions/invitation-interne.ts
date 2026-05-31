@@ -14,7 +14,7 @@
  * Pas d'élévation, pas de spam massif (cap 30 destinataires/appel).
  */
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession, getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { z } from 'zod';
 
@@ -39,10 +39,9 @@ export async function inviterReseauAction(donneesBrutes: unknown): Promise<Resul
   }
   const donnees = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour inviter.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour inviter.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
 

@@ -48,6 +48,33 @@ export async function getSession(): Promise<ContexteSession | null> {
 }
 
 /**
+ * Garde d'authentification pour les Server Actions qui répondent avec le
+ * contrat `{ ok, message }` (et non par redirection comme
+ * `getSessionOuRediriger`).
+ *
+ * Centralise le motif répété « récupérer la session, et si absente
+ * retourner un échec `{ ok: false, message }` » présent dans la quasi
+ * totalité des `app/actions/*`. À utiliser ainsi :
+ *
+ *   const acces = await exigerSession();
+ *   if (!acces.ok) return acces;
+ *   const session = acces.session; // ContexteSession garanti non nul
+ *
+ * @param message Message d'échec renvoyé quand la personne n'est pas
+ *   connectée. Par défaut « Connexion requise. » ; chaque action peut
+ *   passer son propre libellé, conservé tel quel.
+ */
+export async function exigerSession(
+  message = 'Connexion requise.',
+): Promise<{ ok: true; session: ContexteSession } | { ok: false; message: string }> {
+  const session = await getSession();
+  if (session === null) {
+    return { ok: false, message };
+  }
+  return { ok: true, session };
+}
+
+/**
  * Comme `getSession`, mais redirige vers `/connexion?prochaine=<chemin>`
  * si la personne n'est pas connectée. Toutes les pages `/profil/*`
  * passent par ce helper.

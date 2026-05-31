@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { poserNotificationTemplee } from '@/lib/notification-templates';
 import {
   type OffreTypeReservation,
@@ -48,10 +48,9 @@ export type ResultatReservation =
 export async function creerReservationAction(
   options: CreerReservationOptions,
 ): Promise<ResultatReservation> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise pour réserver.' };
-  }
+  const acces = await exigerSession('Connexion requise pour réserver.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   // Cohérence du créneau (deuxième ligne après la validation client).
   const debut = new Date(options.creneauDebut);
@@ -266,10 +265,9 @@ async function executerTransitionProprietaire(
   options: OptionsActionProprietaire,
   cible: 'acceptee' | 'refusee' | 'realisee',
 ): Promise<ResultatActionProprietaire> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
   const verif = await chargerReservationCommeProprietaire(options.reservationId, session.userId);
   if (!verif.ok) return verif;
   if (!transitionAutorisee(verif.statut, cible)) {
@@ -358,10 +356,9 @@ export async function signalerLitigeProprietaireAction(options: {
   motif: string;
   cheminRevalidation?: string;
 }): Promise<ResultatActionProprietaire> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const motifNettoye = options.motif.trim();
   if (motifNettoye.length < 10) {
@@ -447,10 +444,9 @@ export async function resoudreLitigeReservationAction(options: {
   motif: string;
   cheminRevalidation?: string;
 }): Promise<ResultatResolutionLitige> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -540,6 +536,63 @@ export async function resoudreLitigeReservationAction(options: {
 }
 
 // ============================================================
+// Transitions côté demandeur (V2.3.14/16/11, factorisées V2.6 polish Q6)
+// ============================================================
+
+/**
+ * Exécute une transition de statut demandée par le DEMANDEUR d'une
+ * réservation (signalement de litige, confirmation, annulation). Factorise
+ * le squelette commun à ces trois actions :
+ *  1. charge la réservation (introuvable → échec) ;
+ *  2. vérifie que l'appelant·e en est bien le demandeur ;
+ *  3. vérifie que la transition est autorisée par la machine à états D8 ;
+ *  4. applique le changement de statut (journalisé par
+ *     `changerStatutReservation`).
+ *
+ * Les variations propres à chaque action restent chez l'appelant : la
+ * validation du motif (en amont), les notifications et la revalidation
+ * (en aval). Les deux messages d'erreur qui dépendent de l'action sont
+ * passés en paramètres pour être préservés à l'identique.
+ */
+async function executerTransitionDemandeur(options: {
+  reservationId: string;
+  sessionUserId: string;
+  cible: StatutReservation;
+  motif?: string;
+  messageNonAutorise: string;
+  messageTransitionInterdite: (statut: StatutReservation) => string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
+  const supabase = await getSupabaseServer();
+  const { data: existant, error: erreurLecture } = await supabase
+    .from('reservation')
+    .select('id, demandeur_personne_id, statut')
+    .eq('id', options.reservationId)
+    .maybeSingle();
+
+  if (erreurLecture !== null || existant === null) {
+    return { ok: false, message: 'Réservation introuvable.' };
+  }
+  if (existant.demandeur_personne_id !== options.sessionUserId) {
+    return { ok: false, message: options.messageNonAutorise };
+  }
+  const statutActuel = existant.statut as StatutReservation;
+  if (!transitionAutorisee(statutActuel, options.cible)) {
+    return { ok: false, message: options.messageTransitionInterdite(statutActuel) };
+  }
+
+  const resultat = await changerStatutReservation({
+    reservationId: options.reservationId,
+    nouveauStatut: options.cible,
+    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
+    auteurId: options.sessionUserId,
+  });
+  if (!resultat.ok) {
+    return { ok: false, message: resultat.message };
+  }
+  return { ok: true };
+}
+
+// ============================================================
 // Signalement de litige par le demandeur (V2.3.16)
 // ============================================================
 
@@ -575,10 +628,9 @@ export async function signalerLitigeReservationAction(options: {
   motif: string;
   cheminRevalidation?: string;
 }): Promise<ResultatLitige> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const motifNettoye = options.motif.trim();
   if (motifNettoye.length < MOTIF_LITIGE_MIN) {
@@ -594,40 +646,16 @@ export async function signalerLitigeReservationAction(options: {
     };
   }
 
-  const supabase = await getSupabaseServer();
-  const { data: existant, error: erreurLecture } = await supabase
-    .from('reservation')
-    .select('id, demandeur_personne_id, statut')
-    .eq('id', options.reservationId)
-    .maybeSingle();
-
-  if (erreurLecture !== null || existant === null) {
-    return { ok: false, message: 'Réservation introuvable.' };
-  }
-  if (existant.demandeur_personne_id !== session.userId) {
-    return {
-      ok: false,
-      message: 'Tu n’as pas l’autorisation de signaler un litige sur cette réservation.',
-    };
-  }
-  const statutActuel = existant.statut as StatutReservation;
-  if (!transitionAutorisee(statutActuel, 'litige')) {
-    return {
-      ok: false,
-      message: `Une réservation au statut « ${statutActuel} » ne peut pas faire l’objet d’un litige.`,
-    };
-  }
-
-  const resultat = await changerStatutReservation({
+  const resultat = await executerTransitionDemandeur({
     reservationId: options.reservationId,
-    nouveauStatut: 'litige',
+    sessionUserId: session.userId,
+    cible: 'litige',
     motif: motifNettoye,
-    auteurId: session.userId,
+    messageNonAutorise: 'Tu n’as pas l’autorisation de signaler un litige sur cette réservation.',
+    messageTransitionInterdite: (statut) =>
+      `Une réservation au statut « ${statut} » ne peut pas faire l’objet d’un litige.`,
   });
-
-  if (!resultat.ok) {
-    return { ok: false, message: resultat.message };
-  }
+  if (!resultat.ok) return resultat;
 
   if (options.cheminRevalidation !== undefined) {
     revalidatePath(options.cheminRevalidation);
@@ -666,53 +694,32 @@ export async function confirmerReservationAction(options: {
   motif?: string;
   cheminRevalidation?: string;
 }): Promise<ResultatConfirmation> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
-  const supabase = await getSupabaseServer();
-  const { data: existant, error: erreurLecture } = await supabase
-    .from('reservation')
-    .select('id, demandeur_personne_id, statut')
-    .eq('id', options.reservationId)
-    .maybeSingle();
-
-  if (erreurLecture !== null || existant === null) {
-    return { ok: false, message: 'Réservation introuvable.' };
-  }
-  if (existant.demandeur_personne_id !== session.userId) {
-    return { ok: false, message: 'Tu n’as pas l’autorisation de confirmer cette réservation.' };
-  }
-  const statutActuel = existant.statut as StatutReservation;
-  if (!transitionAutorisee(statutActuel, 'confirmee')) {
-    return {
-      ok: false,
-      message: `Une réservation au statut « ${statutActuel} » ne peut pas être confirmée (uniquement depuis « réalisée »).`,
-    };
-  }
-
-  const resultat = await changerStatutReservation({
+  const resultat = await executerTransitionDemandeur({
     reservationId: options.reservationId,
-    nouveauStatut: 'confirmee',
-    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
-    auteurId: session.userId,
+    sessionUserId: session.userId,
+    cible: 'confirmee',
+    motif: options.motif,
+    messageNonAutorise: 'Tu n’as pas l’autorisation de confirmer cette réservation.',
+    messageTransitionInterdite: (statut) =>
+      `Une réservation au statut « ${statut} » ne peut pas être confirmée (uniquement depuis « réalisée »).`,
   });
-
-  if (!resultat.ok) {
-    return { ok: false, message: resultat.message };
-  }
+  if (!resultat.ok) return resultat;
 
   // V2.3.25 : cloche pour le propriétaire d'offre.
-  const { data: r } = await supabase
+  const supabase = await getSupabaseServer();
+  const { data: infoOffre } = await supabase
     .from('reservation')
     .select('offre_type, offre_id')
     .eq('id', options.reservationId)
     .maybeSingle();
-  if (r !== null) {
+  if (infoOffre !== null) {
     const { createurId } = await chargerContexteOffre(
-      r.offre_type as OffreTypeReservation,
-      r.offre_id,
+      infoOffre.offre_type as OffreTypeReservation,
+      infoOffre.offre_id,
     );
     if (createurId !== null) {
       // V2.4.132 : template editable. Le defaut « Le cycle est clos » est
@@ -765,53 +772,32 @@ export async function annulerReservationAction(options: {
   motif?: string;
   cheminRevalidation?: string;
 }): Promise<ResultatAnnulation> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
-  const supabase = await getSupabaseServer();
-  const { data: existant, error: erreurLecture } = await supabase
-    .from('reservation')
-    .select('id, demandeur_personne_id, statut')
-    .eq('id', options.reservationId)
-    .maybeSingle();
-
-  if (erreurLecture !== null || existant === null) {
-    return { ok: false, message: 'Réservation introuvable.' };
-  }
-  if (existant.demandeur_personne_id !== session.userId) {
-    return { ok: false, message: 'Tu n’as pas l’autorisation d’annuler cette réservation.' };
-  }
-  const statutActuel = existant.statut as StatutReservation;
-  if (!transitionAutorisee(statutActuel, 'annulee')) {
-    return {
-      ok: false,
-      message: `Une réservation au statut « ${statutActuel} » ne peut plus être annulée.`,
-    };
-  }
-
-  const resultat = await changerStatutReservation({
+  const resultat = await executerTransitionDemandeur({
     reservationId: options.reservationId,
-    nouveauStatut: 'annulee',
-    motif: options.motif?.trim() !== '' ? options.motif?.trim() : undefined,
-    auteurId: session.userId,
+    sessionUserId: session.userId,
+    cible: 'annulee',
+    motif: options.motif,
+    messageNonAutorise: 'Tu n’as pas l’autorisation d’annuler cette réservation.',
+    messageTransitionInterdite: (statut) =>
+      `Une réservation au statut « ${statut} » ne peut plus être annulée.`,
   });
-
-  if (!resultat.ok) {
-    return { ok: false, message: resultat.message };
-  }
+  if (!resultat.ok) return resultat;
 
   // V2.3.25 : cloche pour le propriétaire d'offre.
-  const { data: r } = await supabase
+  const supabase = await getSupabaseServer();
+  const { data: infoOffre } = await supabase
     .from('reservation')
     .select('offre_type, offre_id')
     .eq('id', options.reservationId)
     .maybeSingle();
-  if (r !== null) {
+  if (infoOffre !== null) {
     const { createurId } = await chargerContexteOffre(
-      r.offre_type as OffreTypeReservation,
-      r.offre_id,
+      infoOffre.offre_type as OffreTypeReservation,
+      infoOffre.offre_id,
     );
     if (createurId !== null) {
       // V2.4.132 : template editable.

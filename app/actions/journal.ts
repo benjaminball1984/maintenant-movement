@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
@@ -29,8 +29,9 @@ export type ResultatEdition = { ok: true; slug: string } | { ok: false; message:
  * pour laisser le contrôle éditorial à la rédaction).
  */
 export async function creerEditionJournalAction(donnees: unknown): Promise<ResultatEdition> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -97,8 +98,8 @@ const schemaMaj = z.object({
 export async function mettreAJourEditionAction(
   donnees: unknown,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -156,8 +157,8 @@ const schemaStatut = z.object({
 export async function changerStatutEditionAction(
   donnees: unknown,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');

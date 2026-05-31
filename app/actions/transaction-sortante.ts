@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { initierTransactionSortante } from '@/lib/caisse';
 import { estIbanValide } from '@/lib/iban';
 import { MIME_JUSTIFICATIF_AUTORISES, type MimeJustificatif } from '@/lib/storage/justificatifs';
@@ -59,10 +59,9 @@ export type ResultatInitiation =
 export async function initierTransactionSortanteAction(
   donneesBrutes: unknown,
 ): Promise<ResultatInitiation> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -120,10 +119,9 @@ export async function confirmerTransactionSortanteAction(options: {
   transactionId: string;
   caisseId: string;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -172,10 +170,8 @@ export async function annulerTransactionSortanteAction(options: {
   caisseId: string;
   motif: string;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
 
   const motifNettoye = options.motif.trim();
   if (motifNettoye.length < 5) {

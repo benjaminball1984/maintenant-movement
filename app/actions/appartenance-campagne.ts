@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
@@ -18,10 +18,9 @@ import { revalidatePath } from 'next/cache';
 export type ResultatAppartenance = { ok: true } | { ok: false; message: string };
 
 export async function rejoindreCampagne(campagneId: string): Promise<ResultatAppartenance> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise pour rejoindre une campagne.' };
-  }
+  const acces = await exigerSession('Connexion requise pour rejoindre une campagne.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
 
@@ -70,10 +69,9 @@ export async function rejoindreCampagne(campagneId: string): Promise<ResultatApp
 }
 
 export async function quitterCampagne(campagneId: string): Promise<ResultatAppartenance> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: campagne } = await supabase

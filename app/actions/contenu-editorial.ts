@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -27,10 +27,9 @@ const schema = z.object({
 export type ResultatMaj = { ok: true } | { ok: false; message: string };
 
 export async function mettreAJourContenuEditorialAction(donnees: unknown): Promise<ResultatMaj> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   // V2.5.21 sous-chantier V2.5.15.b : autorisation étendue : les comptes

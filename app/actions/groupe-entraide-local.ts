@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import {
   type DonneesCreerGroupeEntraide,
   coordonneesValides,
@@ -26,10 +26,9 @@ import { redirect } from 'next/navigation';
 export type ResultatCreerGroupe = { ok: true; slug: string } | { ok: false; message: string };
 
 export async function creerGroupeEntraide(donneesBrutes: unknown): Promise<ResultatCreerGroupe> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise pour créer un groupe.' };
-  }
+  const acces = await exigerSession('Connexion requise pour créer un groupe.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const parse = creerGroupeEntraideSchema.safeParse(donneesBrutes);
   if (!parse.success) {
@@ -97,10 +96,9 @@ export async function creerGroupeEntraide(donneesBrutes: unknown): Promise<Resul
 export async function rejoindreGroupe(
   groupeId: string,
 ): Promise<{ ok: boolean; message?: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { error } = await supabase.from('appartenance_groupe_entraide_local').insert({
@@ -122,10 +120,9 @@ export async function rejoindreGroupe(
 }
 
 export async function quitterGroupe(groupeId: string): Promise<{ ok: boolean; message?: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { error } = await supabase

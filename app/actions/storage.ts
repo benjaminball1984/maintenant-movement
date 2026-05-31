@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import {
   MIME_AUTORISES,
   type ResultatTeleversement,
@@ -37,10 +37,8 @@ function estRoleValide(valeur: unknown): valeur is RoleImage {
 
 export async function televerserImage(formData: FormData): Promise<ResultatTeleversement> {
   // 1. Authentification.
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise pour téléverser une image.' };
-  }
+  const acces = await exigerSession('Connexion requise pour téléverser une image.');
+  if (!acces.ok) return acces;
 
   // 2. Lecture du fichier.
   const fichier = formData.get('fichier');
