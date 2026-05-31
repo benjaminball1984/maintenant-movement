@@ -94,10 +94,10 @@ export async function initierTransactionSortanteAction(
 
 /**
  * Confirme une transaction sortante (V2.3.36). Transition `initiee → confirmee`.
- * Vérifie l'admin national. Le `confirme_par_personne_id` est celui qui
- * appelle l'action ; il DEVRAIT idéalement être différent de
- * `initie_par_personne_id` pour respecter une double-signature, mais
- * cette règle est portée par l'usage humain (pas de contrainte SQL).
+ * Vérifie l'admin national ET applique la double-validation (revue 2026,
+ * correctif C7) : la personne qui confirme doit être différente de celle qui a
+ * initié le reversement (séparation des rôles sur une action destructrice,
+ * matrice de droits MD5).
  */
 export async function confirmerTransactionSortanteAction(options: {
   transactionId: string;
@@ -112,6 +112,20 @@ export async function confirmerTransactionSortanteAction(options: {
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
   if (estAdmin !== true) {
     return { ok: false, message: 'Action réservée aux admins nationaux.' };
+  }
+
+  // Double-validation : interdit à l'initiateur·ice de confirmer son propre reversement.
+  const { data: tx } = await supabase
+    .from('transaction_sortante')
+    .select('initie_par_personne_id')
+    .eq('id', options.transactionId)
+    .maybeSingle();
+  if (tx?.initie_par_personne_id === session.userId) {
+    return {
+      ok: false,
+      message:
+        'Double validation requise : la confirmation doit être faite par une autre personne que celle qui a initié le reversement.',
+    };
   }
 
   const { error } = await supabase

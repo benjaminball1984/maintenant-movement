@@ -50,6 +50,28 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 /**
+ * Compose les classes visuelles d'un bouton. Exporté pour pouvoir styliser un
+ * `<Link>` (next/link) **comme** un bouton sans imbriquer `<Link><Button>` (ce
+ * qui produirait un `<a>` contenant un `<button>` : HTML invalide, double
+ * tabulation, comportement clavier/lecteur d'écran indéterminé). Utiliser
+ * `<Link className={classesBouton({ variant, taille })}>` pour un seul `<a>`.
+ */
+export function classesBouton({
+  variant = 'primary',
+  taille = 'md',
+  className,
+}: Partial<ButtonProps> = {}): string {
+  return cn(
+    'inline-flex items-center justify-center gap-2 font-body font-bold',
+    'transition-[transform,box-shadow,filter,background-color] duration-fast',
+    'active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
+    STYLES_VARIANT[variant],
+    STYLES_TAILLE[taille],
+    className,
+  );
+}
+
+/**
  * Bouton standard. Toujours `type="button"` par défaut (évite les
  * soumissions involontaires de formulaire).
  */
@@ -61,14 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       type={type}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 font-body font-bold',
-        'transition-[transform,box-shadow,filter,background-color] duration-fast',
-        'active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50',
-        STYLES_VARIANT[variant],
-        STYLES_TAILLE[taille],
-        className,
-      )}
+      className={classesBouton({ variant, taille, className })}
       {...props}
     />
   );

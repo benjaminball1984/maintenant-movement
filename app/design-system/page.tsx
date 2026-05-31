@@ -11,6 +11,7 @@ import {
 import { Heart } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { FormulaireExemple } from './FormulaireExemple';
 
 export const metadata: Metadata = {
@@ -31,6 +32,8 @@ export const metadata: Metadata = {
  * reste lisible dans les deux modes (light et dark).
  */
 export default function PageDesignSystem() {
+  // Showcase interne (dev) : masqué en production (revue 2026, correctif C22).
+  if (process.env.NODE_ENV === 'production') notFound();
   return (
     <Container taille="lg" className="py-12">
       <header className="mb-12 flex items-start justify-between gap-4">

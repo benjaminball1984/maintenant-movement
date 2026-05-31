@@ -35,10 +35,18 @@ export default async function PageRetour({ searchParams }: PageRetourProps) {
   if (session_id === undefined || session_id === '' || don_id === undefined || don_id === '') {
     return (
       <Container taille="sm" className="py-12">
-        <Heading niveau={1}>Paramètres manquants</Heading>
-        <p className="mt-2 text-text-2">
-          La page de retour attend <code>session_id</code> et <code>don_id</code> en query string.
-        </p>
+        <Heading niveau={1}>Lien incomplet</Heading>
+        <Alert
+          variant="warning"
+          titre="Cette page de retour attend un paiement valide"
+          className="my-6"
+        >
+          Le lien semble incomplet (paramètres de session manquants). Si tu venais de faire un don,
+          reviens sur la cagnotte concernée pour vérifier qu'il a bien été enregistré.
+        </Alert>
+        <Link href="/mobiliser/cagnottes" className="text-brand hover:underline">
+          Retour à la liste des cagnottes
+        </Link>
       </Container>
     );
   }

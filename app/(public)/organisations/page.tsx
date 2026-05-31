@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Container, Heading } from '@/components/ui';
+import { Badge, Button, Card, Container, Heading, classesBouton } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { listerOrganisations } from '@/lib/organisations/requetes';
 import { LIBELLE_TYPE_ORGANISATION, type TypeOrganisation } from '@/lib/organisations/validation';
@@ -44,8 +44,8 @@ export default async function PageOrganisations({ searchParams }: PageProps) {
           </p>
         </div>
         {session !== null ? (
-          <Link href="/organisations/nouvelle">
-            <Button>Créer une organisation</Button>
+          <Link href="/organisations/nouvelle" className={classesBouton()}>
+            Créer une organisation
           </Link>
         ) : null}
       </header>

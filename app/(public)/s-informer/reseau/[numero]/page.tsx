@@ -4,7 +4,7 @@ import { BoutonSuivre } from '@/components/reseau/BoutonSuivre';
 import { CartePost } from '@/components/reseau/CartePost';
 import { ModaleMessage } from '@/components/reseau/ModaleMessage';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
-import { Badge, Button, Container, Heading } from '@/components/ui';
+import { Badge, Container, Heading, classesBouton } from '@/components/ui';
 import { getSession } from '@/lib/auth/session';
 import { etatAmitieAvec, peutEnvoyerMessageA } from '@/lib/reseau/amitie';
 import { getProfilReseauParNumero, listerPostsDePersonne, nomAffiche } from '@/lib/reseau/requetes';
@@ -93,10 +93,11 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             {profil.estMoi ? (
-              <Link href="/profil/informations">
-                <Button variant="outline" taille="sm">
-                  Modifier mon profil
-                </Button>
+              <Link
+                href="/profil/informations"
+                className={classesBouton({ variant: 'outline', taille: 'sm' })}
+              >
+                Modifier mon profil
               </Link>
             ) : connecte ? (
               <>
@@ -109,8 +110,11 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
                 ) : null}
               </>
             ) : (
-              <Link href={`/connexion?prochaine=/s-informer/reseau/${profil.numero}`}>
-                <Button taille="sm">Se connecter pour interagir</Button>
+              <Link
+                href={`/connexion?prochaine=/s-informer/reseau/${profil.numero}`}
+                className={classesBouton({ taille: 'sm' })}
+              >
+                Se connecter pour interagir
               </Link>
             )}
           </div>

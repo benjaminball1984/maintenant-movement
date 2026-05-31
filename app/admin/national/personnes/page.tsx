@@ -174,13 +174,13 @@ export default async function PageAdminPersonnes({ searchParams }: Props) {
               <li key={p.id}>
                 <Card variant="ombre" className="grid gap-2 sm:grid-cols-[auto_1fr_auto]">
                   <Avatar id={p.id} nomComplet={nomAffiche} taille="md" />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-bold text-text-1">{nomAffiche}</p>
                     <p className="text-text-3 text-xs">
                       <span className="sr-only">Email : </span>
-                      <code className="font-mono">{p.email ?? '(pas d’email)'}</code> ·{' '}
+                      <code className="break-all font-mono">{p.email ?? '(pas d’email)'}</code> ·{' '}
                       <span className="sr-only">Identifiant : </span>
-                      <code className="font-mono">{p.id}</code>
+                      <code className="break-all font-mono">{p.id}</code>
                     </p>
                     <p className="mt-1 text-text-3 text-xs">
                       Inscrit le {formaterDateCourte(p.createdAt)}
