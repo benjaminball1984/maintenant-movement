@@ -31,7 +31,7 @@ export default async function PageMessages() {
     <Container taille="md" className="py-12">
       <p className="mb-4 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-informer/reseau" className="hover:text-brand">
-          ← Réseau social
+          Retour
         </Link>
       </p>
       <Heading niveau={1} className="mb-6">

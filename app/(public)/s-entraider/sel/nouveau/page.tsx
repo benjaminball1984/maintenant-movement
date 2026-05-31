@@ -13,7 +13,7 @@ export default async function PageNouveauService() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/sel" className="hover:text-brand">
-          ← SEL
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier un service SEL</Heading>

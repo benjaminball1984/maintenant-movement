@@ -21,7 +21,7 @@ export default async function PageNouvelleOrganisation() {
     <Container taille="sm" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/organisations" className="hover:text-brand">
-          ← Toutes les organisations
+          Retour
         </Link>
       </p>
       <Heading niveau={1} className="mb-2">

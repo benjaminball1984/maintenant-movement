@@ -13,7 +13,7 @@ export default async function PageAdhererEuros() {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/agir/adherer" className="hover:text-brand">
-          ← Adhérer
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Adhésion 12 €</Heading>

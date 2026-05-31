@@ -44,7 +44,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
             <span className="text-xs font-bold uppercase tracking-cap text-text-3">Console</span>
           </div>
           <Link href="/" className="text-sm text-text-3 hover:text-brand">
-            ← Retour au site
+            Retour
           </Link>
         </div>
       </header>

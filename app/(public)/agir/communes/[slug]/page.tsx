@@ -28,7 +28,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Communes',
+  retour: 'Retour',
   badgeLibre: 'Commune libre',
   badgeStandard: 'Commune',
   labelCodePostal: 'Code postal',

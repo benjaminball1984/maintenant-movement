@@ -18,7 +18,7 @@ export default async function PageBoutiques() {
         <div>
           <p className="text-xs font-bold uppercase tracking-cap text-text-3">
             <Link href="/s-entraider/marche" className="hover:text-brand">
-              ← Marché solidaire
+              Retour
             </Link>
           </p>
           <Heading niveau={1}>Boutiques éphémères</Heading>

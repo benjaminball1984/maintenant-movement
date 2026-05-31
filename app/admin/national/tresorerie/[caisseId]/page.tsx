@@ -69,7 +69,7 @@ export default async function PageDetailCaisse({
     <>
       <p className="text-sm text-text-3">
         <Link href="/admin/national/tresorerie" className="hover:text-brand">
-          ← Trésorerie
+          Retour
         </Link>
       </p>
       <Heading niveau={1} className="mt-2">

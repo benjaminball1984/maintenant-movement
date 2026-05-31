@@ -27,7 +27,7 @@ export default async function PageCreationMobilisation() {
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
           <Link href="/mobiliser/mobilisations" className="hover:text-brand">
-            ← Toutes les mobilisations
+            Retour
           </Link>
         </p>
         <Heading niveau={1} className="mt-1">

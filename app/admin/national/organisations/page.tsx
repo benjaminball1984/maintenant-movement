@@ -23,7 +23,7 @@ export default async function PageAdminOrganisations() {
     <Container taille="lg" className="py-8">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/admin/national" className="hover:text-brand">
-          ← Admin national
+          Retour
         </Link>
       </p>
       <Heading niveau={1} className="mb-2">

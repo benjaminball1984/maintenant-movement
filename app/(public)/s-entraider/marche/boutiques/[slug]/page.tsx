@@ -57,7 +57,7 @@ export default async function PageDetailBoutique({ params }: PageDetailProps) {
   ] = await Promise.all([
     produitsDeLaBoutique(boutique.id),
     estAdminCourant(),
-    lireContenuEditorial('boutique.fiche.retour', { valeurMd: '← Boutiques' }),
+    lireContenuEditorial('boutique.fiche.retour', { valeurMd: 'Retour' }),
     lireContenuEditorial('boutique.fiche.badge_propose', { valeurMd: 'Boutique' }),
     lireContenuEditorial('boutique.fiche.badge_cherche', { valeurMd: 'Cherche à co-créer' }),
     lireContenuEditorial('boutique.fiche.badge_fermee', { valeurMd: 'Fermée' }),

@@ -17,7 +17,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Média Maintenant',
+  retour: 'Retour',
   redactionFallback: 'Rédaction',
   alertExternePrefix: 'Brève reprise de',
   alertExterneAmorce:

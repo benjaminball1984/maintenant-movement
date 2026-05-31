@@ -25,7 +25,7 @@ import { notFound } from 'next/navigation';
 import { signerPetition } from '../actions';
 
 const FALLBACKS = {
-  retour: '← Toutes les pétitions',
+  retour: 'Retour',
   preheaderAmorce: 'Pétition à',
   alertModerationTitre: 'En attente de modération',
   alertModerationCorps:

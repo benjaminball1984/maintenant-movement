@@ -13,7 +13,7 @@ export default async function PageNouveauMinimarche() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/marche/minimarches" className="hover:text-brand">
-          ← Minimarchés
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Annoncer un minimarché solidaire</Heading>

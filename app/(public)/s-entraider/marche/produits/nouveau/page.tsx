@@ -13,7 +13,7 @@ export default async function PageNouveauProduit() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/marche/produits" className="hover:text-brand">
-          ← Produits
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier un produit</Heading>

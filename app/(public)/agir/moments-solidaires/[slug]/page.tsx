@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Moments solidaires',
+  retour: 'Retour',
   labelQuand: 'Quand',
   labelJusquau: "Jusqu'au",
   labelOu: 'Où',

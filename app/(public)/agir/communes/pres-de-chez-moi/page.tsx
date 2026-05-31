@@ -75,7 +75,7 @@ export default async function PagePresDeChezMoi({ searchParams }: PageProps) {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/agir/communes" className="hover:text-brand">
-          ← Toutes les communes libres
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Des gens près de chez moi</Heading>

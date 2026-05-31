@@ -28,7 +28,7 @@ import { notFound } from 'next/navigation';
 import { participerMobilisation } from '../actions';
 
 const FALLBACKS = {
-  retour: '← Toutes les mobilisations',
+  retour: 'Retour',
   preheader: 'Mobilisation',
   alertRetireeTitre: 'Mobilisation retirée',
   alertRetireeAmorce: 'Raison :',

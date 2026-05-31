@@ -60,7 +60,7 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
     <Container taille="md" className="pb-12">
       <p className="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-cap text-text-3 sm:px-0">
         <Link href="/s-informer/reseau" className="hover:text-brand">
-          ← Réseau social
+          Retour
         </Link>
       </p>
 

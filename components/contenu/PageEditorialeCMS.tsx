@@ -58,7 +58,7 @@ export async function PageEditorialeCMS({ surtitre, titreParDefaut, cle, loremFa
 
       <p className="mt-12 text-sm text-text-3">
         <Link href="/" className="text-brand underline-offset-4 hover:underline">
-          ← Retour à l'accueil
+          Retour à l'accueil
         </Link>
       </p>
     </Container>

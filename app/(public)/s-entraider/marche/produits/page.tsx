@@ -40,7 +40,7 @@ export default async function PageProduits({ searchParams }: PageProduitsProps) 
         <div>
           <p className="text-xs font-bold uppercase tracking-cap text-text-3">
             <Link href="/s-entraider/marche" className="hover:text-brand">
-              ← Marché solidaire
+              Retour
             </Link>
           </p>
           <Heading niveau={1}>Produits</Heading>

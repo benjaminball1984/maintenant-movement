@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Fédérations',
+  retour: 'Retour',
   communeLabel: 'commune',
   rattacheeLabel: 'rattachée',
 };

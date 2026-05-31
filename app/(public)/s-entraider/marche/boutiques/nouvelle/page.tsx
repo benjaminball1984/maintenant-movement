@@ -13,7 +13,7 @@ export default async function PageNouvelleBoutique() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/marche/boutiques" className="hover:text-brand">
-          ← Boutiques
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Créer une boutique éphémère</Heading>

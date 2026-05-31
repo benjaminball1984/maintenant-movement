@@ -76,7 +76,7 @@ export default async function PageDetailOrganisation({ params }: PageDetailProps
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/organisations" className="hover:text-brand">
-          ← Toutes les organisations
+          Retour
         </Link>
       </p>
 

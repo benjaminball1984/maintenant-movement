@@ -59,7 +59,7 @@ export default async function PageDetailMinimarche({ params }: PageDetailProps) 
     footerAmorce,
   ] = await Promise.all([
     estAdminCourant(),
-    lireContenuEditorial('minimarche.fiche.retour', { valeurMd: '← Minimarchés' }),
+    lireContenuEditorial('minimarche.fiche.retour', { valeurMd: 'Retour' }),
     lireContenuEditorial('minimarche.fiche.statut_en_cours', { valeurMd: 'En cours' }),
     lireContenuEditorial('minimarche.fiche.statut_annonce', { valeurMd: 'Annoncé' }),
     lireContenuEditorial('minimarche.fiche.statut_termine', { valeurMd: 'Terminé' }),

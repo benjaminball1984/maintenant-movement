@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Produits',
+  retour: 'Retour',
   badgeDon: 'Don gratuit',
   badgeVente: 'Vente',
   statutReserve: 'Réservé',

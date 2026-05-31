@@ -28,7 +28,7 @@ import { notFound } from 'next/navigation';
 import { faireDonEuros, faireDonT99CP } from '../actions';
 
 const FALLBACKS = {
-  retour: '← Toutes les cagnottes',
+  retour: 'Retour',
   badgeSuspendue: 'Suspendue',
   badgeCloturee: 'Clôturée',
   alertSuspendueTitre: 'Cagnotte suspendue',

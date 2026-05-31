@@ -38,7 +38,7 @@ export default async function PageFil({ params }: PageFilProps) {
     <Container taille="md" className="py-12">
       <p className="mb-4 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-informer/reseau/messages" className="hover:text-brand">
-          ← Mes messages
+          Retour
         </Link>
       </p>
 

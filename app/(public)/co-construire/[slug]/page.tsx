@@ -77,7 +77,7 @@ export default async function PageGTDetail({ params }: PageDetailProps) {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/co-construire" className="hover:text-brand">
-          ← Tous les GT
+          Retour
         </Link>
       </p>
 

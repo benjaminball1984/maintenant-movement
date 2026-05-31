@@ -30,7 +30,7 @@ export default async function PageCreationPetition() {
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
           <Link href="/mobiliser/petitions" className="hover:text-brand">
-            ← Toutes les pétitions
+            Retour
           </Link>
         </p>
         <Heading niveau={1} className="mt-1">

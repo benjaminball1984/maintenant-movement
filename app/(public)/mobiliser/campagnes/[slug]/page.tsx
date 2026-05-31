@@ -97,7 +97,7 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/mobiliser/campagnes" className="hover:text-brand">
-          ← Toutes les campagnes
+          Retour
         </Link>
       </p>
 

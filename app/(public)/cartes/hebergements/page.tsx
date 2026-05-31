@@ -17,7 +17,7 @@ export default async function PageCarteHebergements() {
     <Container taille="lg" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/cartes" className="hover:text-brand">
-          ← Toutes les cartes
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>

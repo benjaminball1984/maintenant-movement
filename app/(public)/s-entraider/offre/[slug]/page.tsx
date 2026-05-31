@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retourPrefix: '←',
+  retourPrefix: 'Retour',
   badgeOffre: 'Offre',
   badgeDemande: 'Demande',
   badgeCloturee: 'Clôturée',
@@ -151,7 +151,7 @@ export default async function PageOffreDetail({ params }: PageDetailProps) {
             cle="offre.fiche.retour_prefix"
             valeurInitiale={retourPrefix.valeurMd}
             estAdmin={estAdmin}
-            libelle="prefixe retour (defaut : ←). Le titre du sous-espace s'ajoute apres."
+            libelle="prefixe retour (defaut : Retour). Le titre du sous-espace s'ajoute apres."
             longueurMax={10}
           >
             {(t) => <>{t}</>}

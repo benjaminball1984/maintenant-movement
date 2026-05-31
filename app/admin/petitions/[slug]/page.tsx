@@ -37,7 +37,7 @@ export default async function PageEditionPetition({ params }: PageEditionPetitio
     <section className="grid gap-6">
       <header>
         <Link href="/admin/petitions" className="text-sm text-text-3 hover:text-brand">
-          ← Toutes les pétitions
+          Retour
         </Link>
         <Heading niveau={1} apparenceComme={2} className="mt-2">
           Éditer la pétition

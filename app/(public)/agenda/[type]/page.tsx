@@ -86,7 +86,7 @@ export default async function PageAgendaParType({ params, searchParams }: Props)
     <Container taille="lg" className="py-12">
       <p className="text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/agenda" className="hover:text-brand">
-          ← Agenda complet
+          Retour
         </Link>
       </p>
       <header className="mt-2 mb-8">

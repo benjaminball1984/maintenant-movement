@@ -13,7 +13,7 @@ export default async function PageNouvelleFruitsTerre() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/fruits-de-la-terre" className="hover:text-brand">
-          ← Fruits de la terre
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier une offre</Heading>

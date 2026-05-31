@@ -13,7 +13,7 @@ export default async function PageNouvelleTransport() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/transport" className="hover:text-brand">
-          ← Transport solidaire
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier une offre</Heading>

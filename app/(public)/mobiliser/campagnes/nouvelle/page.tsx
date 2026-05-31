@@ -19,7 +19,7 @@ export default async function PageCreationCampagne() {
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
           <Link href="/mobiliser/campagnes" className="hover:text-brand">
-            ← Toutes les campagnes
+            Retour
           </Link>
         </p>
         <Heading niveau={1} className="mt-1">

@@ -13,7 +13,7 @@ export default async function PageNouvelleHebergement() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/hebergement" className="hover:text-brand">
-          ← Hébergement solidaire
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier une offre</Heading>

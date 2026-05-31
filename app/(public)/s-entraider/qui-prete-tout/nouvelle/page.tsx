@@ -13,7 +13,7 @@ export default async function PageNouvelleQuiPreteTout() {
     <>
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/s-entraider/qui-prete-tout" className="hover:text-brand">
-          ← Qui prête tout
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Publier une offre</Heading>

@@ -56,7 +56,7 @@ export default async function PageFicheCommune({ params }: PageFicheCommuneProps
   return (
     <Container className="py-8">
       <Link href="/communes" className="text-sm text-text-3 hover:text-brand">
-        ← Carte des communes
+        Retour
       </Link>
 
       <header className="mt-2">

@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← Sondages',
+  retour: 'Retour',
   alertConnecteTitre: 'Vote connecté obligatoire',
   alertConnecteLien: 'Connecte-toi',
   alertConnecteFin: 'pour voter (cf. doctrine §4D).',

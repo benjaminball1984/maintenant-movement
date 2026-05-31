@@ -13,7 +13,7 @@ export default async function PageNouveauMoment() {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/agir/moments-solidaires" className="hover:text-brand">
-          ← Moments solidaires
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Organiser un moment solidaire</Heading>

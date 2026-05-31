@@ -23,7 +23,7 @@ export default async function PageCreationCagnotte() {
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
           <Link href="/mobiliser/cagnottes" className="hover:text-brand">
-            ← Toutes les cagnottes
+            Retour
           </Link>
         </p>
         <Heading niveau={1} className="mt-1">

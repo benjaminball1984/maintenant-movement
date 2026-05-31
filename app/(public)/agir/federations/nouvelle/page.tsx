@@ -13,7 +13,7 @@ export default async function PageNouvelleFederation() {
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
         <Link href="/agir/federations" className="hover:text-brand">
-          ← Fédérations
+          Retour
         </Link>
       </p>
       <Heading niveau={1}>Créer une fédération</Heading>

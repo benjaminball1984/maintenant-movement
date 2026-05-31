@@ -22,7 +22,7 @@ import { notFound } from 'next/navigation';
 import { BoutonsAdhesion } from './BoutonsAdhesion';
 
 const FALLBACKS = {
-  retour: '← Tous les groupes',
+  retour: 'Retour',
   badgeEnModeration: 'En modération',
   sectionLeGroupe: 'Le groupe',
   sectionOutilsActives: 'Outils activés',

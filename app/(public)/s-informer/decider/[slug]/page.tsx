@@ -17,7 +17,7 @@ import { notFound } from 'next/navigation';
 import { FormulairePlanifierReunion } from './FormulairePlanifierReunion';
 
 const FALLBACKS = {
-  retour: '← Toutes les salles',
+  retour: 'Retour',
   sectionAVenir: 'Réunions à venir',
   alertVideTitre: 'Aucune réunion planifiée',
   alertVideCorps:

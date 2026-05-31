@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
-  retour: '← SEL',
+  retour: 'Retour',
   badgeService: 'Service',
   badgeVolontariat: 'Volontariat',
   badgeOffre: 'Offre',
