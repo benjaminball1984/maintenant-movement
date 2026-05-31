@@ -2,6 +2,8 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
+import { coinsEnCentimes } from '@/lib/conversion-99coin';
+import { formaterEurosDepuisCentimes } from '@/lib/format-euros';
 import {
   MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
   type MessagesValidationCagnotte,
@@ -20,6 +22,8 @@ export interface LibellesDonT99CP {
   alertEtape1Avant: string;
   alertEtape1Apres: string;
   labelMontant: string;
+  /** Équivalent euros affiché sous le montant. `{euros}` est remplacé. */
+  equivalentEurosPattern: string;
   labelTxHash: string;
   placeholderTxHash: string;
   labelPrenom: string;
@@ -39,6 +43,7 @@ const LIBELLES_DEFAUT: LibellesDonT99CP = {
   alertEtape1Apres:
     'Frais 0 % (côté Maintenant!). Une fois la transaction confirmée, recopie ci-dessous le tx_hash retourné par ton wallet.',
   labelMontant: 'Montant envoyé (en 99-coin entiers)',
+  equivalentEurosPattern: 'soit {euros} (parité 1 99-coin = 1 €)',
   labelTxHash: 'tx_hash de la transaction',
   placeholderTxHash: '0x...',
   labelPrenom: 'Prénom (optionnel)',
@@ -85,6 +90,7 @@ export function FormulaireDonT99CP({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesFaireDonT99CP>({
     resolver: zodResolver(creerFaireDonT99CPSchema(messages)),
@@ -122,6 +128,13 @@ export function FormulaireDonT99CP({
     );
   }
 
+  // Équivalent euros en direct (parité 1 99-coin = 1 €, cf. lib/conversion-99coin).
+  const coinsSaisis = Number(watch('montant_unites'));
+  const equivalentEuros =
+    Number.isFinite(coinsSaisis) && coinsSaisis > 0
+      ? formaterEurosDepuisCentimes(coinsEnCentimes(coinsSaisis))
+      : '';
+
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       {erreur !== null ? (
@@ -154,6 +167,11 @@ export function FormulaireDonT99CP({
         />
         {errors.montant_unites !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.montant_unites.message}</p>
+        ) : null}
+        {equivalentEuros !== '' ? (
+          <p className="mt-2 text-xs text-text-3">
+            {libelles.equivalentEurosPattern.replace('{euros}', equivalentEuros)}
+          </p>
         ) : null}
       </div>
 

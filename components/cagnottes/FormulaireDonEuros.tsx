@@ -2,6 +2,7 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
+import { centimesEnCoins } from '@/lib/conversion-99coin';
 import {
   MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
   type MessagesValidationCagnotte,
@@ -15,6 +16,8 @@ import { useForm } from 'react-hook-form';
 export interface LibellesDonEuros {
   alertErreurTitre: string;
   labelMontant: string;
+  /** Équivalent 99-coin affiché sous le montant. `{coins}` est remplacé. */
+  equivalentCoinsPattern: string;
   decompositionPattern: string;
   decompositionFraisLabel: string;
   decompositionNetLabel: string;
@@ -32,6 +35,7 @@ export interface LibellesDonEuros {
 const LIBELLES_DEFAUT: LibellesDonEuros = {
   alertErreurTitre: 'Don impossible',
   labelMontant: 'Montant en euros',
+  equivalentCoinsPattern: 'soit {coins} 99-coin (parité 1 € = 1 99-coin)',
   decompositionPattern: 'Décomposition : {brut} payés · {frais} de frais Maintenant! (5 %) ·',
   decompositionFraisLabel: 'frais Maintenant!',
   decompositionNetLabel: 'pour la cagnotte',
@@ -59,6 +63,10 @@ interface FormulaireDonEurosProps {
 const FORMAT_EURO = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'EUR',
+});
+
+const FORMAT_COINS = new Intl.NumberFormat('fr-FR', {
+  maximumFractionDigits: 2,
 });
 
 /**
@@ -172,15 +180,23 @@ export function FormulaireDonEuros({
           <p className="mt-1 text-xs text-danger">{errors.montant_centimes.message}</p>
         ) : null}
         {montantEuros > 0 ? (
-          <p className="mt-2 text-xs text-text-3">
-            {libelles.decompositionPattern
-              .replace('{brut}', FORMAT_EURO.format(montantEuros))
-              .replace('{frais}', FORMAT_EURO.format(frais / 100))}{' '}
-            <strong className="text-text-2">
-              {FORMAT_EURO.format(net / 100)} {libelles.decompositionNetLabel}
-            </strong>
-            .
-          </p>
+          <>
+            <p className="mt-2 text-xs text-text-3">
+              {libelles.equivalentCoinsPattern.replace(
+                '{coins}',
+                FORMAT_COINS.format(centimesEnCoins(montantEuros * 100)),
+              )}
+            </p>
+            <p className="mt-1 text-xs text-text-3">
+              {libelles.decompositionPattern
+                .replace('{brut}', FORMAT_EURO.format(montantEuros))
+                .replace('{frais}', FORMAT_EURO.format(frais / 100))}{' '}
+              <strong className="text-text-2">
+                {FORMAT_EURO.format(net / 100)} {libelles.decompositionNetLabel}
+              </strong>
+              .
+            </p>
+          </>
         ) : null}
       </div>
 
