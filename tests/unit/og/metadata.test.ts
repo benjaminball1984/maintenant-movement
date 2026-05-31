@@ -50,7 +50,7 @@ describe('metadataPourPartage', () => {
         : firstImage instanceof URL
           ? firstImage.toString()
           : (firstImage?.url ?? '');
-    expect(String(url)).toContain('/defaults/petition.svg');
+    expect(String(url)).toContain('/defaults/petition.jpg');
   });
 
   it('utilise l’image uploadée quand image_url est présent', () => {

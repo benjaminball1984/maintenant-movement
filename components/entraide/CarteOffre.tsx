@@ -16,10 +16,10 @@ interface CarteOffreProps {
  * les types non spécifiquement illustrés (qui-prête-tout, fruits-de-la-terre).
  */
 const IMAGE_DEFAUT_PAR_TYPE: Record<string, string> = {
-  transport: '/defaults/offre-entraide.svg',
-  hebergement: '/defaults/offre-entraide.svg',
-  pret_objet: '/defaults/offre-entraide.svg',
-  fruits_terre: '/defaults/offre-entraide.svg',
+  transport: '/defaults/offre-entraide.jpg',
+  hebergement: '/defaults/offre-entraide.jpg',
+  pret_objet: '/defaults/offre-entraide.jpg',
+  fruits_terre: '/defaults/offre-entraide.jpg',
 };
 
 /**
@@ -57,7 +57,7 @@ export function CarteOffre({ offre, enAvant = false }: CarteOffreProps) {
   const imageSrc =
     offre.image_url !== null && offre.image_url.trim() !== ''
       ? offre.image_url
-      : (IMAGE_DEFAUT_PAR_TYPE[offre.type] ?? '/defaults/offre-entraide.svg');
+      : (IMAGE_DEFAUT_PAR_TYPE[offre.type] ?? '/defaults/offre-entraide.jpg');
 
   return (
     <article

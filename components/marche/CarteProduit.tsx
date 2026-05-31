@@ -17,7 +17,7 @@ interface CarteProduitProps {
  *
  * Refonte « façon Vinted » (Master Plan V2.6 Phase I §3.5) :
  *   - Photo carrée en haut (aspect-square, object-cover), c'est le hero
- *     de la vignette ; image par défaut `/defaults/offre-marche.svg`
+ *     de la vignette ; image par défaut `/defaults/offre-marche.jpg`
  *     si l'annonce n'a pas encore de photo.
  *   - Badges (mode vente/don, statut) en surimpression sur la photo
  *     en haut à gauche, à la Vinted.
@@ -32,7 +32,7 @@ export function CarteProduit({ produit, enAvant = false }: CarteProduitProps) {
   const imageSrc =
     produit.image_url !== null && produit.image_url.trim() !== ''
       ? produit.image_url
-      : '/defaults/offre-marche.svg';
+      : '/defaults/offre-marche.jpg';
 
   const vendeureuseNom =
     produit.vendeureuse_prenom !== null || produit.vendeureuse_nom !== null

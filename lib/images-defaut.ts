@@ -13,15 +13,16 @@
  * bibliothèque est délibérée, organisée par type d'objet, et son contenu
  * visuel relève d'une **décision politique et esthétique de Lilou/Ben**.
  *
- * État au chantier V2.0.3 (fondation) : les images réelles ne sont pas
- * encore curées. On installe ici la **structure** (la matrice de types, le
- * helper de résolution, des **placeholders SVG identifiables**) pour que
- * le système soit fonctionnel et que les chantiers suivants n'aient qu'à
- * remplacer un fichier dans `public/defaults/` quand Lilou/Ben fournira
- * les vraies images.
+ * État au chantier V2.6.27 : la plupart des types pointent désormais vers de
+ * **vraies photos curées** (Unsplash, licence libre sans attribution),
+ * téléchargées dans `public/defaults/*.jpg` par le script
+ * `scripts/telecharger-images-defaut.ts`. Seuls `profil` et `generique`
+ * restent des SVG de repli (avatar et visuel neutre). Pour remplacer une
+ * image, soit déposer un fichier au même chemin, soit changer l'identifiant
+ * de photo dans le script et le relancer. Aucun appelant n'a besoin de changer.
  *
- * Voir `docs/manifests/v2-0-3-fondations-ui-transversales.md` rubrique
- * « Contenus à arbitrer » pour la liste des images à fournir.
+ * (Fondation initiale au V2.0.3 : placeholders SVG, voir
+ * `docs/manifests/v2-0-3-fondations-ui-transversales.md`.)
  */
 
 /**
@@ -96,34 +97,36 @@ export const TYPES_OBJETS: readonly TypeObjet[] = [
  * Matrice : pour chaque type d'objet, le chemin (servi par Next.js depuis
  * `public/`) de l'image par défaut.
  *
- * Les valeurs pointent toutes vers `public/defaults/*.svg` à la date de
- * V2.0.3. Quand Lilou/Ben fournira des images JPEG/WebP curées, il
- * suffira de remplacer le fichier (même chemin) ou de pointer ici vers
- * un nouveau chemin. Aucun appelant n'a besoin de changer.
+ * Les valeurs pointent vers `public/defaults/*.jpg` (photos curées) sauf
+ * `profil` et `generique` restés en `.svg`. Pour changer une image, remplacer
+ * le fichier (même chemin) ou pointer ici vers un nouveau chemin. Aucun
+ * appelant n'a besoin de changer.
  */
 export const IMAGES_DEFAUT: Record<TypeObjet, string> = {
-  petition: '/defaults/petition.svg',
-  mobilisation: '/defaults/mobilisation.svg',
-  campagne: '/defaults/campagne.svg',
-  cagnotte: '/defaults/cagnotte.svg',
-  moment_solidaire: '/defaults/moment-solidaire.svg',
-  offre_marche: '/defaults/offre-marche.svg',
-  produit_marche: '/defaults/offre-marche.svg',
-  boutique_marche: '/defaults/offre-marche.svg',
-  minimarche_solidaire: '/defaults/offre-marche.svg',
-  commune: '/defaults/commune.svg',
-  commune_libre: '/defaults/commune.svg',
-  federation: '/defaults/commune.svg',
-  confederation: '/defaults/commune.svg',
-  gt_thematique: '/defaults/gt-thematique.svg',
-  article: '/defaults/article.svg',
-  sondage: '/defaults/sondage.svg',
-  service_sel: '/defaults/service-sel.svg',
-  offre_entraide: '/defaults/offre-entraide.svg',
-  offre_transport: '/defaults/offre-entraide.svg',
-  offre_hebergement: '/defaults/offre-entraide.svg',
-  offre_pret: '/defaults/offre-entraide.svg',
-  organisation_partenaire: '/defaults/organisation.svg',
+  petition: '/defaults/petition.jpg',
+  mobilisation: '/defaults/mobilisation.jpg',
+  campagne: '/defaults/campagne.jpg',
+  cagnotte: '/defaults/cagnotte.jpg',
+  moment_solidaire: '/defaults/moment-solidaire.jpg',
+  offre_marche: '/defaults/offre-marche.jpg',
+  produit_marche: '/defaults/offre-marche.jpg',
+  boutique_marche: '/defaults/offre-marche.jpg',
+  minimarche_solidaire: '/defaults/offre-marche.jpg',
+  commune: '/defaults/commune.jpg',
+  commune_libre: '/defaults/commune.jpg',
+  federation: '/defaults/commune.jpg',
+  confederation: '/defaults/commune.jpg',
+  gt_thematique: '/defaults/gt-thematique.jpg',
+  article: '/defaults/article.jpg',
+  sondage: '/defaults/sondage.jpg',
+  service_sel: '/defaults/service-sel.jpg',
+  offre_entraide: '/defaults/offre-entraide.jpg',
+  offre_transport: '/defaults/offre-entraide.jpg',
+  offre_hebergement: '/defaults/offre-entraide.jpg',
+  offre_pret: '/defaults/offre-entraide.jpg',
+  organisation_partenaire: '/defaults/organisation.jpg',
+  // profil et generique restent en SVG : avatar et visuel neutre de repli,
+  // pas des photos de scène (cf. chantier V2.6.27).
   profil: '/defaults/profil.svg',
   generique: '/defaults/generique.svg',
 };
