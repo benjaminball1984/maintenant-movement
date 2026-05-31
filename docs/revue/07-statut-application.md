@@ -78,3 +78,10 @@ Après le Bloc 8, sur décision Lilou/Ben :
 - **C15** (soft-delete contenu_organisation) : **reportée** (table absente en local + nécessite un changement du chemin de lecture).
 - **Reste** : C16 (5 formulaires), C17 (flux paiement), C24 (mineur), C15 ; décision D5 ; flèches « → » résiduelles ; push au distant en Phase M.
 
+## Mise à jour (C16 + C15 + décision D5)
+
+- **C16 implémenté** (V2.6.53) : attestation de mandat obligatoire pour déclarer une organisation initiatrice en mode « nouvelle » (5 formulaires de création). Case à cocher + refus serveur si absente.
+- **C15 implémenté** (V2.6.53) : migration additive `contenu_organisation_soft_delete` (colonne `retire_le`, retrait = soft-delete au lieu de DELETE, re-déclaration réactive). Lecture publique ignore les liens retirés. Table du chantier B absente en local, donc **appliquée au distant en Phase M**.
+- **D5 implémenté** (V2.6.54) : frais de port du marché. Migration additive `produit_marche_frais_port` (colonne `frais_port_centimes` default 0), **appliquée et testée en LOCAL**. Helper pur `lib/marche/port.ts` (+7 tests, 1020 verts). Port en euros ajouté au total Stripe (sans commission sur le port) ; pour le 99-coin, port réglé en POL au taux du moment (référence affichée + alerte « Prévois du POL »). Non-régression par construction (default 0 + dégradation propre sur le distant). Manifest `docs/manifests/v2-6-54-D5-frais-de-port-marche.md`.
+- **Reste après D5** : **C17** (résidu `envoyerTransaction` dans l'adhésion T99CP, à passer au pattern redirection vers the99coinproject.org, touche au paiement), **C24** (mineur : `zodResolver` sur `FormulaireCommentaire` + `FormulairePosterMessage`), **C26-reste** (`aria-label` sur les boutons badge de la console admin organisations), quelques flèches « → » résiduelles dans des affichages de plage et commentaires. **Phase M** : push de toutes les migrations en attente au distant (D1, C5, C13, C14, C15, D5). **S3** : révocation du jeton Management (action manuelle de Lilou/Ben).
+
