@@ -112,7 +112,7 @@ export function BoutonAttacherACampagne({
 
       <dialog
         ref={refDialog}
-        className="m-auto w-full max-w-md rounded-lg border border-border bg-surface p-0 shadow-lg backdrop:bg-black/40"
+        className="m-auto max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-surface p-0 shadow-lg backdrop:bg-black/40"
         aria-label="Intégrer à une campagne"
       >
         <header className="flex items-start justify-between gap-3 border-b border-border p-4">

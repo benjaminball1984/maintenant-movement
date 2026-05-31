@@ -51,6 +51,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type_objet: 'article',
     },
     cheminPage: `/s-informer/journal/${e.slug}`,
+    // Article éditorial Maintenant Médias : doit porter og:type=article
+    // (les autres pages partageables restent en og:type=website par défaut).
+    ogType: 'article',
   });
 }
 
