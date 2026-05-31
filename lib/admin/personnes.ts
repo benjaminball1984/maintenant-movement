@@ -71,7 +71,9 @@ export async function listerPersonnesAdminPagine(
   }
 
   if (options.motCle !== undefined && options.motCle.trim() !== '') {
-    const motif = `%${options.motCle.trim()}%`;
+    // Sécurité (revue 2026, S2) : on retire les caractères qui casseraient la
+    // grammaire d'un filtre `.or()` PostgREST (`,`, `(`, `)`, `%`) avant interpolation.
+    const motif = `%${options.motCle.replace(/[%,()]/g, ' ').trim()}%`;
     query = query.or(`email.ilike.${motif},prenom.ilike.${motif},nom.ilike.${motif}`);
   }
 

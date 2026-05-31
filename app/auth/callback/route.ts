@@ -54,7 +54,15 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get('code');
   const tokenHash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type') as EmailOtpType | null;
-  const next = url.searchParams.get('next') ?? '/profil/dashboard';
+  // Sécurité (revue 2026, S1) : `next` doit rester un chemin INTERNE. Sans ce
+  // filtre, `?next=//evil.com` ou `?next=https://evil.com` provoquerait une
+  // redirection ouverte (hameçonnage après une connexion légitime). On
+  // n'accepte qu'un chemin commençant par un seul « / » (ni « // » ni « /\ »).
+  const nextDemande = url.searchParams.get('next') ?? '/profil/dashboard';
+  const next =
+    nextDemande.startsWith('/') && !nextDemande.startsWith('//') && !nextDemande.startsWith('/\\')
+      ? nextDemande
+      : '/profil/dashboard';
 
   const supabase = await getSupabaseServer();
 

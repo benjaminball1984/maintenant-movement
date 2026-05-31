@@ -47,7 +47,8 @@ export async function listerMediasAdmin(
   }
 
   if (options.motCle !== undefined && options.motCle.trim() !== '') {
-    const motif = `%${options.motCle.trim()}%`;
+    // Sécurité (revue 2026, S2) : échappement des caractères de filtre `.or()` PostgREST.
+    const motif = `%${options.motCle.replace(/[%,()]/g, ' ').trim()}%`;
     query = query.or(`titre.ilike.${motif},corps.ilike.${motif}`);
   }
 
