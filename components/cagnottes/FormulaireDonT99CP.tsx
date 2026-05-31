@@ -29,6 +29,7 @@ export interface LibellesDonT99CP {
   labelPrenom: string;
   labelNom: string;
   labelEmail: string;
+  ctaOuvrirWallet: string;
   ctaSubmit: string;
   ctaEnCours: string;
 }
@@ -49,6 +50,7 @@ const LIBELLES_DEFAUT: LibellesDonT99CP = {
   labelPrenom: 'Prénom (optionnel)',
   labelNom: 'Nom (optionnel)',
   labelEmail: 'Email (optionnel)',
+  ctaOuvrirWallet: 'Ouvrir the99coinproject.org pour payer',
   ctaSubmit: 'Enregistrer le don T99CP',
   ctaEnCours: 'Enregistrement...',
 };
@@ -150,6 +152,18 @@ export function FormulaireDonT99CP({
         </code>
         . {libelles.alertEtape1Apres}
       </Alert>
+
+      {/* C11 (revue 2026) : accès au wallet 99-coin. Toujours la HOME, jamais
+          une URL profonde (doctrine §19), en nouvelle fenêtre. */}
+      <a
+        href="https://the99coinproject.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-fit text-sm font-bold text-brand hover:underline"
+      >
+        {libelles.ctaOuvrirWallet}
+        <span className="sr-only"> (nouvelle fenêtre)</span>
+      </a>
 
       <input type="hidden" {...register('cagnotte_id')} />
 
