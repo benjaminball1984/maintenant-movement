@@ -11,7 +11,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterEuros } from '@/lib/marche/config';
-import { listerNotationsProduit, produitParSlug } from '@/lib/marche/requetes';
+import { listerNotationsProduit, produitParSlug, walletVendeureuse } from '@/lib/marche/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { MapPin, Package, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -151,6 +151,11 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
     produit.statut === 'disponible' &&
     produit.mode === 'vente';
   const peutNoter = session !== null && !estVendeureuse && produit.statut === 'vendu';
+  // P6 : adresse wallet 99-coin de la vendeureuse, chargée seulement quand le
+  // formulaire d'achat s'affiche. Null en l'absence de wallet renseigné (ou sur
+  // le distant tant que la colonne n'est pas poussée) : l'UI dégrade alors vers
+  // le message « adresse communiquée via la messagerie ».
+  const walletVendeur = peutAcheter ? await walletVendeureuse(produit.vendeureuse_id) : null;
 
   return (
     <>
@@ -285,6 +290,7 @@ export default async function PageDetailProduit({ params }: PageDetailProps) {
               fraisPortCentimes={produit.frais_port_centimes}
               remiseMainPropre={produit.remise_main_propre}
               envoiPostal={produit.envoi_postal}
+              walletVendeur={walletVendeur}
               acheterProduit={acheterProduit}
             />
           </Card>
