@@ -60,5 +60,11 @@ Après le Bloc 8, sur décision Lilou/Ben :
 - **Nettoyage écriture (option B, textes affichés d'abord)** : **53 tirets cadratins** retirés des titres / libellés / placeholders affichés (V2.6.41) ; **4 flèches** retirées des liens « voir » (V2.6.42). Cible stricte (chaînes affichées seulement) ; cahiers des charges intacts ; 1013 tests verts.
 - **Décisions tranchées et enregistrées** (mémoire projet) : **D1** (membre actif = adhésion en cours de validité ; compteur public = adhérent·es à jour) et **D2** (Décider = émargement + bulletin secret).
 
-**Reste pour une prochaine passe** : liens « retour » (`← X`, ≈40, formulation « Retour à/au/aux X » au cas par cas) ; tirets/flèches dans les commentaires et la doc interne (le gros volume, invisible au public) ; implémentation du compteur D1 ; décisions D3-D5 ; correctifs C16/C17/C24/C6 + migrations additives C5/C13/C14/C15/C31.
+**Reste pour une prochaine passe** : liens « retour » (`← X`, ≈40, formulation « Retour à/au/aux X » au cas par cas) ; tirets/flèches dans les commentaires et la doc interne (le gros volume, invisible au public) ; décision D5 ; correctifs C16/C17/C24/C6 + migrations additives C5/C13/C14/C15/C31.
+
+## Mise à jour (D1 et D4 implémentés et testés en local)
+
+- **D1 implémenté** (V2.6.45) : fonction SQL `compter_membres_actifs()` (count distinct des personnes à adhésion valide : `statut='active'` et `expire_le > now()`), branchée dans `getCompteursHome`. **Testée en local** (transaction de test : une personne à 2 adhésions comptée une fois, adhésion expirée exclue). Migration additive appliquée au Supabase **local** ; à pousser au distant en Phase M.
+- **D4 implémenté** (V2.6.46) : nouveau helper `peutPublierAuNomEspace` (gestionnaire actif OU `createurice_id` de l'espace). Publier au nom d'un espace n'est plus ouvert à tout membre actif. **Testé en local** (le créateur n'est jamais bloqué ; un non-créateur non-mandataire l'est). 1013 tests verts.
+- **D3** : plan écrit (`09-plan-convergence-tronc.md`), exécution NON commencée (chantier séparé, `pg_dump` d'abord).
 
