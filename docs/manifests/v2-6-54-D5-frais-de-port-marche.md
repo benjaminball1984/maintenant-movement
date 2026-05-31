@@ -1,4 +1,4 @@
-# Manifest — Phase V2.6, Chantier V2.6.54 : D5 — Frais de port du marché solidaire
+# Manifest : Phase V2.6, Chantier V2.6.54 : D5 (frais de port du marché solidaire)
 
 **Date de fin** : 2026-05-31
 **Branche** : main
@@ -24,9 +24,9 @@ Jusqu'ici, `produit_marche` portait les deux drapeaux `remise_main_propre` /
 - [x] **Migration additive** `supabase/migrations/20260602160000_produit_marche_frais_port.sql` :
   colonne `frais_port_centimes integer not null default 0` + contrainte CHECK
   (0 à 100 000 centimes, soit 0 à 1 000 €). **Appliquée et vérifiée en LOCAL**
-  (Docker `supabase_db_Maintenant`). Test transactionnel : insertion port 690 →
+  (Docker `supabase_db_Maintenant`). Test transactionnel : insertion port 690,
   total envoi 2190 ; rejet de 110000 et de -5 par le CHECK ; rollback propre.
-  `produit_marche` est une table V1 → migration appliquée local, **distant en Phase M**.
+  `produit_marche` est une table V1, donc migration appliquée local, **distant en Phase M**.
 - [x] **`types/database.ts`** : `frais_port_centimes` ajouté aux trois blocs
   (Row requis, Insert/Update optionnels) de `produit_marche`.
 - [x] **Validation Zod** (`lib/validations/marche.ts`) :
@@ -40,7 +40,7 @@ Jusqu'ici, `produit_marche` portait les deux drapeaux `remise_main_propre` /
 - [x] **Helper pur** `lib/marche/port.ts` : `portFactureCentimes({ modeRemise,
   envoiPostal, fraisPortCentimes })`. Centralise « le port s'applique-t-il et pour
   combien ? » ; partagé par l'action serveur ET le formulaire d'achat (DRY).
-  Renvoie 0 dès qu'une condition manque → comportement historique garanti.
+  Renvoie 0 dès qu'une condition manque, ce qui garantit le comportement historique.
 - [x] **Formulaire de création produit** (`FormulaireCreationProduit.tsx`) : champ
   « Frais de port (euros, centimes) » qui n'apparaît QUE si l'envoi postal est coché.
   Normalisation à l'envoi (port remis à 0 si l'envoi est décoché). Libellés CMS.
@@ -53,7 +53,7 @@ Jusqu'ici, `produit_marche` portait les deux drapeaux `remise_main_propre` /
 - [x] **Action `acheterProduit`** : charge `frais_port_centimes` /
   `remise_main_propre` / `envoi_postal` ; calcule le port via le helper ; en euros,
   `montantTotalCentimes = prix + port` (frais plateforme inchangés, calculés sur le
-  prix seul → pas de commission sur le port) ; en 99-coin, le montant du jeton reste
+  prix seul, donc pas de commission sur le port) ; en 99-coin, le montant du jeton reste
   le prix seul, le port (POL) est journalisé pour la réconciliation Polygon à venir.
   Métadonnée `frais_port_centimes` ajoutée au checkout.
 - [x] **Affichage fiche produit** : ligne « Frais de port : X € » quand l'envoi a un
@@ -62,16 +62,17 @@ Jusqu'ici, `produit_marche` portait les deux drapeaux `remise_main_propre` /
 ## Non régression (garantie par construction)
 
 - Colonne `frais_port_centimes` avec **DEFAULT 0** : tous les produits existants
-  gardent un port nul → total = prix seul, comme avant.
-- Helper `portFactureCentimes` renvoie 0 dès qu'une condition manque (mode ≠ envoi,
-  envoi non proposé, montant nul) → aucun produit existant ne facture de port.
+  gardent un port nul, donc total = prix seul, comme avant.
+- Helper `portFactureCentimes` renvoie 0 dès qu'une condition manque (mode autre
+  qu'envoi, envoi non proposé, montant nul), donc aucun produit existant ne facture
+  de port.
 - Sur le **distant** (colonne absente jusqu'en Phase M), `select('*')` ne renvoie pas
-  le champ → `produit.frais_port_centimes` vaut `undefined` → l'UI et l'action le
-  traitent comme 0. **Dégradation propre, zéro régression distant.**
+  le champ, donc `produit.frais_port_centimes` vaut `undefined`, et l'UI comme
+  l'action le traitent comme 0. **Dégradation propre, zéro régression distant.**
 
 ## Non livré (et pourquoi)
 
-- [ ] **Conversion euros → POL réelle** : le montant POL exact dépend d'un oracle de
+- [ ] **Conversion euros vers POL réelle** : le montant POL exact dépend d'un oracle de
   taux POL/EUR non branché (toute la voie crypto est en mock tx_hash). Conforme à la
   fiche : le port est affiché en référence euros + « à régler en POL au taux du
   moment » + alerte. La conversion réelle relève du wallet (chantier T99CP dédié).
@@ -83,7 +84,7 @@ Jusqu'ici, `produit_marche` portait les deux drapeaux `remise_main_propre` /
 - Aucun. Les libellés sont des microcopies fonctionnelles (autorisées §3) et restent
   CMS-éditables par Lilou/Ben.
 
-## Écarts V1→V2 signalés (non touchés ici)
+## Écarts V1 vers V2 signalés (non touchés ici)
 
 - **Frais plateforme 5 % sur le marché** : le code V1 applique `calculerFraisEuros`
   (5 %) sur le prix produit, alors que la fiche CDC V2 §Commission dit « Pas de

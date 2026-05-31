@@ -17,7 +17,7 @@
 export type ModeRemise = 'main_propre' | 'envoi';
 
 export interface ParametresPort {
-  /** Mode choisi (undefined = non précisé → traité comme main propre). */
+  /** Mode choisi (undefined = non précisé, traité comme main propre). */
   modeRemise: ModeRemise | undefined;
   /** La vendeureuse propose-t-elle l'envoi postal ? */
   envoiPostal: boolean;

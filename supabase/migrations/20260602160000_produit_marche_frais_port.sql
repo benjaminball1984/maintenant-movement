@@ -1,5 +1,5 @@
 -- ============================================================================
--- Revue 2026 (décision D5) — Frais de port du marché solidaire.
+-- Revue 2026 (décision D5) : frais de port du marché solidaire.
 -- ============================================================================
 --
 -- Conforme à la fiche CDC `marche-solidaire-V2.md` §"Frais de port" :
