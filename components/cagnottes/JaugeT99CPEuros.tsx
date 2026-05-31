@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui';
+import { formaterEurosEntier } from '@/lib/format-euros';
 import { cn } from '@/lib/utils';
 
 interface JaugeT99CPEurosProps {
@@ -10,12 +11,6 @@ interface JaugeT99CPEurosProps {
   taille?: 'sm' | 'md';
   className?: string;
 }
-
-const FORMAT_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-});
 
 const FORMAT_NOMBRE = new Intl.NumberFormat('fr-FR');
 
@@ -48,13 +43,13 @@ export function JaugeT99CPEuros({
       <div className="flex items-baseline justify-between gap-3">
         <p className={cn('font-bold text-text-1', taille === 'sm' ? 'text-base' : 'text-2xl')}>
           {/* 1 99-coin = 1 € = 1 minute : on affiche les deux monnaies. */}
-          {FORMAT_EURO.format(totalCumuleEuros)}
+          {formaterEurosEntier(totalCumuleEuros)}
           <span className="ml-1 font-normal text-brand">
             / {FORMAT_NOMBRE.format(Math.round(totalCumuleEuros))} 99-coin
           </span>
           {objectifEuros > 0 ? (
             <span className="ml-1 text-sm font-normal text-text-3">
-              sur {FORMAT_EURO.format(objectifEuros)} / {FORMAT_NOMBRE.format(objectifEuros)}{' '}
+              sur {formaterEurosEntier(objectifEuros)} / {FORMAT_NOMBRE.format(objectifEuros)}{' '}
               99-coin
             </span>
           ) : null}
@@ -70,7 +65,7 @@ export function JaugeT99CPEuros({
         <progress
           value={pourcentage}
           max={100}
-          aria-label={`Progression : ${pourcentage}% (${FORMAT_EURO.format(totalCumuleEuros)} sur ${FORMAT_EURO.format(objectifEuros)})`}
+          aria-label={`Progression : ${pourcentage}% (${formaterEurosEntier(totalCumuleEuros)} sur ${formaterEurosEntier(objectifEuros)})`}
           className={cn(
             'w-full overflow-hidden rounded-pill bg-surface-2',
             taille === 'sm' ? 'h-1.5' : 'h-2.5',
@@ -83,7 +78,8 @@ export function JaugeT99CPEuros({
 
       <p className="text-xs text-text-3">
         {FORMAT_NOMBRE.format(nombreDons)} don{nombreDons > 1 ? 's' : ''} ·{' '}
-        {FORMAT_EURO.format(totalEuros)} en euros · {FORMAT_NOMBRE.format(totalT99CPUnites)} 99-coin
+        {formaterEurosEntier(totalEuros)} en euros · {FORMAT_NOMBRE.format(totalT99CPUnites)}{' '}
+        99-coin
       </p>
     </div>
   );

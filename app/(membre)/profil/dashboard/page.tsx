@@ -4,6 +4,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { chargerDashboardMembre } from '@/lib/dashboard-membre';
+import { formaterEurosEntier } from '@/lib/format-euros';
 import { formaterRelativePassee } from '@/lib/mobilisations/dates';
 import {
   Bell,
@@ -73,12 +74,6 @@ const FALLBACKS = {
   identiteAVerifier: '⚠️ À vérifier',
   sectionRaccourcis: 'Raccourcis',
 };
-
-const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-});
 
 const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
@@ -369,7 +364,7 @@ export default async function PageDashboard() {
             href="/profil/contributions"
             icone={HandCoins}
             libelle={cms.compteurContributionsE}
-            valeurTexte={FORMATEUR_EURO.format(data.totalEurosContribues)}
+            valeurTexte={formaterEurosEntier(data.totalEurosContribues)}
           />
           <CarteCompteur
             href="/profil/contributions"

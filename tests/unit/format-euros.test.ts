@@ -1,4 +1,9 @@
-import { formaterEuros, formaterEurosDepuisCentimes } from '@/lib/format-euros';
+import {
+  formaterEuros,
+  formaterEurosDecimales,
+  formaterEurosDepuisCentimes,
+  formaterEurosEntier,
+} from '@/lib/format-euros';
 import { describe, expect, it } from 'vitest';
 
 // Note : Intl.NumberFormat('fr-FR', currency: 'EUR') utilise une
@@ -64,5 +69,55 @@ describe('formaterEuros', () => {
   it('arrondit au-delà de 2 décimales', () => {
     const r = formaterEuros(12.567);
     expect(r).toContain('57'); // arrondi à 12,57
+  });
+});
+
+describe('formaterEurosEntier', () => {
+  // Reproduit exactement le formatteur inline { maximumFractionDigits: 0 }
+  // qu'il remplace (compteurs/soldes admin, dashboard, jauge, adhésion).
+  // On le prouve par comparaison directe sur des cas clés.
+  const inline = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  });
+
+  it('est identique au formatteur Intl inline (entier, décimal, zéro, négatif)', () => {
+    for (const v of [0, 1, 12, 12.5, 12.4, 1234, -5, 999999]) {
+      expect(formaterEurosEntier(v)).toBe(inline.format(v));
+    }
+  });
+
+  it('affiche un zéro explicite (et non une chaîne vide comme formaterEuros)', () => {
+    expect(formaterEurosEntier(0)).toContain('0');
+    expect(formaterEurosEntier(0)).not.toBe('');
+  });
+
+  it('arrondit à l’euro entier, sans décimale', () => {
+    expect(formaterEurosEntier(12.5)).not.toMatch(/[.,]\d/);
+  });
+});
+
+describe('formaterEurosDecimales', () => {
+  // Reproduit exactement le défaut de la devise EUR (2 décimales fixes)
+  // utilisé par les affichages comptables (trésorerie, dons, contributions).
+  const inline = new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+  });
+
+  it('est identique au formatteur Intl inline (entier, décimal, zéro, négatif)', () => {
+    for (const v of [0, 1, 12, 12.5, 12.567, 1234.5, -5, 999999.99]) {
+      expect(formaterEurosDecimales(v)).toBe(inline.format(v));
+    }
+  });
+
+  it('conserve toujours deux décimales, y compris pour un entier', () => {
+    expect(formaterEurosDecimales(12)).toMatch(/12[.,]00/);
+  });
+
+  it('affiche « 0,00 € » pour zéro (et non une chaîne vide)', () => {
+    expect(formaterEurosDecimales(0)).toMatch(/0[.,]00/);
+    expect(formaterEurosDecimales(0)).not.toBe('');
   });
 });

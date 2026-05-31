@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth/session';
 import { poserNotificationTemplee } from '@/lib/notification-templates';
 import {
   type OffreTypeReservation,
+  type StatutReservation,
   changerStatutReservation,
   creerReservation,
   transitionAutorisee,
@@ -229,7 +230,7 @@ async function chargerReservationCommeProprietaire(
 ): Promise<
   | {
       ok: true;
-      statut: 'proposee' | 'acceptee' | 'refusee' | 'realisee' | 'confirmee' | 'annulee' | 'litige';
+      statut: StatutReservation;
     }
   | { ok: false; message: string }
 > {
@@ -251,14 +252,7 @@ async function chargerReservationCommeProprietaire(
   }
   return {
     ok: true,
-    statut: reservation.statut as
-      | 'proposee'
-      | 'acceptee'
-      | 'refusee'
-      | 'realisee'
-      | 'confirmee'
-      | 'annulee'
-      | 'litige',
+    statut: reservation.statut as StatutReservation,
   };
 }
 
@@ -616,14 +610,7 @@ export async function signalerLitigeReservationAction(options: {
       message: 'Tu n’as pas l’autorisation de signaler un litige sur cette réservation.',
     };
   }
-  const statutActuel = existant.statut as
-    | 'proposee'
-    | 'acceptee'
-    | 'refusee'
-    | 'realisee'
-    | 'confirmee'
-    | 'annulee'
-    | 'litige';
+  const statutActuel = existant.statut as StatutReservation;
   if (!transitionAutorisee(statutActuel, 'litige')) {
     return {
       ok: false,
@@ -697,14 +684,7 @@ export async function confirmerReservationAction(options: {
   if (existant.demandeur_personne_id !== session.userId) {
     return { ok: false, message: 'Tu n’as pas l’autorisation de confirmer cette réservation.' };
   }
-  const statutActuel = existant.statut as
-    | 'proposee'
-    | 'acceptee'
-    | 'refusee'
-    | 'realisee'
-    | 'confirmee'
-    | 'annulee'
-    | 'litige';
+  const statutActuel = existant.statut as StatutReservation;
   if (!transitionAutorisee(statutActuel, 'confirmee')) {
     return {
       ok: false,
@@ -803,14 +783,7 @@ export async function annulerReservationAction(options: {
   if (existant.demandeur_personne_id !== session.userId) {
     return { ok: false, message: 'Tu n’as pas l’autorisation d’annuler cette réservation.' };
   }
-  const statutActuel = existant.statut as
-    | 'proposee'
-    | 'acceptee'
-    | 'refusee'
-    | 'realisee'
-    | 'confirmee'
-    | 'annulee'
-    | 'litige';
+  const statutActuel = existant.statut as StatutReservation;
   if (!transitionAutorisee(statutActuel, 'annulee')) {
     return {
       ok: false,
