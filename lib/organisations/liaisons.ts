@@ -38,6 +38,7 @@ export async function organisationDuContenu(
     .select('organisation(id, nom, slug, badge_officiel)')
     .eq('objet_type', objetType)
     .eq('objet_id', objetId)
+    .is('retire_le', null) // C15 : ignore les liens « porté par » retirés (soft-delete).
     .maybeSingle();
   if (data === null) return null;
   const org = Array.isArray(data.organisation) ? data.organisation[0] : data.organisation;

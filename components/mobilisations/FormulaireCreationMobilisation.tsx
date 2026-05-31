@@ -140,6 +140,7 @@ export function FormulaireCreationMobilisation({
         org_id: declarationOrg.orgId === '' ? undefined : declarationOrg.orgId,
         nom: declarationOrg.nom === '' ? undefined : declarationOrg.nom,
         type_organisation: declarationOrg.typeOrganisation,
+        attestation: declarationOrg.attestation,
       });
     }
     setEnvoiEnCours(false);

@@ -14,6 +14,8 @@ export interface DeclarationOrgInitiatrice {
   orgId: string;
   nom: string;
   typeOrganisation: TypeOrganisation;
+  /** Attestation de mandat (C16) : obligatoire pour créer une organisation. */
+  attestation: boolean;
 }
 
 export const DECLARATION_ORG_DEFAUT: DeclarationOrgInitiatrice = {
@@ -21,6 +23,7 @@ export const DECLARATION_ORG_DEFAUT: DeclarationOrgInitiatrice = {
   orgId: '',
   nom: '',
   typeOrganisation: 'collectif',
+  attestation: false,
 };
 
 const CHAMP =
@@ -105,6 +108,17 @@ export function ChampOrganisationInitiatrice({ mesOrganisations, value, onChange
               ))}
             </select>
           </div>
+          <label className="flex items-start gap-2 text-sm text-text-2">
+            <input
+              type="checkbox"
+              checked={value.attestation}
+              onChange={(e) => onChange({ ...value, attestation: e.target.checked })}
+              className="mt-1 h-4 w-4 rounded-xs accent-brand"
+            />
+            <span>
+              J’atteste être habilité·e à représenter cette organisation et à publier en son nom.
+            </span>
+          </label>
           <p className="text-text-3 text-xs">
             Tu en deviendras gestionnaire. Le badge « officiel » est accordé séparément par
             l’équipe.

@@ -320,6 +320,8 @@ const declarerInitiatriceSchema = z.object({
   org_id: z.string().uuid().optional(),
   nom: z.string().trim().min(2).max(120).optional(),
   type_organisation: z.enum(TYPES_ORGANISATION).optional(),
+  // C16 (revue 2026) : attestation de mandat, obligatoire pour créer une organisation.
+  attestation: z.boolean().optional(),
 });
 
 export async function declarerOrganisationInitiatriceAction(
@@ -348,6 +350,14 @@ export async function declarerOrganisationInitiatriceAction(
     // mode 'nouvelle' : on crée l'organisation, le·la créateur·ice devient gestionnaire.
     if (d.nom === undefined || d.nom.trim() === '') {
       return { ok: false, message: 'Nom de l’organisation manquant.' };
+    }
+    // C16 (revue 2026) : créer une organisation exige d'attester du mandat (CDC organisations).
+    if (d.attestation !== true) {
+      return {
+        ok: false,
+        message:
+          'Tu dois attester être habilité·e à représenter cette organisation pour la créer en son nom.',
+      };
     }
     const slugBase = slugifier(d.nom);
     const { data: existant } = await supabase
