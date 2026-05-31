@@ -1,5 +1,6 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getEmailService } from '@/lib/email';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
@@ -212,6 +213,17 @@ export async function modererPetition(donneesBrutes: unknown): Promise<ResultatA
   if (error !== null) {
     return { ok: false, message: `Modération impossible : ${error.message}` };
   }
+
+  // C6 (revue 2026) : trace l'acte de modération dans le journal d'audit.
+  await journaliser({
+    action: 'petition.moderation',
+    cibleTable: 'petition',
+    cibleId: donnees.petition_id,
+    nouvelEtat: {
+      decision: donnees.decision,
+      raison_rejet: donnees.decision === 'rejetee' ? (donnees.raison_rejet ?? null) : null,
+    },
+  });
 
   revalidatePath('/admin/moderation/petitions');
   revalidatePath('/mobiliser/petitions');

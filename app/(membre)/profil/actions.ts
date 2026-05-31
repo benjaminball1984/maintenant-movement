@@ -1,5 +1,6 @@
 'use server';
 
+import { journaliser } from '@/lib/admin/national/journal';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
@@ -232,6 +233,9 @@ export async function demanderExportZip(): Promise<ResultatAction> {
     console.warn('[demanderExportZip] envoi mail échoué :', erreur);
   }
 
+  // C6 (revue 2026) : trace la demande d'export RGPD dans le journal d'audit.
+  await journaliser({ action: 'rgpd.export_demande', cibleTable: 'personne', cibleId: userId });
+
   return { ok: true };
 }
 
@@ -266,6 +270,13 @@ export async function demanderSuppression(donneesBrutes: unknown): Promise<Resul
   if (error !== null) {
     return { ok: false, message: `Demande impossible : ${error.message}` };
   }
+
+  // C6 (revue 2026) : trace la demande de suppression RGPD dans le journal d'audit.
+  await journaliser({
+    action: 'rgpd.suppression_demandee',
+    cibleTable: 'personne',
+    cibleId: userId,
+  });
 
   // V2.4.133 : template editable admin via CMS (email.rgpd_suppression_demande.*).
   try {
