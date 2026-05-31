@@ -102,7 +102,7 @@ export default async function PageRetour({ searchParams }: PageRetourProps) {
             </Link>
           ) : (
             <Link href="/mobiliser/cagnottes" className="text-brand hover:underline">
-              Voir toutes les cagnottes →
+              Voir toutes les cagnottes
             </Link>
           )}
         </>

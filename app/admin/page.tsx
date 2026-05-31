@@ -45,7 +45,7 @@ export default async function PageAdmin() {
             <strong>{FORMAT_NB.format(totalEnAttente)}</strong> élément
             {totalEnAttente > 1 ? 's' : ''} en attente d'action.{' '}
             <Link href="/admin/moderation" className="underline">
-              Ouvrir la file de modération →
+              Ouvrir la file de modération
             </Link>
           </p>
         </Alert>
@@ -54,7 +54,7 @@ export default async function PageAdmin() {
           <CheckCircle size={14} className="-mt-0.5 mr-1 inline" aria-hidden="true" />
           Aucune action de modération en attente.{' '}
           <Link href="/admin/moderation" className="underline">
-            Voir la file →
+            Voir la file
           </Link>
         </Alert>
       )}

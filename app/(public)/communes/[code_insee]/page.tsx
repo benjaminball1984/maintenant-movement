@@ -110,7 +110,7 @@ export default async function PageFicheCommune({ params }: PageFicheCommuneProps
               href={`/agir/communes/${communeLibre.slug}`}
               className="font-bold text-brand underline-offset-4 hover:underline"
             >
-              Voir la commune libre et la rejoindre →
+              Voir la commune libre et la rejoindre
             </Link>
           </Card>
         ) : (
