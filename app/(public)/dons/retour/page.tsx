@@ -1,9 +1,15 @@
 import { confirmerDonEuros } from '@/app/(public)/mobiliser/cagnottes/actions';
 import { Alert, Container, Heading } from '@/components/ui';
+import { centimesEnCoins } from '@/lib/conversion-99coin';
+import { formaterEurosDepuisCentimes } from '@/lib/format-euros';
 import { getSupabaseServer } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+
+const FORMATEUR_COINS = new Intl.NumberFormat('fr-FR', {
+  maximumFractionDigits: 2,
+});
 
 export const metadata: Metadata = {
   title: 'Merci pour ton don',
@@ -39,16 +45,18 @@ export default async function PageRetour({ searchParams }: PageRetourProps) {
 
   const resultat = await confirmerDonEuros(session_id, don_id);
 
-  // Récupère le slug de la cagnotte pour proposer le retour à sa page.
+  // Récupère le slug de la cagnotte (pour le retour) et le montant (pour le récap).
   let slugCagnotte: string | null = null;
+  let montantCentimes: number | null = null;
   if (resultat.ok) {
     const supabase = await getSupabaseServer();
     const { data: don } = await supabase
       .from('don')
-      .select('cagnotte_id')
+      .select('cagnotte_id, montant_centimes')
       .eq('id', don_id)
       .maybeSingle();
     if (don !== null) {
+      montantCentimes = don.montant_centimes;
       const { data: c } = await supabase
         .from('cagnotte')
         .select('slug')
@@ -58,13 +66,21 @@ export default async function PageRetour({ searchParams }: PageRetourProps) {
     }
   }
 
+  // Récap du montant dans les deux monnaies (parité 1 € = 1 99-coin = 1 minute).
+  const recapMontant =
+    montantCentimes !== null && montantCentimes > 0
+      ? `Ton don de ${formaterEurosDepuisCentimes(montantCentimes)} (soit ${FORMATEUR_COINS.format(
+          centimesEnCoins(montantCentimes),
+        )} 99-coin) a bien été enregistré et abonde la cagnotte.`
+      : 'Ton paiement a bien été enregistré et abonde la cagnotte.';
+
   return (
     <Container taille="sm" className="py-12">
       {resultat.ok ? (
         <>
           <Heading niveau={1}>Merci pour ton don</Heading>
           <Alert variant="success" titre="Don confirmé" className="my-6">
-            Ton paiement a bien été enregistré et abonde la cagnotte.
+            {recapMontant}
           </Alert>
           {slugCagnotte !== null ? (
             <Link

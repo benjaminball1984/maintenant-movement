@@ -3,6 +3,7 @@ import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { centimesEnCoins, coinsEnCentimes } from '@/lib/conversion-99coin';
 import {
   type ContributionFinanciere,
   calculerRecap,
@@ -27,6 +28,8 @@ const FALLBACKS = {
     'Quand tu feras un don sur une cagnotte ou que tu adhéreras, l’opération apparaîtra ici avec son montant et son canal.',
   cardTotalEuro: 'Total contribué en €',
   cardTotalCoin: 'Total contribué en 99-coin',
+  equivalentCoinPattern: 'soit {coins} 99-coin',
+  equivalentEuroPattern: 'soit {euros}',
   contributionLabel: 'contribution',
   sectionPetitions: 'Pétitions signées',
   alertPetitionsVideTitre: 'Aucune pétition signée pour l’instant',
@@ -67,6 +70,8 @@ export default async function PageContributions() {
     alertVideCorps,
     cardTotalEuro,
     cardTotalCoin,
+    equivalentCoinPattern,
+    equivalentEuroPattern,
     contributionLabel,
     sectionPetitions,
     alertPetitionsVideTitre,
@@ -95,6 +100,12 @@ export default async function PageContributions() {
     }),
     lireContenuEditorial('profil.contributions.card_total_coin', {
       valeurMd: FALLBACKS.cardTotalCoin,
+    }),
+    lireContenuEditorial('profil.contributions.equivalent_coin_pattern', {
+      valeurMd: FALLBACKS.equivalentCoinPattern,
+    }),
+    lireContenuEditorial('profil.contributions.equivalent_euro_pattern', {
+      valeurMd: FALLBACKS.equivalentEuroPattern,
     }),
     lireContenuEditorial('profil.contributions.contribution_label', {
       valeurMd: FALLBACKS.contributionLabel,
@@ -207,6 +218,12 @@ export default async function PageContributions() {
                     {FORMATEUR_EURO.format(recap.parCanal.euro.somme)}
                   </p>
                   <p className="text-text-3 text-xs">
+                    {equivalentCoinPattern.valeurMd.replace(
+                      '{coins}',
+                      equivalentCoins(recap.parCanal.euro.somme),
+                    )}
+                  </p>
+                  <p className="text-text-3 text-xs">
                     {recap.parCanal.euro.nb} {contributionLabel.valeurMd}
                     {recap.parCanal.euro.nb > 1 ? 's' : ''}
                   </p>
@@ -229,6 +246,12 @@ export default async function PageContributions() {
                     {recap.parCanal.coin99.somme.toLocaleString('fr-FR')} 99c
                   </p>
                   <p className="text-text-3 text-xs">
+                    {equivalentEuroPattern.valeurMd.replace(
+                      '{euros}',
+                      equivalentEuros(recap.parCanal.coin99.somme),
+                    )}
+                  </p>
+                  <p className="text-text-3 text-xs">
                     {recap.parCanal.coin99.nb} {contributionLabel.valeurMd}
                     {recap.parCanal.coin99.nb > 1 ? 's' : ''}
                   </p>
@@ -243,6 +266,8 @@ export default async function PageContributions() {
                     contribution={c}
                     statutEnAttente={ligneStatutEnAttente.valeurMd}
                     dateLe={ligneDateLe.valeurMd}
+                    equivalentCoinPattern={equivalentCoinPattern.valeurMd}
+                    equivalentEuroPattern={equivalentEuroPattern.valeurMd}
                   />
                 </li>
               ))}
@@ -331,6 +356,25 @@ const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
   currency: 'EUR',
 });
 
+const FORMATEUR_COINS = new Intl.NumberFormat('fr-FR', {
+  maximumFractionDigits: 2,
+});
+
+/**
+ * Équivalent 99-coin d'un montant en euros (parité 1 € = 1 99-coin,
+ * cf. lib/conversion-99coin). Le montant euro est déjà décimal.
+ */
+function equivalentCoins(montantEuros: number): string {
+  return FORMATEUR_COINS.format(centimesEnCoins(Math.round(montantEuros * 100)));
+}
+
+/**
+ * Équivalent euros d'un montant en 99-coin (unités entières, parité 1:1).
+ */
+function equivalentEuros(montantCoins: number): string {
+  return FORMATEUR_EURO.format(coinsEnCentimes(montantCoins) / 100);
+}
+
 const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
   month: 'long',
@@ -350,15 +394,23 @@ function LigneContribution({
   contribution,
   statutEnAttente,
   dateLe,
+  equivalentCoinPattern,
+  equivalentEuroPattern,
 }: {
   contribution: ContributionFinanciere;
   statutEnAttente: string;
   dateLe: string;
+  equivalentCoinPattern: string;
+  equivalentEuroPattern: string;
 }) {
-  const montant =
-    contribution.canal === 'euro'
-      ? FORMATEUR_EURO.format(contribution.montant)
-      : `${contribution.montant.toLocaleString('fr-FR')} 99c`;
+  const estEuro = contribution.canal === 'euro';
+  const montant = estEuro
+    ? FORMATEUR_EURO.format(contribution.montant)
+    : `${contribution.montant.toLocaleString('fr-FR')} 99c`;
+  // Équivalent dans l'autre monnaie (parité 1 € = 1 99-coin = 1 minute).
+  const equivalent = estEuro
+    ? equivalentCoinPattern.replace('{coins}', equivalentCoins(contribution.montant))
+    : equivalentEuroPattern.replace('{euros}', equivalentEuros(contribution.montant));
   return (
     <Card variant="ombre" className="grid gap-1">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -366,13 +418,16 @@ function LigneContribution({
           <Badge variant="default">{LIBELLE_SOURCE[contribution.sourceType]}</Badge>
           <Badge variant="info">
             <Coins size={12} aria-hidden="true" />
-            {contribution.canal === 'euro' ? '€' : '99c'}
+            {estEuro ? '€' : '99c'}
           </Badge>
           {contribution.statut === 'initiee' ? (
             <Badge variant="warning">{statutEnAttente}</Badge>
           ) : null}
         </div>
-        <span className="font-display font-bold text-lg text-text-1">{montant}</span>
+        <span className="text-right">
+          <span className="block font-display font-bold text-lg text-text-1">{montant}</span>
+          <span className="block text-text-3 text-xs">{equivalent}</span>
+        </span>
       </div>
       {contribution.motif !== null ? (
         <p className="text-sm text-text-2">{contribution.motif}</p>
