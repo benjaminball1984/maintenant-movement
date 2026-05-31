@@ -1949,6 +1949,7 @@ export type Database = {
           telephone: string | null;
           totp_secret: string | null;
           updated_at: string;
+          wallet_t99cp: string | null;
         };
         Insert: {
           anonymise_le?: string | null;
@@ -1973,6 +1974,7 @@ export type Database = {
           telephone?: string | null;
           totp_secret?: string | null;
           updated_at?: string;
+          wallet_t99cp?: string | null;
         };
         Update: {
           anonymise_le?: string | null;
@@ -1997,6 +1999,7 @@ export type Database = {
           telephone?: string | null;
           totp_secret?: string | null;
           updated_at?: string;
+          wallet_t99cp?: string | null;
         };
         Relationships: [];
       };

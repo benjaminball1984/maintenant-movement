@@ -74,6 +74,7 @@ export interface MessagesValidationProfil {
   telephoneFormat: string;
   photoUrlFormat: string;
   bioLongueur: string;
+  walletFormat: string;
   emailFormat: string;
   totpFormat: string;
   signatureUuid: string;
@@ -87,6 +88,7 @@ export const MESSAGES_VALIDATION_PROFIL_DEFAUT: MessagesValidationProfil = {
   telephoneFormat: 'Format de téléphone français invalide.',
   photoUrlFormat: "URL d'image invalide.",
   bioLongueur: 'La bio doit faire 500 caractères maximum.',
+  walletFormat: 'Adresse wallet invalide (format 0x + 40 caractères hexadécimaux attendus).',
   emailFormat: "Le format de l'email semble incorrect.",
   totpFormat: 'Le code TOTP doit comporter 6 chiffres.',
   signatureUuid: 'Signature invalide.',

@@ -181,6 +181,15 @@ export function creerMettreAJourProfilSchema(
        *  que la bio texte plat (~20 000 chars) pour permettre une
        *  presentation enrichie avec mise en forme, liens, listes. */
       bio_html: z.string().max(20000).optional().or(z.literal('')),
+      /** Référence wallet 99-coin (adresse Polygon 0x + 40 hex) pour être
+       *  payé·e entre membres. Optionnelle (requise seulement pour publier
+       *  une offre payante ou créer une cagnotte). Décision 2026-05-31. */
+      wallet_t99cp: z
+        .string()
+        .trim()
+        .regex(/^0x[a-fA-F0-9]{40}$/, messages.walletFormat)
+        .optional()
+        .or(z.literal('')),
       mode_theme: z.enum(['auto', 'light', 'dark']),
     })
     .strict();

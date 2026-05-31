@@ -69,6 +69,7 @@ export async function mettreAJourProfil(donneesBrutes: unknown): Promise<Resulta
       cover_url: donnees.cover_url === '' ? null : (donnees.cover_url ?? null),
       bio: donnees.bio === '' ? null : (donnees.bio ?? null),
       bio_html: bioHtmlPropre,
+      wallet_t99cp: donnees.wallet_t99cp === '' ? null : (donnees.wallet_t99cp ?? null),
       mode_theme: donnees.mode_theme,
     })
     .eq('id', userId);

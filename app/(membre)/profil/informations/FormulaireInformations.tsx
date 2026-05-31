@@ -30,6 +30,8 @@ export interface LibellesInformations {
   sectionCoordonnees: string;
   labelCodePostal: string;
   labelTelephone: string;
+  labelWallet: string;
+  hintWallet: string;
   sectionPresentation: string;
   labelPhoto: string;
   labelCover: string;
@@ -54,6 +56,9 @@ const LIBELLES_DEFAUT: LibellesInformations = {
   sectionCoordonnees: 'Coordonnées',
   labelCodePostal: 'Code postal',
   labelTelephone: 'Téléphone (optionnel)',
+  labelWallet: 'Référence wallet 99-coin (optionnel)',
+  hintWallet:
+    'Ton adresse Polygon (0x suivi de 40 caractères) pour être payé·e en 99-coin entre membres. Nécessaire pour publier une offre payante ou créer une cagnotte.',
   sectionPresentation: 'Présentation publique',
   labelPhoto: 'Photo de profil (URL)',
   labelCover: 'Image de couverture du profil (URL, optionnel)',
@@ -232,6 +237,27 @@ export function FormulaireInformations({
               </p>
             ) : null}
           </div>
+        </div>
+        <div className="mt-4">
+          <Label htmlFor="inf-wallet">{libelles.labelWallet}</Label>
+          <Input
+            id="inf-wallet"
+            className="font-mono text-xs"
+            placeholder="0x..."
+            aria-invalid={errors.wallet_t99cp !== undefined ? true : undefined}
+            aria-describedby={
+              errors.wallet_t99cp !== undefined ? 'inf-wallet-erreur' : 'inf-wallet-hint'
+            }
+            {...register('wallet_t99cp')}
+          />
+          <p id="inf-wallet-hint" className="mt-1 text-xs text-text-3">
+            {libelles.hintWallet}
+          </p>
+          {errors.wallet_t99cp !== undefined ? (
+            <p id="inf-wallet-erreur" className="mt-1 text-xs text-danger">
+              {errors.wallet_t99cp.message}
+            </p>
+          ) : null}
         </div>
       </section>
 

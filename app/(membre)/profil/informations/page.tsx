@@ -100,6 +100,9 @@ export default async function PageInformations() {
     // encore sur le distant : la migration 20260530800000 est en attente
     // de supabase db push Phase M).
     bio_html: (personne as { bio_html?: string | null }).bio_html ?? '',
+    // Cast défensif : la colonne wallet_t99cp est locale jusqu'au push Phase M
+    // (migration 20260602170000). Absente sur le distant = chaîne vide.
+    wallet_t99cp: (personne as { wallet_t99cp?: string | null }).wallet_t99cp ?? '',
     mode_theme: personne.mode_theme ?? 'auto',
   };
 
