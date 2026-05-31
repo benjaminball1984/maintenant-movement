@@ -13,7 +13,7 @@ const schemaEdition = z.object({
   numero: z.number().int().positive(),
   format: z.enum(['A3', 'A4']),
   contenu_md: z.string().max(50000).optional(),
-  /** V2.5.33 — version HTML riche optionnelle (sanitizée avant insertion). */
+  /** V2.5.33 : version HTML riche optionnelle (sanitizée avant insertion). */
   contenu_html: z.string().max(200000).optional(),
   image_couverture_url: z.string().url().optional(),
   publier: z.boolean().optional(),
@@ -50,7 +50,7 @@ export async function creerEditionJournalAction(donnees: unknown): Promise<Resul
     .maybeSingle();
   const slug = existant === null ? baseSlug : `${baseSlug}-${d.numero}`;
 
-  // V2.5.33 — sanitize HTML riche avant insertion. Allowlist stricte
+  // V2.5.33 : sanitize HTML riche avant insertion. Allowlist stricte
   // de balises/attributs/CSS, cf. `lib/rich-text/sanitize.ts`.
   const contenuHtmlPropre =
     d.contenu_html !== undefined && d.contenu_html.trim() !== ''
@@ -83,7 +83,7 @@ const schemaMaj = z.object({
   titre: z.string().min(1).max(300).optional(),
   sous_titre: z.string().max(500).nullable().optional(),
   contenu_md: z.string().max(50000).optional(),
-  /** V2.5.33 — HTML riche optionnel. Vide → efface (retour Markdown). */
+  /** V2.5.33 : HTML riche optionnel. Vide → efface (retour Markdown). */
   contenu_html: z.string().max(200000).optional(),
   image_couverture_url: z.string().url().nullable().optional(),
   numero: z.number().int().positive().optional(),
@@ -121,7 +121,7 @@ export async function mettreAJourEditionAction(
   if (d.sous_titre !== undefined) maj.sous_titre = d.sous_titre;
   if (d.contenu_md !== undefined) maj.contenu_md = d.contenu_md;
   if (d.contenu_html !== undefined) {
-    // V2.5.33 — vide = effacer le HTML riche (retour Markdown).
+    // V2.5.33 : vide = effacer le HTML riche (retour Markdown).
     maj.contenu_html = d.contenu_html.trim() === '' ? null : sanitizeRichHtml(d.contenu_html);
   }
   if (d.image_couverture_url !== undefined) maj.image_couverture_url = d.image_couverture_url;

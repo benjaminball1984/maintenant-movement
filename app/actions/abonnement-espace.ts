@@ -72,7 +72,7 @@ export async function basculerAbonnementEspaceAction(donneesBrutes: unknown): Pr
   return { ok: true, jeSuis: false };
 }
 
-// V2.5.22 — `jeSuisCetEspace` (helper de lecture pour Server Components)
+// V2.5.22 : `jeSuisCetEspace` (helper de lecture pour Server Components)
 // a été déplacé dans `lib/reseau/abonnement.ts`. Un fichier `'use server'`
 // expose TOUTES ses exports comme Server Actions callables depuis le
 // client, ce qui tirait `next/headers` dans le bundle client et cassait

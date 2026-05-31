@@ -15,7 +15,7 @@ function formaterDate(iso: string): string {
 }
 
 /**
- * Page `/s-informer/reseau/amis` — demandes d'ami·e reçues (épopée réseau V2,
+ * Page `/s-informer/reseau/amis` : demandes d'ami·e reçues (épopée réseau V2,
  * chantier D.1).
  *
  * Liste les demandes en attente adressées au lecteur courant, avec les boutons

@@ -85,7 +85,7 @@ export function FormulaireInformations({
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
-  // V2.5.49 — etat du switch Riche/Markdown pour la bio.
+  // V2.5.49 : etat du switch Riche/Markdown pour la bio.
   const [bioHtml, setBioHtml] = useState(valeursInitiales.bio_html ?? '');
   const [modeBio, setModeBio] = useState<'markdown' | 'riche'>(
     valeursInitiales.bio_html !== undefined && valeursInitiales.bio_html !== ''
@@ -273,7 +273,7 @@ export function FormulaireInformations({
               <button
                 type="button"
                 onClick={() => {
-                  // V2.5.49 — bascule vers Riche pre-remplit avec la
+                  // V2.5.49 : bascule vers Riche pre-remplit avec la
                   // conversion du Markdown courant si HTML vide.
                   const bioActuelle = watch('bio') ?? '';
                   if (bioHtml === '' && bioActuelle.trim() !== '') {

@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 /**
  * Flux RSS 2.0 des articles publiés (V2.4.42).
  *
- * GET `/feed.xml` — 30 derniers articles publiés (édito, tribune,
+ * GET `/feed.xml` : 30 derniers articles publiés (édito, tribune,
  * article, brève, dessin, podcast, vidéo, live, newsletter), triés par
  * `publie_le` desc. Format RSS 2.0 standard (Atom-compatible via
  * `<atom:link>`).

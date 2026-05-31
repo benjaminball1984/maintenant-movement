@@ -32,7 +32,7 @@ export interface LibellesNotifications {
   aideVendredi: string;
   ctaSubmit: string;
   ctaEnCours: string;
-  // V2.5.38 — section reseau social
+  // V2.5.38 : section reseau social
   legendeReseau: string;
   libelleReseauMessage: string;
   aideReseauMessage: string;
@@ -253,7 +253,7 @@ function Case({ id, libelle, aide, ...inputProps }: CaseProps) {
 }
 
 /**
- * V2.5.38 — sélecteur de mode pour une préf de notif réseau.
+ * V2.5.38 : sélecteur de mode pour une préf de notif réseau.
  * Présente 5 modes en select. Les digests sont visibles mais
  * étiquetés « à venir » (cf. hintDigestPasEncore).
  */

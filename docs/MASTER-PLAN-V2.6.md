@@ -1,4 +1,4 @@
-# Master plan V2.6 — Maintenant!
+# Master plan V2.6 : Maintenant!
 
 > **Pour qui** : Lilou/Ben (pilote), à transmettre à Claude Code pour exécution par phases.
 > **Par qui** : L2B2 (Claude.ai), à partir des séances vocales du 28 mai 2026 (marche du matin + revue du soir) et de la lecture intégrale du pack export V2 figé au tip `389c03d`.
@@ -12,15 +12,15 @@
 
 Il est long, et c'est voulu. Tu m'as demandé du détail, j'ai mis du détail. Mais tu n'es pas obligé de tout lire d'un coup. Voici l'ordre conseillé sur deux journées.
 
-**Journée 1 — comprendre où on en est.** Lis les parties 1 à 4. Elles font le point honnête sur ce qui existe vraiment dans le code, sur l'écart entre ce qui est « préparé » et ce qui est « fini », et sur les grands principes que tu as formulés ce matin et qui deviennent la boussole de toute la suite. À la fin de cette journée, tu sauras dire en deux phrases où en est ton site et pourquoi.
+**Journée 1 : comprendre où on en est.** Lis les parties 1 à 4. Elles font le point honnête sur ce qui existe vraiment dans le code, sur l'écart entre ce qui est « préparé » et ce qui est « fini », et sur les grands principes que tu as formulés ce matin et qui deviennent la boussole de toute la suite. À la fin de cette journée, tu sauras dire en deux phrases où en est ton site et pourquoi.
 
-**Journée 2 — décider la suite.** Lis les parties 5 à 9. Ce sont les phases de travail concrètes, les tunnels d'engagement à arbitrer, et surtout les directives permanentes à donner à Claude Code pour qu'il travaille comme tu le veux. À la fin de cette journée, tu auras un plan que tu pourras lui transmettre bloc par bloc.
+**Journée 2 : décider la suite.** Lis les parties 5 à 9. Ce sont les phases de travail concrètes, les tunnels d'engagement à arbitrer, et surtout les directives permanentes à donner à Claude Code pour qu'il travaille comme tu le veux. À la fin de cette journée, tu auras un plan que tu pourras lui transmettre bloc par bloc.
 
 Chaque fois que j'emploie un mot technique, je le traduis tout de suite entre parenthèses, parce que tu m'as dit que tu voulais apprendre le vocabulaire sans jamais avoir à deviner. C'est une règle que je tiens dans tout le document, et c'est aussi une règle que je demanderai à Claude Code de tenir.
 
 ---
 
-# PARTIE 1 — Le point de départ, sans flatterie ni alarme
+# PARTIE 1 : Le point de départ, sans flatterie ni alarme
 
 ## 1.1 Ce que tu as entre les mains, dit simplement
 
@@ -52,7 +52,7 @@ La conséquence est énorme pour toi : **tout le site peut être construit, test
 
 ---
 
-# PARTIE 2 — L'état réel de chaque chose, vérifié dans le code
+# PARTIE 2 : L'état réel de chaque chose, vérifié dans le code
 
 Cette partie est le résultat de ce que j'ai lu directement dans le code, pas de ce que la documentation affirme. Quand la documentation et le code se contredisent, je te dis ce que dit le code, parce que c'est lui la vérité.
 
@@ -108,7 +108,7 @@ Les huit pages éditoriales de fond (doctrine, commune libre, monnaie 99-coin, m
 
 ---
 
-# PARTIE 3 — La vision d'ensemble que tu as formulée ce matin
+# PARTIE 3 : La vision d'ensemble que tu as formulée ce matin
 
 Cette partie reformule, en la structurant, la pensée que tu as déroulée pendant la marche. Ce n'est pas du neuf inventé par moi : c'est ta doctrine, que je relie à ce qui est déjà écrit dans tes spécifications V2 et à ce qui est déjà codé. La belle surprise de ma lecture, c'est que ta doctrine V2 sur le papier dit presque exactement ce que tu m'as dit à l'oral. Le travail n'est donc pas d'inventer, c'est de brancher le déjà-décidé sur le déjà-codé.
 
@@ -168,7 +168,7 @@ Mon conseil, que tu as déjà à moitié validé : banque d'images libres plutô
 
 ---
 
-# PARTIE 4 — La logique de gouvernance et d'argent, pour ne pas se tromper
+# PARTIE 4 : La logique de gouvernance et d'argent, pour ne pas se tromper
 
 Cette partie courte rappelle deux règles structurantes que j'ai trouvées dans ta doctrine V2 et qui doivent encadrer tout le travail, parce qu'elles touchent au droit et à l'argent. Je les mets en clair pour que tu puisses les vérifier et les corriger si besoin.
 
@@ -208,13 +208,13 @@ Pour Claude Code, cela veut dire concrètement : il peut écrire les mentions RG
 
 ---
 
-# PARTIE 5 — Le plan de travail par phases
+# PARTIE 5 : Le plan de travail par phases
 
 Voici le cœur opérationnel. J'ai découpé tout ce qu'on s'est dit, plus ce qui manquait avant, en phases qui s'enchaînent logiquement. Chaque phase est pensée pour être confiée à Claude Code en un bloc, avec un objectif clair, un résultat visible à la fin, et zéro dépendance à un service payant.
 
 Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton site prendre vie, parce que c'est ça qui te redonne de l'élan et qui te sert à montrer le produit pour lever du soutien. Le câblage payant et la mise en ligne réelle viennent en toute fin, comme tu l'as demandé.
 
-## Phase A — Voir le site vivant tout de suite
+## Phase A : Voir le site vivant tout de suite
 
 **Objectif** : peupler le site de contenu de démonstration et mettre des images partout, pour que tu puisses enfin juger de l'allure réelle, sur ton ordinateur, sans rien câbler.
 
@@ -226,7 +226,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun. Tout en local et en mock.
 
-## Phase A-bis — Débloquer l'espace profil et les mentions légales
+## Phase A-bis : Débloquer l'espace profil et les mentions légales
 
 **Objectif** : faire écrire à Claude Code l'espace profil utilisateur et les mentions RGPD, qu'il refusait jusqu'ici par prudence juridique, maintenant qu'on lui a fourni le cadre (4.3).
 
@@ -238,7 +238,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase B — Réinjecter l'identité visuelle
+## Phase B : Réinjecter l'identité visuelle
 
 **Objectif** : remettre le dégradé signature aux bons endroits et resserrer la cohérence graphique.
 
@@ -248,7 +248,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase C — Le gabarit riche des espaces collectifs
+## Phase C : Le gabarit riche des espaces collectifs
 
 **Objectif** : donner à la commune libre, aux groupes de travail, aux fédérations et aux groupes d'entraide le même gabarit riche que l'espace campagne, comme tu l'as demandé : image de couverture, logo, bloc descriptif, et la boîte à outils d'action complète.
 
@@ -260,7 +260,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase D — Les blocs personnalisables façon newsletter
+## Phase D : Les blocs personnalisables façon newsletter
 
 **Objectif** : te permettre d'ajouter toi-même, dans un espace collectif, des petits blocs libres (texte, image, lien, bouton) sans code, comme on compose une newsletter.
 
@@ -270,7 +270,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase E — Le tunnel pétition vers adhésion vers commune
+## Phase E : Le tunnel pétition vers adhésion vers commune
 
 **Objectif** : construire bout à bout le parcours phare décrit en 3.3, qui est ton modèle de référence.
 
@@ -282,7 +282,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun en construction. Le vrai envoi d'email viendra au câblage final.
 
-## Phase F — Le moteur d'invitation virale
+## Phase F : Le moteur d'invitation virale
 
 **Objectif** : l'écran d'invitation décrit en bloc viral, irréprochable parce que c'est lui qui transforme un engagement en plusieurs.
 
@@ -294,7 +294,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase G — Brancher la double relation aux campagnes
+## Phase G : Brancher la double relation aux campagnes
 
 **Objectif** : poser enfin la pédale sur le moteur déjà construit (2.1).
 
@@ -304,7 +304,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase H — Le double visage réseau social et espace d'action
+## Phase H : Le double visage réseau social et espace d'action
 
 **Objectif** : réaliser le principe 3.2, le plus ambitieux. Quand on crée une page ou un groupe sur le réseau social, créer en même temps son espace d'action complet.
 
@@ -316,7 +316,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase I — Embellir les espaces type plateforme
+## Phase I : Embellir les espaces type plateforme
 
 **Objectif** : appliquer le principe 3.5 espace par espace, un à la fois, bien fini.
 
@@ -326,7 +326,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase J — Le réseau social plus chaleureux
+## Phase J : Le réseau social plus chaleureux
 
 **Objectif** : répondre à ton « le réseau social est super moche, ça ne ressemble pas à Facebook ».
 
@@ -336,7 +336,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase K — Améliorer l'interface d'édition CMS
+## Phase K : Améliorer l'interface d'édition CMS
 
 **Objectif** : transformer les très nombreuses clés éditables (plus de 1 200) en un outil réellement utilisable par toi et par tes futurs délégués.
 
@@ -348,7 +348,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun.
 
-## Phase L — Les emails soignés par défaut
+## Phase L : Les emails soignés par défaut
 
 **Objectif** : répondre à ton « les mails sont super moches ».
 
@@ -358,7 +358,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : aucun en construction. Le fournisseur d'email réel viendra au câblage final.
 
-## Phase M — La sauvegarde, puis la mise en ligne réelle
+## Phase M : La sauvegarde, puis la mise en ligne réelle
 
 **Objectif** : faire passer le site du local au réel, en sécurité.
 
@@ -368,7 +368,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 **Service payant nécessaire** : l'hébergement réel, à arbitrer à ce moment-là.
 
-## Phase N — Le câblage final des services payants
+## Phase N : Le câblage final des services payants
 
 **Objectif** : basculer les adaptateurs mock vers les vrais services, une fois ton budget arbitré et ton soutien levé.
 
@@ -378,7 +378,7 @@ Une note sur l'ordre : j'ai placé en premier ce qui te permet de voir vite ton 
 
 ---
 
-# PARTIE 6 — Les tunnels d'engagement à arbitrer ensemble
+# PARTIE 6 : Les tunnels d'engagement à arbitrer ensemble
 
 Tu m'as demandé de proposer des tunnels pour les autres espaces, sur le modèle du tunnel pétition. En voici une série. Ce sont des propositions, pas des décisions : on les arbitrera ensemble. Le principe commun, toujours le même : ne jamais laisser retomber l'énergie de quelqu'un qui vient d'agir, et lui proposer l'action suivante un cran plus engageante.
 
@@ -412,7 +412,7 @@ Pour chaque tunnel, la question à se poser ensemble est : quelle est l'action s
 
 ---
 
-# PARTIE 7 — Les arbitrages que je te laisse
+# PARTIE 7 : Les arbitrages que je te laisse
 
 Pour ne pas décider à ta place sur ce qui relève de ton expertise ou de ton goût, voici les points ouverts. Tu trancheras quand tu liras ce document.
 
@@ -430,7 +430,7 @@ Sixième point, le sort de Base44. Tu hésites à le garder pour quelques foncti
 
 ---
 
-# PARTIE 8 — Les directives permanentes pour Claude Code
+# PARTIE 8 : Les directives permanentes pour Claude Code
 
 C'est la partie qui répond à ta vraie douleur : Claude Code qui bloque, qui jargonne, qui réclame des clés. Ces directives sont à ajouter à son fichier de mémoire (le CLAUDE.md). Je te les donne rédigées, prêtes à coller. Elles sont écrites pour qu'il les comprenne et les applique sans interprétation.
 
@@ -468,7 +468,7 @@ C'est la partie qui répond à ta vraie douleur : Claude Code qui bloque, qui ja
 
 ---
 
-# PARTIE 9 — Le premier message à donner à Claude Code
+# PARTIE 9 : Le premier message à donner à Claude Code
 
 Pour démarrer concrètement ta prochaine séance machine, voici un message prêt à coller. Il ouvre la Phase A, celle qui te fait voir ton site vivant. J'ai volontairement fait court et cadré, parce que c'est comme ça que Claude Code travaille le mieux.
 

@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 0, Chantier V2.0.3 : fondations UI transversales (ET1-ET4)
+# Manifest : V2 Vague 0, Chantier V2.0.3 : fondations UI transversales (ET1-ET4)
 
 **Date de fin** : 2026-05-26 (nuit)
 **Branche** : `feature/v2-0-3-fondations-ui-transversales`
@@ -10,21 +10,21 @@
 
 ## Livré et fonctionnel
 
-### ET4 — Variant `primary` du `Button` en dégradé
+### ET4 : Variant `primary` du `Button` en dégradé
 
 - [x] `components/ui/Button.tsx` : ajout du variant **`primary`** qui porte les tokens `--grad` (violet → magenta → framboise) + `--shadow-brand`, dans les deux modes clair/sombre via les tokens. Variants `ghost`, `outline`, `link` inchangés : ils restent neutres (règle anti-saturation : le dégradé est le point fort, pas le fond sonore).
 - [x] Variant `gradient` **préservé comme alias** de `primary` (même style, même classe) pour ne pas casser la documentation V1 ni d'éventuels usages externes. Pas de DROP (doctrine de greffe, interdit n°1).
 - [x] Défaut du `<Button>` passé de `gradient` à `primary`. Aucun usage explicite de `variant="gradient"` dans le code (grep), donc impact d'API nul.
-- [x] `app/design-system/page.tsx` : section « Boutons » mise à jour, titre passé en « Primary — CTA principal (dégradé signature) ».
+- [x] `app/design-system/page.tsx` : section « Boutons » mise à jour, titre passé en « Primary : CTA principal (dégradé signature) ».
 
-### ET3 — Bouton bascule clair/sombre branché sur `personne.mode_theme`
+### ET3 : Bouton bascule clair/sombre branché sur `personne.mode_theme`
 
 - [x] **Composant `ThemeToggle` complété** (`components/ui/ThemeToggle.tsx`) : maintenant qu'on a écrit `localStorage`, on appelle aussi la Server Action `mettreAJourMaPreferenceTheme` en **fire-and-forget**. Pour la personne connectée, sa préférence est miroitée en BDD ; pour la déconnectée, rien ne se passe côté serveur (silencieux par design). Pas de blocage UX si offline ou pas de session.
 - [x] **Server Action `mettreAJourMaPreferenceTheme`** (`app/actions/theme.ts`) : valide que le mode est dans `'auto' | 'light' | 'dark'`, vérifie la session via `getSession()`, met à jour `personne.mode_theme` en BDD. Retour `{ ok: boolean }` silencieux (pas de message d'erreur côté client, car appel fire-and-forget).
 - [x] **Intégration dans le `Header`** (`components/layout/Header.tsx`) : `<ThemeToggle />` ajouté dans la barre de navigation principale, juste avant le menu profil/connexion. Visible en un geste sur toutes les pages publiques et membre.
 - [x] Colonne `personne.mode_theme` déjà présente depuis la migration `20260520120002_personne.sql` (chantier 1.1, contrainte CHECK `auto | light | dark`). **Aucune migration créée**.
 
-### ET2 — Composant `TeleverseurImage` + adapter Image Storage
+### ET2 : Composant `TeleverseurImage` + adapter Image Storage
 
 - [x] **Adapter Image Storage** (`lib/storage/`) avec pattern cohérent vs les autres services externes :
   - `types.ts` : interface `ImageStorageService`, types `RoleImage` (`couverture | vignette | icone`), constantes `MIME_AUTORISES` (JPEG/PNG/WebP) et `TAILLE_MAX_OCTETS` (5 Mo).
@@ -42,11 +42,11 @@
 - [x] **Server Action `televerserImage`** (`app/actions/storage.ts`) : authentification requise, validation MIME + taille (deuxième ligne de défense), délégation à l'adapter. Retour `ResultatTeleversement` discriminé.
 - [x] Export du composant dans `components/ui/index.ts`.
 
-### ET1 — Bibliothèque d'images par défaut par type d'objet
+### ET1 : Bibliothèque d'images par défaut par type d'objet
 
 - [x] **Matrice `lib/images-defaut.ts`** : type union `TypeObjet` (24 types), constante `TYPES_OBJETS` itérable, `IMAGES_DEFAUT: Record<TypeObjet, string>` qui mappe vers `/defaults/*.svg`. Helper `imageDefautPour(type)` qui retombe sur `generique` pour un type inconnu.
 - [x] **Helper unifié `lib/images.ts`** : `getImageObjet(objet)` qui applique la règle d'or « image téléversée gagne sinon image par défaut sinon générique ». Type `ObjetAvecImage` documenté pour les appelants.
-- [x] **15 placeholders SVG** dans `public/defaults/` (un par type principal, avec partage parmi types similaires) : `petition`, `mobilisation`, `campagne`, `cagnotte`, `moment-solidaire`, `offre-marche`, `commune`, `gt-thematique`, `article`, `sondage`, `service-sel`, `offre-entraide`, `organisation`, `profil`, `generique`. Format 1200×675 (ratio Open Graph) ou 800×800 pour le profil. **Ces SVG sont explicitement marqués « Image par défaut · à remplacer par une vraie image curée »** — ce sont des placeholders honnêtes en attendant les images réelles arbitrées par Lilou/Ben.
+- [x] **15 placeholders SVG** dans `public/defaults/` (un par type principal, avec partage parmi types similaires) : `petition`, `mobilisation`, `campagne`, `cagnotte`, `moment-solidaire`, `offre-marche`, `commune`, `gt-thematique`, `article`, `sondage`, `service-sel`, `offre-entraide`, `organisation`, `profil`, `generique`. Format 1200×675 (ratio Open Graph) ou 800×800 pour le profil. **Ces SVG sont explicitement marqués « Image par défaut · à remplacer par une vraie image curée »** : ce sont des placeholders honnêtes en attendant les images réelles arbitrées par Lilou/Ben.
 
 ## Livré partiellement
 
@@ -70,12 +70,12 @@ Liste des images à fournir par Lilou/Ben pour remplacer les placeholders de la 
 - `public/defaults/offre-marche.svg` → vraie image **« Marché solidaire »** (étals, produits, échange).
 - `public/defaults/commune.svg` → vraie image **« Commune »** (paysage rural ou urbain, place de village).
 - `public/defaults/gt-thematique.svg` → vraie image **« Groupe de travail »** (réunion, idéation collective).
-- `public/defaults/article.svg` → vraie image **« Article »** (presse, lecture, plume — pour Maintenant Médias).
+- `public/defaults/article.svg` → vraie image **« Article »** (presse, lecture, plume : pour Maintenant Médias).
 - `public/defaults/sondage.svg` → vraie image **« Sondage »** (graphique participatif, urne).
 - `public/defaults/service-sel.svg` → vraie image **« Service SEL »** (mains qui se passent un objet, échange non monétaire).
-- `public/defaults/offre-entraide.svg` → vraie image **« Entraide »** (covoiturage, hébergement, prêt — image qui couvre les trois).
+- `public/defaults/offre-entraide.svg` → vraie image **« Entraide »** (covoiturage, hébergement, prêt : image qui couvre les trois).
 - `public/defaults/organisation.svg` → vraie image **« Organisation partenaire »** (logos, façade associative).
-- `public/defaults/profil.svg` → **avatar par défaut** (carré 800×800, silhouette neutre — celui actuel est déjà acceptable).
+- `public/defaults/profil.svg` → **avatar par défaut** (carré 800×800, silhouette neutre : celui actuel est déjà acceptable).
 - `public/defaults/generique.svg` → fallback ultime, identité **Maintenant!** assumée (l'actuel sur fond dégradé est cohérent avec l'identité visuelle).
 
 Note : il est possible de **fusionner** certains types vers la même image (déjà fait pour `offre_transport`, `offre_hebergement`, `offre_pret` qui pointent tous vers `offre-entraide.svg`). Lilou/Ben peut ajuster la matrice dans `lib/images-defaut.ts` sans toucher au code applicatif.

@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.3 : Master Plan V2.6 Phase B (identité visuelle, dégradé)
+# Manifest : Chantier V2.5.3 : Master Plan V2.6 Phase B (identité visuelle, dégradé)
 
 **Date de fin** : 2026-05-29 (nuit du 29 au 30)
 **Branche** : `main`

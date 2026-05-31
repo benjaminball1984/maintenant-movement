@@ -1,4 +1,4 @@
-# Manifest : Phase 12, Chantiers 12.1 à 12.6 — Polish global post-revue de copie
+# Manifest : Phase 12, Chantiers 12.1 à 12.6 : Polish global post-revue de copie
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-12-polish-revue-globale`
@@ -15,7 +15,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 
 ---
 
-## 12.1 — Corrections mécaniques (commit `2e89fa2`)
+## 12.1 : Corrections mécaniques (commit `2e89fa2`)
 
 ### Livré
 
@@ -29,7 +29,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 
 - [ ] Néant.
 
-## 12.2 — Design system et dark mode (commit `90d7657`)
+## 12.2 : Design system et dark mode (commit `90d7657`)
 
 ### Livré
 
@@ -40,7 +40,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 - [x] **Commentaire QR 2FA** (`FormulaireEnrollementTotp.tsx`) : le `bg-white` reste volontaire (un QR a besoin d'un fond clair pour rester scannable) et est désormais explicitement commenté et arrondi `rounded-sm`.
 - [x] **Audit `bg-white` / `text-black` / `bg-gray-*`** : aucun autre usage hors-tokens dans le code applicatif.
 
-## 12.3 — Tests responsive cross-format (commit `6caa711`)
+## 12.3 : Tests responsive cross-format (commit `6caa711`)
 
 ### Livré
 
@@ -51,7 +51,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 
 - [ ] **Première exécution complète** : `npx playwright install` pour télécharger Firefox + WebKit en local, puis `npm run test:e2e` pour générer les screenshots de référence et valider que tous les viewports passent.
 
-## 12.4 — Centralisation des contenus à arbitrer (commit `febefb7`)
+## 12.4 : Centralisation des contenus à arbitrer (commit `febefb7`)
 
 ### Livré
 
@@ -60,7 +60,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 - [x] Les 8 pages éditoriales (`contact`, `confidentialite`, `mentions-legales`, `comprendre/doctrine`, `comprendre/faq`, `comprendre/monnaie`, `comprendre/ressources`, `a-propos`) bénéficient automatiquement de ce comportement sans changement individuel.
 - [x] **CLAUDE.md §11** : ajout d'une référence explicite vers `docs/CONTENUS-A-ARBITRER.md`.
 
-## 12.5 — Architecture et lisibilité (commit `84e7ed7`)
+## 12.5 : Architecture et lisibilité (commit `84e7ed7`)
 
 ### Livré
 
@@ -76,7 +76,7 @@ Aucune fonctionnalité métier nouvelle. Que des corrections, du nettoyage et de
 
 - [ ] **Split des 3 fichiers `actions.ts` massifs** (`marche` 600 lignes, `cagnottes` 504, `communes` 502). Refacto pur sans bénéfice fonctionnel, risque de casser la convention Next.js Server Actions trop élevé dans le scope polish. Documenté comme dette technique consciente.
 
-## 12.6 — Sécurité (commit `3a36283`)
+## 12.6 : Sécurité (commit `3a36283`)
 
 ### Livré
 

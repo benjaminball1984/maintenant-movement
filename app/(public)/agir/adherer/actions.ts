@@ -34,7 +34,7 @@ export type ResultatAction<TPayload = unknown> =
   | { ok: false; message: string };
 
 // ============================================================
-// Chemin 1 — Adhésion gratuite
+// Chemin 1 : Adhésion gratuite
 // ============================================================
 
 export async function adhererGratuit(donneesBrutes: unknown): Promise<ResultatAction> {
@@ -69,7 +69,7 @@ export async function adhererGratuit(donneesBrutes: unknown): Promise<ResultatAc
 }
 
 // ============================================================
-// Chemin 2 — Adhésion 12 € via Stripe Checkout
+// Chemin 2 : Adhésion 12 € via Stripe Checkout
 // ============================================================
 
 export async function adhererEuros(
@@ -97,7 +97,7 @@ export async function adhererEuros(
   // session Stripe pour l'instant. Le webhook Stripe (ou le retour
   // utilisateur en mock) la confirme avec le sessionId. En cas
   // d'abandon, la ligne reste mais expire normalement après 365 jours
-  // — équivalent à une adhésion offerte. Pour 5.1 v1, on s'en tient là.
+  // : équivalent à une adhésion offerte. Pour 5.1 v1, on s'en tient là.
   // Une logique de rollback explicite pourrait être ajoutée en polish.
   const { data: adhesion, error: erreurInsert } = await supabase
     .from('adhesion')
@@ -142,7 +142,7 @@ export async function adhererEuros(
 }
 
 // ============================================================
-// Chemin 3 — Adhésion 12 T99CP
+// Chemin 3 : Adhésion 12 T99CP
 // ============================================================
 
 export async function adhererT99CP(donneesBrutes: unknown): Promise<ResultatAction> {
@@ -216,7 +216,7 @@ export async function adhererT99CP(donneesBrutes: unknown): Promise<ResultatActi
 }
 
 // ============================================================
-// Retour Stripe Checkout (chemin euros) — appelé par /agir/adherer/retour
+// Retour Stripe Checkout (chemin euros) : appelé par /agir/adherer/retour
 // ============================================================
 
 export async function confirmerAdhesionEuros(
@@ -266,7 +266,7 @@ export async function confirmerAdhesionEuros(
 }
 
 // ============================================================
-// Cron applicatif — Relance J+365
+// Cron applicatif : Relance J+365
 // ============================================================
 
 /**

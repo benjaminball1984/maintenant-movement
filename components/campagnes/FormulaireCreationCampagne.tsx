@@ -65,7 +65,7 @@ interface FormulaireCreationCampagneProps {
  * Une fois la campagne créée (statut en_moderation), la créateurice
  * peut commencer à y attacher des modules depuis la fiche détail. Pour
  * 3.2 v1, l'attachement de modules est exposé uniquement via la console
- * admin / l'API (Server Action `attacherModule`) — une UI dédiée
+ * admin / l'API (Server Action `attacherModule`) : une UI dédiée
  * d'édition des modules viendra dans un chantier polish.
  */
 export function FormulaireCreationCampagne({
@@ -79,7 +79,7 @@ export function FormulaireCreationCampagne({
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [declarationOrg, setDeclarationOrg] =
     useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
-  // V2.5.51 — switch Riche/Markdown pour la presentation.
+  // V2.5.51 : switch Riche/Markdown pour la presentation.
   const [texteHtml, setTexteHtml] = useState('');
   const [modeTexte, setModeTexte] = useState<'markdown' | 'riche'>('markdown');
 
@@ -151,7 +151,7 @@ export function FormulaireCreationCampagne({
             <button
               type="button"
               onClick={() => {
-                // V2.5.51 — bascule vers Riche pre-remplit avec la
+                // V2.5.51 : bascule vers Riche pre-remplit avec la
                 // conversion du Markdown courant si HTML vide.
                 const texteCourant = watch('texte') ?? '';
                 if (texteHtml === '' && texteCourant.trim() !== '') {

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * `<EditeurRicheAvecToolbar>` — combinaison `BarreOutilsRiche` + `EditeurRiche`
+ * `<EditeurRicheAvecToolbar>` : combinaison `BarreOutilsRiche` + `EditeurRiche`
  * (V2.5.23). Permet d'éditer un contenu HTML riche avec toolbar visible.
  *
  * Ce composant duplique légèrement la logique TipTap de `EditeurRiche` pour

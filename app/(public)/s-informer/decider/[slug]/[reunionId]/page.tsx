@@ -132,7 +132,7 @@ export default async function PageReunion({ params }: Props) {
         </TexteEditableAdmin>
         <Card variant="ombre" className="mt-3">
           {(() => {
-            // V2.5.37 — priorité au HTML riche s'il est posé (déjà sanitizé
+            // V2.5.37 : priorité au HTML riche s'il est posé (déjà sanitizé
             // au save). Fallback Markdown léger. Sinon message vide éditable.
             if (reunion.ordreJourHtml !== null && reunion.ordreJourHtml.trim() !== '') {
               return <RenduRiche valeurHtml={reunion.ordreJourHtml} />;
@@ -168,7 +168,7 @@ export default async function PageReunion({ params }: Props) {
         </Heading>
         <Card variant="ombre" className="mt-3">
           {(() => {
-            // V2.5.37 — priorité au HTML riche.
+            // V2.5.37 : priorité au HTML riche.
             if (reunion.pvHtml !== null && reunion.pvHtml.trim() !== '') {
               return <RenduRiche valeurHtml={reunion.pvHtml} />;
             }

@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 2 : Audit de conformité code ↔ CDC
+# Revue 2026 : Bloc 2 : Audit de conformité code ↔ CDC
 
 > Confrontation des **60 points** de la checklist (`01-synthese-cdc.md` §14) au code réel. 4 sous-agents ont audité 4 domaines en parallèle, avec preuve (fichier:ligne). Verdicts : ✅ conforme · ⚠️ écart partiel · ❌ non conforme · ❓ à confirmer/introuvable.
 
@@ -93,13 +93,13 @@
 
 ## Liste priorisée des correctifs
 
-### P0 — Critique (sécurité / RGPD / règle d'écriture systémique)
+### P0 : Critique (sécurité / RGPD / règle d'écriture systémique)
 - **C1. Imposer la 2FA** (point 21) sur les gardes admin/modération/trésorerie : check `getAuthenticatorAssuranceLevel()` → redirection `/profil/securite/2fa` si pas `aal2`. *(local, faisable)*
 - **C2. Tiret cadratin dans les textes AFFICHÉS** (point 47) : remplacer `—` par deux-points/parenthèses/virgules dans les `<title>`/metadata, JSX visibles, placeholders (priorité au rendu usager), puis commentaires et docs. *(local, mécanique)*
 - **C3. Job d'anonymisation 30 j** (point 50) : fonction SQL `appliquer_suppressions_differees()` (nullifie, garde FK, journalise) + cron. *(migration + cron : la fonction est locale ; le cron est Phase finale)*
 - **C4. Export ZIP RGPD réel** (point 51) : générer les 6 entrées (route serveur + JSZip + Storage + URL signée). *(local, infra async)*
 
-### P1 — Important (conformité fonctionnelle)
+### P1 : Important (conformité fonctionnelle)
 - **C5. `afficher_nom` + payeur non nullable** (point 9) sur transaction_entrante/don. *(migration additive)*
 - **C6. Alimenter `journal_admin`** sur modération pétition, export, suppression (point 13). *(local)*
 - **C7. Double-validation reversement** (point 19) : refuser confirme si `initie_par == confirmateur`. *(local, 3 lignes)*
@@ -108,7 +108,7 @@
 - **C10. Généraliser `BoutonsPartage`** aux ~15 fiches restantes + 3e voie « publier sur le réseau » (point 33). *(local)*
 - **C11. CTA redirection 99-coin** `the99coinproject.org` (nouvelle fenêtre) dans les formulaires T99CP (point 23). *(local)*
 
-### P2 — Polish
+### P2 : Polish
 - **C12. Flèches `→`/`←`** dans textes publiés → reformuler (points 47/spec écriture). *(local)*
 - **C13. ORM+5** : `numero_organisation` (`^ORM[A-Z0-9]{5}$`) + trigger calqué sur M+7 (point 14). *(migration additive)*
 - **C14. Colonnes `compte_immediatement` + `snapshot`** sur signature_petition (point 8, additif). *(migration additive)*
@@ -116,7 +116,7 @@
 - **C16. Aligner `declarerOrganisationInitiatriceAction`** sur l'attestation obligatoire (point 43). *(local)*
 - **C17. Résidu `envoyerTransaction`** dans adhésion T99CP → pattern redirection (point 22). *(local)*
 
-### P3 — Décision Lilou/Ben requise (architecture / produit, reporté)
+### P3 : Décision Lilou/Ben requise (architecture / produit, reporté)
 - **D1. Statuts §13** (silencieux / membre non actif / membre actif-voteur) + correction du compteur public (point 41). *(décision produit)*
 - **D2. Anonymat des votes Décider** : table `bulletin_decider` sans `personne_id` + token purgé (point 53). *(refonte Décider, MVP actuel)*
 - **D3. Tronc `Objet`/`Espace`, `Rattachement` générique, `type_lien`, `OutilActivé`, ESM+5** (points 34/36/37) : Vague 5 explicitement reportée. *(décision nominative)*

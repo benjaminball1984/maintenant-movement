@@ -1,7 +1,7 @@
 /**
  * Helpers de gestion du marqueur de démonstration (table `objet_demo`).
  *
- * Chantier V2.5.1 — Master Plan V2.6 Phase A.
+ * Chantier V2.5.1 : Master Plan V2.6 Phase A.
  *
  * Trois usages :
  *

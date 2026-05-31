@@ -1,4 +1,4 @@
-# Manifest : Phase 7, Chantier 7.2 — Maintenant Radio (player AzuraCast)
+# Manifest : Phase 7, Chantier 7.2 : Maintenant Radio (player AzuraCast)
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-7-chantier-7.2-radio`

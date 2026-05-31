@@ -1,4 +1,4 @@
-# Manifest : Phase 0, Chantier 0.1 — Initialisation du dépôt
+# Manifest : Phase 0, Chantier 0.1 : Initialisation du dépôt
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-0-chantier-0.1-initialisation-depot`

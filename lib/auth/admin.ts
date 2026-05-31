@@ -8,7 +8,7 @@
 import { getSupabaseServer } from '@/lib/supabase';
 
 /**
- * V2.4.2 — true si la personne courante est admin général de plateforme
+ * V2.4.2 : true si la personne courante est admin général de plateforme
  * (niveau `national` ou `admin` dans `droit_admin`). RPC `est_admin_general`.
  */
 export async function estAdminCourant(): Promise<boolean> {
@@ -22,7 +22,7 @@ export async function estAdminCourant(): Promise<boolean> {
 }
 
 /**
- * V2.5.15 (Master Plan §K) — true si la personne courante peut éditer les
+ * V2.5.15 (Master Plan §K) : true si la personne courante peut éditer les
  * libellés CMS via la console `/admin/national/contenus`. Inclut :
  *   - `national` et `admin` (qui ont déjà tous les droits)
  *   - `cms` (rôle dédié sans pouvoir politique, attribuable à un·e proche

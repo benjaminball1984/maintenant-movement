@@ -48,7 +48,7 @@ function estModeValide(mode: unknown): mode is ModeThemeBdd {
  * Met à jour `personne.mode_theme` pour la personne connectée.
  *
  * Retourne `{ ok: true }` en cas de succès, `{ ok: false }` sinon (sans
- * détails — l'appelant·e est en fire-and-forget, on évite de fuiter
+ * détails : l'appelant·e est en fire-and-forget, on évite de fuiter
  * d'information côté client).
  */
 export async function mettreAJourMaPreferenceTheme(

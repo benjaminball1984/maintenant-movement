@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.26 : `transaction_entrante` + solde de caisse
+# Manifest : V2 Vague 3, Chantier V2.3.26 : `transaction_entrante` + solde de caisse
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-26-transaction-entrante-solde`
@@ -22,7 +22,7 @@ Symétrie côté entrées de caisse. La table V2.2.3 posait `caisse`, `receptacl
   - RLS : lecture admin national + payeur (lit ses propres contributions). Insert bloqué côté client (service_role uniquement). Update admin uniquement. Pas de delete.
 - [x] **`types/database.ts`** : ajouté à la main avec Row/Insert/Update/Relationships (2 FK vers `caisse` et `receptacle_caisse`).
 - [x] **`lib/caisse-solde.ts`** : helper `calculerSoldeCaisse(caisseId)` qui retourne `{ euro: {entrees, sorties, solde}, coin99: {entrees, sorties, solde} }`. 2 requêtes parallèles, agrégation TS sur les seules transactions `confirmee`.
-- [x] **`lib/caisse-solde.ts` — `calculerSoldesCaisses(caisseIds)`** : variante batch (2 requêtes au lieu de N×2), Map indexée. Utilisée par le dashboard.
+- [x] **`lib/caisse-solde.ts` : `calculerSoldesCaisses(caisseIds)`** : variante batch (2 requêtes au lieu de N×2), Map indexée. Utilisée par le dashboard.
 - [x] **`app/admin/national/tresorerie/page.tsx`** : affiche le solde dans chaque carte de caisse (encadré sous les compteurs). Affichage conditionnel : si la caisse n'a aucun flux, on n'affiche pas. Format `Intl.NumberFormat` EUR + format custom 99c.
 - [x] **`app/admin/national/tresorerie/[caisseId]/page.tsx`** : section dédiée « Solde » en gros caractères (2 cartes côte à côte EUR et 99-coin), entre l'entête et le rappel D12bis. Toujours affichée même si vide (pédagogique).
 

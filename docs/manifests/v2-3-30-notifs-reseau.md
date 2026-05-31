@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.30 : Branchement notifications réseau
+# Manifest : V2 Vague 3, Chantier V2.3.30 : Branchement notifications réseau
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-30-notifs-reseau`

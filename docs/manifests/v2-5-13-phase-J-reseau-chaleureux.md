@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.13 : Phase J réseau social plus chaleureux
+# Manifest : Chantier V2.5.13 : Phase J réseau social plus chaleureux
 
 **Date de fin** : 2026-05-30
 **Branche** : `main`

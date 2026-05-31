@@ -10,7 +10,7 @@ import { useState } from 'react';
 interface EditeurInlineCMSProps {
   cle: string;
   valeurInitiale: string;
-  /** V2.5.25 — valeur HTML riche initiale (optionnelle). */
+  /** V2.5.25 : valeur HTML riche initiale (optionnelle). */
   valeurHtmlInitiale?: string | null;
   /** Chemin à revalider après sauvegarde (optionnel). */
   cheminRevalidation?: string;
@@ -21,21 +21,21 @@ interface EditeurInlineCMSProps {
 type ModeEdition = 'markdown' | 'riche';
 
 /**
- * Éditeur inline pour la console CMS (V2.5.21 — sous-chantier V2.5.15.b,
+ * Éditeur inline pour la console CMS (V2.5.21 : sous-chantier V2.5.15.b,
  * étendu V2.5.25 avec le mode rich text).
  *
  * Affiche un bouton « ✎ Éditer » en mode lecture. Au clic, déplie un
  * éditeur avec choix de mode :
  *   - Mode Markdown : textarea simple (historique, compatible).
  *   - Mode Riche : éditeur WYSIWYG TipTap (couleurs, polices, listes,
- *     liens, images, embed YouTube) — utile pour les blocs longs et les
+ *     liens, images, embed YouTube) : utile pour les blocs longs et les
  *     corps d'emails (la clé `email.{type}.html` est ensuite consommée
  *     prioritairement par `envoyerEmailTemplee` si renseignée).
  *
  * Le serveur ne reçoit que le champ qu'on a édité (md OU html), l'autre
  * est préservé en base. Au succès, replie et affiche un feedback bref.
  *
- * Pas de preview avant publication pour cette V2.5.21 — c'est V2.5.15.c
+ * Pas de preview avant publication pour cette V2.5.21 : c'est V2.5.15.c
  * (mode brouillon) qui ajoutera ça. Pour l'instant la sauvegarde est
  * immédiate (la console CMS étant accessible uniquement aux admins +
  * CMS, le risque d'erreur publique est borné).

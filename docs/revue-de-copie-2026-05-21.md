@@ -73,7 +73,7 @@ Le manifest 11.1 affirme : « CSP basique posée dans `next.config.ts` ». Or `n
 
 ## 2. Contenu manquant (assumé) mais mal centralisé
 
-Le projet documente honnêtement les `[TEXTE À FAIRE]`. C'est bien. **Mais ils sont éparpillés dans 8 pages, écrits dans le composant `<Alert variant="info" titre="[TEXTE À FAIRE]">` qui s'affiche à l'utilisateur·ice**. Si on déploie aujourd'hui en preview, n'importe quel·le visiteur·euse voit `[TEXTE À FAIRE — politique de confidentialité v3]` en gros dans un encart bleu.
+Le projet documente honnêtement les `[TEXTE À FAIRE]`. C'est bien. **Mais ils sont éparpillés dans 8 pages, écrits dans le composant `<Alert variant="info" titre="[TEXTE À FAIRE]">` qui s'affiche à l'utilisateur·ice**. Si on déploie aujourd'hui en preview, n'importe quel·le visiteur·euse voit `[TEXTE À FAIRE : politique de confidentialité v3]` en gros dans un encart bleu.
 
 Les 8 placeholders éditoriaux confirmés :
 - `app/(public)/contact/page.tsx:15`

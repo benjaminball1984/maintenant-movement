@@ -1,4 +1,4 @@
-# Manifest : Phase 3, Chantier 3.3 — Cagnottes (3 types + Stripe + T99CP)
+# Manifest : Phase 3, Chantier 3.3 : Cagnottes (3 types + Stripe + T99CP)
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-3-chantier-3.3-cagnottes`
@@ -12,7 +12,7 @@
 ### Schéma BDD (migrations 018 + 019)
 
 - [x] **Table `cagnotte`** (018) : 3 types (`ouverte | lutte | cotisation`), slug, titre, texte, image, objectif euros, porteur·euse, `stripe_account_id` (KYC Stripe Connect), `wallet_t99cp`, statut (`publiee | suspendue | cloturee`), méta de suspension. 7 contraintes CHECK (type, statut, slug, objectif positif, cohérence suspension). 4 index.
-- [x] **RLS `cagnotte`** : lecture publique sur les 3 statuts (transparence sur la suspension), porteur·euse voit tout, modé/admin tout. **Cas particulier `cotisation`** : la policy d'insert force `est_admin_national() = true` — seuls les admins peuvent créer les cagnottes structurelles type « sécurité sociale du logement / mobilités / alimentation, RBU » (cf. spec §5D).
+- [x] **RLS `cagnotte`** : lecture publique sur les 3 statuts (transparence sur la suspension), porteur·euse voit tout, modé/admin tout. **Cas particulier `cotisation`** : la policy d'insert force `est_admin_national() = true` : seuls les admins peuvent créer les cagnottes structurelles type « sécurité sociale du logement / mobilités / alimentation, RBU » (cf. spec §5D).
 - [x] **Table `don`** (019) : versement à une cagnotte, `personne_id` nullable (don anonyme), monnaie `EUR | T99CP`, `montant_centimes` (net), `frais_centimes`, références transactionnelles (`stripe_payment_intent_id`, `tx_hash`), statut `en_attente | confirme | echoue | rembourse`, opt-ins newsletter + contact créateurice. Contrainte CHECK qui interdit des frais > 0 sur T99CP (politique 0 %). Index uniques partiels sur `stripe_payment_intent_id` et `tx_hash` (anti-doublon).
 - [x] **RLS `don`** : un don individuel n'est pas public (vie privée). Donatrice connectée, porteur·euse, modé/admin voient. Insert ouverte. Update réservée admin/modé (en prod, c'est le service_role via webhook Stripe qui passera en `confirme`).
 - [x] **Vue `cagnotte_compteur`** + **fonction `compteurs_cagnotte(uuid)`** (SECURITY DEFINER) qui exposent total EUR + total T99CP + nombre de dons agrégés sans laisser lire la table.

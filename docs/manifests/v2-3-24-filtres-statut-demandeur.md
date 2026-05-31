@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.24 : Filtres par statut sur dashboard demandeur + refactor partagé
+# Manifest : V2 Vague 3, Chantier V2.3.24 : Filtres par statut sur dashboard demandeur + refactor partagé
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-24-filtres-statut-demandeur`
@@ -22,7 +22,7 @@ Symétrie côté demandeur du chantier V2.3.23. Plus factorisation du module de 
 
 ## Décisions techniques prises
 
-- **Factorisation à la 2ᵉ instance** : doctrine projet — pas de DRY prématuré. Avec V2.3.23 il n'y avait qu'une instance, j'ai laissé inline. Avec V2.3.24 (2 callers), j'extrait dans `lib/reservation-filtres.ts`. Cohérent.
+- **Factorisation à la 2ᵉ instance** : doctrine projet : pas de DRY prématuré. Avec V2.3.23 il n'y avait qu'une instance, j'ai laissé inline. Avec V2.3.24 (2 callers), j'extrait dans `lib/reservation-filtres.ts`. Cohérent.
 - **`STATUTS_FILTRES_RESERVATION` exporté avec le suffixe `_RESERVATION`** : pour éviter une collision future si d'autres entités (paiements, adhésions) ont des filtres similaires.
 - **Migration silencieuse de V2.3.23 vers le module partagé** : pas de manifest correctif distinct ; l'extraction est cohérente avec ce chantier. Le diff montre clairement la suppression du dédoublonnage.
 

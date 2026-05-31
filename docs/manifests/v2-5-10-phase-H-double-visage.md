@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.10 : Master Plan V2.6 Phase H (double visage réseau / espace)
+# Manifest : Chantier V2.5.10 : Master Plan V2.6 Phase H (double visage réseau / espace)
 
 **Date de fin** : 2026-05-30 (nuit du 29 au 30)
 **Branche** : `main`

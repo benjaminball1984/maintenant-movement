@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.11 : Phase I marché Vinted + finitions G et H
+# Manifest : Chantier V2.5.11 : Phase I marché Vinted + finitions G et H
 
 **Date de fin** : 2026-05-30 (matin du 30)
 **Branche** : `main`
@@ -11,7 +11,7 @@ Lilou/Ben a relevé en revue rapide que les chantiers V2.5.8 (Phase G) et V2.5.1
 
 ## Livré
 
-### Phase I — Marché solidaire façon Vinted (V2.5.11)
+### Phase I : Marché solidaire façon Vinted (V2.5.11)
 
 - [x] **Refonte complète de `<CarteProduit>`** : passage d'une carte verbeuse en colonnes à une **vignette photo carrée** style Vinted.
   - Photo en hero (aspect-square, `object-cover`, transition zoom au survol).
@@ -24,7 +24,7 @@ Lilou/Ben a relevé en revue rapide que les chantiers V2.5.8 (Phase G) et V2.5.1
   - **Toute la carte cliquable** via overlay invisible.
 - [x] **Grille plus dense** : passage de `lg:grid-cols-3` à `lg:grid-cols-4` (et `md:grid-cols-3`) pour densifier comme Vinted.
 
-### Phase H finalisée — Badge espace dans `<CartePost>` (V2.5.11.a)
+### Phase H finalisée : Badge espace dans `<CartePost>` (V2.5.11.a)
 
 - [x] **Extension de `PostAffiche`** avec `espacePublieur: AttributionEspace | null` dans `lib/reseau/requetes.ts`.
 - [x] **Helper `chargerAttributionsEspaces`** : une seule requête par type d'espace présent dans le lot (et pas une requête par post). Switch explicite par les 6 types pour préserver le typage Supabase. Résout nom + slug + image_url + chemin public.
@@ -33,7 +33,7 @@ Lilou/Ben a relevé en revue rapide que les chantiers V2.5.8 (Phase G) et V2.5.1
 - [x] **`<CartePost>` adapté** : si `espacePublieur` présent, met l'espace en avant (avatar = image de l'espace, nom = lien cliquable vers `cheminPublic`) avec « publié par [Auteurice] » en sous-titre fin pour la transparence. Sinon comportement inchangé.
 - [x] **Conséquence visible immédiate** : les 6 posts au nom de communes démo (V2.5.10) apparaissent désormais dans le flux du réseau avec un badge « [DÉMO] Argenteuil » cliquable au lieu d'être confondus avec des posts personnels.
 
-### Phase G finalisée — Modale « Intégrer à une campagne » (V2.5.11.b)
+### Phase G finalisée : Modale « Intégrer à une campagne » (V2.5.11.b)
 
 - [x] **Composant client `<BoutonAttacherACampagne>`** (`components/campagnes/BoutonAttacherACampagne.tsx`) :
   - Bouton outline « + Intégrer à une campagne ».
@@ -71,4 +71,4 @@ Lilou/Ben a relevé en revue rapide que les chantiers V2.5.8 (Phase G) et V2.5.1
 - **V2.5.13** : Phase I hébergement façon Airbnb.
 - Le cas démo de Phase H est désormais entièrement visible : aller sur `/s-informer/reseau` au matin pour voir les 6 posts au nom de communes avec leur badge.
 - Le cas démo de Phase G : aller sur n'importe quelle pétition démo en étant connecté·e en admin, scroll en haut pour voir le nouveau bouton « + Intégrer à une campagne ».
-- Le cas démo de Phase I (marché Vinted) : aller sur `/s-entraider/marche/produits` (vide en local pour l'instant — il faudrait des annonces démo pour vraiment voir la grille à 4 colonnes. Note pour plus tard : enrichir le seeding démo avec quelques `produit_marche`).
+- Le cas démo de Phase I (marché Vinted) : aller sur `/s-entraider/marche/produits` (vide en local pour l'instant : il faudrait des annonces démo pour vraiment voir la grille à 4 colonnes. Note pour plus tard : enrichir le seeding démo avec quelques `produit_marche`).

@@ -67,7 +67,7 @@ const schemaReunion = z.object({
   salle_id: z.string().uuid(),
   titre: z.string().min(1).max(300),
   ordre_jour_md: z.string().max(20000).optional(),
-  /** V2.5.35 — HTML riche optionnel de l'OJ (sanitizé). */
+  /** V2.5.35 : HTML riche optionnel de l'OJ (sanitizé). */
   ordre_jour_html: z.string().max(100000).optional(),
   debut_le: z.string(),
   fin_le: z.string().optional(),
@@ -88,7 +88,7 @@ export async function creerReunionAction(
   if (!parse.success) return { ok: false, message: parse.error.issues[0]?.message ?? 'Invalide.' };
 
   const d = parse.data;
-  // V2.5.35 — sanitize HTML riche de l'OJ avant insertion.
+  // V2.5.35 : sanitize HTML riche de l'OJ avant insertion.
   const ojHtmlPropre =
     d.ordre_jour_html !== undefined && d.ordre_jour_html.trim() !== ''
       ? sanitizeRichHtml(d.ordre_jour_html)
@@ -120,10 +120,10 @@ export async function creerReunionAction(
 const schemaMajReunion = z.object({
   id: z.string().uuid(),
   ordre_jour_md: z.string().max(20000).optional(),
-  /** V2.5.35 — HTML riche optionnel de l'OJ. Vide → efface. */
+  /** V2.5.35 : HTML riche optionnel de l'OJ. Vide → efface. */
   ordre_jour_html: z.string().max(100000).optional(),
   pv_md: z.string().max(50000).optional(),
-  /** V2.5.35 — HTML riche optionnel du PV. Vide → efface. */
+  /** V2.5.35 : HTML riche optionnel du PV. Vide → efface. */
   pv_html: z.string().max(200000).optional(),
   statut: z.enum(['planifiee', 'en_cours', 'terminee', 'annulee']).optional(),
 });

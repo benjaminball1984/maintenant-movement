@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 /**
- * Console d'édition CMS organisée par espace (V2.5.15 — Master Plan V2.6 Phase K).
+ * Console d'édition CMS organisée par espace (V2.5.15 : Master Plan V2.6 Phase K).
  *
  * Au lieu d'une liste plate de centaines de clés intransportables, on offre :
  *  1. **Une barre de recherche** qui filtre instantanément par clé OU par valeur.
@@ -28,7 +28,7 @@ import { useMemo, useState } from 'react';
 export interface ContenuListe {
   cle: string;
   valeurMd: string;
-  /** V2.5.25 — HTML riche (optionnel). Pris en charge par l'éditeur inline
+  /** V2.5.25 : HTML riche (optionnel). Pris en charge par l'éditeur inline
    *  (mode Riche pré-rempli, sinon mode Markdown). */
   valeurHtml?: string | null;
   updatedAt: string;
@@ -74,7 +74,7 @@ function apercuHtml(html: string, max = 60): string {
 export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenusCMSProps) {
   const [recherche, setRecherche] = useState('');
   const [ouverts, setOuverts] = useState<Record<string, boolean>>({});
-  /** V2.5.21 — surcharges locales après édition inline (le re-fetch
+  /** V2.5.21 : surcharges locales après édition inline (le re-fetch
    *  serveur viendra à la prochaine navigation, mais entre-temps on
    *  affiche la nouvelle valeur localement). */
   const [surcharges, setSurcharges] = useState<Record<string, string>>({});
@@ -114,7 +114,7 @@ export function ConsoleContenusCMS({ contenus, pagesNonEditees }: ConsoleContenu
   }, [contenus, recherche]);
 
   const totalAffiches = groupes.reduce((sum, g) => sum + g.items.length, 0);
-  // V2.5.43 — comptes rich text vs markdown pour la barre d'en-tête.
+  // V2.5.43 : comptes rich text vs markdown pour la barre d'en-tête.
   const totalAvecRiche = contenus.filter(
     (c) => c.valeurHtml !== null && c.valeurHtml !== undefined && c.valeurHtml !== '',
   ).length;

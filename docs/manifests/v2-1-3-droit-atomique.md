@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 1, Chantier V2.1.3 : table `droit` atomique + presets
+# Manifest : V2 Vague 1, Chantier V2.1.3 : table `droit` atomique + presets
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-1-3-droit-atomique`
@@ -10,7 +10,7 @@
 
 ## Livré et fonctionnel
 
-- [x] **Migration `supabase/migrations/20260527020000_droit.sql`** : crée la table `droit` (id, personne_id FK, cible_type, cible_id, type_droit, accorde_par, accorde_le, retire_par, retire_le, metadata), contraintes CHECK strictes sur `cible_type` (15 valeurs ou NULL pour droit global) et `type_droit` (25 valeurs atomiques exhaustivement listées selon MD1). Cohérence `(cible_type, cible_id)` par CHECK. Index actifs et unique partiel sur le triplet (personne × type × cible) actif. **4 policies RLS dans la même migration** : `select` self + admin général + DPD ; `insert/update/delete` admin général uniquement. **À appliquer manuellement** avec `supabase db push` ou `scripts/appliquer-sql-distant.ts` — non appliquée au distant cette nuit (consigne).
+- [x] **Migration `supabase/migrations/20260527020000_droit.sql`** : crée la table `droit` (id, personne_id FK, cible_type, cible_id, type_droit, accorde_par, accorde_le, retire_par, retire_le, metadata), contraintes CHECK strictes sur `cible_type` (15 valeurs ou NULL pour droit global) et `type_droit` (25 valeurs atomiques exhaustivement listées selon MD1). Cohérence `(cible_type, cible_id)` par CHECK. Index actifs et unique partiel sur le triplet (personne × type × cible) actif. **4 policies RLS dans la même migration** : `select` self + admin général + DPD ; `insert/update/delete` admin général uniquement. **À appliquer manuellement** avec `supabase db push` ou `scripts/appliquer-sql-distant.ts` : non appliquée au distant cette nuit (consigne).
 - [x] **`lib/droit-presets.ts`** : table de mapping des presets V2 (5 fonctions de commune : redacteurice, moderateurice, editeur_media, gestionnaire_espace, tresorier_iere) ET des presets V1 (6 niveaux historiques : national, admin, moderation, tresorerie, animation, dpd) vers la liste atomique V2. Helper `droitsPourPresetV2(preset)` et `droitsPourPresetV1(preset, { perimetreOnglet })` (gère le cas modération + onglet « petitions » qui ajoute `moderer_a_priori`).
 - [x] **`lib/droit.ts`** : 5 fonctions exposées avec types stricts.
   - `accorderDroit({...})` : upsert idempotent (par triplet personne × type × cible).
@@ -44,8 +44,8 @@ Pas d'ADR formelle. Choix techniques découlant de D10/MD1-MD6 :
 
 - **Liste fermée de `type_droit` via CHECK** plutôt qu'enum Postgres : suit la convention V1 du repo (toutes les contraintes de liste sont des CHECK `... in (...)`). Permet d'ajouter une valeur par simple migration ALTER, sans toucher au type SQL.
 - **Soft delete cohérent avec `droit_admin`** : `retire_le` + `retire_par`, jamais de DELETE. Audit RGPD + MD3 traçabilité obligatoire.
-- **`admin_total_plateforme` comme marqueur unique** plutôt qu'un statut sur `personne` : choix d'extensibilité. MD5 V2 envisage un « Cercle d'admin plateforme » avec appartenances cooptées explicites — entité future, dans laquelle ce marqueur trouvera sa place. En attendant, marqueur = ligne `droit` sans cible.
-- **`peutAccorder` côté TypeScript, pas côté RLS** : la règle MD3 « non-élévation » exige de raisonner sur les droits de l'accordant sur la cible — pas modélisable proprement dans une policy SQL. La RLS reste la deuxième ligne de défense (« est_admin_general »).
+- **`admin_total_plateforme` comme marqueur unique** plutôt qu'un statut sur `personne` : choix d'extensibilité. MD5 V2 envisage un « Cercle d'admin plateforme » avec appartenances cooptées explicites : entité future, dans laquelle ce marqueur trouvera sa place. En attendant, marqueur = ligne `droit` sans cible.
+- **`peutAccorder` côté TypeScript, pas côté RLS** : la règle MD3 « non-élévation » exige de raisonner sur les droits de l'accordant sur la cible : pas modélisable proprement dans une policy SQL. La RLS reste la deuxième ligne de défense (« est_admin_general »).
 
 ## Incertitudes techniques résolues avec Lilou/Ben
 
@@ -74,7 +74,7 @@ Rubrique dédiée au cycle V2 (cf. CLAUDE.md §0.4).
   2. `npx tsx scripts/backfill-droits.ts --dry-run` → vérifier les compteurs annoncés.
   3. Si OK, `npx tsx scripts/backfill-droits.ts --confirm`.
 - **Migration applicative progressive des helpers RLS** : remplacer `est_admin_general()` par `auth.uid() in (select personne_id from droit where type_droit='admin_total_plateforme' and retire_le is null)` etc. À faire chantier par chantier, table par table, avec tests à chaque étape. La coexistence permet de basculer progressivement.
-- **UI admin des droits** : page `/admin/national/droits` (qui existe en V1) à enrichir pour exposer la nouvelle granularité — appliquer un preset, cocher case par case, retirer. Server Actions reposent sur `accorderDroit` + `peutAccorder`.
+- **UI admin des droits** : page `/admin/national/droits` (qui existe en V1) à enrichir pour exposer la nouvelle granularité : appliquer un preset, cocher case par case, retirer. Server Actions reposent sur `accorderDroit` + `peutAccorder`.
 - **Journal admin** : chaque appel à `accorderDroit` / `retirerDroit` devrait également logger dans `journal_admin` (D10 V2 et MD3 « traçabilité obligatoire »). À ajouter dans les Server Actions, pas dans le helper directement (le helper reste un primitive).
 - **`appliquerPreset(presetV2, options)`** côté helper : à ajouter quand la UI le demandera. Doit appliquer le preset en respectant `peutAccorder` pour chaque droit individuellement.
 - **Tests d'intégration** : sans mock Supabase, les helpers `accorderDroit`/`verifierDroit` ne sont pas testés. À écrire en harnais E2E quand Supabase sera disponible, en particulier pour valider le comportement de l'index unique partiel sur les lignes actives uniquement (upsert ne devrait pas violer la contrainte si la seule ligne existante est retirée).

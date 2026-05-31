@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.12 : Phase I suite (transport, hébergement, fruits de la terre, prêt, SEL)
+# Manifest : Chantier V2.5.12 : Phase I suite (transport, hébergement, fruits de la terre, prêt, SEL)
 
 **Date de fin** : 2026-05-30
 **Branche** : `main`

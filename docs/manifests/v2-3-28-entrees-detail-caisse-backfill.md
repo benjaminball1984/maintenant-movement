@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.28 : Liste entrées détail caisse + script backfill
+# Manifest : V2 Vague 3, Chantier V2.3.28 : Liste entrées détail caisse + script backfill
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-28-entrees-detail-caisse-backfill`

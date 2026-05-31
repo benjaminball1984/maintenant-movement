@@ -19,7 +19,7 @@
  *
  * **Règle MD3 « non-élévation »** : un appel à `accorderDroit` doit, côté
  * Server Action, vérifier que l'appelant·e détient elle-même le droit
- * accordé sur la cible — sinon refus. Cette logique vit côté Server Action
+ * accordé sur la cible : sinon refus. Cette logique vit côté Server Action
  * applicative (pas dans la migration RLS qui ne peut pas raisonner sur
  * la sous-relation entre droits). L'aide `peutAccorder` ci-dessous est le
  * helper recommandé.
@@ -108,7 +108,7 @@ export type ResultatDroit = { ok: true; droitId: string } | { ok: false; message
 /**
  * Accorde un droit. Si une ligne ACTIVE existe déjà pour le même triplet
  * `(personne, type, cible)`, retourne `{ ok: true }` avec l'id existant
- * (idempotence — utile pour le backfill ou ré-application d'un preset).
+ * (idempotence : utile pour le backfill ou ré-application d'un preset).
  *
  * **Garde-fou MD3 (non-élévation)** : la vérification que l'appelant·e
  * peut accorder ce droit DOIT être faite par le caller via

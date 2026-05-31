@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.9 : Page « Mes réservations » côté profil
+# Manifest : V2 Vague 3, Chantier V2.3.9 : Page « Mes réservations » côté profil
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-9-page-mes-reservations`

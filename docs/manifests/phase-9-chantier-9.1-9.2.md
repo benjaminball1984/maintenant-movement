@@ -1,4 +1,4 @@
-# Manifest : Phase 9, Chantiers 9.1 + 9.2 — Console modération unique + Tableau de bord admin
+# Manifest : Phase 9, Chantiers 9.1 + 9.2 : Console modération unique + Tableau de bord admin
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-9-chantier-9.1-9.2-admin`
@@ -9,7 +9,7 @@
 
 ## Livré et fonctionnel
 
-### 9.1 — Console modération étendue (7 → 11 onglets)
+### 9.1 : Console modération étendue (7 → 11 onglets)
 
 - [x] **Layout `/admin` enrichi** : la nav latérale gagne 6 nouveaux onglets de modération (médias, SEL, marché, moments, sondages, autres-moyens) en plus des 4 existants (pétitions, campagnes, mobilisations, cagnottes). Section « Tableau de bord » ajoutée en haut.
 - [x] **6 nouvelles pages de modération** (`app/admin/moderation/...`) :
@@ -20,7 +20,7 @@
   - `sondages` : liste avec mode et statut.
   - `autres-moyens` : organisations affichées/retirées avec raison de retrait visible.
 
-### 9.2 — Tableau de bord admin
+### 9.2 : Tableau de bord admin
 
 - [x] **`/admin`** (vue d'ensemble) : 15 cartes de stats globales :
   - personnes, adhérent·es actif·ves, pétitions/mobilisations/cagnottes publiées ;
@@ -28,12 +28,12 @@
   - services SEL, prestations créditées, produits marché ;
   - moments à venir, médias publiés, sondages ouverts ;
   - communes pré-créées, mandats d'assemblée actifs.
-- [x] **`lib/admin/stats.ts`** : 1 fonction `chargerStatsAdmin` qui parallélise 14 `Promise.all` (counts) + 1 select sur les dons confirmés pour sommer EUR/T99CP. Respecte la RLS (donc une personne sans droits voit 0 partout — défense en profondeur).
+- [x] **`lib/admin/stats.ts`** : 1 fonction `chargerStatsAdmin` qui parallélise 14 `Promise.all` (counts) + 1 select sur les dons confirmés pour sommer EUR/T99CP. Respecte la RLS (donc une personne sans droits voit 0 partout : défense en profondeur).
 
 ### Tests
 
 - [x] Lint Biome + typecheck tsc + build Next.js : tous verts.
-- [x] Tests unitaires inchangés (**245 verts**) — les pages admin n'ont pas de logique métier isolable.
+- [x] Tests unitaires inchangés (**245 verts**) : les pages admin n'ont pas de logique métier isolable.
 
 ## Livré partiellement
 
@@ -55,7 +55,7 @@
 
 ## Tests
 
-- Unitaires : **245 verts** (inchangés ; les pages admin lisent des stats — pas de validation Zod nouvelle à tester).
+- Unitaires : **245 verts** (inchangés ; les pages admin lisent des stats : pas de validation Zod nouvelle à tester).
 - Lint, typecheck, build : tous verts.
 
 ## Notes pour les chantiers suivants

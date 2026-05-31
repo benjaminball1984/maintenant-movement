@@ -1,4 +1,4 @@
-# Manifest — Chantier 7.5 : Réseau social (construit pendant la phase 13)
+# Manifest : Chantier 7.5 : Réseau social (construit pendant la phase 13)
 
 **Date de fin** : 2026-05-25
 **Branche** : feature/phase-13-integration

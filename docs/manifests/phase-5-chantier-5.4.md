@@ -1,4 +1,4 @@
-# Manifest : Phase 5, Chantier 5.4 — D'autres moyens d'agir
+# Manifest : Phase 5, Chantier 5.4 : D'autres moyens d'agir
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-5-chantier-5.4-autres-moyens`

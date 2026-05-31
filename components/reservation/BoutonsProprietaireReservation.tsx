@@ -23,7 +23,7 @@ import { useState } from 'react';
  *
  * UX : 2 clics pour les actions destructives (Refuser), 1 clic pour les
  * actions constructives (Accepter, Marquer réalisée). Pas de modale
- * lourde — confirmation inline pour Refuser.
+ * lourde : confirmation inline pour Refuser.
  */
 
 interface BoutonsProprietaireReservationProps {

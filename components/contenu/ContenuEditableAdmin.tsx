@@ -32,7 +32,7 @@ import { MarkdownLeger } from './MarkdownLeger';
 interface Props {
   cle: string;
   valeurInitiale: string;
-  /** V2.5.23 — HTML riche optionnel. Si présent, prime sur Markdown. */
+  /** V2.5.23 : HTML riche optionnel. Si présent, prime sur Markdown. */
   valeurHtmlInitiale?: string | null;
   estAdmin: boolean;
   titre?: string;

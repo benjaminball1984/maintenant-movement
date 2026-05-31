@@ -1,4 +1,4 @@
-# Manifest : Phase 4, Chantier 4.3 — Marché solidaire
+# Manifest : Phase 4, Chantier 4.3 : Marché solidaire
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-4-chantier-4.3-marche-solidaire`
@@ -85,7 +85,7 @@
 
 ## Contenus à arbitrer
 
-Aucun. Le chantier 4.3 est entièrement technique — pas de texte éditorial à rédiger ; les microcopies posées sont fonctionnelles (« Crée la première », « Au moins un mode de retrait », etc.) et conformes à la règle d'or de non-invention.
+Aucun. Le chantier 4.3 est entièrement technique : pas de texte éditorial à rédiger ; les microcopies posées sont fonctionnelles (« Crée la première », « Au moins un mode de retrait », etc.) et conformes à la règle d'or de non-invention.
 
 ## Décisions techniques prises
 

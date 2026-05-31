@@ -48,7 +48,7 @@ function refineGeo<T extends { latitude?: number | null; longitude?: number | nu
 }
 
 // ============================================================
-// Onglet 1 — Création d'un produit
+// Onglet 1 : Création d'un produit
 // ============================================================
 
 export function creerProduitMarcheFactory(
@@ -183,7 +183,7 @@ export const noterVendeureuseSchema = creerNoterVendeureuseSchema();
 export type DonneesNoterVendeureuse = z.infer<typeof noterVendeureuseSchema>;
 
 // ============================================================
-// Onglet 2 — Création d'une boutique éphémère
+// Onglet 2 : Création d'une boutique éphémère
 // ============================================================
 
 export function creerBoutiqueFactory(
@@ -240,7 +240,7 @@ export const creerBoutiqueSchema = creerBoutiqueFactory();
 export type DonneesCreerBoutique = z.infer<typeof creerBoutiqueSchema>;
 
 // ============================================================
-// Onglet 3 — Création d'un minimarché solidaire
+// Onglet 3 : Création d'un minimarché solidaire
 // ============================================================
 
 /** Catalogue strict des monnaies physiques (cf. spec §6F). */

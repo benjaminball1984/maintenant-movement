@@ -1,4 +1,4 @@
-# Manifest : Phase 5, Chantier 5.1 — Adhérer
+# Manifest : Phase 5, Chantier 5.1 : Adhérer
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-5-chantier-5.1-adherer`
@@ -18,7 +18,7 @@
 ### Code applicatif
 
 - [x] **Types Database** : `Adhesion`, `AdherentActif`, unions `CheminAdhesion | StatutAdhesion`. Signature `adhesions_a_relancer` ajoutée dans `Functions`.
-- [x] **Validations Zod** (`lib/validations/adhesion.ts`) : `adhererGratuit`, `adhererEuros`, `adhererT99CP`. Constantes `MONTANT_ADHESION_EUR_CENTIMES = 1200` et `MONTANT_ADHESION_T99CP_UNITES = '12000000000000000000'` (12 * 10^18) — single source of truth.
+- [x] **Validations Zod** (`lib/validations/adhesion.ts`) : `adhererGratuit`, `adhererEuros`, `adhererT99CP`. Constantes `MONTANT_ADHESION_EUR_CENTIMES = 1200` et `MONTANT_ADHESION_T99CP_UNITES = '12000000000000000000'` (12 * 10^18) : single source of truth.
 - [x] **Server Actions** (`app/(public)/agir/adherer/actions.ts`) :
   - `adhererGratuit` : auth + Turnstile, insert direct.
   - `adhererEuros` : pré-insert au statut `active` + génère une session Stripe Checkout via `getPaymentService` (mock par défaut) avec montant 1200 centimes + url de retour. Pas de frais plateforme (l'adhésion vient en intégralité à la trésorerie).

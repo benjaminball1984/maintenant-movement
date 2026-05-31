@@ -1,4 +1,4 @@
-# Manifest : Phase 3, Chantier 3.1 — Pétitions
+# Manifest : Phase 3, Chantier 3.1 : Pétitions
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-3-chantier-3.1-petitions`
@@ -15,7 +15,7 @@
 - [x] **Politiques RLS `petition`** : lecture publique des publiées ; créateurice voit ses brouillons et rejets ; modérateurice / admin voient tout. Insertion auth requise (le `createurice_id` doit être `auth.uid()`). Update créateurice tant que `en_moderation` ; modérateurice à toujours.
 - [x] **Table `signature_petition`** (`supabase/migrations/20260520120013_signature_petition.sql`) : `personne_id` nullable (signature anonyme), nom/prénom/email/code_postal obligatoires, téléphone optionnel, cases newsletter + autorisation contact. CHECK email et code_postal. Unique sur `(petition_id, lower(email))` pour interdire les doublons insensiblement à la casse. Index sur `petition_id`, `personne_id`, et département (préfixe code_postal).
 - [x] **Politiques RLS `signature_petition`** : aucune lecture publique des lignes individuelles (vie privée). Signataire connectée voit ses signatures, créatrice voit les signatures ayant accepté le contact, modé et admin voient tout. Insertion ouverte si `personne_id is null` ou `= auth.uid()`. Update/delete par la signataire (droit RGPD d'opposition).
-- [x] **Vue `petition_compteur`** : agrégat lisible publiquement (via la RLS de `petition`) — utile pour les futures requêtes batch.
+- [x] **Vue `petition_compteur`** : agrégat lisible publiquement (via la RLS de `petition`) : utile pour les futures requêtes batch.
 - [x] **Fonction `nombre_signatures(uuid)`** : `SECURITY DEFINER`, autorise le count public sans exposer la table de signatures. Utilisée par `lib/petitions/requetes.ts`.
 
 ### Server Actions (`app/(public)/mobiliser/petitions/actions.ts`)

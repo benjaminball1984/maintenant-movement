@@ -64,7 +64,7 @@ export async function creerPetition(
   const supabase = await getSupabaseServer();
   const slug = await genererSlugUnique(donnees.titre, supabase);
 
-  // V2.5.53 — sanitize HTML riche optionnel avant insertion.
+  // V2.5.53 : sanitize HTML riche optionnel avant insertion.
   const texteHtmlPropre =
     donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
       ? sanitizeRichHtml(donnees.texte_html)

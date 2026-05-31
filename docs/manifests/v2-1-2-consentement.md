@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 1, Chantier V2.1.2 : entité Consentement + backfill
+# Manifest : V2 Vague 1, Chantier V2.1.2 : entité Consentement + backfill
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-1-2-consentement`
@@ -45,7 +45,7 @@ Pas d'ADR formelle. Toutes les décisions découlent de D8 V2 et de la doctrine 
 
 ## Incertitudes techniques résolues avec Lilou/Ben
 
-Aucune incertitude — déroulé direct sur la base des spécifications V2.
+Aucune incertitude : déroulé direct sur la base des spécifications V2.
 
 ## Écarts V1→V2 appliqués
 

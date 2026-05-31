@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 2, Chantier V2.2.3 : Caisse + reversements (D7/D12)
+# Manifest : V2 Vague 2, Chantier V2.2.3 : Caisse + reversements (D7/D12)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-2-3-caisse-reversements`
@@ -18,7 +18,7 @@
 - [x] **`lib/caisse.ts`** : `creerCaisse`, `poserReceptacle`, `fermerReceptacleCourant`, `initierTransactionSortante`. Types stricts (`TypeCaisse`, `Caisse`, `CanalCaisse`, `MimeJustificatif`, etc.). Validations applicatives en première ligne, contraintes SQL en seconde.
 - [x] **`lib/caisse-validation.ts`** : helpers purs `validerInitiationTransaction` et `validerCoherenceCaisse`. Testable sans Supabase.
 - [x] **`types/database.ts` enrichi** : 3 définitions manuelles (caisse, receptacle_caisse, transaction_sortante) avec Relationships.
-- [x] **Tests unitaires** `tests/unit/caisse/validation.test.ts` — **13 tests** (D12bis justificatif obligatoire, MIME autorisés, montant > 0, motif min 5 chars, bénéficiaire requis, cohérence caisse cagnotte).
+- [x] **Tests unitaires** `tests/unit/caisse/validation.test.ts` : **13 tests** (D12bis justificatif obligatoire, MIME autorisés, montant > 0, motif min 5 chars, bénéficiaire requis, cohérence caisse cagnotte).
 
 ## Livré partiellement
 

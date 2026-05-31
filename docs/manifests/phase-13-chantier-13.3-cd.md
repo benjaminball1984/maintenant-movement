@@ -1,4 +1,4 @@
-# Manifest — Phase 13, Chantier 13.3 (C + D) : fiche commune, carte clusterisée, « Mes données »
+# Manifest : Phase 13, Chantier 13.3 (C + D) : fiche commune, carte clusterisée, « Mes données »
 
 **Date de fin** : 2026-05-25
 **Branche** : feature/phase-13-chantier-13.3-d-mes-donnees (partie de feature/phase-13-integration)

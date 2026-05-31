@@ -49,7 +49,7 @@ export async function mettreAJourProfil(donneesBrutes: unknown): Promise<Resulta
   const { userId } = await getPersonneOuRediriger('/profil/informations');
   const supabase = await getSupabaseServer();
 
-  // V2.5.49 — sanitize la bio HTML riche avant insertion. Vide = NULL
+  // V2.5.49 : sanitize la bio HTML riche avant insertion. Vide = NULL
   // (suppression de la bio riche, retour au texte plat).
   const bioHtmlPropre =
     donnees.bio_html !== undefined && donnees.bio_html !== ''

@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.25 : Cloche in-app + branchement notifs D8
+# Manifest : V2 Vague 3, Chantier V2.3.25 : Cloche in-app + branchement notifs D8
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-25-notifications-cloche`
@@ -16,7 +16,7 @@ Canal 1 du CDC V2 §7 acté 19/05 : cloche in-app universelle. La table V1 `noti
   - `poserNotification(options, auteurId?)` : fire-and-forget. Auto-déduplication minimale (n'insère pas si auteur = destinataire).
   - `listerNotifications(personneId, limite=50)` : trié desc par date.
   - `compterNotificationsNonLues(personneId)` : pour le badge cloche.
-  - `marquerNotificationLue` et `marquerToutesNotificationsLues` (NB : les Server Actions V1 dans `app/(membre)/profil/notifications/actions.ts` existent aussi, on n'a PAS dupliqué — la page liste les réutilise).
+  - `marquerNotificationLue` et `marquerToutesNotificationsLues` (NB : les Server Actions V1 dans `app/(membre)/profil/notifications/actions.ts` existent aussi, on n'a PAS dupliqué : la page liste les réutilise).
 - [x] **`app/actions/reservation.ts`** : branchement de `poserNotification` sur les 8 transitions D8 livrées (V2.3.13-21) :
   - création → propriétaire (`reservation_demande_recue`)
   - accepter/refuser/marquer réalisée → demandeur (3 types)
@@ -24,17 +24,17 @@ Canal 1 du CDC V2 §7 acté 19/05 : cloche in-app universelle. La table V1 `noti
   - annuler → propriétaire (`reservation_annulee`)
   - signaler litige (demandeur ou propriétaire) → l'autre partie (`reservation_litige_signale`)
   - arbitrage admin → les deux parties (`reservation_litige_arbitre`)
-- [x] **`components/layout/HeaderCloche.tsx`** : Server Component, badge avec compteur non lues. Lien direct vers la page liste (pas de dropdown — philosophie « ne capte pas l'attention »). « 99+ » au-delà.
+- [x] **`components/layout/HeaderCloche.tsx`** : Server Component, badge avec compteur non lues. Lien direct vers la page liste (pas de dropdown : philosophie « ne capte pas l'attention »). « 99+ » au-delà.
 - [x] **`components/layout/Header.tsx`** : intègre la cloche entre `ThemeToggle` et `HeaderProfilMenu` quand session active.
 - [x] **`app/(membre)/profil/notifications-recues/page.tsx`** : nouvelle page distincte de `/profil/notifications` (préférences V1 chantier 8.1). Liste 50 dernières notifs, bouton « tout marquer lu », clic sur une notif marque lue + suit le lien. Réutilise les Server Actions V1 `marquerNotificationLue` et `marquerToutesLues`.
 - [x] **`app/(membre)/profil/NavOnglets.tsx`** : ajout onglet « Notifications » (`notifications-recues`) et renommage de l'existant en « Préférences notif ».
 
 ## Non livré (et pourquoi)
 
-- [ ] **Canal 2 — messagerie interne (haute priorité)** : déjà géré par `message_reseau` V1 chantier 7.5. Pas dans ce chantier ; les DM ont leur propre UI dans `/s-informer/reseau/messages`.
-- [ ] **Canal 3 — mail récap hebdo (mardi)** : demande Brevo branché + cron Cloudflare Worker. Préalable externe.
-- [ ] **Canal 4 — newsletter (vendredi)** : pareil que canal 3.
-- [ ] **Canal 5 — push** : opt-in via préférences (`push_active` déjà présent côté préférences V1) + service worker + clé VAPID. Préalable externe.
+- [ ] **Canal 2 : messagerie interne (haute priorité)** : déjà géré par `message_reseau` V1 chantier 7.5. Pas dans ce chantier ; les DM ont leur propre UI dans `/s-informer/reseau/messages`.
+- [ ] **Canal 3 : mail récap hebdo (mardi)** : demande Brevo branché + cron Cloudflare Worker. Préalable externe.
+- [ ] **Canal 4 : newsletter (vendredi)** : pareil que canal 3.
+- [ ] **Canal 5 : push** : opt-in via préférences (`push_active` déjà présent côté préférences V1) + service worker + clé VAPID. Préalable externe.
 - [ ] **Types `info_groupe`/`autre`** : pas posés en pratique. Les actions concrètes qui les déclencheraient (annonce dans une commune, conv en GT) n'ont pas encore de Server Action côté V2.
 - [ ] **Tests unitaires** : `poserNotification` mocké demanderait un mock Supabase complet. Non posés.
 - [ ] **Lecture en temps réel** : pas de WebSocket Supabase Realtime. Le compteur s'actualise au prochain rendu de page. Acceptable selon la philosophie « pas urgent ».

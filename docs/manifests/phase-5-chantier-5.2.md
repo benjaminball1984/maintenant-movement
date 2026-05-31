@@ -1,4 +1,4 @@
-# Manifest : Phase 5, Chantier 5.2 — Communes libres + Fédérations + Confédérations + Assemblée Confédérale
+# Manifest : Phase 5, Chantier 5.2 : Communes libres + Fédérations + Confédérations + Assemblée Confédérale
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-5-chantier-5.2-communes`

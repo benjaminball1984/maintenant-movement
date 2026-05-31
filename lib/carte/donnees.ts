@@ -1,7 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase';
 
 /**
- * Couche de données de la carte unifiée (chantier 6.1 — enrichi).
+ * Couche de données de la carte unifiée (chantier 6.1 : enrichi).
  *
  * Spec §8A : « bases de données séparées par espace, agrégation à
  * l'affichage (pas une table monolithique) ». On agrège ici, au moment
@@ -9,7 +9,7 @@ import { getSupabaseServer } from '@/lib/supabase';
  *
  * Sources couvertes par 6.1 :
  *   - mobilisations          (3.2)
- *   - offres d'entraide      (4.1) — 4 sous-types via le type discriminant
+ *   - offres d'entraide      (4.1) : 4 sous-types via le type discriminant
  *   - SEL                    (4.2)
  *   - marché produits        (4.3)
  *   - boutiques marché       (4.3)

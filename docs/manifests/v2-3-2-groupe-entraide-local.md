@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.2 : Groupe d'entraide local
+# Manifest : V2 Vague 3, Chantier V2.3.2 : Groupe d'entraide local
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-2-groupe-entraide-local`
@@ -27,12 +27,12 @@ Nouveau sous-espace **« porte d'entrée non-politique »**. Variante de l'espac
   - `nouveau/page.tsx` : formulaire `FormulaireCreationGroupeEntraide` (Client Component), protégé par session.
   - `[slug]/page.tsx` : page détail avec image grand format, badges des outils activés, boutons rejoindre/quitter (`BoutonsAdhesion` Client Component), nombre de membres, **`FilDeGroupe` intégré pour les membres** (composant V2.2.1).
 - [x] **`types/database.ts`** : 2 nouvelles définitions (`groupe_entraide_local`, `appartenance_groupe_entraide_local`) avec Relationships.
-- [x] **Tests unitaires** `tests/unit/groupe-entraide-local/validation.test.ts` — **20 tests** sur le schéma Zod, le slugifier (accents, longueur, conformité CHECK SQL), la validation de coordonnées.
+- [x] **Tests unitaires** `tests/unit/groupe-entraide-local/validation.test.ts` : **20 tests** sur le schéma Zod, le slugifier (accents, longueur, conformité CHECK SQL), la validation de coordonnées.
 
 ## Livré partiellement
 
 - [ ] **`TeleverseurImage` sur le formulaire de création** : actuellement on ne propose pas d'upload d'image. La couverture utilise systématiquement la défaut. À brancher dans le chantier V2.3.4 (déjà au plan).
-- [ ] **Page de paramètres du groupe** (édition des outils activés, gestion des membres, fermeture du groupe) : non livrée. La fiche §Fonctionnement dit « les gens paramètrent », ce qui demande une UI admin/animateur dédiée — chantier V2 ultérieur.
+- [ ] **Page de paramètres du groupe** (édition des outils activés, gestion des membres, fermeture du groupe) : non livrée. La fiche §Fonctionnement dit « les gens paramètrent », ce qui demande une UI admin/animateur dédiée : chantier V2 ultérieur.
 - [ ] **Intégration aux outils activés** (prêt, marché, SEL, etc.) : le groupe a les booléens mais n'affiche pas encore les annonces correspondantes filtrées par groupe. Demande un branchement profond avec chaque sous-espace V1, à faire au cas par cas.
 - [ ] **Modération a posteriori** : la fiche §15 V2 sur la modération a posteriori s'applique aussi aux groupes. La queue de modération existe (`/admin/moderation/reseau`) ; le branchement spécifique des groupes y est à ajouter.
 
@@ -70,5 +70,5 @@ Rien à arbitrer côté contenu éditorial pour V2.3.2 : la fiche V2 fournissait
 - **Application au matin** : ajouter `20260527060000_groupe_entraide_local.sql` à la séquence `supabase db push`.
 - **`TeleverseurImage`** à brancher sur le formulaire (V2.3.4 du plan).
 - **UI de paramétrage** : page `/s-entraider/groupes-locaux/[slug]/parametres` réservée aux animateurs (édition des outils activés, gestion des membres, fermeture). Chantier UX V2 dédié.
-- **Filtrage des annonces par groupe** : chaque sous-espace d'entraide (prêt, marché, SEL, etc.) pourrait recevoir un paramètre `?groupe=<id>` qui filtre les annonces. Demande un branchement profond — chantier par sous-espace.
+- **Filtrage des annonces par groupe** : chaque sous-espace d'entraide (prêt, marché, SEL, etc.) pourrait recevoir un paramètre `?groupe=<id>` qui filtre les annonces. Demande un branchement profond : chantier par sous-espace.
 - **Page « Mes groupes »** côté profil membre : liste des groupes auxquels la personne appartient. Chantier UX V2 dédié.

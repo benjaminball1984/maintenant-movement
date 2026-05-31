@@ -68,7 +68,7 @@ async function resoudreCibles(
       }
     }
     // cagnotte / sondage : tables pas encore créées (3.3 et 7.5).
-    // On laisse les modules sans titre_cible — l'UI affichera un état
+    // On laisse les modules sans titre_cible : l'UI affichera un état
     // « cible indisponible » plutôt que de planter.
   }
 

@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.1 : Master Plan V2.6 Phase A (données de démonstration)
+# Manifest : Chantier V2.5.1 : Master Plan V2.6 Phase A (données de démonstration)
 
 **Date de fin** : 2026-05-29 (nuit du 29 au 30)
 **Branche** : `main` (chantiers Master Plan livrés directement sur main, comme V2.5.0)

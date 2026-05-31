@@ -4,7 +4,7 @@
  *
  * Le §10 V2 dit : « métadonnées OG (titre + description + IMAGE par défaut
  * ou uploadée) générées CÔTÉ SERVEUR sur chaque page partageable. Les
- * robots OG ne lisent pas le JS — c'est un point dur de Next.js. »
+ * robots OG ne lisent pas le JS : c'est un point dur de Next.js. »
  *
  * Avant V2.2.4, les pages de détail (pétition, cagnotte, mobilisation,
  * moment solidaire, article) avaient `generateMetadata` qui ne retournait

@@ -6,7 +6,7 @@
  * collectif (bus/car/salle/lieu) ; les participants paient leur part ;
  * la collecte atteint le seuil → départ. EUROS UNIQUEMENT (§12). L'argent
  * va à l'organisateur, qui paie le prestataire (avec responsabilité de
- * tampon — avertissement juridique obligatoire à la création).
+ * tampon : avertissement juridique obligatoire à la création).
  */
 
 import { getSupabaseServer } from '@/lib/supabase';

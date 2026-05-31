@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 5 : Performance, rapidité d'affichage, scalabilité
+# Revue 2026 : Bloc 5 : Performance, rapidité d'affichage, scalabilité
 
 > Échelle réelle : 35 011 communes, 17 746 signatures, 15 737 profils. Distant en région Francfort.
 

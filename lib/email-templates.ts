@@ -86,7 +86,7 @@ https://maintenant-le-mouvement.org/agir/adherer
 
 L’équipe Maintenant!`,
   },
-  // V2.5.27 V2.5.16.d — Notifications reseau social. Templates definis mais
+  // V2.5.27 V2.5.16.d : Notifications reseau social. Templates definis mais
   // PAS appeles automatiquement (anti-spam). Un futur systeme de preferences
   // utilisateurice declenchera l'envoi pour les abonne·es opt-in.
   reseau_message_recu: {

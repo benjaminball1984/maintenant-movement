@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.12 : message d'amorce envoyé dans la messagerie interne
+# Manifest : V2 Vague 3, Chantier V2.3.12 : message d'amorce envoyé dans la messagerie interne
 
 **Date de fin** : 2026-05-27 (matin)
 **Branche** : `feature/v2-3-12-message-amorce-reseau`
@@ -12,16 +12,16 @@ Tient la promesse UX du bouton « Demander une réservation » (V2.3.5) qui anno
 
 - [x] **`creerReservationAction`** (`app/actions/reservation.ts`) enrichi : après une création de réservation réussie, on insère AUSSI un `message_reseau` (DM V1 chantier 7.5) de la personne demandeuse vers le créateur de l'offre, avec le `messageAmorce` comme texte.
 - [x] **Helper interne `envoyerMessageAmorceInterne`** : fire-and-forget (try/catch). Si l'envoi du message échoue (par exemple en dev sans réseau social actif), la réservation reste créée et l'utilisateurice peut renvoyer le message manuellement depuis la messagerie. Cohérent avec la doctrine « pas d'effet de cascade qui annule une opération principale ».
-- [x] **Microcopy ajusté** : `app/(public)/s-entraider/offre/[slug]/page.tsx` ne dit plus « chantier réseau social » au futur — c'est désormais effectif.
+- [x] **Microcopy ajusté** : `app/(public)/s-entraider/offre/[slug]/page.tsx` ne dit plus « chantier réseau social » au futur : c'est désormais effectif.
 
 ## Livré partiellement
 
-- [ ] **Lien retour vers la réservation depuis le DM** : le message arrive comme un texte brut chez le propriétaire. Pas de bouton « voir la réservation » côté propriétaire (qui n'existe pas en V1 — V2.3.13 à venir : dashboard propriétaire). Pour l'instant, le propriétaire répond simplement au DM et coordonne avec le demandeur en messagerie.
+- [ ] **Lien retour vers la réservation depuis le DM** : le message arrive comme un texte brut chez le propriétaire. Pas de bouton « voir la réservation » côté propriétaire (qui n'existe pas en V1 : V2.3.13 à venir : dashboard propriétaire). Pour l'instant, le propriétaire répond simplement au DM et coordonne avec le demandeur en messagerie.
 - [ ] **Notification cloche** quand le DM arrive : le module `notification` V1 (chantier 8.1) gère probablement les notifs DM. À vérifier que le pipeline déclenche bien une notif à chaque insertion `message_reseau`. Si non, à brancher.
 
 ## Non livré (et pourquoi)
 
-- [ ] **Lien permanent message ↔ réservation** : pas de FK SQL entre `message_reseau` et `reservation`. On accepte le découplage pour V2.3.12 — la coordination se fait par le contenu du message. Si on veut un lien fort, ajouter une colonne `reservation_id` nullable sur `message_reseau` dans un chantier dédié.
+- [ ] **Lien permanent message ↔ réservation** : pas de FK SQL entre `message_reseau` et `reservation`. On accepte le découplage pour V2.3.12 : la coordination se fait par le contenu du message. Si on veut un lien fort, ajouter une colonne `reservation_id` nullable sur `message_reseau` dans un chantier dédié.
 - [ ] **Idempotence stricte** : si la Server Action est appelée 2 fois (retry réseau), on peut avoir 2 messages identiques. Acceptable car la table `reservation` a un index unique partiel qui empêchera la 2e réservation, donc le 2e message ne sera pas envoyé.
 
 ## Décisions techniques prises

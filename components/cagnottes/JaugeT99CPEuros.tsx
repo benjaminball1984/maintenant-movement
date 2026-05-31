@@ -20,7 +20,7 @@ const FORMAT_EURO = new Intl.NumberFormat('fr-FR', {
 const FORMAT_NOMBRE = new Intl.NumberFormat('fr-FR');
 
 /**
- * `<JaugeT99CPEuros>` — compteur unifié euros + T99CP d'une cagnotte
+ * `<JaugeT99CPEuros>` : compteur unifié euros + T99CP d'une cagnotte
  * (cf. composants réutilisables spec §11).
  *
  * Convention de cumul : 1 T99CP = 1 € (cf. SEL spec §6E). Le total

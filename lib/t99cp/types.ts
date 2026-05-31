@@ -46,7 +46,7 @@ export interface T99CPService {
   obtenirBalance(adresseWallet: string): Promise<ResultatBalance>;
 
   /**
-   * @deprecated Cycle V2 V2.1.1 — la plateforme ne signe AUCUNE transaction
+   * @deprecated Cycle V2 V2.1.1 : la plateforme ne signe AUCUNE transaction
    * (§19). Utiliser à la place : redirection vers la home
    * `https://the99coinproject.org/` (jamais d'URL profonde), puis
    * `verifierTransaction(txHash)` au retour, puis `enregistrerHashConsomme`

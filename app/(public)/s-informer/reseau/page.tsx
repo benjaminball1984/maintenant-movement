@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page `/s-informer/reseau` — flux du réseau social (chantier 7.5).
+ * Page `/s-informer/reseau` : flux du réseau social (chantier 7.5).
  *
  * Cf. spec §4E : flux hiérarchisé TRANSPARENT (soi -> suivi·es -> reste), sans
  * publicité ni pondération cachée, modération a posteriori, encart financement.

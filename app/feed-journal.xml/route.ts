@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 /**
  * Flux RSS 2.0 du journal-affiche (V2.4.52).
  *
- * GET `/feed-journal.xml` — 30 dernières éditions publiées de Maintenant
+ * GET `/feed-journal.xml` : 30 dernières éditions publiées de Maintenant
  * Médias (journal-affiche), triées par publie_le desc.
  *
  * Distinct du flux principal `/feed.xml` (articles de la rédaction) :

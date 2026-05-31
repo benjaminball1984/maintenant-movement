@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 /**
- * `<BoutonAttacherACampagne>` — UI admin pour intégrer un objet (pétition,
+ * `<BoutonAttacherACampagne>` : UI admin pour intégrer un objet (pétition,
  * mobilisation, cagnotte, sondage) à une campagne existante. V2.5.11.b
  * (finalisation Master Plan V2.6 Phase G).
  *

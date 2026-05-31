@@ -28,7 +28,7 @@ export function FormulaireMajEdition({
   titreInitial: string;
   sousTitreInitial: string;
   contenuInitial: string;
-  /** V2.5.33 — HTML riche initial (optionnel). */
+  /** V2.5.33 : HTML riche initial (optionnel). */
   contenuHtmlInitial?: string | null;
   imageInitial: string;
   numeroInitial: number;
@@ -58,7 +58,7 @@ export function FormulaireMajEdition({
       titre: titre.trim(),
       sous_titre: sousTitre.trim() === '' ? null : sousTitre.trim(),
       contenu_md: contenu,
-      // V2.5.33 — envoie aussi le HTML riche (vide = efface côté serveur,
+      // V2.5.33 : envoie aussi le HTML riche (vide = efface côté serveur,
       // retour au Markdown). Sanitization côté Server Action.
       contenu_html: contenuHtml,
       image_couverture_url: imageUrl.trim() === '' ? null : imageUrl.trim(),
@@ -145,7 +145,7 @@ export function FormulaireMajEdition({
             <button
               type="button"
               onClick={() => {
-                // V2.5.33 — bascule vers Riche pré-remplit avec la conversion
+                // V2.5.33 : bascule vers Riche pré-remplit avec la conversion
                 // du Markdown si le HTML est vide (pour ne pas perdre le contenu).
                 if (contenuHtml === '' && contenu.trim() !== '') {
                   setContenuHtml(markdownLegerEnHtml(contenu));

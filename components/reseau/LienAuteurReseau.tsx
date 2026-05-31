@@ -12,10 +12,10 @@ interface LienAuteurReseauProps {
 
 /**
  * Affiche le nom d'un·e auteurice/proposeur·euse, cliquable vers son profil
- * réseau si elle a un numéro public (chantier A.2b — « tout auteur devient une
+ * réseau si elle a un numéro public (chantier A.2b : « tout auteur devient une
  * présence suivable »). Server Component : résout le numéro public via
  * `numeroReseauDe`. Sans numéro (pas encore de profil unifié), affiche le nom
- * en clair sans lien — dégradation propre.
+ * en clair sans lien : dégradation propre.
  */
 export async function LienAuteurReseau({ personneId, nom, className }: LienAuteurReseauProps) {
   const numero = await numeroReseauDe(personneId);

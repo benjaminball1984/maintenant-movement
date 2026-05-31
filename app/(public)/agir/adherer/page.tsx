@@ -39,7 +39,7 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
 });
 
 /**
- * Page d'accueil Adhérer — 3 chemins en cartes.
+ * Page d'accueil Adhérer : 3 chemins en cartes.
  *
  * Cf. spec §7A : « Page sobre, doctrine ouverte. Pas d'argumentaire
  * pesant : on entre dans le mouvement, on en sort, on revient. »

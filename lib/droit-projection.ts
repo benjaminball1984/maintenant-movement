@@ -21,7 +21,7 @@
  * - `dpd` → preset V1 `dpd` (2 droits), cible globale.
  *
  * On ne projette QUE les lignes actives (`retire_le IS NULL`). Les droits
- * retirés en V1 ne sont pas réintroduits en V2 — le passé reste figé
+ * retirés en V1 ne sont pas réintroduits en V2 : le passé reste figé
  * dans `droit_admin`.
  */
 

@@ -77,10 +77,10 @@ export function FormulaireMajReunion({
 }: {
   reunionId: string;
   ordreJourInitial: string;
-  /** V2.5.37 — HTML riche initial de l'OJ (optionnel). */
+  /** V2.5.37 : HTML riche initial de l'OJ (optionnel). */
   ordreJourHtmlInitial?: string | null;
   pvInitial: string;
-  /** V2.5.37 — HTML riche initial du PV (optionnel). */
+  /** V2.5.37 : HTML riche initial du PV (optionnel). */
   pvHtmlInitial?: string | null;
   statutInitial: StatutReunion;
 }) {

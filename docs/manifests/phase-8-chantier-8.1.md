@@ -1,4 +1,4 @@
-# Manifest : Phase 8, Chantier 8.1 — Notifications
+# Manifest : Phase 8, Chantier 8.1 : Notifications
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-8-chantier-8.1-notifications`
@@ -17,7 +17,7 @@
 ### Code applicatif
 
 - [x] **Types Database** : `Notification`, `PreferenceNotification`, `CanalNotification`.
-- [x] **Service de notifications** (`lib/notifications/service.ts`) : `declencherNotification` centralise l'envoi — charge ou crée les préférences de la personne, vérifie l'opt-out par type, insère la cloche, déclenche un mail immédiat si demandé via `EmailService` (Mock ou Brevo). Cohérent avec la doctrine §10 : « On ne capte pas l'attention, on la respecte. »
+- [x] **Service de notifications** (`lib/notifications/service.ts`) : `declencherNotification` centralise l'envoi : charge ou crée les préférences de la personne, vérifie l'opt-out par type, insère la cloche, déclenche un mail immédiat si demandé via `EmailService` (Mock ou Brevo). Cohérent avec la doctrine §10 : « On ne capte pas l'attention, on la respecte. »
 - [x] **Couche de requêtes** (`lib/notifications/requetes.ts`) : `listerNotifications`, `nombreNonLues`, `preferencesParDefaut`.
 - [x] **Server Actions** (`app/(membre)/profil/notifications/actions.ts`) : `mettreAJourPreferencesNotification` (upsert sur personne_id), `marquerNotificationLue`, `marquerToutesLues`.
 

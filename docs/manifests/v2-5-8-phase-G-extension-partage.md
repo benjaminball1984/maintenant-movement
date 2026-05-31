@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.8 : extension du moteur de partage + état Phase G
+# Manifest : Chantier V2.5.8 : extension du moteur de partage + état Phase G
 
 **Date de fin** : 2026-05-30 (nuit du 29 au 30)
 **Branche** : `main`
@@ -19,7 +19,7 @@ La Phase G du Master Plan (« brancher la double relation aux campagnes ») mér
 - [x] **Typecheck** vert, **lint** propre.
 - [x] **941 tests verts** (inchangé).
 
-## État Phase G (campagnes UI) — non livré, documenté
+## État Phase G (campagnes UI) : non livré, documenté
 
 Le Master Plan §2.1 et §G décrit le besoin d'un bouton « Intégrer cette pétition à une campagne » sur chaque objet rattachable (pétition, mobilisation, cagnotte, sondage), avec une modale qui propose de choisir parmi les campagnes existantes ou d'en créer une à la volée.
 

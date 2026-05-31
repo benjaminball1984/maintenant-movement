@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 1, Chantier V2.1.1 : retrait du wallet intégré (§19)
+# Manifest : V2 Vague 1, Chantier V2.1.1 : retrait du wallet intégré (§19)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-1-1-retrait-wallet-integre`
@@ -14,7 +14,7 @@
 - [x] **Onglet « Wallet T99CP » retiré du `NavOnglets`** profil. Le menu ne propose plus de lien vers une page inexistante. Un commentaire explicite dans le code pose la décision V2 et indique qu'un onglet « 99-coin » en **lecture seule** sera réintroduit dans un chantier dédié.
 - [x] **Test E2E `tests/e2e/profil.spec.ts`** mis à jour : `'/profil/wallet'` retiré de la liste des pages protégées, avec un commentaire qui pointe vers V2.1.1.
 - [x] **Référence `docs/specs/01_ARCHITECTURE.md` neutralisée** : la ligne `- /profil/wallet : statut T99CP + lien externe` est commutée en commentaire HTML pour préserver la mémoire historique sans laisser un libellé V1 trompeur.
-- [x] **Migration additive `supabase/migrations/20260527000000_t99cp_hash_consomme.sql`** : crée la table `t99cp_hash_consomme` (clé primaire = `tx_hash`, garde-fou d'unicité contre la double-consommation d'un même hash), 2 index, RLS activée avec policy de lecture (admin général + modérateur autres-moyens + propriétaire), insert exclusivement via service_role (cohérent avec `journal_admin`). **À appliquer manuellement avec `supabase db push` ou `scripts/appliquer-sql-distant.ts`** — non appliquée au distant cette nuit (consigne).
+- [x] **Migration additive `supabase/migrations/20260527000000_t99cp_hash_consomme.sql`** : crée la table `t99cp_hash_consomme` (clé primaire = `tx_hash`, garde-fou d'unicité contre la double-consommation d'un même hash), 2 index, RLS activée avec policy de lecture (admin général + modérateur autres-moyens + propriétaire), insert exclusivement via service_role (cohérent avec `journal_admin`). **À appliquer manuellement avec `supabase db push` ou `scripts/appliquer-sql-distant.ts`** : non appliquée au distant cette nuit (consigne).
 - [x] **Helper `lib/t99cp/hashes-consommes.ts`** : deux fonctions exposées.
   - `enregistrerHashConsomme({ txHash, type, cibleId?, profilId, metadata? })` : insère dans la table, retourne `{ ok: true }` ou `{ ok: false, raison: 'deja_consomme' | 'erreur_base' }` selon que le hash est déjà présent (détecté via le code Postgres `23505` ou le pattern « duplicate key ») ou une erreur autre. Atomique grâce à la contrainte d'unicité Postgres.
   - `hashDejaConsomme(txHash)` : check préventif pour l'UI, sans écrire.
@@ -62,8 +62,8 @@ Rubrique dédiée au cycle V2 (cf. CLAUDE.md §0.4).
 
 - **Application au matin** : `supabase db push` pour appliquer `20260527000000_t99cp_hash_consomme.sql`.
 - **Refacto des 3 flux qui consomment encore `envoyerTransaction`** (chacun mérite probablement son propre chantier de greffe additive) :
-  - `app/(public)/agir/adherer/actions.ts:171` — adhésion T99CP. Doit basculer vers : redirection vers `https://the99coinproject.org/` → retour avec `tx_hash` → `verifierTransaction` → `enregistrerHashConsomme({ type: 'adhesion', ... })`.
-  - `app/(public)/s-entraider/sel/actions.ts:367` — crédit T99CP pour prestation SEL. Idem.
-  - `app/(public)/s-entraider/marche/actions.ts:396` — marché solidaire T99CP. Idem.
-- **Page « 99-coin » en lecture seule** à réintroduire dans `/profil/` : un Server Component qui appelle `obtenirBalance(adresseWallet)` (à condition que la personne ait renseigné son adresse, à stocker dans une colonne `personne.adresse_wallet_t99cp` — colonne additive nouvelle, à créer dans un chantier dédié).
+  - `app/(public)/agir/adherer/actions.ts:171` : adhésion T99CP. Doit basculer vers : redirection vers `https://the99coinproject.org/` → retour avec `tx_hash` → `verifierTransaction` → `enregistrerHashConsomme({ type: 'adhesion', ... })`.
+  - `app/(public)/s-entraider/sel/actions.ts:367` : crédit T99CP pour prestation SEL. Idem.
+  - `app/(public)/s-entraider/marche/actions.ts:396` : marché solidaire T99CP. Idem.
+- **Page « 99-coin » en lecture seule** à réintroduire dans `/profil/` : un Server Component qui appelle `obtenirBalance(adresseWallet)` (à condition que la personne ait renseigné son adresse, à stocker dans une colonne `personne.adresse_wallet_t99cp` : colonne additive nouvelle, à créer dans un chantier dédié).
 - **Tests d'intégration du helper** : à écrire dans un harnais avec instance Supabase live, vérifiant que le `unique_violation` Postgres se traduit bien en `{ ok: false, raison: 'deja_consomme' }`. Sans cela, on découvrira un éventuel mismatch d'API Supabase à la première utilisation réelle.

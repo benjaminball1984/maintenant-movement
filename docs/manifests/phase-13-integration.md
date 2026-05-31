@@ -1,4 +1,4 @@
-# Manifest — Phase 13, intégration des chantiers 13.1 / 13.2 / 13.3
+# Manifest : Phase 13, intégration des chantiers 13.1 / 13.2 / 13.3
 
 **Date de fin** : 2026-05-25
 **Branche** : feature/phase-13-integration (fusionne 13.1, 13.2, 13.3 depuis la base saine d01562b)

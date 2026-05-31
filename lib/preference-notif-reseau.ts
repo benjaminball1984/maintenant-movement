@@ -26,7 +26,7 @@ const CLE_PAR_TYPE: Record<
 /**
  * Lit la préférence de notification réseau d'une personne pour un type
  * donné. Retourne 'cloche' (défaut) si pas de pref ou si la lecture
- * échoue (la personne aura juste la cloche, pas d'email — c'est le
+ * échoue (la personne aura juste la cloche, pas d'email : c'est le
  * comportement le plus prudent).
  *
  * Utilisé en service_role (Edge / Server Action) pour pouvoir lire la

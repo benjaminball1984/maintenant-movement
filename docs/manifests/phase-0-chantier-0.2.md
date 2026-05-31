@@ -1,4 +1,4 @@
-# Manifest : Phase 0, Chantier 0.2 — Système de design
+# Manifest : Phase 0, Chantier 0.2 : Système de design
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-0-chantier-0.2-systeme-de-design`

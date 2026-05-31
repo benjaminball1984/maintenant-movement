@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page À propos — migrée sur PageEditorialeCMS en V2.5.46 pour
+ * Page À propos : migrée sur PageEditorialeCMS en V2.5.46 pour
  * bénéficier du mode rich text (couleurs, polices, citations, embeds)
  * et de l'édition admin inline.
  *

@@ -48,7 +48,7 @@ function estTypeValide(v: string | undefined): v is FiltreAgenda['type'] {
 }
 
 /**
- * Page `/agenda` — agenda agrégé (chantier 6.2).
+ * Page `/agenda` : agenda agrégé (chantier 6.2).
  *
  * Cf. spec §8B « miroir temporel ». Liste linéaire triée par date,
  * regroupée par jour. Filtres URL pour jour, département, type.

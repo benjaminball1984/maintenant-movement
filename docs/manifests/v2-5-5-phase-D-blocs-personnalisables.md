@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.5 : Master Plan V2.6 Phase D (blocs personnalisables)
+# Manifest : Chantier V2.5.5 : Master Plan V2.6 Phase D (blocs personnalisables)
 
 **Date de fin** : 2026-05-30 (nuit du 29 au 30)
 **Branche** : `main`
@@ -15,7 +15,7 @@ Phase D : « Te permettre d'ajouter toi-même, dans un espace collectif, des pet
 - [x] **Types TS** (`lib/blocs-espace/types.ts`) : union discriminée `BlocEspaceDecode` qui assure le typage fort de chaque variante (texte/image/lien/bouton) avec son contenu spécifique. Énumération `TypeEspace` pour les 6 types d'espaces supportés.
 - [x] **Validation Zod** (`lib/blocs-espace/validation.ts`) : 4 schémas Zod (`SchemaContenuTexte`, `SchemaContenuImage`, `SchemaContenuLien`, `SchemaContenuBouton`) avec contraintes strictes (URL valide refusant javascript:, longueurs max, variantes énumérées). Helper `decoderBloc` qui prend une ligne brute et renvoie l'union typée ou `null` si invalide (rendu silencieusement ignoré, pas de crash).
 - [x] **Helpers de requête** (`lib/blocs-espace/requetes.ts`) : `listerBlocsEspace` (lecture, ordonnée), `creerBlocEspace` (ordre auto-incrémenté), `mettreAJourBlocEspace`, `supprimerBlocEspace`. Lecture via `getSupabaseServer`, écriture via `getSupabaseAdmin` (service_role bypasse RLS).
-- [x] **Composant `RenduBlocsEspace`** (`components/blocs/RenduBlocsEspace.tsx`) : Server Component qui charge les blocs et dispatche au bon rendu selon le type. Bloc texte = `<div>` whitespace-pre-line, bloc image = `<figure>` 16/9 avec figcaption, bloc lien = `<Link>` avec icône externe, bloc bouton = `<Link>` stylé avec 3 variantes (primary/ghost/outline) — réutilise le dégradé `bg-grad`.
+- [x] **Composant `RenduBlocsEspace`** (`components/blocs/RenduBlocsEspace.tsx`) : Server Component qui charge les blocs et dispatche au bon rendu selon le type. Bloc texte = `<div>` whitespace-pre-line, bloc image = `<figure>` 16/9 avec figcaption, bloc lien = `<Link>` avec icône externe, bloc bouton = `<Link>` stylé avec 3 variantes (primary/ghost/outline) : réutilise le dégradé `bg-grad`.
 - [x] **Branchement sur la page commune** : `<RenduBlocsEspace espaceType="commune" espaceId={commune.id} />` ajouté entre la carte d'infos et la zone d'inscription. Affichage silencieux si aucun bloc.
 - [x] **Seeding démo** : le script `seed-demo.ts` crée 3 blocs démo sur chacune des 6 communes (texte de bienvenue + lien WhatsApp + bouton réunion visio). 18 blocs au total. Idempotent (skip si la commune a déjà des blocs).
 - [x] **Tests unitaires** : 14 nouveaux tests sur `decoderBloc` et `estTypeBloc`. Couvre les cas valides, les types inconnus, les contenus mal formés, les URLs malveillantes (javascript:), les longueurs excessives. **932 tests verts au total** (918 + 14).
@@ -48,4 +48,4 @@ Phase D : « Te permettre d'ajouter toi-même, dans un espace collectif, des pet
 
 - **V2.5.5.a (éditeur admin blocs)** : prévoir un composant client `<EditeurBlocsEspace>` qui liste les blocs existants, propose un bouton « + Ajouter un bloc » avec un sélecteur de type, et un formulaire dynamique par type (texte = textarea, image = champ URL + alt, lien = url + libellé + checkbox externe, bouton = url + libellé + sélecteur variante). Server Actions : `creerBlocEspaceAction`, `modifierBlocEspaceAction`, `supprimerBlocEspaceAction`. Validation Zod côté serveur (réutiliser les schémas de `lib/blocs-espace/validation.ts`).
 - **Branchement multi-espaces** : ajouter `<RenduBlocsEspace>` sur les pages fédération, GT, groupe entraide local, campagne. ~5 minutes par page.
-- **Cas d'usage du Master Plan** : « afficher le lien du groupe WhatsApp pour la commune d'Argenteuil » est désormais possible — il suffit d'insérer un bloc de type `lien` ou `bouton` dans la base (UI éditeur à venir).
+- **Cas d'usage du Master Plan** : « afficher le lien du groupe WhatsApp pour la commune d'Argenteuil » est désormais possible : il suffit d'insérer un bloc de type `lien` ou `bouton` dans la base (UI éditeur à venir).

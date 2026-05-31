@@ -19,7 +19,7 @@ export type ResultatValidation =
  * - refuse si vide ou trop long.
  *
  * La validation MIME / pièce jointe ne s'applique pas ici (le fil est
- * texte uniquement à ce stade — cf. migration V2.2.1).
+ * texte uniquement à ce stade : cf. migration V2.2.1).
  */
 export function validerContenuMessageFil(contenuBrut: string): ResultatValidation {
   const contenuNettoye = contenuBrut.trim();

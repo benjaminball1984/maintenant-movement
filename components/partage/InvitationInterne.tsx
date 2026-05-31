@@ -22,8 +22,8 @@ interface InvitationInterneProps {
 }
 
 /**
- * `<InvitationInterne>` — voie interne d'invitation via la messagerie réseau
- * (V2.5.20 — Master Plan V2.6 Phase F sous-chantier V2.5.7.a).
+ * `<InvitationInterne>` : voie interne d'invitation via la messagerie réseau
+ * (V2.5.20 : Master Plan V2.6 Phase F sous-chantier V2.5.7.a).
  *
  * Complément de `<BoutonsPartage>` (voie externe WhatsApp/Email/etc.). Cette
  * voie interne permet d'inviter directement les personnes qu'on suit déjà

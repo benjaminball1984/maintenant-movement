@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page Doctrine fondatrice — migrée sur PageEditorialeCMS en V2.5.46
+ * Page Doctrine fondatrice : migrée sur PageEditorialeCMS en V2.5.46
  * pour bénéficier du mode rich text (couleurs, polices, citations,
  * embeds vidéo) et de l'édition admin inline.
  *

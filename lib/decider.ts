@@ -51,7 +51,7 @@ export interface ReunionDecider {
   salleId: string;
   titre: string;
   ordreJourMd: string;
-  /** V2.5.37 — HTML riche optionnel de l'OJ. Si présent, prime à l'affichage. */
+  /** V2.5.37 : HTML riche optionnel de l'OJ. Si présent, prime à l'affichage. */
   ordreJourHtml: string | null;
   debutLe: string;
   finLe: string | null;
@@ -59,7 +59,7 @@ export interface ReunionDecider {
   statut: StatutReunion;
   enregistree: boolean;
   pvMd: string | null;
-  /** V2.5.37 — HTML riche optionnel du PV. Si présent, prime à l'affichage. */
+  /** V2.5.37 : HTML riche optionnel du PV. Si présent, prime à l'affichage. */
   pvHtml: string | null;
 }
 

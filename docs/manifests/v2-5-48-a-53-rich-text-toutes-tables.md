@@ -1,4 +1,4 @@
-# Manifest groupé — Cycle V2.5.48 → V2.5.53 : rich text étendu à toutes les tables de contenu long
+# Manifest groupé : Cycle V2.5.48 → V2.5.53 : rich text étendu à toutes les tables de contenu long
 
 **Date de fin** : 2026-05-29
 **Branche** : `main`
@@ -11,11 +11,11 @@
 
 ## Livré
 
-### V2.5.48 — Recherche console CMS étendue à `valeur_html` (commit `0fbf926`)
+### V2.5.48 : Recherche console CMS étendue à `valeur_html` (commit `0fbf926`)
 
 - [x] **`ConsoleContenusCMS`** : la barre de recherche cherche aussi dans `valeur_html` après strip des balises HTML. Permet de retrouver les contenus migrés en rich text dont `valeur_md` est obsolète.
 
-### V2.5.49 — Bio rich text sur profil personne (commit `7a869e1`)
+### V2.5.49 : Bio rich text sur profil personne (commit `7a869e1`)
 
 - [x] **Migration `20260530800000_personne_bio_html.sql`** : colonne `bio_html` nullable additive sur `personne`.
 - [x] **Migration `20260530810000_personne_affichage_bio_html.sql`** : DROP + CREATE de la RPC `personne_affichage(uuid)` pour ajouter `bio_html` au RETURN TABLE. Visibilité suit le même flag `bio` dans `preferences_visibilite`.
@@ -25,7 +25,7 @@
 - [x] **UI `FormulaireInformations`** : switch Riche/Markdown au-dessus du champ bio. Mode Riche = `EditeurRicheAvecToolbar`. Pré-remplissage au bascule via `markdownLegerEnHtml`.
 - [x] **Rendu profil réseau** : `ProfilReseau.bioHtml` consommé, prioritaire sur `bio` plat.
 
-### V2.5.50 — Rich text infrastructure pour campagne (commit `fafaa75`)
+### V2.5.50 : Rich text infrastructure pour campagne (commit `fafaa75`)
 
 - [x] **Migration `20260530900000_campagne_texte_html.sql`** : colonne `texte_html` nullable additive.
 - [x] **`types/database.ts`** : `campagne.texte_html` ajouté.
@@ -33,12 +33,12 @@
 - [x] **Server Action `creerCampagne`** : sanitize.
 - [x] **Rendu page `/mobiliser/campagnes/[slug]`** : priorise `texte_html`, fallback texte brut.
 
-### V2.5.51 — UI rich text dans `FormulaireCreationCampagne` (commit `7532ade`)
+### V2.5.51 : UI rich text dans `FormulaireCreationCampagne` (commit `7532ade`)
 
 - [x] **Switch Riche/Markdown** au-dessus du champ Présentation. Mode Riche = `EditeurRicheAvecToolbar`. Pré-remplissage au bascule.
 - [x] **Champ texte plat reste obligatoire** (Zod min 100 chars) mais devient pliable en mode Riche : résumé/fallback pour SEO et lecteurs de RSS / mail texte.
 
-### V2.5.52 — Rich text infrastructure pour mobilisation (commit `8767762`)
+### V2.5.52 : Rich text infrastructure pour mobilisation (commit `8767762`)
 
 - [x] **Migration `20260530910000_mobilisation_description_html.sql`** : colonne `description_html` nullable additive.
 - [x] **`types/database.ts`** : `mobilisation.description_html` ajouté.
@@ -46,7 +46,7 @@
 - [x] **Server Action `creerMobilisation`** : sanitize.
 - [x] **Rendu page `/mobiliser/mobilisations/[slug]`** : priorise `description_html`, fallback texte brut.
 
-### V2.5.53 — Rich text infrastructure pour pétitions et cagnottes (commit `9ae43b3`)
+### V2.5.53 : Rich text infrastructure pour pétitions et cagnottes (commit `9ae43b3`)
 
 - [x] **Migration `20260530920000_petition_cagnotte_texte_html.sql`** : 2× `ALTER TABLE ADD COLUMN texte_html`.
 - [x] **`types/database.ts`** : `petition.texte_html` et `cagnotte.texte_html` ajoutés.

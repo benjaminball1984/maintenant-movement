@@ -15,7 +15,7 @@
  * restent disponibles tels quels et utilisent les defauts.
  */
 
-// V2.5.22 — Ce fichier est désormais **client-safe** : il ne contient
+// V2.5.22 : Ce fichier est désormais **client-safe** : il ne contient
 // que les types `MessagesValidation*` et les constantes `MESSAGES_VALIDATION_*_DEFAUT`.
 // Les loaders `lireMessagesValidation*` qui touchent à `contenu-editorial`
 // (et donc à `next/headers` via `lib/supabase/server`) ont été déplacés

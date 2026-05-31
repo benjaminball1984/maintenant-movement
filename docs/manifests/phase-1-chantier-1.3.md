@@ -1,4 +1,4 @@
-# Manifest : Phase 1, Chantier 1.3 — Profil utilisateurice
+# Manifest : Phase 1, Chantier 1.3 : Profil utilisateurice
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-1-chantier-1.3-profil-utilisateurice`

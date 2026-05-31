@@ -1,5 +1,5 @@
 /**
- * Conversion Markdown très léger → HTML compatible email (V2.5.20 — Master
+ * Conversion Markdown très léger → HTML compatible email (V2.5.20 : Master
  * Plan V2.6 Phase L sous-chantier V2.5.16.c).
  *
  * Permet aux templates CMS d'utiliser une syntaxe Markdown simple plutôt
@@ -34,7 +34,7 @@ function escapeHtml(s: string): string {
 /** Échappe HTML mais réautorise les balises Markdown converties après. */
 function appliquerInline(ligne: string): string {
   let s = escapeHtml(ligne);
-  // Liens [texte](url) — avant gras/italique pour ne pas casser les URLs.
+  // Liens [texte](url) : avant gras/italique pour ne pas casser les URLs.
   s = s.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
     (_, texte: string, url: string) =>

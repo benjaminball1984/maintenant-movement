@@ -1,8 +1,8 @@
-# Revue 2026 — Plan d'action consolidé des correctifs (C1-C31)
+# Revue 2026 : Plan d'action consolidé des correctifs (C1-C31)
 
 > Synthèse de tous les écarts des Blocs 2-5, classés par priorité et par nature : **[LOCAL]** = applicable maintenant en local (Bloc 6, doctrine de greffe respectée, aucun service externe, aucune écriture distante) ; **[MIGRATION]** = migration SQL additive posée en local, à pousser au distant en Phase M ; **[DÉCISION]** = arbitrage Lilou/Ben requis ; **[PHASE FINALE]** = dépend du déploiement/cron/service payant.
 
-## P0 — Critique
+## P0 : Critique
 
 | Id | Correctif | Nature | Effort |
 |---|---|---|---|
@@ -13,7 +13,7 @@
 | C3 | **Job d'anonymisation 30 j** (`appliquer_suppressions_differees()`) | [MIGRATION] + [PHASE FINALE] (cron) | Moyen |
 | C4 | **Export ZIP RGPD réel** (6 entrées) | [LOCAL] (route serveur + JSZip) | Élevé |
 
-## P1 — Important
+## P1 : Important
 
 | Id | Correctif | Nature | Effort |
 |---|---|---|---|
@@ -30,7 +30,7 @@
 | C29 | Compteurs pétitions/cagnottes via vues `petition_compteur`/`cagnotte_compteur` (supprime 2 N+1) | [LOCAL] | Faible |
 | C30 | Cache compteurs home (`unstable_cache` revalidate) + fiche commune | [LOCAL] | Moyen |
 
-## P2 — Polish
+## P2 : Polish
 
 | Id | Correctif | Nature |
 |---|---|---|
@@ -48,7 +48,7 @@
 | C27 | `aria-live` toggles optimistes ; `aria-label` Textarea CartePost ; `role=img` BadgeCheck | [LOCAL] |
 | C31 | RPC batch `personne_affichage_lot` ; TipTap `dynamic()` ; `.limit()` conversations ; `remotePatterns` + `<img>`→`next/image` | [LOCAL] + [MIGRATION] (RPC) |
 
-## P3 — Décision Lilou/Ben requise (architecture / produit)
+## P3 : Décision Lilou/Ben requise (architecture / produit)
 
 | Id | Sujet | Pourquoi une décision |
 |---|---|---|
@@ -62,7 +62,7 @@
 
 1. **Vague A (triviaux sûrs, fort impact)** : C18, C25, C28, C8, C7, C11, C21, C22, C23.
 2. **Vague B (états & a11y)** : C19, C20, C26, C27, C16, C17.
-3. **Vague C (vocabulaire/écriture mécanique)** : C2, C12 (sweep — sur textes affichés d'abord, vérifié).
+3. **Vague C (vocabulaire/écriture mécanique)** : C2, C12 (sweep : sur textes affichés d'abord, vérifié).
 4. **Vague D (perf & N+1)** : C29, C30, C31.
 5. **Vague E (migrations additives locales)** : C5, C13, C14, C15, C28-RPC (queue Phase M).
 6. **Vague F (RGPD lourde)** : C4 (export ZIP), C6 (journal), C1 (2FA), C3 (fonction anonymisation).

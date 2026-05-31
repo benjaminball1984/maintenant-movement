@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 3 : Responsivité + UX + complétude fonctionnelle
+# Revue 2026 : Bloc 3 : Responsivité + UX + complétude fonctionnelle
 
 > Deux audits parallèles (responsivité mobile→desktop ; UX et règle d'exhaustivité §4). Preuves fichier:ligne.
 
@@ -31,7 +31,7 @@
 | Basse | `dons/retour` état « paramètres manquants » : titre nu sans `<Alert>` ni lien retour (incohérent avec les 2 autres états). | `app/(public)/dons/retour/page.tsx:35-44` | `<Alert variant="warning">` + `<Link>` vers `/mobiliser/cagnottes`. |
 | Basse (info) | `FormulaireCommentaire` et `FormulairePosterMessage` sans `zodResolver` (27 autres l'ont). | `components/commentaires/FormulaireCommentaire.tsx`, `components/fil-groupe/FormulairePosterMessage.tsx` | Optionnel : aligner sur Zod. |
 
-**Stubs honnêtes déclarés (pas des bugs)** : Maintenant Radio (bannière explicite tant que flux AzuraCast absent, player prêt) ; pages éditoriales à `[TEXTE À FAIRE]` (convention §3, CMS-éditable — à remplir côté contenu) ; pré-remplissage tunnel post-signature (reporté, dépend du flux email). Aucun chantier 7.3/7.6 résiduel.
+**Stubs honnêtes déclarés (pas des bugs)** : Maintenant Radio (bannière explicite tant que flux AzuraCast absent, player prêt) ; pages éditoriales à `[TEXTE À FAIRE]` (convention §3, CMS-éditable : à remplir côté contenu) ; pré-remplissage tunnel post-signature (reporté, dépend du flux email). Aucun chantier 7.3/7.6 résiduel.
 
 **Points forts** : 78 pages à état vide explicite ; `not-found.tsx` + 26 `notFound()` ; 27/29 formulaires Zod+RHF, 31/31 gèrent l'état d'envoi + erreurs par champ ; Server Actions `{ok:false,message}` (zéro `throw` non maîtrisé) ; tunnels post-signature et post-don présents ; microcopy FR sobre, CMS-éditable ; auth-gating via `/connexion?prochaine=`.
 
@@ -39,7 +39,7 @@
 
 ## Correctifs ajoutés à la liste (suite de 02-conformite.md)
 
-- **C18 (P0, Haute)** : scroll interne des modales `<dialog>` (`max-h-[90dvh] overflow-y-auto`) — signature + message. *(local, 2 lignes, fort impact mobile)*
+- **C18 (P0, Haute)** : scroll interne des modales `<dialog>` (`max-h-[90dvh] overflow-y-auto`) : signature + message. *(local, 2 lignes, fort impact mobile)*
 - **C19 (P1, Haute)** : `app/error.tsx` + `app/global-error.tsx` (+ profil/admin). *(local)*
 - **C20 (P1, Moyenne)** : `app/loading.tsx` global + espaces lourds, réutilisant `Skeleton`. *(local)*
 - **C21 (P2)** : UUID admin `min-w-0`/`break-all` (personnes). *(local)*

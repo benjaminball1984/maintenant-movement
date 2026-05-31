@@ -18,7 +18,7 @@ interface PageFilProps {
 export const metadata: Metadata = { title: 'Conversation' };
 
 /**
- * Page `/s-informer/reseau/messages/[numero]` — fil de conversation avec une
+ * Page `/s-informer/reseau/messages/[numero]` : fil de conversation avec une
  * personne (identifiée par son numéro public M+7).
  */
 export default async function PageFil({ params }: PageFilProps) {

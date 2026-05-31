@@ -44,7 +44,7 @@ export const metadata: Metadata = {
  * vers l'offre si disponible, message d'amorce en aperçu replié.
  *
  * Le dashboard symétrique « En tant que propriétaire d'offre » (lister
- * les réservations qu'on reçoit) sera un chantier dédié — demande aussi
+ * les réservations qu'on reçoit) sera un chantier dédié : demande aussi
  * la jointure côté offre, donc soit on filtre par `offre_id IN (mes
  * offres)`, soit on agrège différemment.
  */

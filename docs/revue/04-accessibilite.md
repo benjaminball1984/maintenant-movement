@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 4 : Accessibilité (WCAG 2.1 AA), delta depuis l'audit du 2026-05-29
+# Revue 2026 : Bloc 4 : Accessibilité (WCAG 2.1 AA), delta depuis l'audit du 2026-05-29
 
 > L'audit exhaustif `docs/audits/a11y-audit-2026-05-29.md` (cycle V2.5.57-63) **tient toujours** : tous ses correctifs sont intacts. Ce bloc vérifie la tenue + repère les régressions introduites par le code V2.6 (organisations, home « une », images démo, double affichage 99-coin).
 
@@ -20,7 +20,7 @@ Bonne tenue générale. Le nouveau code V2.6 suit majoritairement les patterns p
 | Mineur (résidu accepté) | 1.1.1 | Flèches `←`/`→` dans des libellés de lien (lues « flèche gauche/droite »). Résidu CMS déjà accepté par l'audit ; V2.6 en a ajouté quelques-unes. | `organisations/[slug]/page.tsx:79` ; `home/UneSection.tsx:95,101` ; `UneArticle/UneCagnotte` ; `CarteUnifiee.tsx:234` | Non bloquant ; à traiter au nettoyage global des flèches. |
 
 ## Régressions V2.6
-1. `<Link><Button>` réintroduit (`organisations/page.tsx:47`) — seul vrai retour en arrière sur un correctif d'audit.
+1. `<Link><Button>` réintroduit (`organisations/page.tsx:47`) : seul vrai retour en arrière sur un correctif d'audit.
 2. Pattern `libelleObjet` (LOT 4) non hérité par la console admin organisations + panneau gestionnaires.
 3. Pattern `sr-only aria-live` (LOT 6) oublié sur 2 toggles optimistes hors-Alert.
 

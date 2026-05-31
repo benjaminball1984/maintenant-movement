@@ -102,7 +102,7 @@ export async function listerPetitionsPubliees(limite = 50): Promise<PetitionAvec
 }
 
 /**
- * Pétition la plus récente publiée — pour la « Une » d'accueil.
+ * Pétition la plus récente publiée : pour la « Une » d'accueil.
  * Retourne null s'il n'y en a aucune.
  */
 export async function petitionAlaUne(): Promise<PetitionAvecCompteur | null> {

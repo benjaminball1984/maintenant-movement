@@ -20,7 +20,7 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
 });
 
 /**
- * `<CarteMinimarche>` — vignette d'un minimarché solidaire physique.
+ * `<CarteMinimarche>` : vignette d'un minimarché solidaire physique.
  * Affiche la date, le lieu, et les monnaies acceptées.
  */
 export function CarteMinimarche({ minimarche, enAvant = false }: CarteMinimarcheProps) {

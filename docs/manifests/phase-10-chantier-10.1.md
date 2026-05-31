@@ -1,4 +1,4 @@
-# Manifest : Phase 10, Chantier 10.1 — Migration Base44
+# Manifest : Phase 10, Chantier 10.1 : Migration Base44
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-10-chantier-10.1-migration-base44`

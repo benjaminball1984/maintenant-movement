@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.29 : `appartenance_campagne` + extension Mes groupes
+# Manifest : V2 Vague 3, Chantier V2.3.29 : `appartenance_campagne` + extension Mes groupes
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-29-appartenance-campagne-groupe`
@@ -12,7 +12,7 @@ Couverture des 6 axes d'appartenance dans « Mes groupes ». `appartenance_campa
 
 - [x] **Migration `supabase/migrations/20260527120000_appartenance_campagne_groupe.sql`** : crée UNIQUEMENT `appartenance_campagne` (pattern aligné sur `appartenance_commune`). Pas de table groupes : la V1 a déjà `appartenance_groupe_entraide_local` (champs `rejoint_le`/`quitte_le`/`role_groupe`).
 - [x] **`types/database.ts`** : Row/Insert/Update/Relationships de `appartenance_campagne` ajoutés à la main. Pas de duplicat de `appartenance_groupe_entraide_local` (qui existe déjà).
-- [x] **`lib/mes-groupes.ts` — `listerMesAppartenances`** :
+- [x] **`lib/mes-groupes.ts` : `listerMesAppartenances`** :
   - Élargi à 6 axes (4 → 6) : ajout `campagnes` et `groupesEntraide`.
   - 4 requêtes en parallèle au lieu de 2 (Promise.all élargi).
   - Schémas adaptés : `campagne.titre` (pas `nom`), `appartenance_groupe_entraide_local.rejoint_le` (pas `rejointe_le`).

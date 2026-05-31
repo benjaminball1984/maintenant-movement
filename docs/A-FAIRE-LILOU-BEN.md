@@ -19,7 +19,7 @@ Quand tu auras fait ta part, **lance `npm run dev` localement, dis-moi ce qui ma
 
 ---
 
-## Catégorie 1 — Secrets & clés API à obtenir
+## Catégorie 1 : Secrets & clés API à obtenir
 
 Tu auras besoin de créer/récupérer ces secrets. Tous vont dans `.env.local` pour le dev local et dans les Secrets GitHub Actions + Cloudflare Pages pour la production.
 
@@ -49,7 +49,7 @@ Tu auras besoin de créer/récupérer ces secrets. Tous vont dans `.env.local` p
 
 ---
 
-## Catégorie 2 — Comptes & services externes à créer
+## Catégorie 2 : Comptes & services externes à créer
 
 ### 2.1 Supabase
 
@@ -89,7 +89,7 @@ Tu auras besoin de créer/récupérer ces secrets. Tous vont dans `.env.local` p
 Étapes :
 
 1. https://www.brevo.com/ → créer compte gratuit (jusqu'à 300 emails/jour).
-2. Vérifier le domaine d'envoi (SPF/DKIM/DMARC — cf. catégorie 6).
+2. Vérifier le domaine d'envoi (SPF/DKIM/DMARC : cf. catégorie 6).
 3. Settings → SMTP & API → API Keys → créer une clé. → mettre dans `BREVO_API_KEY`.
 4. Settings → SMTP & API → SMTP credentials → générer un mot de passe SMTP. → utiliser dans Supabase SMTP Settings.
 
@@ -142,7 +142,7 @@ https://sentry.io/ → free tier → créer projet Next.js. Récupérer DSN → 
 
 ---
 
-## Catégorie 3 — Configuration de la base Supabase distante
+## Catégorie 3 : Configuration de la base Supabase distante
 
 ### 3.1 Migrations à appliquer dans l'ordre
 
@@ -170,10 +170,10 @@ Ordre :
 6. `20260527050000_caisse.sql` (V2.2.3)
 7. `20260527060000_groupe_entraide_local.sql` (V2.3.2)
 8. `20260527070000_location_mutualisee.sql` (V2.3.3)
-9. `20260527080000_est_membre_espace_fix.sql` (V2.3.8 — fix critique helper SQL)
+9. `20260527080000_est_membre_espace_fix.sql` (V2.3.8 : fix critique helper SQL)
 10. `20260527090000_reservation_journal.sql` (V2.3.15)
 11. `20260527110000_transaction_entrante.sql` (V2.3.26)
-12. `20260527120000_appartenance_campagne_groupe.sql` (V2.3.29 — uniquement appartenance_campagne car appartenance_groupe_entraide_local existait déjà)
+12. `20260527120000_appartenance_campagne_groupe.sql` (V2.3.29 : uniquement appartenance_campagne car appartenance_groupe_entraide_local existait déjà)
 
 ### 3.2 Vérification post-migration
 
@@ -196,7 +196,7 @@ Mais cela écrasera les ajouts manuels. Préférer vérifier qu'il n'y a pas de 
 
 ---
 
-## Catégorie 4 — Backfills à lancer (idempotents, --dry-run obligatoire d'abord)
+## Catégorie 4 : Backfills à lancer (idempotents, --dry-run obligatoire d'abord)
 
 Tous suivent le pattern V2 : `--dry-run` par défaut (analyse sans écrire), `--confirm` explicite (écriture distante). Lancer **dans l'ordre suivant** après que les migrations distantes ont été appliquées :
 
@@ -243,7 +243,7 @@ npx tsx scripts/import-communes.ts mon-fichier.csv --confirm
 
 ---
 
-## Catégorie 5 — Configuration DNS pour le domaine
+## Catégorie 5 : Configuration DNS pour le domaine
 
 ### 5.1 Domaine cible
 
@@ -267,7 +267,7 @@ Récupérer ou créer une adresse `noreply@maintenant-le-mouvement.org` chez Ion
 
 ---
 
-## Catégorie 6 — Crons à poser
+## Catégorie 6 : Crons à poser
 
 Tous à créer en **Cloudflare Workers + Cron Triggers** quand le déploiement Cloudflare sera fait.
 
@@ -301,7 +301,7 @@ Déjà fait (V2.3.32 fix Ultraplan). Workflow GitHub : `.github/workflows/ci-cro
 
 ---
 
-## Catégorie 7 — Pull Request CI à merger
+## Catégorie 7 : Pull Request CI à merger
 
 **Branche** : `fix/ci-playwright-multi-browser` (poussée sur GitHub).
 
@@ -318,7 +318,7 @@ Déjà fait (V2.3.32 fix Ultraplan). Workflow GitHub : `.github/workflows/ci-cro
 
 ---
 
-## Catégorie 8 — Déploiement initial Cloudflare Pages
+## Catégorie 8 : Déploiement initial Cloudflare Pages
 
 Préalable : compte Cloudflare créé (catégorie 2.4).
 
@@ -350,7 +350,7 @@ Branch `main` → Deploy. Vérifier l'URL `*.pages.dev` d'abord, puis le domaine
 
 ---
 
-## Catégorie 9 — Données externes à fournir
+## Catégorie 9 : Données externes à fournir
 
 ### 9.1 CSV des communes pré-créées (2 100 à 2 300 communes)
 
@@ -366,14 +366,14 @@ Lancer ensuite `scripts/import-communes.ts` (cf. catégorie 4.4).
 
 Cf. `docs/CONTENUS-A-ARBITRER.md` pour la liste exacte. Pages :
 
-1. Doctrine — texte long de présentation
-2. Commune libre — qu'est-ce que c'est, comment en créer une
-3. Assemblée Confédérale — gouvernance
-4. Monnaie 99-coin — qu'est-ce que T99CP, contrat, fonctionnement
-5. FAQ — questions fréquentes
-6. Ressources — guides, kits militants
-7. À propos — l'asso, l'équipe, les origines
-8. Mentions légales — texte juridique (RNA, DPD, etc.)
+1. Doctrine : texte long de présentation
+2. Commune libre : qu'est-ce que c'est, comment en créer une
+3. Assemblée Confédérale : gouvernance
+4. Monnaie 99-coin : qu'est-ce que T99CP, contrat, fonctionnement
+5. FAQ : questions fréquentes
+6. Ressources : guides, kits militants
+7. À propos : l'asso, l'équipe, les origines
+8. Mentions légales : texte juridique (RNA, DPD, etc.)
 
 Fournir le texte à Claude.ai qui peuplera les pages.
 
@@ -400,11 +400,11 @@ Vérifier `docs/specs/04_DESIGN-TOKENS.md` (déjà posé). Si modifications voul
 
 ---
 
-## Catégorie 10 — Décisions politiques en attente d'arbitrage
+## Catégorie 10 : Décisions politiques en attente d'arbitrage
 
 À trancher avec Lilou/Ben, puis Claude.ai peut appliquer.
 
-### Q5 — Services proposés selon statut
+### Q5 : Services proposés selon statut
 
 Quels services sont accessibles aux **adhérent·e·s** (12€/an) vs **sympathisant·e·s** (gratuit) vs **donateur·ice·s** ?
 
@@ -414,17 +414,17 @@ Exemples à arbitrer :
 - Cagnottes : créer une cagnotte = adhérent only ?
 - Visio Décider : tous statuts ou seulement adhérent·e·s d'une commune ?
 
-### Q13 — Boucle d'engagement
+### Q13 : Boucle d'engagement
 
 Mécaniques transverses : comment fidéliser les sympathisant·e·s qui ne paient pas ? Notifs, gamification (interdit), recommandations ?
 
-### Q14 — Indicateurs publics du mouvement
+### Q14 : Indicateurs publics du mouvement
 
 Quoi afficher publiquement ? Nombre d'adhérent·e·s ? Nombre de signataires ? Trésorerie globale (somme des soldes caisses) ?
 
 ---
 
-## Catégorie 11 — Tests à lancer (local + CI)
+## Catégorie 11 : Tests à lancer (local + CI)
 
 ### 11.1 Tests unitaires + lint + typecheck
 
@@ -469,15 +469,15 @@ Lancer `npm run dev` et naviguer manuellement :
 
 ---
 
-## Catégorie 12 — Notes pour les chantiers V2.4+ (à coder plus tard)
+## Catégorie 12 : Notes pour les chantiers V2.4+ (à coder plus tard)
 
 Ces chantiers sont **listés dans le CDC mais pas encore codés** parce qu'ils demandent une spec ou un branchement externe. À traiter quand Lilou/Ben sera prête.
 
 ### 12.1 Notifications canaux 3-5
 
-- **Canal 3 — Mail récap hebdo (mardi)** : Server Action `genererMailRecap(personneId)` + cron Cloudflare Worker mardi 9h + template Brevo.
-- **Canal 4 — Newsletter (vendredi)** : éditorial humain. Côté tech : envoi via Brevo aux personnes ayant accepté la newsletter (consentement V2.1.2).
-- **Canal 5 — Push** : service worker + VAPID keys. Opt-in via préférences (déjà UI).
+- **Canal 3 : Mail récap hebdo (mardi)** : Server Action `genererMailRecap(personneId)` + cron Cloudflare Worker mardi 9h + template Brevo.
+- **Canal 4 : Newsletter (vendredi)** : éditorial humain. Côté tech : envoi via Brevo aux personnes ayant accepté la newsletter (consentement V2.1.2).
+- **Canal 5 : Push** : service worker + VAPID keys. Opt-in via préférences (déjà UI).
 
 ### 12.2 Vision D8 améliorée
 
@@ -498,11 +498,11 @@ Route `/co-construire/[slug]/page.tsx` à poser (lien depuis Mes groupes V2.3.22
 
 ### 12.5 Convergence tronc Objet (VAGUE 5 CDC)
 
-**REPORTÉE** — ne lancer que sur décision nominative explicite. Doctrine de greffe §0.3.
+**REPORTÉE** : ne lancer que sur décision nominative explicite. Doctrine de greffe §0.3.
 
 ---
 
-## Catégorie 13 — Suite progressive recommandée
+## Catégorie 13 : Suite progressive recommandée
 
 **Ordre suggéré pour avancer sans se perdre :**
 
@@ -518,7 +518,7 @@ Entre deux soirées, **dis-moi où tu en es** et je débloque/finalise ce qui pe
 
 ---
 
-## Catégorie 14 — Migration Base44 (chantier 10.1)
+## Catégorie 14 : Migration Base44 (chantier 10.1)
 
 État partiel selon CLAUDE.md :
 

@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 8 : audit post-correctifs (re-audit + sécurité + qualité de code)
+# Revue 2026 : Bloc 8 : audit post-correctifs (re-audit + sécurité + qualité de code)
 
 > Mené sur l'état après application des 13 correctifs (commits V2.6.33→38). **Build vert, 1013/1013 tests verts.** Trois volets : (A) re-vérification des audits précédents + régressions, (B) sécurité, (C) qualité/architecture du code. Respect CDC + persona vérifié.
 
@@ -10,7 +10,7 @@
 - **Scan repo complet** : plus **aucun** `<Link><Button>`/`<a><button>` nulle part (l'anti-pattern a été éliminé partout, pas seulement aux 2 endroits signalés). Le helper `classesBouton` rend `Button` plus DRY (Button l'utilise lui-même → zéro divergence de style possible).
 - Aucun nouveau `console.log`/`alert()`/`href="#"`/`TODO`/`any`/`@ts-ignore` introduit. Aucun bouton mort (les Server Actions sous-jacentes existent). Vocabulaire propre sur les fichiers neufs/touchés.
 - **Manques mineurs trouvés (non régressifs, hors des 13)** :
-  - 2 autres modales `<dialog>` sans `max-h` (`InvitationInterne.tsx:115`, `BoutonAttacherACampagne.tsx:115`) — même classe que C18, atténué (scroll interne ou contenu court). → à aligner.
+  - 2 autres modales `<dialog>` sans `max-h` (`InvitationInterne.tsx:115`, `BoutonAttacherACampagne.tsx:115`) : même classe que C18, atténué (scroll interne ou contenu court). → à aligner.
   - `og:type` reste `website` sur l'article journal (`ogType` non passé). → ajouter `ogType:'article'`.
   - Tiret cadratin : **300** en code (était 303 ; 3 corrigés). Flèches résiduelles. → C2/C12, passe dédiée reportée.
 
@@ -55,11 +55,11 @@
 
 > Toutes additives / surgicales, aucune ne touche aux données réelles. À appliquer avec test, avant mise en ligne publique pour S1/S2/S3.
 
-1. **S1 — open redirect** (`auth/callback`) : 3 lignes, sûr, à faire avant le public. **Prioritaire sécurité.**
-2. **S2 — échappement filtre admin** : réutiliser `termeSecurise()`, sûr.
-3. **S3 — révoquer le jeton Management** (action manuelle Lilou/Ben).
+1. **S1 : open redirect** (`auth/callback`) : 3 lignes, sûr, à faire avant le public. **Prioritaire sécurité.**
+2. **S2 : échappement filtre admin** : réutiliser `termeSecurise()`, sûr.
+3. **S3 : révoquer le jeton Management** (action manuelle Lilou/Ben).
 4. **Q1, Q4, Q5** : DRY/validation, gains rapides sûrs (`StatutReservation`, `formaterEuros`, IBAN Zod).
-5. Retrait du code mort (3 Stubs) — **seulement après confirmation** (le code est conservé dans l'historique git de toute façon).
+5. Retrait du code mort (3 Stubs) : **seulement après confirmation** (le code est conservé dans l'historique git de toute façon).
 6. Restes du Bloc 6 (C16, C17, C24, C26-badge, C6, migrations C5/C13/C14/C15, C31) et la passe C2/C12.
 7. P3 (décisions) : D1-D5 inchangées.
 

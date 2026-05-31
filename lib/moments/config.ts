@@ -142,7 +142,7 @@ export const SEPT_RDV: RDVPortAPorte[] = [
 
 // ============================================================
 // Gabarit du flyer SANS écriture inclusive (accessibilité tactique
-// — cf. spec §7C « Flyer "Entrez dans nous..." SANS écriture
+// : cf. spec §7C « Flyer "Entrez dans nous..." SANS écriture
 // inclusive (accessibilité tactique) »).
 // ============================================================
 

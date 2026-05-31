@@ -1,5 +1,5 @@
 /**
- * Lecteurs CMS des messages de validation (V2.5.22 — extrait de
+ * Lecteurs CMS des messages de validation (V2.5.22 : extrait de
  * `lib/messages-validation.ts`).
  *
  * Server-only : importe `lireContenuEditorial` qui dépend de `cookies()`

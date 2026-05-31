@@ -1,4 +1,4 @@
-# État des lieux du code — Maintenant! (V1)
+# État des lieux du code : Maintenant! (V1)
 
 > **But de ce document** : donner à une instance Claude (ou à toute personne)
 > une vue **exhaustive et fidèle** du code existant, pour comprendre l'ensemble
@@ -165,7 +165,7 @@ Légende : ✅ livré fonctionnel · 🟡 stub honnête · 🟧 bloqué (contenu
 
 ---
 
-## 6. Réseau social (chantier 7.5) — le plus récent
+## 6. Réseau social (chantier 7.5) : le plus récent
 
 Migration `20260525140000_reseau_social.sql`. Voir
 `docs/manifests/phase-13-chantier-7.5-reseau-social.md`.

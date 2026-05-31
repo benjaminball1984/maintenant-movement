@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.27 : Branchement caisses ↔ flux V1
+# Manifest : V2 Vague 3, Chantier V2.3.27 : Branchement caisses ↔ flux V1
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-27-branchement-caisses-flux-v1`
@@ -24,10 +24,10 @@ Doctrine V2 D7 : « régime B = l'argent arrive bien à Maintenant!, dans une Ca
 ## Non livré (et pourquoi)
 
 - [ ] **Chemin `adhererGratuit`** : pas de flux monétaire, donc pas d'entrée à poser. Cohérent.
-- [ ] **Cotisations solidaires** : table `cotisation` non touchée. Le helper `obtenirOuCreerCaisseGlobale('cotisation_solidaire')` est prêt mais aucune Server Action V1 ne l'utilise — à brancher quand le flux de cotisation sera livré.
+- [ ] **Cotisations solidaires** : table `cotisation` non touchée. Le helper `obtenirOuCreerCaisseGlobale('cotisation_solidaire')` est prêt mais aucune Server Action V1 ne l'utilise : à brancher quand le flux de cotisation sera livré.
 - [ ] **Dons généraux non liés à une cagnotte** : la V1 n'a que des dons sur cagnotte (`don.cagnotte_id NOT NULL`). Pas de flux « don général au mouvement ». Si un jour on l'ouvre, brancher sur `obtenirOuCreerCaisseGlobale('don_general')`.
 - [ ] **Backfill historique** : les dons et adhésions déjà passés en V1 ne sont PAS rétroactivement injectés dans les caisses. À faire avec un script `scripts/backfill-caisses.ts --dry-run` qui parcourt `don` et `adhesion` `confirme/active`, appelle `poserEntreeCaisse` (idempotent). À écrire et lancer quand Lilou/Ben veut activer la trésorerie sur les flux passés.
-- [ ] **Webhook Stripe direct** : actuellement le branchement passe par les Server Actions de retour Stripe Checkout (URL succès) — qui sont appelées par le navigateur. Un webhook direct Stripe → backend serait plus fiable mais demande une refonte plus large.
+- [ ] **Webhook Stripe direct** : actuellement le branchement passe par les Server Actions de retour Stripe Checkout (URL succès) : qui sont appelées par le navigateur. Un webhook direct Stripe → backend serait plus fiable mais demande une refonte plus large.
 
 ## Décisions techniques prises
 

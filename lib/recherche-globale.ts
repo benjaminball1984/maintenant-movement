@@ -62,7 +62,7 @@ export function trierParPertinence<T extends { titre: string }>(items: T[], quer
 }
 
 /**
- * Recherche globale (V2.4.24) — recherche `ilike` sur le titre / nom
+ * Recherche globale (V2.4.24) : recherche `ilike` sur le titre / nom
  * de toutes les entités publiques principales du site, en parallèle.
  * Limite 10 résultats par type. RLS Supabase filtre les éléments non
  * accessibles. Tri par pertinence simple : préfixe match avant infixe.

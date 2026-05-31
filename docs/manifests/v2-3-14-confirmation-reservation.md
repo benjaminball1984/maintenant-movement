@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.14 : Bouton « Confirmer » côté demandeur + correction du branchement Annuler V2.3.11
+# Manifest : V2 Vague 3, Chantier V2.3.14 : Bouton « Confirmer » côté demandeur + correction du branchement Annuler V2.3.11
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-14-confirmation-reservation`
@@ -10,7 +10,7 @@
 
 Boucle finale de la machine à états D8 côté demandeur : confirmation post-réalisation pour figer la réservation. Plus dette résolue : le bouton Annuler V2.3.11 n'avait jamais été branché dans la page (le commit V2.3.11 ne touchait pas `app/(membre)/profil/reservations/page.tsx` malgré ce que disait son manifest).
 
-- [x] **`app/actions/reservation.ts` — `confirmerReservationAction({reservationId, motif?, cheminRevalidation?})`** : Server Action. Vérifie session active, demandeur (`reservation.demandeur_personne_id === session.userId`), transition autorisée par la machine à états D8 (`transitionAutorisee(statut, 'confirmee')` n'est vrai que depuis `realisee`). Appelle `changerStatutReservation` (V2.2.2) puis `revalidatePath`. Symétrique à `annulerReservationAction` (V2.3.11).
+- [x] **`app/actions/reservation.ts` : `confirmerReservationAction({reservationId, motif?, cheminRevalidation?})`** : Server Action. Vérifie session active, demandeur (`reservation.demandeur_personne_id === session.userId`), transition autorisée par la machine à états D8 (`transitionAutorisee(statut, 'confirmee')` n'est vrai que depuis `realisee`). Appelle `changerStatutReservation` (V2.2.2) puis `revalidatePath`. Symétrique à `annulerReservationAction` (V2.3.11).
 - [x] **`components/reservation/BoutonConfirmerReservation.tsx`** : composant client minimaliste, 1 clic (pas de confirmation 2-étapes : la confirmation n'est pas destructive, c'est la fin attendue du cycle). Gestion d'erreur inline. État `enCours` pendant l'appel.
 - [x] **`app/(membre)/profil/reservations/page.tsx`** : branche les DEUX boutons conditionnellement.
   - `transitionAutorisee(statut, 'confirmee')` vrai → `BoutonConfirmerReservation` (uniquement quand statut = `realisee`).
@@ -25,8 +25,8 @@ Boucle finale de la machine à états D8 côté demandeur : confirmation post-r�
 ## Décisions techniques prises
 
 - **1 clic pour confirmer, 2 clics pour annuler** : la confirmation est une action constructive (action attendue à la fin d'une réalisation). L'annulation et le refus sont destructifs (déçoivent l'autre partie), donc 2 clics. Aligné avec V2.3.11 et V2.3.13.
-- **Dette V2.3.11 corrigée silencieusement** : le manifest V2.3.11 affirmait avoir branché `BoutonAnnulerReservation` dans `/profil/reservations` mais le commit ne touchait pas cette page (`git show --name-only 91db11a` confirme). Le bouton existait mais n'était jamais rendu. La correction tient en 2 lignes — coût trivial vs. faire un V2.3.14b dédié.
-- **Pas d'AlertDialog / modale** : suit le pattern V2.3.11 / V2.3.13 — confirmation inline pour Annuler (encadré danger), 1 clic direct pour Confirmer. Cohérence UI.
+- **Dette V2.3.11 corrigée silencieusement** : le manifest V2.3.11 affirmait avoir branché `BoutonAnnulerReservation` dans `/profil/reservations` mais le commit ne touchait pas cette page (`git show --name-only 91db11a` confirme). Le bouton existait mais n'était jamais rendu. La correction tient en 2 lignes : coût trivial vs. faire un V2.3.14b dédié.
+- **Pas d'AlertDialog / modale** : suit le pattern V2.3.11 / V2.3.13 : confirmation inline pour Annuler (encadré danger), 1 clic direct pour Confirmer. Cohérence UI.
 - **Ordre des boutons** : Confirmer rendu avant Annuler dans le JSX. En pratique les deux ne sont jamais visibles simultanément (les statuts `realisee` et `proposee/acceptee` sont disjoints), donc l'ordre est cosmétique.
 
 ## Écarts V1→V2 appliqués
@@ -35,7 +35,7 @@ Boucle finale de la machine à états D8 côté demandeur : confirmation post-r�
 
 ## Tests
 
-- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (inchangés — `transitionAutorisee('realisee', 'confirmee')` est déjà couvert par les tests V2.2.2).
+- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (inchangés : `transitionAutorisee('realisee', 'confirmee')` est déjà couvert par les tests V2.2.2).
 - **Lint Biome** : 462 fichiers, 0 issue.
 - **Typecheck (tsc)** : 0 erreur.
 - **Build / E2E** : non lancés.

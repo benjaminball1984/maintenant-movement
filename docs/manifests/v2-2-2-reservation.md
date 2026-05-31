@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 2, Chantier V2.2.2 : Réservation (composant transversal D8)
+# Manifest : V2 Vague 2, Chantier V2.2.2 : Réservation (composant transversal D8)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-2-2-reservation`

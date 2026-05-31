@@ -15,7 +15,7 @@ interface NotationEtoilesAffichageProps {
 }
 
 /**
- * `<NotationEtoiles>` (lecture seule) — affiche une moyenne sur 5
+ * `<NotationEtoiles>` (lecture seule) : affiche une moyenne sur 5
  * étoiles avec un fill partiel pour la dernière étoile si fractionnaire.
  */
 export function NotationEtoiles({
@@ -73,7 +73,7 @@ interface SelectEtoilesProps {
 }
 
 /**
- * `<SelectEtoiles>` — saisie des 5 étoiles. Utilise de vrais
+ * `<SelectEtoiles>` : saisie des 5 étoiles. Utilise de vrais
  * `<input type="radio">` (un par valeur) cachés visuellement, et
  * délègue le rendu graphique aux labels. Pattern accessible :
  * navigable clavier (flèches gauche/droite), annoncé correctement

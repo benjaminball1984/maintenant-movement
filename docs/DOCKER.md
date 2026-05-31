@@ -1,4 +1,4 @@
-# Docker & développement local — Maintenant!
+# Docker & développement local : Maintenant!
 
 Trois façons de faire tourner le projet. Toutes lisent la configuration depuis
 `.env.local` (copier `.env.example`, remplir au moins les clés Supabase). Le site

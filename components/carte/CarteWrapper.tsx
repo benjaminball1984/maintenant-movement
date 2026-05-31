@@ -13,7 +13,7 @@ interface CarteWrapperProps {
  * casse en SSR.
  *
  * Next.js 14+ exige que `dynamic({ ssr: false })` soit appelé depuis un
- * Client Component — d'où ce wrapper minimaliste, qui n'a aucune autre
+ * Client Component : d'où ce wrapper minimaliste, qui n'a aucune autre
  * raison d'exister.
  */
 const CarteUnifiee = dynamic(() => import('./CarteUnifiee').then((m) => m.CarteUnifiee), {

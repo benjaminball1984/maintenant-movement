@@ -46,7 +46,7 @@ export type ResultatAction<TPayload = unknown> =
 type ClientSupabase = Awaited<ReturnType<typeof getSupabaseServer>>;
 
 // ============================================================
-// Onglet 1 — Produit
+// Onglet 1 : Produit
 // ============================================================
 
 export async function creerProduitMarche(
@@ -416,7 +416,7 @@ export async function acheterProduit(
 }
 
 // ============================================================
-// Onglet 2 — Boutique éphémère
+// Onglet 2 : Boutique éphémère
 // ============================================================
 
 export async function creerBoutique(
@@ -501,7 +501,7 @@ export async function rattacherProduitBoutique(donneesBrutes: unknown): Promise<
 }
 
 // ============================================================
-// Onglet 3 — Minimarché solidaire
+// Onglet 3 : Minimarché solidaire
 // ============================================================
 
 export async function creerMinimarche(

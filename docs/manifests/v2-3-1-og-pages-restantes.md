@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.1 : Open Graph sur pages restantes
+# Manifest : V2 Vague 3, Chantier V2.3.1 : Open Graph sur pages restantes
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-1-og-pages-restantes`
@@ -25,14 +25,14 @@ V2.3.1 est volontairement **resserré** sur la finition Open Graph (suite direct
 
 ## Livré partiellement
 
-- [ ] **Sous-espaces S'entraider — autres enrichissements** : pas branché `FilDeGroupe`, `Réservation`, `TeleverseurImage` sur les formulaires V1 existants. Chacun mérite son chantier dédié avec contenus à arbitrer.
+- [ ] **Sous-espaces S'entraider : autres enrichissements** : pas branché `FilDeGroupe`, `Réservation`, `TeleverseurImage` sur les formulaires V1 existants. Chacun mérite son chantier dédié avec contenus à arbitrer.
 - [ ] **Description fédération générique** : `description: \`Fédération ${federation.nom} du mouvement Maintenant!\`` est une formule fonctionnelle, à enrichir quand le champ `description` sera ajouté à la table (chantier V2 dédié).
 
 ## Non livré (et pourquoi)
 
-- [ ] **V2.3.1 (plan original) — nouveaux sous-espaces** : hébergement/transport/prêt/marché solidaire/groupe d'entraide local. Constat : les 5 premiers existent déjà en V1. Le 6e (groupe d'entraide local) est vraiment nouveau et demande une migration BDD complète (nouvelle table avec RLS + helpers + UI). Reporté en chantier dédié.
-- [ ] **V2.3.2 — location mutualisée** : composant transversal §12 (bus/car/salle, organisateur tampon, euros only). Non démarré, demande conception UI + conformité juridique.
-- [ ] **V2.3.3 — compléments S'informer / Agir** : seulement les pages OG cette nuit ; les compléments propres aux fiches (réseau social affinements, Décider, etc.) sont des chantiers à part.
+- [ ] **V2.3.1 (plan original) : nouveaux sous-espaces** : hébergement/transport/prêt/marché solidaire/groupe d'entraide local. Constat : les 5 premiers existent déjà en V1. Le 6e (groupe d'entraide local) est vraiment nouveau et demande une migration BDD complète (nouvelle table avec RLS + helpers + UI). Reporté en chantier dédié.
+- [ ] **V2.3.2 : location mutualisée** : composant transversal §12 (bus/car/salle, organisateur tampon, euros only). Non démarré, demande conception UI + conformité juridique.
+- [ ] **V2.3.3 : compléments S'informer / Agir** : seulement les pages OG cette nuit ; les compléments propres aux fiches (réseau social affinements, Décider, etc.) sont des chantiers à part.
 
 ## Contenus à arbitrer
 

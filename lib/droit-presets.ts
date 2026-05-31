@@ -35,7 +35,7 @@ export type PresetV2 =
 export type PresetV1 = 'national' | 'admin' | 'moderation' | 'tresorerie' | 'animation' | 'dpd';
 
 /**
- * Presets V2 — cf. MD1 (« presets de départ, calqués sur les fonctions
+ * Presets V2 : cf. MD1 (« presets de départ, calqués sur les fonctions
  * d'admin d'une commune libre »).
  */
 export const PRESETS_V2: Record<PresetV2, readonly TypeDroit[]> = {
@@ -47,7 +47,7 @@ export const PRESETS_V2: Record<PresetV2, readonly TypeDroit[]> = {
 };
 
 /**
- * Presets V1 — traduction des 6 niveaux historiques de `droit_admin` vers
+ * Presets V1 : traduction des 6 niveaux historiques de `droit_admin` vers
  * la liste atomique V2. Utilisé par le script de backfill V2.1.3 pour ne
  * faire perdre aucun droit existant en attendant la migration applicative
  * vers la table `droit`.

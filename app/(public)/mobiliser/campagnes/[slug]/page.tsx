@@ -171,7 +171,7 @@ export default async function PageCampagneDetail({ params }: PageDetailProps) {
             Présentation
           </Heading>
           {(() => {
-            // V2.5.50 — priorité au HTML riche s'il est posé (déjà sanitizé
+            // V2.5.50 : priorité au HTML riche s'il est posé (déjà sanitizé
             // au save). Fallback texte brut whitespace-pre-line.
             const html = (campagne as { texte_html?: string | null }).texte_html ?? null;
             if (html !== null && html.trim() !== '') {

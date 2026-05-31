@@ -1,4 +1,4 @@
-# ADR — Architecture Decision Records
+# ADR : Architecture Decision Records
 
 Journal des décisions techniques notables prises pendant le développement du site Maintenant!. Format : Contexte / Décision / Conséquences / Alternatives considérées (cf. CLAUDE.md §7 et `docs/specs/08_PLAN_CHANTIERS.md`).
 
@@ -6,7 +6,7 @@ Numérotation contigüe (ADR-001, ADR-002, ...). Une décision = une entrée dat
 
 ---
 
-## ADR-001 — Conservation de la ligne Next.js 14.x (chantier 0.1)
+## ADR-001 : Conservation de la ligne Next.js 14.x (chantier 0.1)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -33,7 +33,7 @@ On reste sur Next.js 14.2.x pour le chantier 0.1 et les chantiers suivants tant 
 
 ---
 
-## ADR-002 — Choix de Biome plutôt qu'ESLint + Prettier (chantier 0.1)
+## ADR-002 : Choix de Biome plutôt qu'ESLint + Prettier (chantier 0.1)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -60,7 +60,7 @@ Biome (`@biomejs/biome`) est l'outil unique de lint et de formatage. Pas d'ESLin
 
 ---
 
-## ADR-003 — Composants UI reconstruits maison, sans shadcn/ui CLI ni Radix (chantier 0.2)
+## ADR-003 : Composants UI reconstruits maison, sans shadcn/ui CLI ni Radix (chantier 0.2)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -91,7 +91,7 @@ L'index `components/ui/index.ts` réexporte tout, pour permettre des imports com
 
 ---
 
-## ADR-004 — Polices Sora + Inter + JetBrains Mono via next/font/google (chantier 0.2)
+## ADR-004 : Polices Sora + Inter + JetBrains Mono via next/font/google (chantier 0.2)
 
 **Date** : 2026-05-20
 **Statut** : actée (corrige une mention prématurée de Fraunces/Atkinson dans le MANIFEST de 0.1)
@@ -120,7 +120,7 @@ Les trois polices sont chargées via `next/font/google`. Next télécharge les f
 
 ---
 
-## ADR-005 — `personne.id` lié à `auth.users.id` via FK avec cascade (chantier 1.1)
+## ADR-005 : `personne.id` lié à `auth.users.id` via FK avec cascade (chantier 1.1)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -152,7 +152,7 @@ On retient la convention 2 : `personne.id uuid primary key references auth.users
 
 ---
 
-## ADR-006 — Anti-spam et max-3 sur `appartenance_commune` via triggers SQL (chantier 1.1)
+## ADR-006 : Anti-spam et max-3 sur `appartenance_commune` via triggers SQL (chantier 1.1)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -190,7 +190,7 @@ L'application duplique la vérification au niveau Zod pour donner un retour avan
 
 ---
 
-## ADR-007 — Supabase Auth pour l'auth transactionnel, Brevo pour la newsletter et le métier (chantier 1.2)
+## ADR-007 : Supabase Auth pour l'auth transactionnel, Brevo pour la newsletter et le métier (chantier 1.2)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -228,7 +228,7 @@ Avantages :
 
 ---
 
-## ADR-008 — Export ZIP des données : stub asynchrone en 1.3, infra dédiée plus tard (chantier 1.3)
+## ADR-008 : Export ZIP des données : stub asynchrone en 1.3, infra dédiée plus tard (chantier 1.3)
 
 **Date** : 2026-05-20
 **Statut** : actée
@@ -262,7 +262,7 @@ Pour 1.3 :
 
 ---
 
-## ADR-009 — Modale signature pétition via `<dialog>` HTML5 plutôt que Radix (chantier 2.1)
+## ADR-009 : Modale signature pétition via `<dialog>` HTML5 plutôt que Radix (chantier 2.1)
 
 **Date** : 2026-05-20
 **Statut** : actée

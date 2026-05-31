@@ -1,4 +1,4 @@
-# Manifest : Phase 1, Chantier 1.1 — Schéma BDD initial
+# Manifest : Phase 1, Chantier 1.1 : Schéma BDD initial
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-1-chantier-1.1-schema-bdd-initial`
@@ -36,7 +36,7 @@
 
 ## Livré partiellement
 
-- (rien sur le code applicatif. Les tests d'intégration SQL réels — exécution des migrations sur un Postgres + insertion + vérification des triggers + tests RLS — restent à faire à l'arrivée de l'instance Supabase, cf. « Non livré ».)
+- (rien sur le code applicatif. Les tests d'intégration SQL réels : exécution des migrations sur un Postgres + insertion + vérification des triggers + tests RLS : restent à faire à l'arrivée de l'instance Supabase, cf. « Non livré ».)
 
 ## Non livré (et pourquoi)
 

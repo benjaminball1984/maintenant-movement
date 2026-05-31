@@ -2,7 +2,7 @@
 
 /**
  * Server Actions pour publier dans le flux du réseau social au nom d'un
- * espace collectif (V2.5.18 — finition Phase H, sous-chantier V2.5.10.b).
+ * espace collectif (V2.5.18 : finition Phase H, sous-chantier V2.5.10.b).
  *
  * Permissions (décision D4, revue 2026) :
  *   - L'utilisateur·rice doit être connecté·e.

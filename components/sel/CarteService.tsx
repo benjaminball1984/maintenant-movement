@@ -12,7 +12,7 @@ interface CarteServiceProps {
 }
 
 /**
- * `<CarteService>` — vignette d'un service ou volontariat SEL (V2.5.12).
+ * `<CarteService>` : vignette d'un service ou volontariat SEL (V2.5.12).
  *
  * Le SEL n'a pas de photo associée à un service (c'est du temps + une
  * compétence). On transpose donc la « grammaire visuelle des leaders »

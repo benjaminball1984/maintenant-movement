@@ -1,6 +1,6 @@
 /**
  * Types client-safe pour les espaces publieurs dans le réseau social
- * (V2.5.22 — extraction depuis `lib/reseau/espace.ts`).
+ * (V2.5.22 : extraction depuis `lib/reseau/espace.ts`).
  *
  * Ce fichier ne contient AUCUN runtime : pas d'import de Supabase, pas de
  * `next/headers`. Sûr à importer depuis n'importe quel composant client

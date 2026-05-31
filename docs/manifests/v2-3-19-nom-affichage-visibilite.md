@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.19 : Helper `nomAffichageRespectantVisibilite`
+# Manifest : V2 Vague 3, Chantier V2.3.19 : Helper `nomAffichageRespectantVisibilite`
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-19-nom-affichage-visibilite`
@@ -11,13 +11,13 @@
 Helper transverse de nommage qui respecte la visibilité réseau V1 (RPC `personne_affichage(cible)` SECURITY DEFINER). Identifié comme manquant dans 3 manifests précédents (V2.3.13, V2.3.15, V2.3.17). Désormais branché partout où on a un `personne_id` à afficher dans les vues réservation.
 
 - [x] **`lib/reseau/identite.ts`** :
-  - `IdentiteAffichee` : `{ personneId, numero, prenom, nom, photoUrl }` — chaque champ sensible peut être `null` si la visibilité le masque.
+  - `IdentiteAffichee` : `{ personneId, numero, prenom, nom, photoUrl }` : chaque champ sensible peut être `null` si la visibilité le masque.
   - `chargerIdentitesAffichables(personneIds)` : batch dédupliqué, une RPC `personne_affichage` par id (parallèle via `Promise.all`). Retourne `Map<string, IdentiteAffichee>`.
   - `nomAffichageRespectantVisibilite(identite)` : produit l'étiquette à afficher. Stratégie : `Prénom Nom` si visible (réutilise `nomAffiche` existant), sinon le numéro M+7, sinon « Membre ».
-- [x] **`components/reservation/HistoriqueTransitions.tsx`** : nouvelle prop optionnelle `identites?: Map<string, IdentiteAffichee>`. Affiche « · par X » à côté de la date de chaque transition (« · par système » quand `auteurId IS NULL` — transitions automatiques futures).
+- [x] **`components/reservation/HistoriqueTransitions.tsx`** : nouvelle prop optionnelle `identites?: Map<string, IdentiteAffichee>`. Affiche « · par X » à côté de la date de chaque transition (« · par système » quand `auteurId IS NULL` : transitions automatiques futures).
 - [x] **`app/(membre)/profil/reservations/page.tsx`** : charge les identités des auteurs du journal (utile pour voir QUI a accepté / refusé / marqué réalisée côté propriétaire), les passe à `HistoriqueTransitions`.
 - [x] **`app/(membre)/profil/demandes-reservations/page.tsx`** : charge les identités du demandeur + des auteurs du journal. Affiche le nom du demandeur en lien vers son profil réseau (`/s-informer/reseau/[numero]`) si le numéro M+7 est dispo. Avant : « voir dans la messagerie » générique. Maintenant : « Demandeur·euse : Prénom Nom » (ou M+7) avec lien direct.
-- [x] **`app/admin/moderation/reservations/page.tsx`** : symétrique côté admin — affiche le demandeur (lien profil) + identités dans l'historique.
+- [x] **`app/admin/moderation/reservations/page.tsx`** : symétrique côté admin : affiche le demandeur (lien profil) + identités dans l'historique.
 
 ## Non livré (et pourquoi)
 

@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.6 : FilDeGroupe sur commune + campagne
+# Manifest : V2 Vague 3, Chantier V2.3.6 : FilDeGroupe sur commune + campagne
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-6-fil-groupe-espaces`
@@ -38,7 +38,7 @@ Branche le composant transversal **`FilDeGroupe` (V2.2.1, §18)** sur deux espac
 
 ## Tests
 
-- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test — le helper `posterMessageFil` et la validation sont déjà couverts en V2.2.1).
+- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test : le helper `posterMessageFil` et la validation sont déjà couverts en V2.2.1).
 - **Lint Biome** : 454 fichiers, 0 issue.
 - **Typecheck (tsc)** : 0 erreur.
 - **Build / E2E** : non lancés.

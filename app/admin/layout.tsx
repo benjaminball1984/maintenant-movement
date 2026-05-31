@@ -25,7 +25,7 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
 
   // La console nationale n'est proposée qu'aux admins du niveau le plus élevé.
   const peutNational = await estAdminNational();
-  // V2.5.15 Phase K — un compte avec niveau CMS uniquement (pas admin général)
+  // V2.5.15 Phase K : un compte avec niveau CMS uniquement (pas admin général)
   // ne voit que la section Contenus dans la nav. Cohérent avec la doctrine
   // §4.2 « la plateforme technique n'ouvre aucun droit politique ».
   const estAdmin = await estAdminCourant();
@@ -192,7 +192,7 @@ async function garantirAccesAdmin(prochaine: string): Promise<void> {
   const { data: estModerateurice } = await supabase.rpc('est_moderateurice', {});
   if (estModerateurice === true) return;
 
-  // V2.5.15 Master Plan §K — le rôle CMS donne accès à la console pour
+  // V2.5.15 Master Plan §K : le rôle CMS donne accès à la console pour
   // éditer les libellés sans pouvoir politique. La nav cache les onglets
   // sensibles (modération, trésorerie, etc.) pour ces comptes-là.
   const { data: peutEditerCms } = await supabase.rpc('peut_editer_cms');

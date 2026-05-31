@@ -31,7 +31,7 @@ const FALLBACKS = {
 /**
  * Page `/s-informer/journal` V2.4.11.
  *
- * Maintenant Médias — journal-affiche. Liste les éditions publiées par
+ * Maintenant Médias : journal-affiche. Liste les éditions publiées par
  * le mouvement, classées par numéro décroissant.
  *
  * L'export PDF print-ready (Paged.js + Puppeteer) viendra dans un

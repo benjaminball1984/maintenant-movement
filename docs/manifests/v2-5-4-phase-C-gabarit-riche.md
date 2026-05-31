@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.4 : Master Plan V2.6 Phase C (gabarit riche espaces collectifs)
+# Manifest : Chantier V2.5.4 : Master Plan V2.6 Phase C (gabarit riche espaces collectifs)
 
 **Date de fin** : 2026-05-29 (nuit du 29 au 30)
 **Branche** : `main`

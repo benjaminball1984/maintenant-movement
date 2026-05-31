@@ -86,7 +86,7 @@ export async function creerGroupeEntraide(donneesBrutes: unknown): Promise<Resul
       role_groupe: 'animateur',
     });
   if (errAppartenance !== null) {
-    // Ne pas casser la création du groupe pour autant — on logge et on continue.
+    // Ne pas casser la création du groupe pour autant : on logge et on continue.
     console.warn('[creerGroupeEntraide] appartenance créateur échouée :', errAppartenance);
   }
 

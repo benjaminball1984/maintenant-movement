@@ -33,7 +33,7 @@ function lireMeta(meta: unknown, cle: string): string | null {
 }
 
 /**
- * `<CarteOffre>` — vignette d'annonce d'entraide (V2.5.12).
+ * `<CarteOffre>` : vignette d'annonce d'entraide (V2.5.12).
  *
  * Refonte « grammaire visuelle des leaders grand public » (Master Plan
  * V2.6 Phase I §3.5). Vinted-like pour le marché, BlaBlaCar-like pour
@@ -43,7 +43,7 @@ function lireMeta(meta: unknown, cle: string): string | null {
  *
  * V2.5.20 sous-chantiers V2.5.12.a (transport) et V2.5.12.b (hébergement) :
  * lecture de `offre.meta` jsonb pour afficher les infos spécifiques par
- * type — départ/arrivée/horaires pour transport, dates/capacité pour
+ * type : départ/arrivée/horaires pour transport, dates/capacité pour
  * hébergement. Présenté sous la photo dans un encart compact identifiable
  * au coup d'œil (mini-icônes en ligne).
  *

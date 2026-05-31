@@ -101,7 +101,7 @@ export function CartePost({
     }
   };
 
-  // V2.5.10 Phase H — si le post est publié AU NOM d'un espace, on met
+  // V2.5.10 Phase H : si le post est publié AU NOM d'un espace, on met
   // l'espace en avant (avatar/photo + nom cliquable) et l'auteurice
   // personne devient un sous-titre fin « publié par X ».
   const espace = post.espacePublieur;

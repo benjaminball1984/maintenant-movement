@@ -151,7 +151,7 @@ async function hydraterMinimarches(
 }
 
 // ============================================================
-// Onglet 1 — Produits
+// Onglet 1 : Produits
 // ============================================================
 
 export interface FiltreListeProduits {
@@ -224,7 +224,7 @@ export async function listerNotationsProduit(
 }
 
 // ============================================================
-// Onglet 2 — Boutiques
+// Onglet 2 : Boutiques
 // ============================================================
 
 export async function listerBoutiques(limite = 50): Promise<BoutiqueMarcheEnrichie[]> {
@@ -268,7 +268,7 @@ export async function produitsDeLaBoutique(boutiqueId: string): Promise<ProduitM
 }
 
 // ============================================================
-// Onglet 3 — Minimarchés
+// Onglet 3 : Minimarchés
 // ============================================================
 
 export async function listerMinimarches(

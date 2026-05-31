@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 /**
  * Sitemap dynamique (V2.4.40).
  *
- * GET `/sitemap.xml` — généré à chaque requête (pas de cache CDN
+ * GET `/sitemap.xml` : généré à chaque requête (pas de cache CDN
  * pour rester à jour à la minute). Liste :
  * - les pages statiques racines
  * - les pétitions publiées

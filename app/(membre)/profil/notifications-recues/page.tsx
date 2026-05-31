@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page « Mes notifications reçues » (V2.3.25) — canal 1 du CDC V2 §7.
+ * Page « Mes notifications reçues » (V2.3.25) : canal 1 du CDC V2 §7.
  *
  * Liste des notifs (50 dernières) avec badge non lu, lien cible,
  * bouton « tout marquer lu ». Distinct de `/profil/notifications` qui

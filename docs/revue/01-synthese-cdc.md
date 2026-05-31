@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 1 : Synthèse des cahiers des charges
+# Revue 2026 : Bloc 1 : Synthèse des cahiers des charges
 
 > Document de référence produit en lecture de **tout** le pack CDC V2 (`docs/cdc-v2/`, fiche par fiche + fondations) et des specs V1 (`docs/specs/`). Objectif : reconstituer la logique générale, l'architecture cible, les invariants, le vocabulaire et la doctrine, puis fournir une **checklist de conformité consolidée** (§14) qui sert d'outil au Bloc 2 (audit code ↔ CDC).
 >

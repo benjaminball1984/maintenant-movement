@@ -34,12 +34,12 @@ export interface LibellesSignaturePetition {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaAnnuler: string;
-  /** V2.5.6 Phase E — tunnel post-signature. */
+  /** V2.5.6 Phase E : tunnel post-signature. */
   tunnelTitre: string;
   tunnelIntro: string;
   tunnelCtaAdherer: string;
   tunnelCtaCommune: string;
-  /** V2.5.19 Phase E.bis — bouton unique vers la page intermédiaire de bienvenue. */
+  /** V2.5.19 Phase E.bis : bouton unique vers la page intermédiaire de bienvenue. */
   tunnelCtaDecouvrir: string;
 }
 

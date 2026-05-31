@@ -1,4 +1,4 @@
-# Manifest groupé — Cycle V2.5.23 → V2.5.29 : rich text complet + logo officiel + hotfix CMS auth
+# Manifest groupé : Cycle V2.5.23 → V2.5.29 : rich text complet + logo officiel + hotfix CMS auth
 
 **Date de fin** : 2026-05-29
 **Branche** : `main`
@@ -15,7 +15,7 @@ Trois objectifs entrelacés, livrés en un cycle de 7 commits :
 
 ## Livré
 
-### V2.5.23 — Fondations rich text + fix hydration button (commit `7b6a5fa`)
+### V2.5.23 : Fondations rich text + fix hydration button (commit `7b6a5fa`)
 
 - [x] **Migration `supabase/migrations/20260530500000_contenu_editorial_html.sql`** : ajoute la colonne `valeur_html text` nullable à `contenu_editorial`. Strictement additive (doctrine de greffe §0.3). Quand renseignée, prend le pas sur `valeur_md` à l'affichage.
 - [x] **`lib/rich-text/sanitize.ts`** : `sanitizeRichHtml(html)` avec allowlist stricte sanitize-html (balises p/h1-4/blockquote/ul/ol/li/strong/em/u/s/a/img/iframe/span/figure/figcaption/table, CSS color/background-color/font-size/font-family/font-weight/font-style/text-align/text-decoration/text-transform/line-height/letter-spacing, iframes filtrées par hostname YouTube/Vimeo/Spotify/SoundCloud/PeerTube, refus de `javascript:` / `data:` pour les liens, force `noopener noreferrer` sur `target=_blank`). Server-only (sanitize-html dépend de htmlparser2 non bundlable client).
@@ -27,7 +27,7 @@ Trois objectifs entrelacés, livrés en un cycle de 7 commits :
 - [x] **`lib/contenu-editorial.ts`** : interface `ContenuEditorial` enrichie, `lireContenuEditorial` retourne `valeurHtml`.
 - [x] **Fix bonus** : `BoutonEditerInline` passe de `<button>` à `<span role="button">` + `tabIndex=0` + gestion clavier Enter/Space. Résout l'erreur d'hydration `button-dans-button` que produisait l'usage de `TexteEditableAdmin` à l'intérieur du `<button>` déclencheur de `ModaleSignaturePetition` (HTML interdit cette imbrication).
 
-### V2.5.24 — Logo officiel intégré (commit `733befc`)
+### V2.5.24 : Logo officiel intégré (commit `733befc`)
 
 - [x] **Logo `public/logo/maintenant.png`** : 1 Mo PNG bitmap, qualité native conservée pour les écrans haute densité.
 - [x] **`components/layout/Footer.tsx`** : remplace le wordmark texte dégradé par le logo (128–144 px, `next/image` priority, wrappé en `Link` vers la home).
@@ -37,7 +37,7 @@ Trois objectifs entrelacés, livrés en un cycle de 7 commits :
 
 **Décision explicite** : le logo n'est PAS dans le header public principal. Le header reste le menu de navigation, le wordmark gradient continue d'y figurer (Master Plan §B).
 
-### V2.5.25 — Rich text branché sur PageEditorialeCMS + emails + hotfix CMS auth (commit `54c0dc9`)
+### V2.5.25 : Rich text branché sur PageEditorialeCMS + emails + hotfix CMS auth (commit `54c0dc9`)
 
 - [x] **`components/contenu/ContenuEditableAdmin.tsx`** : refonte avec switch 2 modes (Markdown / Riche). Mode Riche pré-rempli si `valeurHtmlInitiale` existe. La sauvegarde envoie seulement le champ édité, l'autre est préservé côté serveur.
 - [x] **`components/contenu/PageEditorialeCMS.tsx`** : propage `valeurHtmlInitiale` à `ContenuEditableAdmin` pour activer le rendu HTML riche côté visiteur sur les 10 pages éditoriales (Doctrine, Commune libre, Assemblée confédérale, FAQ, Monnaie, Ressources, À propos, Mentions légales, Confidentialité, Contact).
@@ -45,26 +45,26 @@ Trois objectifs entrelacés, livrés en un cycle de 7 commits :
 - [x] **Hotfix `app/actions/contenu-editorial.ts`** : si l'appel à `peut_editer_cms` retourne une erreur (RPC inexistant sur le distant), fallback gracieux sur `est_admin_general`. Restaure le droit d'édition CMS pour les admins généraux sur le distant en attendant la migration V2.5.15.
 - [x] **Mises à jour partielles** : la Server Action lit l'existant pour ne pas écraser `valeur_md` quand on n'édite que `valeur_html` (et inversement). L'upsert reste atomique.
 
-### V2.5.26 — Mode rich text dans la console CMS admin (commit `5188d76`)
+### V2.5.26 : Mode rich text dans la console CMS admin (commit `5188d76`)
 
 - [x] **`components/contenu/EditeurInlineCMS.tsx`** : ajoute le switch Riche/Markdown. Mode par défaut Riche si `valeurHtml` existe, sinon Markdown. Particulièrement utile pour éditer les corps d'emails (`email.{type}.html`) sans coller du HTML brut à la main.
 - [x] **`components/contenu/ConsoleContenusCMS.tsx`** : `ContenuListe` gagne `valeurHtml` optionnel, propage à `EditeurInlineCMS`.
-- [x] **`app/admin/national/contenus/page.tsx`** : récupère `valeur_html` depuis Supabase (cast défensif si la colonne n'existe pas encore sur le distant — Master Plan local strict).
+- [x] **`app/admin/national/contenus/page.tsx`** : récupère `valeur_html` depuis Supabase (cast défensif si la colonne n'existe pas encore sur le distant : Master Plan local strict).
 
-### V2.5.27 — Templates email réseau (sous-chantier V2.5.16.d) (commit `efc9d70`)
+### V2.5.27 : Templates email réseau (sous-chantier V2.5.16.d) (commit `efc9d70`)
 
 - [x] **`lib/email-templates.ts`** : `TypeEmail` étendu avec `reseau_message_recu` / `reseau_post_commente` / `reseau_post_soutenu`. Templates par défaut fournis (sujet + html + texte), toujours surchargeables CMS.
 - [x] **`app/admin/national/emails-preview/page.tsx`** : 3 nouvelles previews iframe (message, commentaire, soutien) pour visualiser le rendu avec le gabarit identitaire.
 - **Décision anti-spam** : les templates sont définis et previewables MAIS pas appelés automatiquement par les Server Actions du réseau. Un futur système de préférences utilisateurice (digest hebdo / opt-in par type) décidera quand basculer cloche → email.
 
-### V2.5.28 — Tests sécurité sanitizeRichHtml (commit `526d9cd`)
+### V2.5.28 : Tests sécurité sanitizeRichHtml (commit `526d9cd`)
 
 - [x] **`tests/unit/rich-text-sanitize.test.ts`** : 18 tests couvrant 3 catégories :
   - **7 tests d'allowlist positive** : paragraphes/titres, gras/italique/souligné/barré, listes, liens http(s)/mailto, images http(s)/data:, iframes YouTube, styles CSS color/font-size.
   - **8 tests d'allowlist négative (vecteurs XSS)** : `<script>` supprimé, handlers `on*` supprimés, URL `javascript:`, `<object>`/`<embed>`, iframes hors hostname allowlistés, iframes sans src, styles `position:fixed` / `z-index`, force `noopener noreferrer` sur `target=_blank`, refuse `data:` pour `href`.
   - **3 tests sur `ressembleAduHtml`** (heuristique HTML vs Markdown).
 
-### V2.5.29 — Mise à jour CLAUDE.md (commit `96cacc7`)
+### V2.5.29 : Mise à jour CLAUDE.md (commit `96cacc7`)
 
 - [x] Section §11 État courant enrichie avec les chantiers V2.5.23–V2.5.28.
 

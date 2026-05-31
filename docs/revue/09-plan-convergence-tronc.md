@@ -1,4 +1,4 @@
-# Revue 2026 — Plan de convergence vers le tronc commun (décision D3)
+# Revue 2026 : Plan de convergence vers le tronc commun (décision D3)
 
 > Décision Lilou/Ben du 2026-05-31 : **planifier** la convergence du modèle de données vers le tronc générique `Objet` / `Espace` (schéma cible D1-D13 de `docs/cdc-v2/CDC-Maintenant-V2/schema-donnees-V2.md`).
 >

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page `/carte` — carte unifiée transverse (chantier 3.2 v1).
+ * Page `/carte` : carte unifiée transverse (chantier 3.2 v1).
  *
  * Cf. spec §8A : « bases de données séparées par espace, agrégation à
  * l'affichage ». Le Server Component charge les points (mobilisations

@@ -30,9 +30,9 @@ export interface IdentiteAffichee {
 export interface ProfilReseau extends IdentiteAffichee {
   pronom: string | null;
   bio: string | null;
-  /** V2.5.49 — bio HTML riche (optionnel). Suit le même flag de visibilité que `bio`. */
+  /** V2.5.49 : bio HTML riche (optionnel). Suit le même flag de visibilité que `bio`. */
   bioHtml: string | null;
-  /** V2.5.13.a — image de couverture (bandeau haut du profil), nul = dégradé. */
+  /** V2.5.13.a : image de couverture (bandeau haut du profil), nul = dégradé. */
   coverUrl: string | null;
   nbAbonnes: number;
   nbSuivis: number;
@@ -58,7 +58,7 @@ export interface PostAffiche {
    */
   palier: 0 | 1 | 2 | 3 | 4;
   /**
-   * V2.5.10 Phase H — si renseigné, le post est publié AU NOM de cet espace.
+   * V2.5.10 Phase H : si renseigné, le post est publié AU NOM de cet espace.
    * L'affichage met alors l'espace en avant (avatar + nom + lien) et garde
    * l'`auteur` en sous-titre fin pour la transparence.
    */
@@ -172,7 +172,7 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
     pronom: aff.pronom,
     photoUrl: aff.photo_url,
     bio: aff.bio,
-    // V2.5.49 — bio HTML riche (cast défensif si la migration RPC
+    // V2.5.49 : bio HTML riche (cast défensif si la migration RPC
     // 20260530810000 n'est pas encore appliquée sur le distant).
     bioHtml: (aff as { bio_html?: string | null }).bio_html ?? null,
     coverUrl:
@@ -190,7 +190,7 @@ export async function getProfilReseauParNumero(numero: string): Promise<ProfilRe
  * Une seule requête par TYPE d'espace présent dans le lot (et pas une
  * requête par post). Retourne une Map id_espace → AttributionEspace.
  *
- * V2.5.10 Phase H — utilisé par `hydraterPosts` pour ramener le nom et
+ * V2.5.10 Phase H : utilisé par `hydraterPosts` pour ramener le nom et
  * le slug de l'espace dans chaque PostAffiche concerné.
  */
 async function chargerAttributionsEspaces(
@@ -354,11 +354,11 @@ async function hydraterPosts(
   }>,
   viewerId: string | null,
   suivis: Set<string>,
-  /** V2.5.22 — espaces suivis (clé "type:id"). Optionnel pour compat. */
+  /** V2.5.22 : espaces suivis (clé "type:id"). Optionnel pour compat. */
   espacesSuivis: Set<string> = new Set(),
-  /** D.4 — ami·es directs (palier 1). */
+  /** D.4 : ami·es directs (palier 1). */
   amis: Set<string> = new Set(),
-  /** D.4 — ami·es d'ami·es (palier 2). */
+  /** D.4 : ami·es d'ami·es (palier 2). */
   amisDamis: Set<string> = new Set(),
 ): Promise<PostAffiche[]> {
   if (posts.length === 0) return [];
@@ -410,7 +410,7 @@ async function hydraterPosts(
   });
 
   return posts.map((p) => {
-    // V2.5.22 sous-chantier V2.5.10.d — un post publié par un espace SUIVI
+    // V2.5.22 sous-chantier V2.5.10.d : un post publié par un espace SUIVI
     // remonte au palier 1 (« suivi·e ») même si l'auteurice personne
     // n'est pas suivie directement.
     const espaceSuiviClef =
@@ -421,7 +421,7 @@ async function hydraterPosts(
         ? `${p.espace_type}:${p.espace_id}`
         : null;
     const espaceEstSuivi = espaceSuiviClef !== null && espacesSuivis.has(espaceSuiviClef);
-    // D.4 — classement affiné : moi → ami·es → ami·es d'ami·es → suivi·es
+    // D.4 : classement affiné : moi → ami·es → ami·es d'ami·es → suivi·es
     // (personnes ou espaces) → reste. Le test sur l'auteurice prime sur
     // l'espace (un post d'ami·e reste palier 1 même via un espace suivi).
     const auteur = p.auteurice_id;
@@ -466,7 +466,7 @@ async function chargerSuivis(supabase: ClientSupabase, viewerId: string): Promis
 }
 
 /**
- * V2.5.22 sous-chantier V2.5.10.d — Ensemble des espaces suivis par le
+ * V2.5.22 sous-chantier V2.5.10.d : Ensemble des espaces suivis par le
  * lecteur courant (clé "type:id"). Utilisé par `hydraterPosts` pour
  * remonter un post d'espace suivi au palier 1 du flux transparent.
  */
@@ -552,7 +552,7 @@ export async function getFluxReseau(limite = 60): Promise<PostAffiche[]> {
 }
 
 /**
- * V2.5.18 (Phase H sous-chantier V2.5.10.c) — publications publiées AU NOM
+ * V2.5.18 (Phase H sous-chantier V2.5.10.c) : publications publiées AU NOM
  * d'un espace collectif. Utilise l'index `post_reseau_espace_idx` (partiel
  * sur les posts avec espace_type non-NULL).
  */

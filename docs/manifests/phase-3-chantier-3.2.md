@@ -1,4 +1,4 @@
-# Manifest : Phase 3, Chantier 3.2 — Mobilisations + Campagnes + Carte unifiée
+# Manifest : Phase 3, Chantier 3.2 : Mobilisations + Campagnes + Carte unifiée
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-3-chantier-3.2-mobilisations-campagnes`
@@ -60,7 +60,7 @@
 
 - [x] **Nav latérale étendue** (`app/admin/layout.tsx`) : 3 onglets actifs (Pétitions, Campagnes, Mobilisations) + Cagnottes grisée (3.3).
 - [x] **`/admin/moderation/campagnes`** : file FIFO des `en_moderation`, formulaire publier/rejeter inline. Calque exact du flux pétitions (3.1).
-- [x] **`/admin/moderation/mobilisations`** : modération a posteriori — liste des 50 mobilisations publiées les plus récentes, action « Retirer » avec raison obligatoire. v1 sans table `signalement` (à venir).
+- [x] **`/admin/moderation/mobilisations`** : modération a posteriori : liste des 50 mobilisations publiées les plus récentes, action « Retirer » avec raison obligatoire. v1 sans table `signalement` (à venir).
 
 ### Page d'accueil
 

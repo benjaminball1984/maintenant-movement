@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.16 : Phase L emails soignés par défaut
+# Manifest : Chantier V2.5.16 : Phase L emails soignés par défaut
 
 **Date de fin** : 2026-05-30
 **Branche** : `main`

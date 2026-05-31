@@ -21,7 +21,7 @@ import { type TypeObjet, imageDefautPour } from '@/lib/images-defaut';
 /**
  * Forme minimale qu'un objet doit avoir pour qu'on puisse résoudre son
  * image. Les tables V1 n'ont pas toutes une colonne `image_url` au même
- * nom (certaines ont `photo_url`, `visuel_url`, etc.) — les appelants
+ * nom (certaines ont `photo_url`, `visuel_url`, etc.) : les appelants
  * sont responsables de mapper avant d'appeler ce helper.
  */
 export interface ObjetAvecImage {

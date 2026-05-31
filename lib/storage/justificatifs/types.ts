@@ -11,7 +11,7 @@
  *
  * Variable d'env : `JUSTIFICATIF_STORAGE_PROVIDER` (`mock` par défaut,
  * `supabase` en prod). Le bucket `justificatifs` côté Supabase doit
- * être créé MANUELLEMENT via le Dashboard (privé, RLS) — pas de
+ * être créé MANUELLEMENT via le Dashboard (privé, RLS) : pas de
  * migration SQL pour le storage.
  */
 

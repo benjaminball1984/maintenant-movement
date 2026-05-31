@@ -127,14 +127,14 @@ export const preferencesNotificationsSchema = z
     push_vibration: z.boolean(),
     mardi_recap: z.boolean(),
     vendredi_newsletter: z.boolean(),
-    /** V2.5.38 — préf pour les messages directs reçus sur le réseau.
+    /** V2.5.38 : préf pour les messages directs reçus sur le réseau.
      *  Pas de .default() Zod : ça rendrait le champ optionnel à l'input,
      *  ce qui casse l'inférence côté react-hook-form. Le fallback se
      *  fait dans la lecture côté page (`PREFERENCES_NOTIFICATIONS_DEFAUT`). */
     reseau_message_recu: modeNotifReseauSchema,
-    /** V2.5.38 — préf pour les commentaires sur les publications de la personne. */
+    /** V2.5.38 : préf pour les commentaires sur les publications de la personne. */
     reseau_post_commente: modeNotifReseauSchema,
-    /** V2.5.38 — préf pour les soutiens (cœurs) sur les publications. */
+    /** V2.5.38 : préf pour les soutiens (cœurs) sur les publications. */
     reseau_post_soutenu: modeNotifReseauSchema,
   })
   .strict();
@@ -177,7 +177,7 @@ export function creerMettreAJourProfilSchema(
       photo_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
       cover_url: z.string().url(messages.photoUrlFormat).optional().or(z.literal('')),
       bio: z.string().max(500, messages.bioLongueur).optional().or(z.literal('')),
-      /** V2.5.49 — bio en HTML riche (sanitizée au save). Plus longue
+      /** V2.5.49 : bio en HTML riche (sanitizée au save). Plus longue
        *  que la bio texte plat (~20 000 chars) pour permettre une
        *  presentation enrichie avec mise en forme, liens, listes. */
       bio_html: z.string().max(20000).optional().or(z.literal('')),

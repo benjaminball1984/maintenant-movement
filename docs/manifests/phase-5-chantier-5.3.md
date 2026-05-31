@@ -1,4 +1,4 @@
-# Manifest : Phase 5, Chantier 5.3 — Moments solidaires (8 types + porte-à-porte 7 RDV + tracker Tupperwares)
+# Manifest : Phase 5, Chantier 5.3 : Moments solidaires (8 types + porte-à-porte 7 RDV + tracker Tupperwares)
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-5-chantier-5.3-moments`
@@ -18,7 +18,7 @@
 ### Code applicatif
 
 - [x] **Types Database** : `MomentSolidaire`, `ParticipationMoment`, `Tupperware`, unions `TypeMomentSolidaire | StatutMomentSolidaire | StatutTupperware | SousTypeMomentPaP`.
-- [x] **Config centralisée** (`lib/moments/config.ts`) : `TYPES_MOMENTS` (catalogue des 8 types), `SEPT_RDV` (les 7 sous-types du porte-à-porte avec leurs décalages en jours), `gabaritFlyerPortAPorte` (générateur de texte SANS écriture inclusive — cf. spec §7C « Flyer SANS écriture inclusive (accessibilité tactique) »).
+- [x] **Config centralisée** (`lib/moments/config.ts`) : `TYPES_MOMENTS` (catalogue des 8 types), `SEPT_RDV` (les 7 sous-types du porte-à-porte avec leurs décalages en jours), `gabaritFlyerPortAPorte` (générateur de texte SANS écriture inclusive : cf. spec §7C « Flyer SANS écriture inclusive (accessibilité tactique) »).
 - [x] **Validations Zod** (`lib/validations/moments.ts`) : `creerMomentSolidaire` avec refinement géo + dates cohérentes, `participerMoment` (anonyme OK), `ajouterTupperware`, `marquerTupperwareRendu`.
 - [x] **Server Actions** (`app/(public)/agir/moments-solidaires/actions.ts`) :
   - `creerMomentSolidaire` : vérifie `est_membre_commune` si une commune est précisée (cf. spec §7C « organiser = membre de la commune territoriale »). Génère automatiquement les 7 RDV enfants quand `type = 'porte_a_porte'` en utilisant les décalages de `SEPT_RDV`.

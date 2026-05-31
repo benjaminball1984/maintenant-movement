@@ -1,4 +1,4 @@
-# Manifest : Phase 2, Chantier 2.1 — Page d'accueil définitive
+# Manifest : Phase 2, Chantier 2.1 : Page d'accueil définitive
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-2-chantier-2.1-page-accueil`
@@ -25,7 +25,7 @@
 - [x] **9 pages stub** pour les liens du header et du footer (aucun lien mort) :
   - **5 espaces racines** : `/s-informer`, `/mobiliser`, `/s-entraider`, `/agir`, `/comprendre`. Composant générique `<PageEspaceStub>` qui liste les sous-espaces avec leur chantier de référence (sans lien, parce que les sous-espaces ne sont pas tous prêts).
   - **`/comprendre`** (cas particulier) lie aux 4 sous-pages (qui existent en stub éditorial).
-  - **4 pages éditoriales** : `/a-propos`, `/mentions-legales`, `/confidentialite`, `/contact`. Composant générique `<PageEditorialeStub>` avec placeholder `[TEXTE À FAIRE — …]` visible et listé en MANIFEST « Contenus à arbitrer ».
+  - **4 pages éditoriales** : `/a-propos`, `/mentions-legales`, `/confidentialite`, `/contact`. Composant générique `<PageEditorialeStub>` avec placeholder `[TEXTE À FAIRE : …]` visible et listé en MANIFEST « Contenus à arbitrer ».
   - **4 sous-pages comprendre** : `/comprendre/{monnaie,doctrine,faq,ressources}` (idem placeholders).
   - **4 sous-espaces** liés depuis les unes : `/mobiliser/petitions`, `/mobiliser/mobilisations`, `/mobiliser/cagnottes`, `/s-informer/media`. Composant générique `<PageSousEspaceStub>` qui pointe vers leur chantier futur.
 - [x] **Page 404** (`app/not-found.tsx`) : sobre, message clair, lien retour `/`.

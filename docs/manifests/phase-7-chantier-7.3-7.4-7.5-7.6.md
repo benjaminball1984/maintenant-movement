@@ -13,7 +13,7 @@ Ce commit livre **un chantier réel (7.4 Sondages)** et **trois stubs explicites
 
 ---
 
-## 7.4 — Sondages (chantier complet)
+## 7.4 : Sondages (chantier complet)
 
 ### Schéma BDD (migration 032)
 
@@ -43,7 +43,7 @@ Ce commit livre **un chantier réel (7.4 Sondages)** et **trois stubs explicites
 
 ---
 
-## 7.3 — Journal-affiche (stub explicite)
+## 7.3 : Journal-affiche (stub explicite)
 
 - [x] **`/s-informer/journal`** : page stub avec rappel doctrine §4C (30 modèles Canva + agent Claude + Paged.js + Puppeteer + Stripe/T99CP pour impression à façon). Indique clairement les dépendances manquantes :
   - modèles Canva à fournir par l'équipe édito ;
@@ -55,7 +55,7 @@ Ce commit livre **un chantier réel (7.4 Sondages)** et **trois stubs explicites
 
 ---
 
-## 7.5 — Réseau social (stub explicite)
+## 7.5 : Réseau social (stub explicite)
 
 - [x] **`/s-informer/reseau`** : page stub avec rappel des règles strictes de la doctrine §4E (pas de pub, pas d'algo caché, pas d'autoplay, pas de captation, encart financement permanent). Renvoie vers Média Maintenant et Mobiliser en attendant.
 
@@ -63,7 +63,7 @@ Ce commit livre **un chantier réel (7.4 Sondages)** et **trois stubs explicites
 
 ---
 
-## 7.6 — Décider (stub explicite)
+## 7.6 : Décider (stub explicite)
 
 - [x] **`/s-informer/decider`** : page stub avec 3 cartes pédagogiques :
   - **3 modes de décision hiérarchisés** : consensus / levée d'objections (PAS « consentement ») / jugement majoritaire Balinski-Laraki (max 10 propositions, mentions Excellent → À rejeter).

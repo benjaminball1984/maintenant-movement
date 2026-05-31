@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.4 : TeleverseurImage sur formulaires de création
+# Manifest : V2 Vague 3, Chantier V2.3.4 : TeleverseurImage sur formulaires de création
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-4-televerseur-image-formulaires`
@@ -22,10 +22,10 @@ Remplace le champ « collez l'URL d'image » par un **vrai bouton d'upload** (ET
 
 - [ ] **Formulaires non encore branchés** (à compléter au cas par cas) :
   - `FormulaireEditionPetition.tsx` (édition d'une pétition existante).
-  - `FormulaireCreationMinimarche.tsx`, `FormulaireCreationBoutique.tsx` (marché solidaire — autres types d'objet).
+  - `FormulaireCreationMinimarche.tsx`, `FormulaireCreationBoutique.tsx` (marché solidaire : autres types d'objet).
   - `FormulaireCreationCampagne.tsx`.
   - `FormulaireCreationSondage.tsx`.
-  - `FormulaireCreationGroupeEntraide.tsx` (V2.3.2 — gardée volontairement minimale jusqu'à V2.3.4, à brancher maintenant si besoin).
+  - `FormulaireCreationGroupeEntraide.tsx` (V2.3.2 : gardée volontairement minimale jusqu'à V2.3.4, à brancher maintenant si besoin).
 
 Pour chacun, le pattern d'intégration est simple (≤ 5 lignes ajoutées + 1 import + suppression de l'ancien `<Input type="url">`).
 
@@ -45,7 +45,7 @@ Pour chacun, le pattern d'intégration est simple (≤ 5 lignes ajoutées + 1 im
 
 ## Tests
 
-- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test — le helper `TeleverseurImage` était déjà couvert en V2.0.3, et `ChampImageObjet` est un wrapper trivial).
+- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test : le helper `TeleverseurImage` était déjà couvert en V2.0.3, et `ChampImageObjet` est un wrapper trivial).
 - **Lint Biome** : 452 fichiers, 0 issue (fix : `role` → `roleImage` pour éviter le faux positif a11y).
 - **Typecheck (tsc)** : 0 erreur.
 - **Build / E2E** : non lancés.

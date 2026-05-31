@@ -121,7 +121,7 @@ export async function fermerSondageAction(donnees: unknown): Promise<ResultatArc
 }
 
 // ============================================================
-// SUPPRESSION DÉFINITIVE (DELETE physique) — admin uniquement
+// SUPPRESSION DÉFINITIVE (DELETE physique) : admin uniquement
 // ============================================================
 /**
  * Server Action de suppression définitive d'une entité créée par
@@ -157,7 +157,7 @@ const schemaSuppression = z.object({
     'sondage',
   ]),
   id: z.string().uuid(),
-  /** Doit valoir le nom de la table — preuve que l'opérateurice a lu. */
+  /** Doit valoir le nom de la table : preuve que l'opérateurice a lu. */
   confirmation: z.string(),
 });
 

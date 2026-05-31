@@ -2,7 +2,7 @@ import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 
 /**
  * Composant de rendu d'un contenu CMS qui peut être HTML riche OU markdown
- * léger (V2.5.23 — Master Plan rich text).
+ * léger (V2.5.23 : Master Plan rich text).
  *
  * Si `valeurHtml` est renseignée, le composant insère directement le HTML
  * via `dangerouslySetInnerHTML` (déjà sanitizé au save par le Server

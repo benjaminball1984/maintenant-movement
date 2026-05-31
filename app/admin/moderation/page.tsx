@@ -37,7 +37,7 @@ interface LigneFile {
 }
 
 /**
- * Page `/admin/moderation` — File de modération globale (V2.4.14).
+ * Page `/admin/moderation` : File de modération globale (V2.4.14).
  *
  * Agrège tous les compteurs « en attente d'action » par module et les
  * affiche en un coup d'œil, classés du plus urgent au moins urgent.

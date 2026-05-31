@@ -20,7 +20,7 @@ const FALLBACKS = {
 };
 
 /**
- * Page `/s-informer/radio` — Maintenant Radio (chantier 7.2).
+ * Page `/s-informer/radio` : Maintenant Radio (chantier 7.2).
  *
  * Cf. spec §4B : « Onglet live unique. Infrastructure : AzuraCast
  * auto-hébergé. Player intégré + métadonnées de l'émission en cours. »

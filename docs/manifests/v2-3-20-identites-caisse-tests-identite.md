@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.20 : Identités affichables dans caisse + tests helper
+# Manifest : V2 Vague 3, Chantier V2.3.20 : Identités affichables dans caisse + tests helper
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-20-identites-caisse-tests-identite`

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 /**
  * Endpoint d'export CSV des personnes (V2.4.36).
  *
- * GET `/admin/national/personnes/export.csv` — réservé aux admins
+ * GET `/admin/national/personnes/export.csv` : réservé aux admins
  * généraux (RLS rejette toute lecture non autorisée). Retourne un
  * fichier CSV strict (RFC 4180) avec les colonnes :
  * `id, email, prenom, nom, statut, email_verifie, derniere_connexion_le, created_at`.

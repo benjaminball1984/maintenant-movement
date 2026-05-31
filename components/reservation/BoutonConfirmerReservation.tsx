@@ -15,7 +15,7 @@ import { useState } from 'react';
  * conditionne déjà l'affichage via la machine à états D8.
  *
  * Une fois `confirmee`, la machine à états D8 ne propose plus aucune
- * action — le bouton disparaît au prochain refresh (Server Component
+ * action : le bouton disparaît au prochain refresh (Server Component
  * relit le statut après `revalidatePath`).
  */
 

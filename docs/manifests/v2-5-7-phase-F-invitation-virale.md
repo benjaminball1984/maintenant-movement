@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.7 : Master Plan V2.6 Phase F (moteur d'invitation virale)
+# Manifest : Chantier V2.5.7 : Master Plan V2.6 Phase F (moteur d'invitation virale)
 
 **Date de fin** : 2026-05-30 (nuit du 29 au 30)
 **Branche** : `main`

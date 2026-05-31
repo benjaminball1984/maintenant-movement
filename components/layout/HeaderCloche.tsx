@@ -3,7 +3,7 @@ import { Bell } from 'lucide-react';
 import Link from 'next/link';
 
 /**
- * Cloche de notifications (V2.3.25) — canal 1 du CDC V2 §7.
+ * Cloche de notifications (V2.3.25) : canal 1 du CDC V2 §7.
  *
  * Server Component : compte les notifs non lues à chaque rendu de
  * header. Badge rouge avec compteur si > 0. Pas d'overlay déroulant

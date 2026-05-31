@@ -32,7 +32,7 @@ interface PageProps {
 }
 
 /**
- * Page « gens près de chez moi » (V2.5.19 — Master Plan V2.6 Phase E
+ * Page « gens près de chez moi » (V2.5.19 : Master Plan V2.6 Phase E
  * sous-chantier V2.5.6.b).
  *
  * Version MVP avec 2 blocs (sur 4 prévus au Master Plan §E) :

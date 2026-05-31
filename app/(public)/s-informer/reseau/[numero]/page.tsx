@@ -131,7 +131,7 @@ export default async function PageProfilReseau({ params }: PageProfilProps) {
         </div>
 
         {profil.bioHtml !== null && profil.bioHtml.trim() !== '' ? (
-          // V2.5.49 — bio rich text (déjà sanitizée au save). V2.5.55 — rendu
+          // V2.5.49 : bio rich text (déjà sanitizée au save). V2.5.55 : rendu
           // via RenduRiche (chemin canonique). Le parent max-w-2xl contraint
           // la largeur (RenduRiche pose max-w-none en interne).
           <div className="max-w-2xl">

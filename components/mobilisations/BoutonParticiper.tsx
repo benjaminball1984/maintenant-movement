@@ -17,7 +17,7 @@ interface BoutonParticiperProps {
 }
 
 /**
- * `<BoutonParticiper>` — bouton « Je participe » d'une mobilisation
+ * `<BoutonParticiper>` : bouton « Je participe » d'une mobilisation
  * (cf. composants réutilisables spec §11).
  *
  * Comportement :
@@ -47,7 +47,7 @@ export function BoutonParticiper({
   const [messageStatut, setMessageStatut] = useState('');
 
   // Lecture du cookie anonyme au montage (seulement si la personne
-  // n'est pas connectée — pour la connectée, la BDD est la source).
+  // n'est pas connectée : pour la connectée, la BDD est la source).
   useEffect(() => {
     if (dejaParticipanteConnectee) return;
     if (typeof document === 'undefined') return;

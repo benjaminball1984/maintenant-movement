@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.13 : Dashboard propriétaire d'offre (demandes reçues)
+# Manifest : V2 Vague 3, Chantier V2.3.13 : Dashboard propriétaire d'offre (demandes reçues)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-13-dashboard-proprietaire-offre`
@@ -10,7 +10,7 @@
 
 Côté symétrique à V2.3.9 (« Mes réservations » côté demandeur). Le·la créateur·ice d'une offre voit désormais les demandes reçues et peut accepter / refuser / marquer réalisée selon la machine à états D8.
 
-- [x] **`lib/reservation.ts` — `listerReservationsRecuesParProprietaire(personneId)`** : FK polymorphe gérée applicativement. 3 requêtes parallèles pour ramasser les ids des offres possédées (`offre_entraide.createurice_id`, `service_sel.createurice_id`, `location_mutualisee.organisateur_personne_id`), puis jusqu'à 3 requêtes sur `reservation` pour matcher (`offre_type` filtré par les types possédés, `offre_id` `IN ids`). Concaténation et tri décroissant côté TS.
+- [x] **`lib/reservation.ts` : `listerReservationsRecuesParProprietaire(personneId)`** : FK polymorphe gérée applicativement. 3 requêtes parallèles pour ramasser les ids des offres possédées (`offre_entraide.createurice_id`, `service_sel.createurice_id`, `location_mutualisee.organisateur_personne_id`), puis jusqu'à 3 requêtes sur `reservation` pour matcher (`offre_type` filtré par les types possédés, `offre_id` `IN ids`). Concaténation et tri décroissant côté TS.
 - [x] **`app/actions/reservation.ts`** : 3 Server Actions
   - `accepterReservationAction({reservationId, motif?, cheminRevalidation?})`
   - `refuserReservationAction({reservationId, motif?, cheminRevalidation?})`
@@ -26,13 +26,13 @@ Côté symétrique à V2.3.9 (« Mes réservations » côté demandeur). Le·la 
 ## Non livré (et pourquoi)
 
 - [ ] **Détail du demandeur** : on n'affiche pas le nom du demandeur (juste « voir dans la messagerie »). Demande une jointure `personne` qui implique la RLS V1 sur les visibilités réseau. À ajouter dans un chantier dédié si Lilou/Ben veut afficher le prénom + lien profil quand la visibilité l'autorise.
-- [ ] **Notifications** : le propriétaire ne reçoit pas de notif quand une demande arrive (la V2.3.12 a déjà branché le DM `message_reseau` qui sert d'amorce — c'est la notif minimale). À ajouter quand la table `notification` V2 sera là.
+- [ ] **Notifications** : le propriétaire ne reçoit pas de notif quand une demande arrive (la V2.3.12 a déjà branché le DM `message_reseau` qui sert d'amorce : c'est la notif minimale). À ajouter quand la table `notification` V2 sera là.
 - [ ] **Compteur badge sur l'onglet** : « Demandes reçues (3) » avec le nombre de `proposee` en attente. Demande de poser un compteur léger dans la layout. Au prochain chantier UX si besoin.
 - [ ] **Filtres / tri** : la liste est triée par date décroissante uniquement. Pas de filtre par statut ou type d'offre. À ajouter si la liste devient longue en pratique.
 
 ## Décisions techniques prises
 
-- **Symétrie helpers demandeur/propriétaire** : `listerReservationsDuDemandeur` filtre sur `demandeur_personne_id` (1 colonne, 1 requête). `listerReservationsRecuesParProprietaire` doit faire un join logique côté TS via la FK polymorphe (`offre_type, offre_id`) parce qu'il n'y a pas de colonne `proprietaire_offre_id` sur `reservation` (cohérent : un objet réservable peut changer de main, le propriétaire courant se relit à l'offre). 6 requêtes max au lieu d'une — acceptable parce que les ids sont chargés une fois puis le `IN` est efficace.
+- **Symétrie helpers demandeur/propriétaire** : `listerReservationsDuDemandeur` filtre sur `demandeur_personne_id` (1 colonne, 1 requête). `listerReservationsRecuesParProprietaire` doit faire un join logique côté TS via la FK polymorphe (`offre_type, offre_id`) parce qu'il n'y a pas de colonne `proprietaire_offre_id` sur `reservation` (cohérent : un objet réservable peut changer de main, le propriétaire courant se relit à l'offre). 6 requêtes max au lieu d'une : acceptable parce que les ids sont chargés une fois puis le `IN` est efficace.
 - **Vérification de la propriété SERVEUR à chaque action** : même si la page ne propose pas les boutons quand on n'est pas propriétaire, le Server Action recharge `reservation` puis l'offre puis compare le créateur au `session.userId`. RLS Supabase reste la 2e ligne (mais la table `reservation` autorise la lecture aux deux parties).
 - **`transitionAutorisee()` re-vérifiée côté serveur** : V2.2.2 a déjà la machine à états D8 (`proposee` → `acceptee|refusee` ; `acceptee` → `realisee|annulee` ; `realisee` → `confirmee|litige` ; etc.). Le helper la consulte avant d'appeler `changerStatutReservation` ; message d'erreur explicite si une transition illégale est tentée.
 - **UX 2 clics pour refus, 1 clic pour acceptation/réalisation** : aligné avec V2.3.11 (`BoutonAnnulerReservation`) qui faisait pareil pour l'annulation. Le refus est destructif (déçoit le demandeur), donc on demande une confirmation. L'acceptation n'est pas destructive.

@@ -13,7 +13,7 @@ interface CarteProduitProps {
 }
 
 /**
- * `<CarteProduit>` — vignette d'annonce du marché solidaire (V2.5.11).
+ * `<CarteProduit>` : vignette d'annonce du marché solidaire (V2.5.11).
  *
  * Refonte « façon Vinted » (Master Plan V2.6 Phase I §3.5) :
  *   - Photo carrée en haut (aspect-square, object-cover), c'est le hero

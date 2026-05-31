@@ -15,7 +15,7 @@ const FORMAT_EUR = new Intl.NumberFormat('fr-FR', {
 });
 
 /**
- * Page `/admin` — Tableau de bord admin (chantier 9.2).
+ * Page `/admin` : Tableau de bord admin (chantier 9.2).
  *
  * Cf. spec §9 « Tableau de bord admin : stats globales et par commune
  * + gestion financière + édition pages éditoriales et catégories

@@ -75,7 +75,7 @@ ${ctaEmail('Renouveler mon adhésion', 'https://maintenant-le-mouvement.org/agir
 <p>L'équipe Maintenant!</p>
 `,
   },
-  // V2.5.27 V2.5.16.d — Previews des templates email reseau. Pas encore
+  // V2.5.27 V2.5.16.d : Previews des templates email reseau. Pas encore
   // appeles automatiquement (anti-spam), un futur systeme de preferences
   // utilisateurice decidera quand basculer cloche → email.
   {

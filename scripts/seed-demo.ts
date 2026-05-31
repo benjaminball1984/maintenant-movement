@@ -1,7 +1,7 @@
 /**
  * Script de seeding des données de démonstration.
  *
- * Chantier V2.5.1 — Master Plan V2.6 Phase A.
+ * Chantier V2.5.1 : Master Plan V2.6 Phase A.
  *
  * Crée 6 comptes Auth (test1@maintenant.local → test6@maintenant.local),
  * 6 lignes `personne` correspondantes, puis dans chaque espace métier un
@@ -767,7 +767,7 @@ async function seedBlocsCommune(supabase: SupabaseClient<Database>): Promise<voi
 }
 
 /**
- * Pose 6 publications au nom des communes démo (Phase H — V2.5.10). Permet
+ * Pose 6 publications au nom des communes démo (Phase H : V2.5.10). Permet
  * de voir le double visage en action : la commune existe comme espace
  * d'action ET comme entité postante dans le flux du réseau social.
  *

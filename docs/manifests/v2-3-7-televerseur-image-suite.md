@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.7 : ChampImageObjet sur 5 formulaires restants
+# Manifest : V2 Vague 3, Chantier V2.3.7 : ChampImageObjet sur 5 formulaires restants
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-7-televerseur-image-suite`

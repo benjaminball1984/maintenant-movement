@@ -1,4 +1,4 @@
-# Manifest — Phase V2.5, Chantiers V2.5.57 → V2.5.63 : audit d'accessibilité exhaustif
+# Manifest : Phase V2.5, Chantiers V2.5.57 → V2.5.63 : audit d'accessibilité exhaustif
 
 **Date de fin** : 2026-05-29
 **Branche** : main
@@ -22,42 +22,42 @@ exhaustif (constat par constat, fichier:ligne) est dans
 
 ## Livré et fonctionnel
 
-- [x] **LOT 1 — Lien d'évitement** : composant `LienEvitement` (Server,
+- [x] **LOT 1 : Lien d'évitement** : composant `LienEvitement` (Server,
   libellé CMS `a11y.lien_evitement`), câblé dans les 3 layouts à navigation
   + `id="contenu"`/`tabIndex={-1}` sur chaque `<main>`.
-- [x] **LOT 2 — Éditeur rich text TipTap** (BLOQUANT) : `role="textbox"` +
+- [x] **LOT 2 : Éditeur rich text TipTap** (BLOQUANT) : `role="textbox"` +
   `aria-label` (prop `labelA11y`) + `aria-multiline` ; labels parlants sur
   les 6 usages ; texte alternatif demandé à l'insertion d'image ; bouton
   « Code » `aria-pressed` corrigé.
-- [x] **LOT 3 — Champs de filtre/recherche** (BLOQUANT) : `aria-label`
+- [x] **LOT 3 : Champs de filtre/recherche** (BLOQUANT) : `aria-label`
   contextuel sur 9 pages admin national + recherche communes + recherche
   réseau.
-- [x] **LOT 4 — Boutons de modération nommés** (BLOQUANT) : prop
+- [x] **LOT 4 : Boutons de modération nommés** (BLOQUANT) : prop
   `libelleObjet` injectée en `aria-label`, répercutée depuis 11 pages
   appelantes ; textareas motif reliés.
-- [x] **LOT 5 — Erreurs de formulaire reliées** : `aria-invalid` +
+- [x] **LOT 5 : Erreurs de formulaire reliées** : `aria-invalid` +
   `aria-describedby` sur les formulaires auth, profil, suppression, modale
   signature.
-- [x] **LOT 6 — Annonces vocales** : régions live persistantes masquées
+- [x] **LOT 6 : Annonces vocales** : régions live persistantes masquées
   (`aria-live`) sur ~23 composants (suivre, post, messagerie, réservations,
   participation, notifications, uploads, recherche admin, reversement, CMS,
   créations, invitation) ; `aria-pressed`/`aria-expanded`/`aria-busy` selon
   les cas.
-- [x] **LOT 7 — Libellés humains** au lieu d'enum bruts (réservations,
+- [x] **LOT 7 : Libellés humains** au lieu d'enum bruts (réservations,
   trésorerie, sondages, moments, médias, décider, mes-créations,
   signatures), avec fallback.
-- [x] **LOT 8 — Données admin** : intitulés `sr-only` devant les valeurs
+- [x] **LOT 8 : Données admin** : intitulés `sr-only` devant les valeurs
   nues (trésorerie, personnes) + `aria-label` titre+valeur sur les cartes de
   stats. Choix assumé : PAS de conversion en `<table>` (préserve le design
   en cartes responsive).
-- [x] **LOT 9 — Divers** : `<Link><Button>` imbriqués corrigés ; hiérarchie
+- [x] **LOT 9 : Divers** : `<Link><Button>` imbriqués corrigés ; hiérarchie
   de titres home ; média (alt/track/icône) ; OAuth groupes ; QR 2FA (clé
   textuelle visible + `role="img"`) ; HeaderProfilMenu (downgrade
   `role="menu"`) ; CartePost (`window.confirm` → confirmation inline).
 - [x] **Bug fonctionnel corrigé** (au-delà de l'a11y) : la modale de
   signature de pétition n'a jamais bloqué le scroll de fond (un événement
   `show` inexistant était écouté) ; corrigé.
-- [x] **LOT 10 — Détails** : `aria-hidden` sur les icônes décoratives (cartes
+- [x] **LOT 10 : Détails** : `aria-hidden` sur les icônes décoratives (cartes
   + pages détail) ; flèches `↓ → ` admin masquées ; `<dl>` sans `<dt>`
   corrigés (5 cartes) ; Avatar double nom ; emoji 👋 dashboard.
 

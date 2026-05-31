@@ -1,6 +1,6 @@
 /**
  * Publications de réseau social attribuées à un espace collectif
- * (V2.5.10 — Master Plan V2.6 Phase H, double visage).
+ * (V2.5.10 : Master Plan V2.6 Phase H, double visage).
  *
  * Un `post_reseau` reste toujours créé par une personne (l'`auteurice_id`
  * obligatoire est conservé pour traçabilité et modération), mais peut
@@ -21,7 +21,7 @@
  */
 
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-// V2.5.22 — les types client-safe vivent désormais dans `types-espace.ts`
+// V2.5.22 : les types client-safe vivent désormais dans `types-espace.ts`
 // pour pouvoir être importés depuis des composants client sans tirer la
 // chaîne runtime de ce module (Supabase admin / next/headers).
 export type { AttributionEspace, TypeEspacePostable } from './types-espace';
@@ -241,7 +241,7 @@ export async function creerPostEspace(args: {
   return { ok: true, postId: data.id };
 }
 
-// V2.5.22 — `AttributionEspace` est maintenant défini dans `types-espace.ts`
+// V2.5.22 : `AttributionEspace` est maintenant défini dans `types-espace.ts`
 // et réexporté en tête de ce fichier. La définition dupliquée a été retirée.
 
 /**

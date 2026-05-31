@@ -1,4 +1,4 @@
-# Manifest : Phase 6, Chantiers 6.1 + 6.2 — Carte unifiée enrichie + Agenda agrégé
+# Manifest : Phase 6, Chantiers 6.1 + 6.2 : Carte unifiée enrichie + Agenda agrégé
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-6-chantier-6.1-carte-agenda`
@@ -9,7 +9,7 @@
 
 ## Livré et fonctionnel
 
-### 6.1 — Carte unifiée enrichie
+### 6.1 : Carte unifiée enrichie
 
 Une carte existait depuis le chantier 3.2 (mobilisations + communes). On l'enrichit avec les nouvelles sources géolocalisées posées en 4.x et 5.x.
 
@@ -18,7 +18,7 @@ Une carte existait depuis le chantier 3.2 (mobilisations + communes). On l'enric
 - [x] **Filtre par type** : 11 cases à cocher avec compteur par type. Persistant pendant la session (état local).
 - [x] **Indexes BDD existants** suffisent : chaque table porte un `_geo_idx` partiel (lat/lng non nulles + statut visible) posé au chantier de la table.
 
-### 6.2 — Agenda agrégé
+### 6.2 : Agenda agrégé
 
 - [x] **`lib/agenda/donnees.ts`** : agrège 4 types d'événements datés (mobilisations, moments solidaires, minimarchés, boutiques avec `ouverte_du`). Tous les événements à partir de `now()` exclusivement. Heuristique `extraireDepartement` qui sort un code département à 2 chiffres depuis un lieu libre par regex `\b(\d{2})\d{3}\b`.
 - [x] **`/agenda`** : page qui regroupe les événements par jour, avec formulaire de filtres GET (`?jour=YYYY-MM-DD`, `?departement=75`, `?type=mobilisation|moment_solidaire|minimarche|boutique_marche`). Badge par type, horaire de début/fin, lien vers la fiche détail.

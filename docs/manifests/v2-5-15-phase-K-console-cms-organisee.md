@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.15 : Phase K console CMS organisée + rôle CMS dédié
+# Manifest : Chantier V2.5.15 : Phase K console CMS organisée + rôle CMS dédié
 
 **Date de fin** : 2026-05-30
 **Branche** : `main`

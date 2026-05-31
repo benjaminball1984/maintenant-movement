@@ -12,7 +12,7 @@ export interface ContenuEditorial {
   cle: string;
   titre: string | null;
   valeurMd: string;
-  /** V2.5.23 — HTML riche optionnel (couleurs, polices, images, embeds).
+  /** V2.5.23 : HTML riche optionnel (couleurs, polices, images, embeds).
    *  Si renseigné, le rendu doit l'utiliser en priorité via
    *  `dangerouslySetInnerHTML` (déjà sanitizé au save). Sinon, fallback
    *  sur `valeurMd`. */

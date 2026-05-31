@@ -1,6 +1,6 @@
 /**
  * Fabrique des URLs de partage pour les applications de messagerie et
- * réseaux courants (V2.5.7 — Master Plan V2.6 Phase F).
+ * réseaux courants (V2.5.7 : Master Plan V2.6 Phase F).
  *
  * Helpers PURS, testables sans navigateur. Les URLs renvoyées suivent
  * les conventions documentées par chaque service au moment de l'écriture.

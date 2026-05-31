@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.8 : FilDeGroupe sur fédération + fix helper SQL
+# Manifest : V2 Vague 3, Chantier V2.3.8 : FilDeGroupe sur fédération + fix helper SQL
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-8-fil-groupe-federations-gt`
@@ -36,10 +36,10 @@
 - **Lint Biome** : 454 fichiers, 0 issue.
 - **Typecheck (tsc)** : 0 erreur.
 - **Build / E2E** : non lancés.
-- **Test SQL** : le helper corrigé compile (DDL) ; le test de comportement réel nécessite une instance Supabase avec des données — à valider au matin après `supabase db push`.
+- **Test SQL** : le helper corrigé compile (DDL) ; le test de comportement réel nécessite une instance Supabase avec des données : à valider au matin après `supabase db push`.
 
 ## Notes pour les chantiers suivants
 
 - **Appliquer `20260527080000_est_membre_espace_fix.sql`** au matin. C'est une migration **prioritaire** car le helper V2.2.1 plantait pour 3 valeurs d'`espace_type`.
-- **Créer des pages détail GT thématique et confédération** si la spec V2 le demande — pas vu de fiche dédiée actuellement, à clarifier avec Lilou/Ben.
+- **Créer des pages détail GT thématique et confédération** si la spec V2 le demande : pas vu de fiche dédiée actuellement, à clarifier avec Lilou/Ben.
 - **Index `appartenance_commune(personne_id, est_active)`** : vérifier qu'il existe (cf. migration 004). Si non, le créer pour éviter une dégradation perf des helpers RLS.

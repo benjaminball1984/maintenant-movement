@@ -83,7 +83,7 @@ export async function creerCagnotte(
   const wallet =
     donnees.wallet_t99cp === '' || donnees.wallet_t99cp === undefined ? null : donnees.wallet_t99cp;
 
-  // V2.5.53 — sanitize HTML riche optionnel avant insertion.
+  // V2.5.53 : sanitize HTML riche optionnel avant insertion.
   const texteHtmlPropre =
     donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
       ? sanitizeRichHtml(donnees.texte_html)

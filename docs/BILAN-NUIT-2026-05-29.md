@@ -16,13 +16,13 @@ git log --oneline 3b2826a..HEAD
 | Chantier | Tip commit | Description | Livré |
 |---|---|---|---|
 | V2.5.0 | `3b2826a` | Adoption Master Plan V2.6, 8 directives intégrées au CLAUDE.md, mémorialisation des arbitrages | ✅ Complet |
-| V2.5.1 | `7433c27` | **Phase A — Données de démo** : 6 profils Auth, table `objet_demo`, seeding par espace, 14 tests | ✅ Complet |
-| V2.5.2 | `c6b62a1` | **Phase A-bis — Cadre juridique** : Collectif Maintenant dans mentions légales + politique de confidentialité RGPD | ✅ Complet |
-| V2.5.3 | `bd1a188` | **Phase B — Identité** : wordmark dégradé dans le footer, emplacement logo | ✅ Partiel (manque le vrai logo poing levé + coquelicot, à fournir) |
-| V2.5.4 | `83b5283` | **Phase C — Gabarit riche** : image de couverture sur commune + fédération | ✅ Partiel (manque boîte à outils universelle module_espace) |
-| V2.5.5 | `8b52889` | **Phase D — Blocs newsletter** : système complet (migration + helpers + composant + seeding démo + 14 tests) | ✅ Fondations complètes, manque éditeur UI admin |
-| V2.5.6 | `5e09a66` | **Phase E — Tunnel pétition** : CTA adhésion + commune dans l'écran de merci | ✅ Partiel (manque page de confirmation pré-remplie) |
-| V2.5.7 | `6ed8be0` | **Phase F — Invitation virale** : 6 boutons de partage (WhatsApp, Telegram, Messenger, Signal, Email, Mastodon) sur la page pétition + 9 tests | ✅ Complet |
+| V2.5.1 | `7433c27` | **Phase A : Données de démo** : 6 profils Auth, table `objet_demo`, seeding par espace, 14 tests | ✅ Complet |
+| V2.5.2 | `c6b62a1` | **Phase A-bis : Cadre juridique** : Collectif Maintenant dans mentions légales + politique de confidentialité RGPD | ✅ Complet |
+| V2.5.3 | `bd1a188` | **Phase B : Identité** : wordmark dégradé dans le footer, emplacement logo | ✅ Partiel (manque le vrai logo poing levé + coquelicot, à fournir) |
+| V2.5.4 | `83b5283` | **Phase C : Gabarit riche** : image de couverture sur commune + fédération | ✅ Partiel (manque boîte à outils universelle module_espace) |
+| V2.5.5 | `8b52889` | **Phase D : Blocs newsletter** : système complet (migration + helpers + composant + seeding démo + 14 tests) | ✅ Fondations complètes, manque éditeur UI admin |
+| V2.5.6 | `5e09a66` | **Phase E : Tunnel pétition** : CTA adhésion + commune dans l'écran de merci | ✅ Partiel (manque page de confirmation pré-remplie) |
+| V2.5.7 | `6ed8be0` | **Phase F : Invitation virale** : 6 boutons de partage (WhatsApp, Telegram, Messenger, Signal, Email, Mastodon) sur la page pétition + 9 tests | ✅ Complet |
 | V2.5.8 | `3bfc438` | Extension du moteur de partage à mobilisations + cagnottes + état Phase G documenté | ✅ |
 
 **Total** : 941 tests verts, 0 régression, typecheck propre, lint propre.

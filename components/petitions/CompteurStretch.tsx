@@ -3,7 +3,7 @@ import { calculerEtatStretch } from '@/lib/petitions/stretch';
 import { cn } from '@/lib/utils';
 
 /**
- * `<CompteurStretch>` — jauge de progression d'une pétition (cf. composants
+ * `<CompteurStretch>` : jauge de progression d'une pétition (cf. composants
  * réutilisables listés dans `docs/specs/01_ARCHITECTURE.md §11`).
  *
  * Applique la règle métier « ×1,5 à 90 % » : si la pétition a franchi 90 %

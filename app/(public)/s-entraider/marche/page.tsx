@@ -23,7 +23,7 @@ const FALLBACKS = {
 };
 
 /**
- * Page d'accueil du Marché solidaire — vitrine des 3 onglets.
+ * Page d'accueil du Marché solidaire : vitrine des 3 onglets.
  *
  * Cf. spec §6F. Chaque onglet ouvre une page dédiée (produits,
  * boutiques, minimarchés). Pas de liste mêlée pour rester lisible.

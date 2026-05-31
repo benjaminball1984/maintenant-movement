@@ -57,7 +57,7 @@ export async function creerCampagne(
   const supabase = await getSupabaseServer();
   const slug = await genererSlugUnique(donnees.titre, supabase);
 
-  // V2.5.50 — sanitize HTML riche optionnel avant insertion.
+  // V2.5.50 : sanitize HTML riche optionnel avant insertion.
   const texteHtmlPropre =
     donnees.texte_html !== undefined && donnees.texte_html.trim() !== ''
       ? sanitizeRichHtml(donnees.texte_html)
@@ -146,7 +146,7 @@ export async function attacherModule(donneesBrutes: unknown): Promise<ResultatAc
   // Si la cible référence une entité concrète, on vérifie qu'elle existe
   // et est dans un état attachable. La RLS sur `module_campagne` impose
   // déjà la lecture côté campagne, mais ici on valide la cible elle-même
-  // (ce que la BDD ne peut pas faire — FK polymorphe).
+  // (ce que la BDD ne peut pas faire : FK polymorphe).
   if (donnees.type_module !== 'page_editoriale' && donnees.cible_id !== undefined) {
     const verif = await verifierCible(supabase, donnees.type_module, donnees.cible_id);
     if (!verif.ok) {

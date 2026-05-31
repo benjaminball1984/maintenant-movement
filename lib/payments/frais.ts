@@ -1,5 +1,5 @@
 /**
- * Helpers de calcul de frais — purs, sans dépendance au service de
+ * Helpers de calcul de frais : purs, sans dépendance au service de
  * paiement (donc importables côté client sans tirer Node APIs).
  *
  * Convention « absorbés par la donatrice » : la donatrice saisit un

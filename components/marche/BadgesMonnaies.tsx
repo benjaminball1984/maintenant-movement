@@ -12,7 +12,7 @@ interface DoubleAffichagePrixProps {
 }
 
 /**
- * `<DoubleAffichagePrix>` — affiche EUR + T99CP côte à côte, ou « Don »
+ * `<DoubleAffichagePrix>` : affiche EUR + T99CP côte à côte, ou « Don »
  * gratuit selon le mode. Cf. spec §6F : « la personne acheteuse choisit ».
  */
 export function DoubleAffichagePrix({
@@ -40,7 +40,7 @@ interface BadgesMonnaiesProps {
 }
 
 /**
- * `<BadgesMonnaies>` — pour les fiches de minimarché : affiche les
+ * `<BadgesMonnaies>` : pour les fiches de minimarché : affiche les
  * 1 à 4 monnaies acceptées sous forme de petits badges.
  */
 export function BadgesMonnaies({ monnaies }: BadgesMonnaiesProps) {

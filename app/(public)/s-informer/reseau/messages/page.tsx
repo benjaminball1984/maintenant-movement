@@ -16,7 +16,7 @@ function formaterDate(iso: string): string {
 }
 
 /**
- * Page `/s-informer/reseau/messages` — liste des conversations (messagerie
+ * Page `/s-informer/reseau/messages` : liste des conversations (messagerie
  * interne du réseau social, chantier 7.5).
  */
 export default async function PageMessages() {

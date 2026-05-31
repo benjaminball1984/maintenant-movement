@@ -1,4 +1,4 @@
-# Audit sécurité — Maintenant!
+# Audit sécurité : Maintenant!
 
 Chantier 11.2. Inventaire des mesures de sécurité posées par le code applicatif et liste des actions opérationnelles complémentaires.
 

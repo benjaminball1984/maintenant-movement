@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 /**
  * Endpoint de healthcheck (V2.4.46).
  *
- * GET `/api/health` — public, retourne 200 si l'app tourne ET si
+ * GET `/api/health` : public, retourne 200 si l'app tourne ET si
  * Supabase répond. Sinon retourne 503.
  *
  * Pour utilisation par les sondes externes (UptimeRobot, Cloudflare

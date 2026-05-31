@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 0, Chantier V2.0.2 : CSP réelle + hygiène repo
+# Manifest : V2 Vague 0, Chantier V2.0.2 : CSP réelle + hygiène repo
 
 **Date de fin** : 2026-05-26 (nuit)
 **Branche** : `feature/v2-0-2-csp-hygiene`
@@ -10,7 +10,7 @@
 
 ## Livré et fonctionnel
 
-- [x] **CSP nominative réécrite dans `next.config.mjs`**. Toutes les origines sont extraites dans un objet `ORIGINES` documenté, chaque directive porte un commentaire qui explique pourquoi elle existe. Compromis de durcissement assumés et documentés en tête du fichier (`'unsafe-inline'` Next.js, pas de `report-to`, pas de COOP/COEP) — voir les notes au bas de ce MANIFEST pour la suite.
+- [x] **CSP nominative réécrite dans `next.config.mjs`**. Toutes les origines sont extraites dans un objet `ORIGINES` documenté, chaque directive porte un commentaire qui explique pourquoi elle existe. Compromis de durcissement assumés et documentés en tête du fichier (`'unsafe-inline'` Next.js, pas de `report-to`, pas de COOP/COEP) : voir les notes au bas de ce MANIFEST pour la suite.
 - [x] **Directives CSP ajoutées par rapport à l'état antérieur** :
   - `media-src 'self' data: blob: https://*.supabase.co` : pour les vocaux/audio uploadés sur Supabase Storage (réseau social, max 10 min).
   - `worker-src 'self' blob:` : MapLibre crée des Web Workers depuis des `blob:` URLs pour le rendu vectoriel. Sans cette directive, le worker tomberait sur `script-src` qui n'autorise pas `blob:`.

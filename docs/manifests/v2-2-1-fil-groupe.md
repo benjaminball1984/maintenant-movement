@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 2, Chantier V2.2.1 : Fil de discussion de groupe (§18)
+# Manifest : V2 Vague 2, Chantier V2.2.1 : Fil de discussion de groupe (§18)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-2-1-fil-groupe`

@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.6 : Master Plan V2.6 Phase E (tunnel pétition → adhésion → commune)
+# Manifest : Chantier V2.5.6 : Master Plan V2.6 Phase E (tunnel pétition → adhésion → commune)
 
 **Date de fin** : 2026-05-30 (nuit du 29 au 30)
 **Branche** : `main`

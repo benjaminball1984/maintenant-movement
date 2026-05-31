@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Éditeur riche WYSIWYG basé sur TipTap (V2.5.23 — Master Plan rich text).
+ * Éditeur riche WYSIWYG basé sur TipTap (V2.5.23 : Master Plan rich text).
  *
  * Permet l'édition de contenu HTML formaté : couleurs, polices, tailles,
  * gras/italique/souligné, listes, liens, images, alignements, embeds vidéo

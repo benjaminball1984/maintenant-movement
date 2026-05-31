@@ -27,7 +27,7 @@ const FORMATEUR = new Intl.DateTimeFormat('fr-FR', {
 });
 
 /**
- * Page `/profil/decider` — Vue personnelle des réunions Décider visibles
+ * Page `/profil/decider` : Vue personnelle des réunions Décider visibles
  * à la personne (V2.4.22).
  *
  * RLS Supabase filtre déjà les salles selon la visibilité (membres /

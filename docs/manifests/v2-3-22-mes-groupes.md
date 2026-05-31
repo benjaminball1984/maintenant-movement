@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.22 : Page « Mes groupes » côté profil
+# Manifest : V2 Vague 3, Chantier V2.3.22 : Page « Mes groupes » côté profil
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-22-mes-groupes`
@@ -8,12 +8,12 @@
 
 ## Livré et fonctionnel
 
-Page récapitulative des appartenances actives d'une personne dans le mouvement. Permet de naviguer d'un coup vers toutes les communes/fédérations/confédérations/GT auxquels on appartient — sans devoir chercher dans plusieurs sous-espaces.
+Page récapitulative des appartenances actives d'une personne dans le mouvement. Permet de naviguer d'un coup vers toutes les communes/fédérations/confédérations/GT auxquels on appartient : sans devoir chercher dans plusieurs sous-espaces.
 
-- [x] **`lib/mes-groupes.ts` — `listerMesAppartenances(personneId)`** : 4 axes couverts par les tables V1 existantes.
+- [x] **`lib/mes-groupes.ts` : `listerMesAppartenances(personneId)`** : 4 axes couverts par les tables V1 existantes.
   - Communes libres : direct (`appartenance_commune.personne_id`).
-  - Fédérations : indirect — la personne appartient à une fédération **via sa commune**. Charge `appartenance_federation` filtrée par les `commune_id` chargés au préalable. Dédoublonnage car une personne peut être dans 2 communes d'une même fédération.
-  - Confédérations : indirect — pivot sur l'`id` de `appartenance_federation` qui est référencé par `appartenance_confederation.federation_id` (donc l'`id` de l'appartenance, pas l'`id` de la fédération ; cf. fix V2.3.8). Idem dédoublonnage.
+  - Fédérations : indirect : la personne appartient à une fédération **via sa commune**. Charge `appartenance_federation` filtrée par les `commune_id` chargés au préalable. Dédoublonnage car une personne peut être dans 2 communes d'une même fédération.
+  - Confédérations : indirect : pivot sur l'`id` de `appartenance_federation` qui est référencé par `appartenance_confederation.federation_id` (donc l'`id` de l'appartenance, pas l'`id` de la fédération ; cf. fix V2.3.8). Idem dédoublonnage.
   - GT thématiques : direct (`appartenance_gt.personne_id`).
   - Triés par `rejointe_le` ascendant (les plus anciennes d'abord).
 - [x] **`app/(membre)/profil/mes-groupes/page.tsx`** : Server Component. 4 sections (Communes, Fédérations, Confédérations, GT thématiques) avec compteur dans le titre. Chaque entrée = carte avec nom (lien cliquable) + type + date d'entrée.
@@ -21,7 +21,7 @@ Page récapitulative des appartenances actives d'une personne dans le mouvement.
 
 ## Non livré (et pourquoi)
 
-- [ ] **Groupes d'entraide locaux (V2.3.2)** : la table `appartenance_groupe_entraide` n'existe pas encore. À ajouter quand le besoin se confirme (la doctrine V2.3.2 traite les groupes comme nouveau sous-espace, mais l'appartenance n'est pas encore typée — sans doute parce que le périmètre des « membres d'un groupe d'entraide » reste à définir). Mentionné dans le manifest V2.3.2.
+- [ ] **Groupes d'entraide locaux (V2.3.2)** : la table `appartenance_groupe_entraide` n'existe pas encore. À ajouter quand le besoin se confirme (la doctrine V2.3.2 traite les groupes comme nouveau sous-espace, mais l'appartenance n'est pas encore typée : sans doute parce que le périmètre des « membres d'un groupe d'entraide » reste à définir). Mentionné dans le manifest V2.3.2.
 - [ ] **Campagnes** : pas de table `appartenance_campagne`. Mentionné dans V2.3.6. À ajouter avec un chantier dédié.
 - [ ] **Page publique GT thématique** : la table `gt_thematique` existe (depuis chantier 1.1) mais aucune route `/co-construire/[slug]` ou `/gt-thematiques/[slug]` n'a été livrée. Les noms s'affichent en texte non cliquable dans cette page pour l'instant. Chantier de route GT à venir.
 - [ ] **Confédérations individuelles** : pas de route `/agir/confederations/[slug]`. Le lien renvoie à la page de liste `/agir/confederations`. À étendre quand la page individuelle sera livrée.

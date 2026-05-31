@@ -16,7 +16,7 @@ interface FilEspacePublicProps {
  * Section « Fil propre » d'un espace collectif (V2.5.18 finition Phase H,
  * sous-chantier V2.5.10.c). Liste les posts publiés au nom de l'espace,
  * affichés en utilisant le même `<CartePost>` que le flux principal du
- * réseau social — donc avec le badge espace qui pointe vers cette page
+ * réseau social : donc avec le badge espace qui pointe vers cette page
  * (chemin circulaire visuellement cohérent).
  *
  * Server Component : lit la session pour passer `connecte` et `estMien`

@@ -1,4 +1,4 @@
-# Revue 2026 — Bloc 6 : statut d'application des correctifs
+# Revue 2026 : Bloc 6 : statut d'application des correctifs
 
 > État honnête de ce qui a été appliqué pendant cette session, et de ce qui reste. Tout est commité par incréments (V2.6.33→V2.6.37). 1013 tests verts après application : **rien de cassé**.
 
@@ -20,7 +20,7 @@
 | C27 | a11y : `aria-label` champ commentaire, `role=img` badge officiel | V2.6.37 |
 | C26 | a11y : noms d'objet sur les actions admin organisations (accepter/refuser, retirer gestionnaire) | V2.6.37 |
 
-## Reste à poursuivre — sûr et rapide (aucun risque de régression)
+## Reste à poursuivre : sûr et rapide (aucun risque de régression)
 
 Ces correctifs sont locaux, additifs, sans dépendance externe ni test BDD. À enchaîner dans une prochaine session de polish.
 
@@ -33,7 +33,7 @@ Ces correctifs sont locaux, additifs, sans dépendance externe ni test BDD. À e
 - **C5 / C13 / C14 / C15** : migrations SQL **additives** (afficher_nom + payeur ; numero_organisation ORM+5 ; compte_immediatement+snapshot ; contenu_organisation soft-delete). Sûres à écrire ; à appliquer en local puis distant en Phase M.
 - **C31** : TipTap en `dynamic()` ; `.limit()` sur `listerConversations` ; `remotePatterns` Supabase + `<img>`→`next/image`.
 
-## Reste — nécessite un test BDD / infra / auth (NON appliqué à l'aveugle, pour « ne rien casser »)
+## Reste : nécessite un test BDD / infra / auth (NON appliqué à l'aveugle, pour « ne rien casser »)
 
 Ces correctifs sont importants mais comportent un **risque réel de régression** s'ils sont appliqués sans test dans l'environnement adéquat. Conformément à la consigne « sans rien casser », ils sont décrits précisément mais pas appliqués mécaniquement.
 
@@ -43,7 +43,7 @@ Ces correctifs sont importants mais comportent un **risque réel de régression*
 - **C3 (job d'anonymisation 30 j)** [P0 RGPD] : la fonction SQL est écrivable ; le **cron** d'exécution relève de la Phase finale (déploiement).
 - **C4 (export ZIP RGPD réel)** [P0 RGPD] : génération asynchrone des 6 entrées + Storage + URL signée ; chantier d'infra à part entière.
 
-## Décisions Lilou/Ben (P3) — inchangées
+## Décisions Lilou/Ben (P3) : inchangées
 D1 statuts §13 + compteur public ; D2 anonymat votes Décider ; D3 tronc Objet/Espace + rattachement générique ; D4 mini-blog (mandataires vs membre actif) ; D5 frais de port marché en POL. Voir `06-plan-correctifs.md`.
 
 ---

@@ -25,7 +25,7 @@ function formaterPlage(du: string | null, au: string | null): string | null {
 }
 
 /**
- * `<CarteBoutique>` — vignette d'une boutique éphémère.
+ * `<CarteBoutique>` : vignette d'une boutique éphémère.
  */
 export function CarteBoutique({ boutique, enAvant = false }: CarteBoutiqueProps) {
   const plage = formaterPlage(boutique.ouverte_du, boutique.ouverte_au);

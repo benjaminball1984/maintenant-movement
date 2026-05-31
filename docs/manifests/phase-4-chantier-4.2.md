@@ -1,4 +1,4 @@
-# Manifest : Phase 4, Chantier 4.2 — SEL (système d'échange local)
+# Manifest : Phase 4, Chantier 4.2 : SEL (système d'échange local)
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-4-chantier-4.2-sel`

@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 3, Chantier V2.3.5 : Réservation sur offres entraide + SEL
+# Manifest : V2 Vague 3, Chantier V2.3.5 : Réservation sur offres entraide + SEL
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-3-5-reservation-offres`
@@ -26,7 +26,7 @@ Branche le **composant transversal `Réservation` (V2.2.2)** aux pages de détai
 ## Livré partiellement
 
 - [ ] **Page détail location mutualisée** : pas livrée en V2.3.3 (socle backend uniquement). Quand la UI viendra, brancher `<BoutonReserverOffre offreType="location_mutualisee" />`.
-- [ ] **Calendrier graphique** : pour l'instant `<input type="datetime-local">` natif. Une vue calendrier visuelle (façon Airbnb) demande un composant dédié — chantier UX V2 ultérieur.
+- [ ] **Calendrier graphique** : pour l'instant `<input type="datetime-local">` natif. Une vue calendrier visuelle (façon Airbnb) demande un composant dédié : chantier UX V2 ultérieur.
 - [ ] **Envoi réel du message d'amorce dans la messagerie interne** : la `messageAmorce` est stockée dans la ligne `reservation` mais aucun `message_reseau` n'est créé automatiquement. À brancher quand la messagerie V2 sera consolidée.
 - [ ] **Acceptation/refus côté propriétaire de l'offre** : la UI n'expose pas encore le tableau de bord des réservations reçues. Le helper `listerReservationsParOffre` est posé en V2.2.2 ; la UI vient dans un chantier dédié.
 
@@ -42,7 +42,7 @@ Branche le **composant transversal `Réservation` (V2.2.2)** aux pages de détai
 
 ## Tests
 
-- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test — le helper `genererMessageAmorce` était déjà couvert en V2.2.2, idem `transitionAutorisee`).
+- **Unitaires (Vitest)** : 37 fichiers, **406 tests verts** (pas de nouveau test : le helper `genererMessageAmorce` était déjà couvert en V2.2.2, idem `transitionAutorisee`).
 - **Lint Biome** : 454 fichiers, 0 issue.
 - **Typecheck (tsc)** : 0 erreur.
 - **Build / E2E** : non lancés.

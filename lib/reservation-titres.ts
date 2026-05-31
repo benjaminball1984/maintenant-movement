@@ -3,7 +3,7 @@
  * offres référencées par une liste de `reservation` (FK polymorphe).
  *
  * Le `reservation` V2.2.2 a une FK polymorphe `(offre_type, offre_id)`
- * sans contrainte SQL — donc pas de jointure native. Pour afficher la
+ * sans contrainte SQL : donc pas de jointure native. Pour afficher la
  * liste « Mes réservations » avec le titre + lien vers l'offre, on
  * regroupe les ids par type d'offre puis on fait 3 requêtes max
  * (offre_entraide, service_sel, location_mutualisee).

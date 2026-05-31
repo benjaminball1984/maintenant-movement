@@ -1,5 +1,5 @@
 /**
- * Test RLS — chantier 11.2.
+ * Test RLS : chantier 11.2.
  *
  * Énumère toutes les tables du schéma `public` et vérifie que :
  *   1. `enable row level security` est ON.

@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 0, Chantier V2.0.1 : préséance + dépôt CDC V2 + coquilles
+# Manifest : V2 Vague 0, Chantier V2.0.1 : préséance + dépôt CDC V2 + coquilles
 
 **Date de fin** : 2026-05-26 (nuit)
 **Branche** : `feature/v2-0-1-preseance-cdc-pack`
@@ -64,6 +64,6 @@ Rubrique spécifique au cycle V2 (cf. CLAUDE.md §0.4). Pour V2.0.1, **aucun éc
 
 ## Notes pour les chantiers suivants
 
-- **V2.0.2 — hygiène repo** : déjà ajusté selon constats préalables — `app/(admin)/` n'existe pas (rien à ranger), `lib/stripe/` n'existe pas (rien à supprimer). Le chantier se réduit à : poser une **CSP réelle** dans `next.config.mjs`. La coexistence `app/(auth)/` (route group, layout commun) + `app/auth/callback/route.ts` (route stable pour callback Supabase) est intentionnelle ; on peut juste documenter cette coexistence par un README court dans `app/auth/`.
-- **V2.0.3 — fondations UI** : la colonne `personne.mode_theme` existe déjà (vue dans `types/database.ts`, `app/(membre)/profil/informations/page.tsx`, `lib/validations/profil.ts`, etc.). Pas de migration à créer pour ET3. La bibliothèque d'images par défaut ET1 devra placeholder les images réelles (à arbitrer avec Lilou/Ben dans une rubrique « Contenus à arbitrer » du MANIFEST V2.0.3).
+- **V2.0.2 : hygiène repo** : déjà ajusté selon constats préalables : `app/(admin)/` n'existe pas (rien à ranger), `lib/stripe/` n'existe pas (rien à supprimer). Le chantier se réduit à : poser une **CSP réelle** dans `next.config.mjs`. La coexistence `app/(auth)/` (route group, layout commun) + `app/auth/callback/route.ts` (route stable pour callback Supabase) est intentionnelle ; on peut juste documenter cette coexistence par un README court dans `app/auth/`.
+- **V2.0.3 : fondations UI** : la colonne `personne.mode_theme` existe déjà (vue dans `types/database.ts`, `app/(membre)/profil/informations/page.tsx`, `lib/validations/profil.ts`, etc.). Pas de migration à créer pour ET3. La bibliothèque d'images par défaut ET1 devra placeholder les images réelles (à arbitrer avec Lilou/Ben dans une rubrique « Contenus à arbitrer » du MANIFEST V2.0.3).
 - **Risque résiduel** : si le push `origin main` échoue pour des raisons d'authentification GitHub, le travail reste local. À résoudre au matin.

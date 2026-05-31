@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * Page `/recherche` — Recherche globale du site (V2.4.24).
+ * Page `/recherche` : Recherche globale du site (V2.4.24).
  *
  * Form GET avec input texte (?q=). Si q présent, lance la recherche
  * agrégée sur 11 types d'entités en parallèle. Sinon, affiche la page

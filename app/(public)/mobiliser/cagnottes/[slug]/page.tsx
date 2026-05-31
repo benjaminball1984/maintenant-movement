@@ -437,7 +437,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
             )}
           </TexteEditableAdmin>
           {(() => {
-            // V2.5.53 — priorité au HTML riche (déjà sanitizé au save).
+            // V2.5.53 : priorité au HTML riche (déjà sanitizé au save).
             const html = (cagnotte as { texte_html?: string | null }).texte_html ?? null;
             if (html !== null && html.trim() !== '') {
               return <RenduRiche valeurHtml={html} className="text-text-2 leading-relaxed" />;

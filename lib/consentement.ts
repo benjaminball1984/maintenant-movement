@@ -12,7 +12,7 @@
  * 1. **Création** (au moment de la signature, de l'inscription, ou via
  *    paramètres profil) : `enregistrerConsentement` insère une ligne.
  *    Si la ligne existe déjà pour le même (profil, type, objet), on bascule
- *    en update — l'unicité est gérée par la contrainte SQL.
+ *    en update : l'unicité est gérée par la contrainte SQL.
  * 2. **Révocation** : `revoquerConsentement` met `valeur = false` sur la
  *    ligne existante. Ne supprime PAS (trace conservée pour audit RGPD).
  * 3. **Lecture** : `listerConsentementsDuProfil` retourne tous les
@@ -70,7 +70,7 @@ export type ResultatConsentement =
 /**
  * Enregistre un consentement. Si une ligne existe déjà pour le même
  * `(profil_unifie_id, type_consentement, objet_id)`, l'opération bascule
- * en UPDATE de la valeur et de la date — c'est le comportement attendu
+ * en UPDATE de la valeur et de la date : c'est le comportement attendu
  * pour les révocations / réacceptations.
  *
  * En base, l'insertion utilise `upsert` (ON CONFLICT DO UPDATE) avec

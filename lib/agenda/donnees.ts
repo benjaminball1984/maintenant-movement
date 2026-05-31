@@ -6,7 +6,7 @@ import { getSupabaseServer } from '@/lib/supabase';
  * Cf. spec §8B « Agenda agrégé » : miroir temporel de la carte unifiée.
  * Agrège tout ce qui est public dans le temps :
  *   - Mobilisations (3.2)
- *   - Moments solidaires — porte-à-porte, tri, repas, distribution,
+ *   - Moments solidaires : porte-à-porte, tri, repas, distribution,
  *     maraudes (5.3)
  *   - Minimarchés solidaires (4.3)
  *   - Boutiques éphémères ouvertes (4.3) avec date de début

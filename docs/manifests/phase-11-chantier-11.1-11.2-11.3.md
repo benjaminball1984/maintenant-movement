@@ -1,4 +1,4 @@
-# Manifest : Phase 11, Chantiers 11.1 + 11.2 + 11.3 — Polish (a11y + perf), Sécurité, Lancement
+# Manifest : Phase 11, Chantiers 11.1 + 11.2 + 11.3 : Polish (a11y + perf), Sécurité, Lancement
 
 **Date de fin** : 2026-05-21
 **Branche** : `feature/phase-11-chantier-11.1-11.2-11.3-polish-lancement`
@@ -20,11 +20,11 @@ Le reste (déploiement effectif, pentest, plan incident écrit) sera fait par Li
 
 ---
 
-## 11.1 — Accessibilité et performance
+## 11.1 : Accessibilité et performance
 
 ### Livré
 
-- [x] **CSP basique** posée dans `next.config.ts` (cf. headers `Content-Security-Policy`) — bloque `<script>` inline non listé, autorise Supabase + Stripe + AzuraCast + LiveKit + tile.openstreetmap.org.
+- [x] **CSP basique** posée dans `next.config.ts` (cf. headers `Content-Security-Policy`) : bloque `<script>` inline non listé, autorise Supabase + Stripe + AzuraCast + LiveKit + tile.openstreetmap.org.
 - [x] **Lighthouse CI** intégré dans le pipeline GitHub Actions (à vérifier dans `.github/workflows/ci.yml`).
 - [x] **Audits a11y de surface** consignés dans `docs/audits/accessibilite.md` :
   - tous les `<form>` ont des `<label htmlFor>` ;
@@ -38,7 +38,7 @@ Le reste (déploiement effectif, pentest, plan incident écrit) sera fait par Li
 - [ ] **Audit Lighthouse mobile ≥ 90 perf** : nécessite un déploiement de preview pour mesurer. À faire au moment du staging Cloudflare Pages (chantier 11.3).
 - [ ] **Audit WCAG 2.1 AA complet** : un audit externe (NDA / cabinet spécialisé) est recommandé pour la conformité légale. Le code respecte les bonnes pratiques de base mais une revue tierce est plus crédible.
 
-## 11.2 — Sécurité
+## 11.2 : Sécurité
 
 ### Livré
 
@@ -51,7 +51,7 @@ Le reste (déploiement effectif, pentest, plan incident écrit) sera fait par Li
 - [ ] **Pentest interne** : appel d'offres ou bénévolat sécu spécialisé. Pas faisable depuis le code.
 - [ ] **Plan incident** : à rédiger par Lilou/Ben + la trésorerie (qui notifie quoi quand un incident survient). On laisse un squelette dans `docs/plan-incident.md`.
 
-## 11.3 — Lancement
+## 11.3 : Lancement
 
 ### Livré
 

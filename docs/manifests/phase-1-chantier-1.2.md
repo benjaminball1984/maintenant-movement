@@ -1,4 +1,4 @@
-# Manifest : Phase 1, Chantier 1.2 — Auth 4 portes
+# Manifest : Phase 1, Chantier 1.2 : Auth 4 portes
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-1-chantier-1.2-auth-4-portes`

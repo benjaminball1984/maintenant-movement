@@ -1,4 +1,4 @@
-# Manifest : Phase 4, Chantier 4.1 — S'entraider (4 sous-espaces)
+# Manifest : Phase 4, Chantier 4.1 : S'entraider (4 sous-espaces)
 
 **Date de fin** : 2026-05-20
 **Branche** : `feature/phase-4-chantier-4.1-entraide`
@@ -33,8 +33,8 @@
 - [x] **Layout `/s-entraider`** : nav latérale listant les 4 sous-espaces actifs + SEL/Marché en stub.
 - [x] **`/s-entraider`** : accueil avec 4 tuiles cliquables vers chaque sous-espace + info SEL/Marché à venir.
 - [x] **4 pages liste** : `/hebergement`, `/transport`, `/qui-prete-tout`, `/fruits-de-la-terre`. Chacune ne fait qu'appeler `<PageListeSousEspace type={...} />`.
-- [x] **4 pages création** : `/[sousespace]/nouvelle` — auth requise, type pré-rempli.
-- [x] **Page détail commune** : `/s-entraider/offre/[slug]` — image, lieu (avec lien carte), description, créateur·ice, état (publiée/retirée/cloturée).
+- [x] **4 pages création** : `/[sousespace]/nouvelle` : auth requise, type pré-rempli.
+- [x] **Page détail commune** : `/s-entraider/offre/[slug]` : image, lieu (avec lien carte), description, créateur·ice, état (publiée/retirée/cloturée).
 
 ### Tests
 

@@ -12,7 +12,7 @@ function apercu(texte: string, max = 240): string {
 }
 
 /**
- * Page `/admin/moderation/reseau` — modération A POSTERIORI du réseau social
+ * Page `/admin/moderation/reseau` : modération A POSTERIORI du réseau social
  * (chantier 7.5). Liste les publications et commentaires récents ; permet le
  * retrait avec motif (tracé dans le journal d'audit). L'accès est gardé par le
  * layout `/admin` et par la RLS (retrait réservé modération/admin).

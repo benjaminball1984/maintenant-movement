@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Page intermédiaire « après signature » (V2.5.19 — Master Plan V2.6 Phase E
+ * Page intermédiaire « après signature » (V2.5.19 : Master Plan V2.6 Phase E
  * sous-chantier V2.5.6.a).
  *
  * Accédée depuis l'écran de merci de la modale signature pétition. Présente

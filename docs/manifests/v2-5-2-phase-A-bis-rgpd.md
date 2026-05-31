@@ -1,4 +1,4 @@
-# Manifest — Chantier V2.5.2 : Master Plan V2.6 Phase A-bis (profil + RGPD)
+# Manifest : Chantier V2.5.2 : Master Plan V2.6 Phase A-bis (profil + RGPD)
 
 **Date de fin** : 2026-05-29 (nuit du 29 au 30)
 **Branche** : `main`

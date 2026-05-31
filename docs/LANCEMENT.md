@@ -1,4 +1,4 @@
-# Runbook de lancement — Maintenant!
+# Runbook de lancement : Maintenant!
 
 Ce document liste les étapes ordonnées pour passer du code local à un site en production sur `maintenant-le-mouvement.org`. Il est destiné à Lilou/Ben et à l'équipe technique d'astreinte.
 
@@ -139,11 +139,11 @@ Programmer les jobs suivants (Cloudflare Workers Cron Triggers ou Pages Function
 | Nom | Fréquence | Server Action appelée |
 |---|---|---|
 | Crédit SEL | toutes les heures | `crediterPrestationsEnAttente` |
-| Expirer annonces marché | quotidien à 04:00 | (à implémenter — passe `produit_marche.statut` à `expire` après 3 mois d'inactivité) |
+| Expirer annonces marché | quotidien à 04:00 | (à implémenter : passe `produit_marche.statut` à `expire` après 3 mois d'inactivité) |
 | Relance adhésions | quotidien à 09:00 | `envoyerRelancesAdhesion(14)` |
-| Transition moments | toutes les heures | (à implémenter — `annonce → en_cours → termine`) |
-| Récap mardi | hebdo mardi 18:00 | (à implémenter — envoi groupé via EmailService) |
-| Newsletter vendredi | hebdo vendredi 18:00 | (à implémenter — envoi groupé Brevo avec médias publiés sur la semaine) |
+| Transition moments | toutes les heures | (à implémenter : `annonce → en_cours → termine`) |
+| Récap mardi | hebdo mardi 18:00 | (à implémenter : envoi groupé via EmailService) |
+| Newsletter vendredi | hebdo vendredi 18:00 | (à implémenter : envoi groupé Brevo avec médias publiés sur la semaine) |
 
 ---
 

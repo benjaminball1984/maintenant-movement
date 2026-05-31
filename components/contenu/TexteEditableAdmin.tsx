@@ -2,7 +2,7 @@ import { BoutonEditerInline } from '@/components/contenu/BoutonEditerInline';
 import type { ReactNode } from 'react';
 
 /**
- * Composant inline d'édition d'un texte court (V2.5.22 — refonte).
+ * Composant inline d'édition d'un texte court (V2.5.22 : refonte).
  *
  * Auparavant un Client Component qui acceptait `children: (valeur) => ReactNode`
  * (render-prop). Ce pattern provoquait l'erreur Next.js 14 « Functions are

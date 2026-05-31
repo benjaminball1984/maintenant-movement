@@ -1,4 +1,4 @@
-# Manifest — Phase 13, Chantier 13.3-E : profil unifié + numéro public M+7
+# Manifest : Phase 13, Chantier 13.3-E : profil unifié + numéro public M+7
 
 **Date de fin** : 2026-05-25
 **Branche** : feature/phase-13-integration

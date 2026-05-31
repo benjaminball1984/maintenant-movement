@@ -1,4 +1,4 @@
-# Manifest — V2 Vague 2, Chantier V2.2.4 : Open Graph côté serveur (§10)
+# Manifest : V2 Vague 2, Chantier V2.2.4 : Open Graph côté serveur (§10)
 
 **Date de fin** : 2026-05-27 (nuit)
 **Branche** : `feature/v2-2-4-open-graph`
@@ -19,11 +19,11 @@
   - `app/(public)/mobiliser/cagnottes/[slug]/page.tsx` (`type_objet: 'cagnotte'`)
   - `app/(public)/mobiliser/mobilisations/[slug]/page.tsx` (`type_objet: 'mobilisation'`)
   - `app/(public)/agir/moments-solidaires/[slug]/page.tsx` (`type_objet: 'moment_solidaire'`, pas d'`image_url` en V1 → image par défaut)
-- [x] **Tests unitaires** `tests/unit/og/metadata.test.ts` — **8 tests** (title/description, URL canonique absolue, image par défaut vs uploadée, troncation 200 chars, ogType article vs website, URL d'image rendue absolue).
+- [x] **Tests unitaires** `tests/unit/og/metadata.test.ts` : **8 tests** (title/description, URL canonique absolue, image par défaut vs uploadée, troncation 200 chars, ogType article vs website, URL d'image rendue absolue).
 
 ## Livré partiellement
 
-- [ ] **Pages partageables non encore branchées** : campagne, sondage, article (Maintenant Médias), produit_marche, service_sel, offre_entraide, commune, fédération. Le helper est posé, l'ajout sur chaque page se fait en 3 lignes — à compléter au fil des chantiers VAGUE 3 dédiés à chaque sous-espace.
+- [ ] **Pages partageables non encore branchées** : campagne, sondage, article (Maintenant Médias), produit_marche, service_sel, offre_entraide, commune, fédération. Le helper est posé, l'ajout sur chaque page se fait en 3 lignes : à compléter au fil des chantiers VAGUE 3 dédiés à chaque sous-espace.
 
 ## Non livré (et pourquoi)
 
@@ -39,7 +39,7 @@
 
 ## Écarts V1→V2 appliqués
 
-- **Open Graph minimal V1 → complet V2** : avant V2.2.4, `generateMetadata` ne renvoyait que `title` + `description` (Next.js dérivait des balises OG sans image). Le V2 §10 exige titre + description + IMAGE par défaut ou uploadée, sur chaque page partageable. **Compromis** : on **ajoute** le helper + on branche 4 pages clés. Les autres pages partageables (campagne, article, marché, etc.) restent en mode minimal V1 jusqu'à leur chantier VAGUE 3 dédié — pas de régression, juste pas encore enrichies.
+- **Open Graph minimal V1 → complet V2** : avant V2.2.4, `generateMetadata` ne renvoyait que `title` + `description` (Next.js dérivait des balises OG sans image). Le V2 §10 exige titre + description + IMAGE par défaut ou uploadée, sur chaque page partageable. **Compromis** : on **ajoute** le helper + on branche 4 pages clés. Les autres pages partageables (campagne, article, marché, etc.) restent en mode minimal V1 jusqu'à leur chantier VAGUE 3 dédié : pas de régression, juste pas encore enrichies.
 
 ## Tests
 

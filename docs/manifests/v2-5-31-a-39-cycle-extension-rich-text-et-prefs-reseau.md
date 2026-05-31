@@ -1,4 +1,4 @@
-# Manifest groupé — Cycle V2.5.31 → V2.5.39 : extension rich text + préfs notif réseau email
+# Manifest groupé : Cycle V2.5.31 → V2.5.39 : extension rich text + préfs notif réseau email
 
 **Date de fin** : 2026-05-29
 **Branche** : `main`
@@ -15,46 +15,46 @@ Suite directe du cycle V2.5.23→V2.5.30 (rich text + logo). Trois objectifs :
 
 ## Livré
 
-### V2.5.31 — Convertisseur Markdown → HTML (commit `82f3e29`)
+### V2.5.31 : Convertisseur Markdown → HTML (commit `82f3e29`)
 
 - [x] **`lib/rich-text/markdown-vers-html.ts`** : `markdownLegerEnHtml(texte): string` retourne du HTML minimal compatible TipTap. Couvre titres `## ` / `### `, listes `- `, paragraphes, inline `**gras**` / `*italique*`. Échappement HTML sur le texte pour éviter injection.
 - [x] **Branchement dans `ContenuEditableAdmin` + `EditeurInlineCMS`** : au bascule Markdown → Riche, pré-remplit le HTML vide avec la conversion du Markdown courant. Plus de perte de contenu.
 - [x] **16 nouveaux tests** : structures de blocs (paragraphes/listes/titres), inline (**, *), échappement HTML, document réaliste complet.
 
-### V2.5.32 — Polish console CMS (commit `05b0e48`)
+### V2.5.32 : Polish console CMS (commit `05b0e48`)
 
-- [x] **Badge brand-tint « Riche »** à côté de la clé quand `valeur_html` posée — l'admin repère en un coup d'œil les contenus avec version riche.
+- [x] **Badge brand-tint « Riche »** à côté de la clé quand `valeur_html` posée : l'admin repère en un coup d'œil les contenus avec version riche.
 - [x] **Aperçu textuel intelligent** : strip des balises HTML pour afficher les 60 premiers caractères du texte (proche de ce que voit le visiteur).
 - [x] **Compteur de caractères** bascule sur la longueur de la version active (md ou html).
 
-### V2.5.33 — Rich text étendu au journal-affiche (commit `6eb39a1`)
+### V2.5.33 : Rich text étendu au journal-affiche (commit `6eb39a1`)
 
 - [x] **Migration `20260530600000_journal_affiche_contenu_html.sql`** : colonne `contenu_html` nullable additive.
 - [x] **Server Actions `creerEditionJournalAction` / `mettreAJourEditionAction`** : acceptent `contenu_html` optionnel avec sanitization via `sanitizeRichHtml`. Vide = efface (retour Markdown).
 - [x] **`FormulaireMajEdition`** gagne le switch Riche/Markdown avec pré-remplissage automatique au bascule via `markdownLegerEnHtml`.
 - [x] **Page article `/s-informer/journal/[slug]`** priorise `contenu_html` (déjà sanitizé) via `dangerouslySetInnerHTML`, fallback `MarkdownLeger` sur `contenu_md`.
 
-### V2.5.34 — Mise à jour CLAUDE.md V2.5.30 → V2.5.33 (commit `00f760c`)
+### V2.5.34 : Mise à jour CLAUDE.md V2.5.30 → V2.5.33 (commit `00f760c`)
 
 - [x] Section §11 État courant enrichie.
 
-### V2.5.35 — Infrastructure rich text Décider (commit `03f05c7`)
+### V2.5.35 : Infrastructure rich text Décider (commit `03f05c7`)
 
 - [x] **Migration `20260530700000_reunion_decider_html.sql`** : colonnes `ordre_jour_html` et `pv_html` nullable additives.
 - [x] **`app/actions/decider.ts`** : schemas Zod `creerReunion` et `majReunion` acceptent les champs HTML optionnels avec sanitization. Mises à jour partielles préservées (vide = efface, undefined = inchangé).
 - [x] **Types `types/database.ts`** enrichis.
 
-### V2.5.36 — Tests intégration md → html → sanitize (commit `c887bee`)
+### V2.5.36 : Tests intégration md → html → sanitize (commit `c887bee`)
 
 - [x] **2 tests anti-régression** sur le pipeline réel : sortie du convertisseur passe par `sanitizeRichHtml` sans perte des balises légitimes ; échappement HTML protège contre injection `<script>` (texte inerte préservé entre `&lt;` `&gt;`).
 
-### V2.5.37 — UI rich text Décider OJ + PV (commit `0aac684`)
+### V2.5.37 : UI rich text Décider OJ + PV (commit `0aac684`)
 
 - [x] **`FormulaireMajReunion`** : composant `SwitchMode` réutilisable, OJ et PV éditables indépendamment en Riche ou Markdown. Pré-remplissage au bascule via `markdownLegerEnHtml`.
 - [x] **`lib/decider.ts`** : interface `ReunionDecider` enrichie avec `ordreJourHtml` et `pvHtml`. 4 maps (lister/lister prochaines/lister dernières/charger par id) renvoient ces champs.
 - [x] **Page `/s-informer/decider/[slug]/[reunionId]`** : OJ et PV priorisent `contenu_html` avec classes `prose`, fallback Markdown léger.
 
-### V2.5.38 — Préfs notif réseau email — schéma + UI (commit `c6762a3`)
+### V2.5.38 : Préfs notif réseau email : schéma + UI (commit `c6762a3`)
 
 - [x] **`modeNotifReseauSchema`** : enum `cloche` / `mail_immediat` / `digest_quotidien` / `digest_hebdo` / `aucune`.
 - [x] **`preferencesNotificationsSchema`** étendu avec 3 prefs réseau (`reseau_message_recu`, `reseau_post_commente`, `reseau_post_soutenu`). Pas de `.default()` Zod (casse l'inférence react-hook-form), fallback géré à la lecture.
@@ -63,7 +63,7 @@ Suite directe du cycle V2.5.23→V2.5.30 (rich text + logo). Trois objectifs :
 - [x] **UI `FormulaireNotifications`** : nouvelle section « Notifications du réseau social » avec 3 sélecteurs (1 par type). Composant `SelecteurMode` réutilisé. Les digests sont visibles mais étiquetés « à venir » (cron de regroupement pas encore branché).
 - [x] **13 nouveaux libellés éditables CMS** (légende, libellé/aide par type, option par mode, hint digest).
 
-### V2.5.39 — Branchement routage cloche/email selon prefs réseau (commit `572fd41`)
+### V2.5.39 : Branchement routage cloche/email selon prefs réseau (commit `572fd41`)
 
 - [x] **`lib/preference-notif-reseau.ts`** :
   - `lirePrefNotifReseau(destinatairePersonneId, type)` : lit la pref. Fallback `'cloche'` si pas de pref, lecture échouée, ou parse invalide.
@@ -87,7 +87,7 @@ Suite directe du cycle V2.5.23→V2.5.30 (rich text + logo). Trois objectifs :
 - **Lecture-puis-merge** pour ne pas écraser les vieilles prefs : si la pref existante n'a pas les nouveaux champs, on les complète avec DEFAUT au lieu de tout remplacer par DEFAUT (qui perdrait les choix push/mardi/vendredi historiques).
 - **`SwitchMode` dupliqué dans `FormulaireMajReunion`, `FormulaireMajEdition`, `ContenuEditableAdmin`, `EditeurInlineCMS`** : 4 sites d'usage légèrement différents (props, styling). La factorisation aurait coûté plus que le bénéfice (cf. CLAUDE.md « Three similar lines is better than a premature abstraction »). À reconsidérer si on dépasse 6-7 sites.
 - **Email envoyé même si Brevo est en mode mock** : aucun risque, ça loggue. Permet de tester le routage de bout en bout sans avoir branché Brevo en prod.
-- **Échec silencieux de l'envoi email** : la cloche est posée d'abord. Si l'email échoue (Brevo down, email invalide, quota dépassé), la cloche reste — la personne sera notifiée in-app au minimum.
+- **Échec silencieux de l'envoi email** : la cloche est posée d'abord. Si l'email échoue (Brevo down, email invalide, quota dépassé), la cloche reste : la personne sera notifiée in-app au minimum.
 
 ## Tests
 

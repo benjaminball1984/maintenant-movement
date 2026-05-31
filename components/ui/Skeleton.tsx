@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Composant Skeleton — placeholder animé pendant le chargement (V2.4.85).
+ * Composant Skeleton : placeholder animé pendant le chargement (V2.4.85).
  *
  * Affiche un rectangle gris animé (pulse). À utiliser dans les
  * suspense boundaries ou les états de chargement client. Server Component

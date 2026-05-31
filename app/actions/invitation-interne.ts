@@ -2,7 +2,7 @@
 
 /**
  * Server Action : invitation interne en lot via la messagerie réseau
- * (V2.5.20 — Master Plan V2.6 Phase F sous-chantier V2.5.7.a).
+ * (V2.5.20 : Master Plan V2.6 Phase F sous-chantier V2.5.7.a).
  *
  * Permet à une personne connectée d'envoyer un même message à plusieurs
  * destinataires de son réseau d'un coup, pour les inviter à voir/signer

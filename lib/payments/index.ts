@@ -48,7 +48,7 @@ export function resetPaymentService(): void {
 }
 
 // ============================================================
-// Helpers de calcul de frais — extraits dans `./frais` pour pouvoir
+// Helpers de calcul de frais : extraits dans `./frais` pour pouvoir
 // être importés côté client sans tirer le PaymentService (et donc
 // `node:crypto`). On réexporte ici pour préserver l'API publique.
 // ============================================================

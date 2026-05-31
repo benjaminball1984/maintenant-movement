@@ -142,7 +142,7 @@ export default async function PageEditionJournal({ params }: Props) {
 
       <article className="prose-maintenant mt-8 font-body text-text-1">
         {(() => {
-          // V2.5.33 — priorité au HTML riche s'il est posé (déjà sanitizé
+          // V2.5.33 : priorité au HTML riche s'il est posé (déjà sanitizé
           // au save côté Server Action via sanitizeRichHtml). Sinon
           // fallback Markdown léger. Si les deux sont vides, message
           // placeholder éditable.

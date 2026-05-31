@@ -565,7 +565,7 @@ const MOTIF_LITIGE_MAX = 1000;
  *   `acceptee → litige` (depuis V2.2.2 le code D8 l'autorise aussi
  *   pendant l'exécution si la prestation est interrompue) ET
  *   `realisee → litige`. Pour l'instant on n'expose que `realisee` côté
- *   UI car c'est le cas d'usage le plus courant — la transition
+ *   UI car c'est le cas d'usage le plus courant : la transition
  *   `acceptee → litige` reste possible côté admin.
  * - Motif obligatoire (10 à 1000 caractères) pour la modération à venir.
  * - Action terminale : une fois en litige, la réservation est bloquée

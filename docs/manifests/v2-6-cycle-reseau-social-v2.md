@@ -1,4 +1,4 @@
-# Manifest — Cycle V2.6 : épopée réseau social V2 (commentaires, liens auteur, espaces suivables, amitié)
+# Manifest : Cycle V2.6 : épopée réseau social V2 (commentaires, liens auteur, espaces suivables, amitié)
 
 **Date de fin** : 2026-05-30
 **Branche** : `main`
@@ -9,19 +9,19 @@ Source de vérité du cycle : `docs/specs/09_RESEAU-SOCIAL-V2.md` (spec arbitré
 
 ## Livré et fonctionnel
 
-### Chantier A — Commentaires polymorphes (V2.6.1, V2.6.2)
+### Chantier A : Commentaires polymorphes (V2.6.1, V2.6.2)
 - [x] Table polymorphe `commentaire_objet (objet_type, objet_id, …)`, réservée aux connecté·es, modération a posteriori. Migration `20260531100000_commentaire_objet.sql`.
 - [x] `FilCommentaires` propagé à tous les contenus (pétitions, mobilisations, cagnottes, campagnes, moments, sondages, offres entraide, SEL, produits, boutiques).
 
-### Chantier A.2b — Auteur·ice cliquable vers le profil réseau (V2.6.3, V2.6.4, V2.6.5)
+### Chantier A.2b : Auteur·ice cliquable vers le profil réseau (V2.6.3, V2.6.4, V2.6.5)
 - [x] Helper `lib/reseau/lien.ts` (`numeroReseauDe`) : numéro public M+7 via `personne_affichage` (jamais masqué, c'est le handle).
 - [x] Server Component `components/reseau/LienAuteurReseau.tsx` : nom cliquable vers `/s-informer/reseau/[numero]`, dégradation propre si pas de profil unifié.
 - [x] Câblé sur les 10 fiches qui créditent un·e auteur·ice/proposeur·euse (pétition, mobilisation, cagnotte, campagne, offre entraide, SEL, produit, boutique, moment, sondage).
 
-### Chantier C — Espaces communautaires suivables (V2.6.6)
+### Chantier C : Espaces communautaires suivables (V2.6.6)
 - [x] Bouton « Suivre dans le réseau » (`BoutonSuivreEspace`, infra Phase H) ajouté sur fédération, GT thématique, groupe d'entraide local, campagne (la commune l'avait déjà depuis V2.5.22). Réutilise `abonnement_espace_reseau`, `basculerAbonnementEspaceAction`, `jeSuisCetEspace`. Aucune nouvelle table.
 
-### Chantier D — Amitié stockée + messagerie verrouillée + flux re-classé (V2.6.7 → V2.6.11)
+### Chantier D : Amitié stockée + messagerie verrouillée + flux re-classé (V2.6.7 → V2.6.11)
 - [x] **D.1 (V2.6.7)** : table `amitie` (cycle demande → acceptation), distincte du suivi. Migration `20260601000000_amitie.sql`. **Backfill** des suivis mutuels existants en amitiés acceptées (aucun statut perdu). Helpers SQL : `est_ami_reseau` réimplémenté sur la table (signature inchangée, appelants intacts), `peut_demander_ami`, `accepter_amitie` (SECURITY DEFINER : statut + suivi mutuel forcé), `personne_affichage` redéfinie (palier « amies » sur la vraie amitié). `lib/reseau/amitie.ts` (lectures + `deriverStatutAmitie` pur, 4 tests). Server Actions `demanderAmi`/`accepterAmi`/`refuserAmi`/`retirerAmi` + notifs templées `reseau_demande_ami` / `reseau_amitie_acceptee` (CMS-éditables). UI : `BoutonAmitie`, câblé au profil, page `/s-informer/reseau/amis` (demandes reçues), lien + badge dans le header réseau.
 - [x] **D.2 (V2.6.8)** : préférences `demande_ami_ouverte` et `messagerie_ouverte` (top-level de `preferences_visibilite`, défaut false). Schéma `preferencesReseauSchema`, action `mettreAJourPreferencesReseau` (fusion jsonb), UI `FormulaireReseauPrefs` + section CMS dans `/profil/confidentialite`.
 - [x] **D.3 (V2.6.9)** : messagerie verrouillée. Migration `20260601010000_message_reseau_verrou.sql` : helper `peut_envoyer_message_reseau` (ami·e, OU messagerie ouverte, OU réponse à un fil déjà ouvert par l'autre) + RLS d'insertion durcie. Verrou applicatif dans `envoyerMessage` + bouton message masqué sur le profil si non permis.
@@ -36,7 +36,7 @@ Source de vérité du cycle : `docs/specs/09_RESEAU-SOCIAL-V2.md` (spec arbitré
 
 ## Non livré (et pourquoi)
 
-- [ ] **Chantier B — Pages organisation + mandat** : NON entrepris. C'est une **porte de gouvernance** (CLAUDE.md §0bis.5, §3 : on n'invente pas les droits politiques). La spec §7 le marque « à concevoir avec Lilou/Ben » : type d'espace « organisation », création auto à la déclaration d'une organisation initiatrice, anti-usurpation par **attestation + officialisation validée** (badge officiel accordé par admin ou gestionnaire existant), rôle de gestionnaire. Décisions attendues de Lilou/Ben avant implémentation : (1) qui valide le badge officiel et selon quel processus ; (2) quels droits exacts un·e gestionnaire d'organisation obtient ; (3) que se passe-t-il en cas de revendication concurrente d'une même organisation.
+- [ ] **Chantier B : Pages organisation + mandat** : NON entrepris. C'est une **porte de gouvernance** (CLAUDE.md §0bis.5, §3 : on n'invente pas les droits politiques). La spec §7 le marque « à concevoir avec Lilou/Ben » : type d'espace « organisation », création auto à la déclaration d'une organisation initiatrice, anti-usurpation par **attestation + officialisation validée** (badge officiel accordé par admin ou gestionnaire existant), rôle de gestionnaire. Décisions attendues de Lilou/Ben avant implémentation : (1) qui valide le badge officiel et selon quel processus ; (2) quels droits exacts un·e gestionnaire d'organisation obtient ; (3) que se passe-t-il en cas de revendication concurrente d'une même organisation.
 
 ## Migrations à appliquer au distant (au matin, Phase M)
 

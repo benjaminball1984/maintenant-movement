@@ -16,7 +16,7 @@ const schema = z.object({
   titre: z.string().max(500).optional(),
   /** Optionnel V2.5.23 : si absent, on garde la valeur existante en base. */
   valeurMd: z.string().max(50000).optional(),
-  /** V2.5.23 rich text — HTML enrichi optionnel (sanitizé avant insertion).
+  /** V2.5.23 rich text : HTML enrichi optionnel (sanitizé avant insertion).
    *  Si la chaîne est vide, on remet la colonne à NULL (suppression du HTML
    *  riche, retour au fallback Markdown).
    */
@@ -33,11 +33,11 @@ export async function mettreAJourContenuEditorialAction(donnees: unknown): Promi
   }
 
   const supabase = await getSupabaseServer();
-  // V2.5.21 sous-chantier V2.5.15.b — autorisation étendue : les comptes
+  // V2.5.21 sous-chantier V2.5.15.b : autorisation étendue : les comptes
   // niveau CMS (rôle dédié sans pouvoir politique, cf. V2.5.15) peuvent
   // aussi éditer les libellés en plus des admins généraux.
   //
-  // V2.5.23 hotfix — fallback gracieux sur est_admin_general() si le RPC
+  // V2.5.23 hotfix : fallback gracieux sur est_admin_general() si le RPC
   // peut_editer_cms n'existe pas (migration 20260530300000 pas encore
   // appliquée sur le distant Francfort, Master Plan local strict jusqu'à
   // Phase M). Comme ça les admins généraux peuvent éditer sans attendre
@@ -61,7 +61,7 @@ export async function mettreAJourContenuEditorialAction(donnees: unknown): Promi
   }
   const { cle, titre, valeurMd, valeurHtml, cheminRevalidation } = parse.data;
 
-  // V2.5.23 — sanitization du HTML riche avant insertion. Allowlist stricte
+  // V2.5.23 : sanitization du HTML riche avant insertion. Allowlist stricte
   // de balises/attributs/CSS, cf. `lib/rich-text/sanitize.ts`. En base on
   // stocke du HTML déjà propre, pas besoin de re-sanitize à la lecture.
   const valeurHtmlPropre =

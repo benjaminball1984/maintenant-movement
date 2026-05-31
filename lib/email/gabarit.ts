@@ -1,5 +1,5 @@
 /**
- * Gabarit d'email identitaire (V2.5.16 — Master Plan V2.6 Phase L).
+ * Gabarit d'email identitaire (V2.5.16 : Master Plan V2.6 Phase L).
  *
  * Enveloppe un contenu HTML libre dans une mise en page Maintenant! :
  *  - En-tête avec wordmark coloré (le dégradé CSS ne marche pas en email,

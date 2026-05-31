@@ -25,7 +25,7 @@ import {
 } from '@/lib/notification';
 import { lireEmailPersonne, lirePrefNotifReseau } from '@/lib/preference-notif-reseau';
 
-/** V2.5.39 — types de notifs reseau dont le routage cloche/email est gouverne
+/** V2.5.39 : types de notifs reseau dont le routage cloche/email est gouverne
  *  par les preferences utilisateurice (cf. lirePrefNotifReseau). */
 const TYPES_RESEAU = new Set<TypeNotification>([
   'reseau_message_recu',
@@ -142,7 +142,7 @@ export async function poserNotificationTemplee(
   const titre = interpoler(titreCms.valeurMd, params);
   const message = interpoler(messageCms.valeurMd, params);
 
-  // V2.5.39 — pour les notifs reseau, consulte la pref de la personne
+  // V2.5.39 : pour les notifs reseau, consulte la pref de la personne
   // destinataire pour decider du routage cloche/email/aucune.
   // Les autres types (reservation, moderation, info_groupe...) restent
   // gouvernes par leur logique propre : cloche systematique.
@@ -159,7 +159,7 @@ export async function poserNotificationTemplee(
   if (mode === 'aucune') return;
 
   // Cloche dans tous les autres cas (cloche / mail_immediat /
-  // digest_quotidien / digest_hebdo — les digests tombent en cloche
+  // digest_quotidien / digest_hebdo : les digests tombent en cloche
   // en attendant le cron de regroupement).
   await poserNotification(
     {

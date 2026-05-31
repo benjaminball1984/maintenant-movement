@@ -25,4 +25,4 @@ Le **callback OAuth/Magic Link de Supabase** doit pointer vers une URL **stable 
 ## Référence
 
 - Chantier d'origine : 1.2 (auth + Supabase).
-- Constaté lors du chantier V2.0.2 (hygiène repo, cycle V2) qui avait initialement listé cette coexistence comme « route group fantôme à nettoyer » — vérification a montré que la coexistence est intentionnelle. Voir `docs/manifests/v2-0-2-csp-hygiene.md`.
+- Constaté lors du chantier V2.0.2 (hygiène repo, cycle V2) qui avait initialement listé cette coexistence comme « route group fantôme à nettoyer » : vérification a montré que la coexistence est intentionnelle. Voir `docs/manifests/v2-0-2-csp-hygiene.md`.

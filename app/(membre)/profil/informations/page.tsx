@@ -96,7 +96,7 @@ export default async function PageInformations() {
     photo_url: personne.photo_url ?? '',
     cover_url: personne.cover_url ?? '',
     bio: personne.bio ?? '',
-    // V2.5.49 — bio HTML riche (cast defensif si la colonne n'existe pas
+    // V2.5.49 : bio HTML riche (cast defensif si la colonne n'existe pas
     // encore sur le distant : la migration 20260530800000 est en attente
     // de supabase db push Phase M).
     bio_html: (personne as { bio_html?: string | null }).bio_html ?? '',

@@ -352,7 +352,7 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             )}
           </TexteEditableAdmin>
           {(() => {
-            // V2.5.52 — priorité au HTML riche (déjà sanitizé au save),
+            // V2.5.52 : priorité au HTML riche (déjà sanitizé au save),
             // fallback texte brut.
             const html =
               (mobilisation as { description_html?: string | null }).description_html ?? null;
