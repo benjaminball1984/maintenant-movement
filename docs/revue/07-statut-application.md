@@ -92,6 +92,22 @@ Après le Bloc 8, sur décision Lilou/Ben :
 - **Nettoyage flèches « → » publiées** (V2.6.58) : retrait des flèches d'affordance « voir → » que le nettoyage V2.6.42 avait manquées (cartes « à la une » de la home, carte unifiée « Voir la fiche », module campagne, CTA tunnel de la modale de signature) + 2 cas de prose publiée (conditions du marché, note `pres-de-chez-moi`). **Volontairement laissées** : les flèches de PLAGE date/heure (« début → fin », idiome de données ; le Master Plan valide « Départ → Arrivée » pour le covoiturage) et les flèches dans les pages admin, commentaires, README, page design-system (= « notes internes », explicitement autorisées par `03_VOCABULAIRE.md` §6).
 - **Reste réellement** : **C17** (flux paiement adhésion T99CP, gardé pour plus tard sur décision de Lilou/Ben car il touche au paiement) ; **Phase M** (push distant des migrations D1/C5/C13/C14/C15/D5) ; **S3** (révocation du jeton, action manuelle de Lilou/Ben).
 
+## Mise à jour (polish final post-revue : items Q1-Q6 + manques mineurs)
+
+Vagues P1→P6 (V2.6.66→V2.6.71, manifest `docs/manifests/v2-6-polish-final-revue.md`). Tout local, additif, **aucune migration**, **1027 tests verts**, lint (18 warnings préexistants)/typecheck/build verts.
+
+- **Manques mineurs (Bloc 8 §A)** : les 2 dernières modales `<dialog>` sans `max-h` alignées sur C18 (`InvitationInterne`, `BoutonAttacherACampagne`) ; `og:type=article` sur la fiche journal (`ogType` passé à `metadataPourPartage`).
+- **Q1** : `StatutReservation` réutilisé (fin des 5 réinlines dans `reservation.ts`).
+- **Q4** : `formaterEurosEntier`/`formaterEurosDecimales` ajoutés à `lib/format-euros.ts` (répliquent exactement les 2 styles inline) ; 8 fichiers migrés ; affichage strictement identique prouvé par 6 tests d'équivalence.
+- **Q5** : `estIbanValide` branché dans le Zod du reversement (câble au passage un helper « musée »).
+- **Q3** : helper `exigerSession()` appliqué à ~40 gardes (16 fichiers `app/actions/*` + `reservation.ts`), messages préservés.
+- **Q6** : `executerTransitionDemandeur` factorise les 3 transitions demandeur de `reservation.ts`.
+- **Q2** : `LIBELLE_TYPE_CAGNOTTE` centralisé (3 copies byte-identiques) ; `LIBELLE_VISIBILITE_SALLE` dans `lib/decider.ts`, console admin Décider harmonisée vers la forme longue canonique.
+- **Dette technique** : 3 stubs orphelins retirés (~180 lignes) ; `lib/iban.ts` désormais câblé (Q5) ; `lib/siret.ts`/`lib/distance-gps.ts` signalés (musée, à câbler ou retirer, arbitrage) ; `export-claudeai/` rangé sous `docs/archives/` (reste gitignoré) ; `V2/` bloqué par un verrou Windows, à ranger manuellement.
+- **Petit reste marché** : wallet 99-coin de la vendeureuse affiché sur l'achat (P6), avec dégradation propre si la colonne est absente sur le distant.
+
+**Hors périmètre (inchangé)** : C1 (2FA), C3/C4 (RGPD anonymisation/export), C29/C30 (perf compteurs/cache), passe C2/C12 (tirets/flèches restants en docs/commentaires), Phase M (push distant), feature paiement 99-coin entre membres dans la réservation. **S3** (révoquer le jeton Management) reste une action Lilou/Ben.
+
 ## Mise à jour (C17 : adhésion 99-coin sans wallet intégré)
 
 - **C17 implémenté** (V2.6.60), avec feu vert explicite de Lilou/Ben (flux paiement). L'adhésion en 99-coin n'appelle plus `envoyerTransaction` (la plateforme ne simule plus de paiement) : `tx_hash` devient OBLIGATOIRE, la personne paie depuis son propre wallet (lien vers the99coinproject.org, encadré « envoie 12 99-coin vers [adresse trésorerie] »), et le garde-fou anti-réutilisation `enregistrerHashConsomme` (table `t99cp_hash_consomme` de V2.1.1) est branché pour la **première fois** : un même hash ne peut servir qu'une fois, tous flux confondus. Conforme à la doctrine §19. Adresse de trésorerie = clé CMS `adhesion.t99cp.wallet_tresorerie` (placeholder ajouté à `CONTENUS-A-ARBITRER.md` §3.3). Aucune migration (table déjà locale). 1021 tests verts ; garde-fou prouvé par test transactionnel (même hash refusé une 2ᵉ fois). Manifest `docs/manifests/v2-6-60-C17-adhesion-t99cp-redirection.md`.
