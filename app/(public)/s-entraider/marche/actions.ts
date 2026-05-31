@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth/session';
 import { portFactureCentimes } from '@/lib/marche/port';
 import { calculerFraisEuros, getPaymentService } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
-import { getT99CPService } from '@/lib/t99cp';
+import { enregistrerHashConsomme } from '@/lib/t99cp/hashes-consommes';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesAcheterProduit,
@@ -409,16 +409,37 @@ export async function acheterProduit(
     return { ok: false, message: 'Ce produit n’a pas de prix en T99CP.' };
   }
 
-  // En v1, le tx_hash est admis comme preuve (cohérent avec dons T99CP
-  // §5D). Une réconciliation Polygon viendra avec le wallet réel.
-  const t99cp = getT99CPService();
-  const adresseSource = `0xperso_${session.userId.slice(0, 32)}`;
-  const adresseDestination = `0xperso_${produit.vendeureuse_id.slice(0, 32)}`;
-  await t99cp.envoyerTransaction(
-    adresseSource,
-    adresseDestination,
-    BigInt(produit.prix_t99cp_unites),
-  );
+  // C17 / doctrine §19 : la plateforme ne signe AUCUNE transaction. La personne
+  // acheteuse paie la vendeureuse depuis son propre wallet (the99coinproject.org)
+  // et fournit le hash (obligatoire pour T99CP, garanti par le schéma). On ne
+  // simule plus aucun transfert.
+  const txHash = donnees.tx_hash;
+  if (txHash === undefined || txHash === '') {
+    return { ok: false, message: 'Le hash de transaction T99CP est requis.' };
+  }
+
+  // Garde-fou anti-réutilisation (table t99cp_hash_consomme) : un même hash ne
+  // peut servir qu'une fois, tous flux confondus.
+  const consommation = await enregistrerHashConsomme({
+    txHash,
+    type: 'marche_solidaire',
+    cibleId: produit.id,
+    profilId: session.userId,
+    metadata: { prix_t99cp_unites: produit.prix_t99cp_unites, port_centimes: portCentimes },
+  });
+  if (!consommation.ok) {
+    if (consommation.raison === 'deja_consomme') {
+      return {
+        ok: false,
+        message:
+          'Ce hash de transaction a déjà été utilisé. Chaque paiement en 99-coin ne peut servir qu’une seule fois.',
+      };
+    }
+    return {
+      ok: false,
+      message: 'Vérification du paiement impossible pour le moment. Réessaie dans un instant.',
+    };
+  }
 
   const { error: errUpdate } = await supabase
     .from('produit_marche')
@@ -426,8 +447,11 @@ export async function acheterProduit(
       statut: 'vendu',
       derniere_activite_le: new Date().toISOString(),
     })
-    .eq('id', produit.id);
+    .eq('id', produit.id)
+    .eq('statut', 'disponible');
   if (errUpdate !== null) {
+    // L'octroi a échoué : on libère le hash pour permettre une nouvelle tentative.
+    await supabase.from('t99cp_hash_consomme').delete().eq('tx_hash', txHash);
     return { ok: false, message: `Mise à jour impossible : ${errUpdate.message}` };
   }
   // Le port (s'il s'applique) se règle en POL au taux du moment, hors de cette
@@ -435,7 +459,7 @@ export async function acheterProduit(
   // réconciliation Polygon à venir ; le montant du jeton reste le prix seul.
   console.info(
     '[acheterProduit T99CP] tx_hash :',
-    donnees.tx_hash,
+    txHash,
     '| port (centimes euros, à régler en POL) :',
     portCentimes,
   );

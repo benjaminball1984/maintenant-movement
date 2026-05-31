@@ -23,6 +23,8 @@ export interface LibellesAchat {
   labelTxHash: string;
   placeholderTxHash: string;
   hintTxHash: string;
+  walletInstruction: string;
+  ctaOuvrirWallet: string;
   legendeRemise: string;
   remiseMainPropreLabel: string;
   remiseMainPropreAide: string;
@@ -44,9 +46,13 @@ const LIBELLES_DEFAUT: LibellesAchat = {
   legendeMonnaie: 'Choisis la monnaie de paiement',
   optionEurAide: 'Stripe Checkout. Frais plateforme 5 %.',
   optionT99CPAide: 'Wallet T99CP. Frais 0 %.',
-  labelTxHash: 'Hash de transaction T99CP (optionnel en mock)',
-  placeholderTxHash: '0x... (64 hex)',
-  hintTxHash: 'En mock, laisser vide : un hash factice sera généré. En prod, le wallet le fournit.',
+  labelTxHash: 'Hash de transaction T99CP',
+  placeholderTxHash: '0x... (64 caractères hexadécimaux)',
+  hintTxHash:
+    'Le hash retourné par ton wallet après le paiement. Format : 0x suivi de 64 caractères.',
+  walletInstruction:
+    'Paie la vendeureuse en 99-coin depuis ton propre wallet (l’adresse t’est communiquée par la vendeureuse via la messagerie), puis recopie ci-dessous le hash de transaction.',
+  ctaOuvrirWallet: 'Ouvrir the99coinproject.org pour payer',
   legendeRemise: 'Comment veux-tu récupérer le produit ?',
   remiseMainPropreLabel: 'Remise en main propre',
   remiseMainPropreAide: 'Rencontre physique, sans frais de port.',
@@ -144,16 +150,13 @@ export function FormulaireAchat({
   async function onSubmit(donnees: DonneesAcheterProduit) {
     setErreur(null);
     setEnvoiEnCours(true);
-    // En l'absence d'un wallet T99CP réel côté front (chantier T99CP),
-    // on génère un tx_hash mock pour rester compatible avec le schéma.
-    // On fixe explicitement le mode de remise calculé (robuste même si le
-    // champ n'est pas affiché en radio, p. ex. produit en envoi seul).
+    // C17 / doctrine §19 : la plateforme ne signe aucune transaction et ne
+    // génère plus de hash factice. Pour T99CP, le hash réel est obligatoire
+    // (imposé par le schéma). On fixe juste le mode de remise calculé (robuste
+    // même si le choix n'est pas affiché, p. ex. produit en envoi seul).
     const a_envoyer: DonneesAcheterProduit = {
       ...donnees,
       mode_remise: modeRemise,
-      ...(donnees.monnaie === 'T99CP' && (donnees.tx_hash === '' || donnees.tx_hash === undefined)
-        ? { tx_hash: `0x${'a'.repeat(64)}` }
-        : {}),
     };
     const resultat = await acheterProduit(a_envoyer);
     setEnvoiEnCours(false);
@@ -279,16 +282,36 @@ export function FormulaireAchat({
       ) : null}
 
       {monnaie === 'T99CP' ? (
-        <div>
-          <Label htmlFor="achat-txhash">{libelles.labelTxHash}</Label>
-          <input
-            id="achat-txhash"
-            type="text"
-            placeholder={libelles.placeholderTxHash}
-            className="w-full rounded-sm border border-border bg-surface p-2 font-mono text-xs"
-            {...register('tx_hash')}
-          />
-          <p className="mt-1 text-xs text-text-3">{libelles.hintTxHash}</p>
+        <div className="grid gap-2">
+          <p className="text-sm text-text-2">{libelles.walletInstruction}</p>
+          {/* Doctrine §19 : toujours la HOME du site officiel, jamais une URL
+              profonde, en nouvelle fenêtre. La plateforme n'intègre aucun wallet. */}
+          <a
+            href="https://the99coinproject.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-fit text-sm font-bold text-brand hover:underline"
+          >
+            {libelles.ctaOuvrirWallet}
+            <span className="sr-only"> (nouvelle fenêtre)</span>
+          </a>
+          <div>
+            <Label htmlFor="achat-txhash" obligatoire>
+              {libelles.labelTxHash}
+            </Label>
+            <input
+              id="achat-txhash"
+              type="text"
+              placeholder={libelles.placeholderTxHash}
+              aria-invalid={errors.tx_hash !== undefined ? true : undefined}
+              className="w-full rounded-sm border border-border bg-surface p-2 font-mono text-xs"
+              {...register('tx_hash')}
+            />
+            <p className="mt-1 text-xs text-text-3">{libelles.hintTxHash}</p>
+            {errors.tx_hash !== undefined ? (
+              <p className="mt-1 text-xs text-danger">{errors.tx_hash.message}</p>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
