@@ -77,7 +77,14 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI !== undefined ? 2 : 0,
-  workers: process.env.CI !== undefined ? 1 : undefined,
+  // En CI : 4 workers en parallèle (les runners GitHub des dépôts publics ont
+  // 4 vCPU). Les 5 viewports × 20 fichiers se répartissent sur les workers au
+  // lieu de tourner les uns après les autres : environ 3 à 4 fois plus rapide,
+  // sans retirer aucun test ni aucun viewport. Possible sans risque ici car en
+  // CI la base de données est un bouchon (aucune écriture persistée), donc les
+  // tests ne partagent pas d'état entre eux. `fullyParallel: false` est
+  // conservé : les tests d'un même fichier restent ordonnés.
+  workers: process.env.CI !== undefined ? 4 : undefined,
   reporter: process.env.CI !== undefined ? 'github' : 'html',
   outputDir: './test-results',
   use: {
