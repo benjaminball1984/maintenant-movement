@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -24,8 +24,8 @@ const schemaArchivage = z.object({
 export type ResultatArchivage = { ok: true } | { ok: false; message: string };
 
 async function gardeAdmin(): Promise<true | ResultatArchivage> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
   const supabase = await getSupabaseServer();
   const { data } = await supabase.rpc('est_admin_general');
   if (data !== true) return { ok: false, message: 'Action réservée aux admins.' };

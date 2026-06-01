@@ -3,6 +3,7 @@
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
 import { centimesEnCoins } from '@/lib/conversion-99coin';
+import { formaterEurosDecimales } from '@/lib/format-euros';
 import {
   MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
   type MessagesValidationCagnotte,
@@ -59,11 +60,6 @@ interface FormulaireDonEurosProps {
   libelles?: LibellesDonEuros;
   messages?: MessagesValidationCagnotte;
 }
-
-const FORMAT_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-});
 
 const FORMAT_COINS = new Intl.NumberFormat('fr-FR', {
   maximumFractionDigits: 2,
@@ -189,10 +185,10 @@ export function FormulaireDonEuros({
             </p>
             <p className="mt-1 text-xs text-text-3">
               {libelles.decompositionPattern
-                .replace('{brut}', FORMAT_EURO.format(montantEuros))
-                .replace('{frais}', FORMAT_EURO.format(frais / 100))}{' '}
+                .replace('{brut}', formaterEurosDecimales(montantEuros))
+                .replace('{frais}', formaterEurosDecimales(frais / 100))}{' '}
               <strong className="text-text-2">
-                {FORMAT_EURO.format(net / 100)} {libelles.decompositionNetLabel}
+                {formaterEurosDecimales(net / 100)} {libelles.decompositionNetLabel}
               </strong>
               .
             </p>
@@ -265,7 +261,7 @@ export function FormulaireDonEuros({
       <Button type="submit" disabled={envoiEnCours || montantEuros < 1}>
         {envoiEnCours
           ? libelles.ctaEnCours
-          : `${libelles.ctaSubmitPrefixe} ${FORMAT_EURO.format(montantEuros)}`}
+          : `${libelles.ctaSubmitPrefixe} ${formaterEurosDecimales(montantEuros)}`}
       </Button>
       <p className="-mt-2 text-xs text-text-3">{libelles.noteStripe}</p>
     </form>

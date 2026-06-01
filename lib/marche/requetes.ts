@@ -59,6 +59,27 @@ async function chargerPersonnes(
   return new Map((data ?? []).map((p) => [p.id, { prenom: p.prenom, nom: p.nom }]));
 }
 
+/**
+ * Charge l'adresse wallet 99-coin de la vendeureuse (V2.6 polish P6).
+ *
+ * Requête SÉPARÉE et défensive, volontairement non jointe à la requête
+ * produit : la colonne `personne.wallet_t99cp` est locale jusqu'à la Phase M
+ * (absente du distant Francfort). Sélectionner une colonne inexistante
+ * renvoie une erreur PostgREST (et non une exception) : `data` vaut alors
+ * null et on dégrade proprement à `null`, sans jamais faire échouer la fiche
+ * produit. Quand le wallet est null, l'UI d'achat conserve le message
+ * « l'adresse t'est communiquée via la messagerie ».
+ */
+export async function walletVendeureuse(vendeureuseId: string): Promise<string | null> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from('personne')
+    .select('wallet_t99cp')
+    .eq('id', vendeureuseId)
+    .maybeSingle();
+  return data?.wallet_t99cp ?? null;
+}
+
 async function chargerNotations(
   supabase: ClientSupabase,
   vendeureuseIds: string[],

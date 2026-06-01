@@ -4,6 +4,7 @@ import { listerCaissesPourDashboard } from '@/lib/admin/tresorerie';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { type SoldeCaisse, calculerSoldesCaisses } from '@/lib/caisse-solde';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { formaterEurosDecimales } from '@/lib/format-euros';
 import { Wallet } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -27,13 +28,8 @@ export const metadata: Metadata = {
  * on pourra étendre l'accès aux trésorier·ière·s cooptés (droit
  * atomique `gerer_caisse`).
  */
-const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-});
-
 function formaterMontantCanal(montant: number, canal: 'euro' | 'coin99'): string {
-  if (canal === 'euro') return FORMATEUR_EURO.format(montant);
+  if (canal === 'euro') return formaterEurosDecimales(montant);
   return `${montant.toLocaleString('fr-FR')} 99c`;
 }
 

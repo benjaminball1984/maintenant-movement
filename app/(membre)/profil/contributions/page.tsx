@@ -4,6 +4,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getPersonneOuRediriger } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { centimesEnCoins, coinsEnCentimes } from '@/lib/conversion-99coin';
+import { formaterEurosDecimales } from '@/lib/format-euros';
 import {
   type ContributionFinanciere,
   calculerRecap,
@@ -215,7 +216,7 @@ export default async function PageContributions() {
                     )}
                   </TexteEditableAdmin>
                   <p className="mt-1 font-display font-bold text-2xl text-text-1">
-                    {FORMATEUR_EURO.format(recap.parCanal.euro.somme)}
+                    {formaterEurosDecimales(recap.parCanal.euro.somme)}
                   </p>
                   <p className="text-text-3 text-xs">
                     {equivalentCoinPattern.valeurMd.replace(
@@ -351,11 +352,6 @@ export default async function PageContributions() {
   );
 }
 
-const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-});
-
 const FORMATEUR_COINS = new Intl.NumberFormat('fr-FR', {
   maximumFractionDigits: 2,
 });
@@ -372,7 +368,7 @@ function equivalentCoins(montantEuros: number): string {
  * Équivalent euros d'un montant en 99-coin (unités entières, parité 1:1).
  */
 function equivalentEuros(montantCoins: number): string {
-  return FORMATEUR_EURO.format(coinsEnCentimes(montantCoins) / 100);
+  return formaterEurosDecimales(coinsEnCentimes(montantCoins) / 100);
 }
 
 const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
@@ -405,7 +401,7 @@ function LigneContribution({
 }) {
   const estEuro = contribution.canal === 'euro';
   const montant = estEuro
-    ? FORMATEUR_EURO.format(contribution.montant)
+    ? formaterEurosDecimales(contribution.montant)
     : `${contribution.montant.toLocaleString('fr-FR')} 99c`;
   // Équivalent dans l'autre monnaie (parité 1 € = 1 99-coin = 1 minute).
   const equivalent = estEuro

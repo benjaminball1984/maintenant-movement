@@ -19,7 +19,7 @@
  */
 
 import { estAdminCourant } from '@/lib/auth/admin';
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import {
   type TypeEspacePostable,
   creerPostEspace,
@@ -60,10 +60,9 @@ export async function publierAuNomDeLEspaceAction(donneesBrutes: unknown): Promi
   }
   const donnees = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour publier.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour publier.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const estAdmin = await estAdminCourant();
   const espaceType = donnees.espaceType as TypeEspacePostable;

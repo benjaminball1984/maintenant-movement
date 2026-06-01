@@ -1,6 +1,7 @@
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCompteursFileModeration } from '@/lib/admin/file-moderation';
 import { chargerStatsAdmin } from '@/lib/admin/stats';
+import { formaterEurosEntier } from '@/lib/format-euros';
 import { CheckCircle, Flag } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -8,11 +9,6 @@ import Link from 'next/link';
 export const metadata: Metadata = { title: 'Console : Vue d’ensemble' };
 
 const FORMAT_NB = new Intl.NumberFormat('fr-FR');
-const FORMAT_EUR = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-});
 
 /**
  * Page `/admin` : Tableau de bord admin (chantier 9.2).
@@ -115,7 +111,7 @@ export default async function PageAdmin() {
         <Carte titre="Cagnottes publiées" valeur={FORMAT_NB.format(stats.cagnottesPubliees)} />
         <Carte
           titre="Euros collectés"
-          valeur={FORMAT_EUR.format(stats.totalEurosCollectes / 100)}
+          valeur={formaterEurosEntier(stats.totalEurosCollectes / 100)}
         />
         <Carte titre="99-coin reçus" valeur={`${FORMAT_NB.format(stats.totalT99CPCollectes)} u.`} />
         <Carte titre="Services SEL" valeur={FORMAT_NB.format(stats.servicesSel)} />
@@ -138,7 +134,7 @@ export default async function PageAdmin() {
       </header>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Carte titre="Caisses ouvertes" valeur={FORMAT_NB.format(stats.caissesOuvertes)} />
-        <Carte titre="Solde € caisses" valeur={FORMAT_EUR.format(stats.totalEurosCaisses)} />
+        <Carte titre="Solde € caisses" valeur={formaterEurosEntier(stats.totalEurosCaisses)} />
         <Carte
           titre="Solde 99-coin caisses"
           valeur={`${FORMAT_NB.format(stats.totalCoin99Caisses)} u.`}

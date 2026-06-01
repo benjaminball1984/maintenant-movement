@@ -2,7 +2,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
-import { listerSallesDecider } from '@/lib/decider';
+import { LIBELLE_VISIBILITE_SALLE, listerSallesDecider } from '@/lib/decider';
 import { getSupabaseServer } from '@/lib/supabase';
 import { ExternalLink, Plus, Video } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -28,13 +28,6 @@ const LIBELLE_ESPACE: Record<string, string> = {
   campagne: 'Campagne',
   groupe_entraide_local: 'Groupe d’entraide',
   national: 'National',
-};
-
-/** Libellés humains pour l'affichage de la visibilité d'une salle (badge). */
-const LIBELLE_VISIBILITE: Record<string, string> = {
-  membres: 'Membres',
-  fedeere: 'Fédéré',
-  public: 'Public',
 };
 
 /**
@@ -120,7 +113,7 @@ export default async function PageAdminDecider() {
                     <div className="flex items-center gap-2">
                       <Badge variant="info">{LIBELLE_ESPACE[s.espaceType] ?? s.espaceType}</Badge>
                       <Badge variant="default">
-                        {LIBELLE_VISIBILITE[s.typeVisibilite] ?? s.typeVisibilite}
+                        {LIBELLE_VISIBILITE_SALLE[s.typeVisibilite] ?? s.typeVisibilite}
                       </Badge>
                     </div>
                     <span className="text-text-3 text-xs">

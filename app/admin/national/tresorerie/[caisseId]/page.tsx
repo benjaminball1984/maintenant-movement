@@ -5,6 +5,7 @@ import { Alert, Badge, Card, Heading } from '@/components/ui';
 import { chargerCaissePourDetail } from '@/lib/admin/tresorerie';
 import { calculerSoldeCaisse } from '@/lib/caisse-solde';
 import { formaterDateMoyenne } from '@/lib/format-date';
+import { formaterEurosDecimales } from '@/lib/format-euros';
 import {
   chargerIdentitesAffichables,
   nomAffichageRespectantVisibilite,
@@ -95,11 +96,11 @@ export default async function PageDetailCaisse({
         <div>
           <p className="font-bold text-text-3 text-xs uppercase tracking-cap">Solde €</p>
           <p className="mt-1 font-display font-bold text-2xl text-text-1">
-            {FORMATEUR_EURO.format(solde.euro.solde)}
+            {formaterEurosDecimales(solde.euro.solde)}
           </p>
           <p className="text-text-3 text-xs">
-            {FORMATEUR_EURO.format(solde.euro.entrees)} entrées −{' '}
-            {FORMATEUR_EURO.format(solde.euro.sorties)} sorties
+            {formaterEurosDecimales(solde.euro.entrees)} entrées −{' '}
+            {formaterEurosDecimales(solde.euro.sorties)} sorties
           </p>
         </div>
         <div>
@@ -350,13 +351,8 @@ const STATUT_TX_VARIANT = {
   litige: 'danger',
 } as const;
 
-const FORMATEUR_EURO = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-});
-
 function formaterMontant(montant: number, canal: 'euro' | '99_coin'): string {
   if (Number.isNaN(montant)) return `${montant} ${canal === 'euro' ? '€' : '99c'}`;
-  if (canal === 'euro') return FORMATEUR_EURO.format(montant);
+  if (canal === 'euro') return formaterEurosDecimales(montant);
   return `${montant.toLocaleString('fr-FR')} 99c`;
 }

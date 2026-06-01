@@ -1,7 +1,8 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { initierTransactionSortante } from '@/lib/caisse';
+import { estIbanValide } from '@/lib/iban';
 import { MIME_JUSTIFICATIF_AUTORISES, type MimeJustificatif } from '@/lib/storage/justificatifs';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -21,19 +22,35 @@ import { z } from 'zod';
  * comptable.
  */
 
-const schema = z.object({
-  caisse_id: z.string().uuid(),
-  receptacle_id: z.string().uuid(),
-  beneficiaire_personne_id: z.string().uuid().nullable(),
-  beneficiaire_externe_nom: z.string().max(200).nullable(),
-  beneficiaire_externe_iban_ou_wallet: z.string().max(500).nullable(),
-  montant: z.number().positive().max(1_000_000),
-  canal: z.enum(['euro', '99_coin']),
-  motif: z.string().min(5).max(1000),
-  justificatif_chemin: z.string().min(1),
-  justificatif_nom_original: z.string().min(1).max(500),
-  justificatif_mime_type: z.enum(MIME_JUSTIFICATIF_AUTORISES),
-});
+const schema = z
+  .object({
+    caisse_id: z.string().uuid(),
+    receptacle_id: z.string().uuid(),
+    beneficiaire_personne_id: z.string().uuid().nullable(),
+    beneficiaire_externe_nom: z.string().max(200).nullable(),
+    beneficiaire_externe_iban_ou_wallet: z.string().max(500).nullable(),
+    montant: z.number().positive().max(1_000_000),
+    canal: z.enum(['euro', '99_coin']),
+    motif: z.string().min(5).max(1000),
+    justificatif_chemin: z.string().min(1),
+    justificatif_nom_original: z.string().min(1).max(500),
+    justificatif_mime_type: z.enum(MIME_JUSTIFICATIF_AUTORISES),
+  })
+  // Q5 (revue) : pour le canal euro, si un IBAN bénéficiaire est saisi (le
+  // champ est optionnel), il doit être un IBAN valide (ISO 13616, clé de
+  // contrôle mod 97). Pour le canal 99-coin le même champ porte une adresse
+  // wallet : la validation IBAN ne s'y applique pas.
+  .refine(
+    (d) =>
+      d.canal !== 'euro' ||
+      d.beneficiaire_externe_iban_ou_wallet === null ||
+      d.beneficiaire_externe_iban_ou_wallet.trim() === '' ||
+      estIbanValide(d.beneficiaire_externe_iban_ou_wallet),
+    {
+      message: 'L’IBAN du bénéficiaire est invalide (vérifie la clé de contrôle).',
+      path: ['beneficiaire_externe_iban_ou_wallet'],
+    },
+  );
 
 export type ResultatInitiation =
   | { ok: true; transactionId: string }
@@ -42,10 +59,9 @@ export type ResultatInitiation =
 export async function initierTransactionSortanteAction(
   donneesBrutes: unknown,
 ): Promise<ResultatInitiation> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -103,10 +119,9 @@ export async function confirmerTransactionSortanteAction(options: {
   transactionId: string;
   caisseId: string;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -155,10 +170,8 @@ export async function annulerTransactionSortanteAction(options: {
   caisseId: string;
   motif: string;
 }): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
 
   const motifNettoye = options.motif.trim();
   if (motifNettoye.length < 5) {

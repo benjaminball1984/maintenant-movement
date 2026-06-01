@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { type EspaceTypeFil, posterMessageFil, supprimerMessageFil } from '@/lib/fil-groupe';
 import { validerContenuMessageFil } from '@/lib/fil-groupe-validation';
 import { revalidatePath } from 'next/cache';
@@ -29,10 +29,9 @@ export interface PosterDansFilOptions {
 }
 
 export async function posterDansFilGroupe(options: PosterDansFilOptions): Promise<ResultatPoster> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise pour poster dans le fil.' };
-  }
+  const acces = await exigerSession('Connexion requise pour poster dans le fil.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const validation = validerContenuMessageFil(options.contenu);
   if (!validation.ok) {
@@ -73,10 +72,9 @@ export interface SupprimerDansFilOptions {
 export async function supprimerDansFilGroupe(
   options: SupprimerDansFilOptions,
 ): Promise<{ ok: boolean; message?: string }> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Connexion requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const resultat = await supprimerMessageFil({
     messageId: options.messageId,

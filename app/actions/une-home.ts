@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
@@ -13,10 +13,8 @@ const EMPLACEMENTS = ['petition', 'article', 'mobilisation', 'cagnotte'] as cons
  * V2.6.19). Réservé à l'admin (la RPC `definir_une_home` vérifie le droit).
  */
 export async function definirUneHomeAction(donneesBrutes: unknown): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { emplacement?: unknown; objet_id?: unknown })
@@ -42,10 +40,8 @@ export async function definirUneHomeAction(donneesBrutes: unknown): Promise<Resu
 
 /** Retire l'épinglage d'un emplacement (retour à l'automatique). Admin. */
 export async function retirerUneHomeAction(donneesBrutes: unknown): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { emplacement?: unknown })

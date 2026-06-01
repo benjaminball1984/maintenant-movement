@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { TYPES_CONTENU_ORGANISATION } from '@/lib/organisations/liaisons';
 import {
   TYPES_ORGANISATION,
@@ -31,10 +31,9 @@ export async function creerOrganisationAction(donneesBrutes: unknown): Promise<R
   }
   const donnees = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour créer une organisation.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour créer une organisation.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
   const supabase = await getSupabaseServer();
 
   // Slug : base dérivée du nom, suffixe temporel si déjà pris.
@@ -83,10 +82,8 @@ export async function mettreAJourOrganisationAction(
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
   }
   const d = parse.data;
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const supabase = await getSupabaseServer();
   const { data, error } = await supabase
     .from('organisation')
@@ -119,10 +116,8 @@ export async function coopterGestionnaireAction(donneesBrutes: unknown): Promise
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
   }
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const supabase = await getSupabaseServer();
 
   // Résout le numéro public M+7 en identifiant de personne.
@@ -150,10 +145,8 @@ export async function coopterGestionnaireAction(donneesBrutes: unknown): Promise
 
 /** Retire un·e gestionnaire (jamais le·la dernier·e). Gestionnaire ou admin. */
 export async function retirerGestionnaireAction(donneesBrutes: unknown): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const gestionnaireId =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { gestionnaire_id?: unknown }).gestionnaire_id
@@ -181,10 +174,8 @@ export async function retirerGestionnaireAction(donneesBrutes: unknown): Promise
  * droit admin.
  */
 export async function definirBadgeOfficielAction(donneesBrutes: unknown): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { org_id?: unknown; officiel?: unknown })
@@ -212,10 +203,8 @@ export async function definirBadgeOfficielAction(donneesBrutes: unknown): Promis
 export async function revendiquerOrganisationAction(
   donneesBrutes: unknown,
 ): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour revendiquer une organisation.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour revendiquer une organisation.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { org_id?: unknown; message?: unknown })
@@ -246,10 +235,8 @@ export async function revendiquerOrganisationAction(
 export async function declarerContenuOrganisationAction(
   donneesBrutes: unknown,
 ): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { objet_type?: unknown; objet_id?: unknown; org_id?: unknown })
@@ -280,10 +267,8 @@ export async function declarerContenuOrganisationAction(
 export async function retirerContenuOrganisationAction(
   donneesBrutes: unknown,
 ): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { objet_type?: unknown; objet_id?: unknown })
@@ -334,10 +319,9 @@ export async function declarerOrganisationInitiatriceAction(
   const d = parse.data;
   if (d.mode === 'aucune') return { ok: true };
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
   const supabase = await getSupabaseServer();
 
   let orgId: string;
@@ -403,10 +387,8 @@ export async function declarerOrganisationInitiatriceAction(
 
 /** Admin : accepte (→ gestionnaire) ou refuse une revendication (chantier B.3). */
 export async function traiterRevendicationAction(donneesBrutes: unknown): Promise<ResultatSimple> {
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Authentification requise.' };
-  }
+  const acces = await exigerSession('Authentification requise.');
+  if (!acces.ok) return acces;
   const o =
     typeof donneesBrutes === 'object' && donneesBrutes !== null
       ? (donneesBrutes as { revendication_id?: unknown; accepter?: unknown })

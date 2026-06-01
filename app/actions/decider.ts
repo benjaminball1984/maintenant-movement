@@ -1,6 +1,6 @@
 'use server';
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { slugifier } from '@/lib/slug';
 import { getSupabaseServer } from '@/lib/supabase';
@@ -26,8 +26,9 @@ const schemaSalle = z.object({
 export type Resultat = { ok: true; slug: string } | { ok: false; message: string };
 
 export async function creerSalleDeciderAction(donnees: unknown): Promise<Resultat> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -77,8 +78,9 @@ const schemaReunion = z.object({
 export async function creerReunionAction(
   donnees: unknown,
 ): Promise<{ ok: true; id: string } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');
@@ -135,8 +137,8 @@ const schemaMajReunion = z.object({
 export async function mettreAJourReunionAction(
   donnees: unknown,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const session = await getSession();
-  if (session === null) return { ok: false, message: 'Connexion requise.' };
+  const acces = await exigerSession();
+  if (!acces.ok) return acces;
 
   const supabase = await getSupabaseServer();
   const { data: estAdmin } = await supabase.rpc('est_admin_general');

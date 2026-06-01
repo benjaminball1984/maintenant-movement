@@ -24,6 +24,10 @@ export interface LibellesAchat {
   placeholderTxHash: string;
   hintTxHash: string;
   walletInstruction: string;
+  /** Encadré affiché quand l'adresse wallet de la vendeureuse est connue (P6). */
+  walletVendeurTitre: string;
+  walletVendeurAvant: string;
+  walletVendeurApres: string;
   ctaOuvrirWallet: string;
   legendeRemise: string;
   remiseMainPropreLabel: string;
@@ -52,6 +56,11 @@ const LIBELLES_DEFAUT: LibellesAchat = {
     'Le hash retourné par ton wallet après le paiement. Format : 0x suivi de 64 caractères.',
   walletInstruction:
     'Paie la vendeureuse en 99-coin depuis ton propre wallet (l’adresse t’est communiquée par la vendeureuse via la messagerie), puis recopie ci-dessous le hash de transaction.',
+  walletVendeurTitre: 'Paie à l’adresse de la vendeureuse',
+  walletVendeurAvant:
+    'Envoie le montant en 99-coin depuis ton propre wallet vers l’adresse de la vendeureuse :',
+  walletVendeurApres:
+    'Une fois la transaction confirmée, recopie ci-dessous le hash retourné par ton wallet.',
   ctaOuvrirWallet: 'Ouvrir the99coinproject.org pour payer',
   legendeRemise: 'Comment veux-tu récupérer le produit ?',
   remiseMainPropreLabel: 'Remise en main propre',
@@ -78,6 +87,13 @@ interface FormulaireAchatProps {
   remiseMainPropre?: boolean;
   /** La vendeureuse propose-t-elle l'envoi postal ? Défaut false. */
   envoiPostal?: boolean;
+  /**
+   * Adresse wallet 99-coin de la vendeureuse si renseignée sur son profil
+   * (V2.6 polish P6). Connue : on l'affiche en clair à recopier ; null (offre
+   * sans wallet, ou distant avant Phase M) : on garde le message de repli
+   * « l'adresse t'est communiquée via la messagerie ».
+   */
+  walletVendeur?: string | null;
   acheterProduit: (
     donnees: unknown,
   ) => Promise<{ ok: true; urlRedirection?: string } | { ok: false; message: string }>;
@@ -100,6 +116,7 @@ export function FormulaireAchat({
   fraisPortCentimes = 0,
   remiseMainPropre = true,
   envoiPostal = false,
+  walletVendeur = null,
   acheterProduit,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_MARCHE_DEFAUT,
@@ -283,7 +300,17 @@ export function FormulaireAchat({
 
       {monnaie === 'T99CP' ? (
         <div className="grid gap-2">
-          <p className="text-sm text-text-2">{libelles.walletInstruction}</p>
+          {walletVendeur !== null && walletVendeur.trim() !== '' ? (
+            <Alert variant="info" titre={libelles.walletVendeurTitre}>
+              {libelles.walletVendeurAvant}
+              <code className="ml-1 inline-block break-all rounded-sm bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
+                {walletVendeur}
+              </code>
+              . {libelles.walletVendeurApres}
+            </Alert>
+          ) : (
+            <p className="text-sm text-text-2">{libelles.walletInstruction}</p>
+          )}
           {/* Doctrine §19 : toujours la HOME du site officiel, jamais une URL
               profonde, en nouvelle fenêtre. La plateforme n'intègre aucun wallet. */}
           <a

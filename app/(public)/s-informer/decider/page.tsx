@@ -6,6 +6,7 @@ import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import {
   LIBELLE_MODE,
   LIBELLE_STATUT,
+  LIBELLE_VISIBILITE_SALLE,
   listerDernieresReunionsAvecPV,
   listerProchainesReunionsToutesSalles,
   listerSallesDecider,
@@ -60,12 +61,6 @@ const ICONE_VISIBILITE: Record<string, typeof Lock> = {
   membres: Lock,
   fedeere: Users,
   public: Globe,
-};
-
-const LIBELLE_VISIBILITE: Record<string, string> = {
-  membres: 'Membres uniquement',
-  fedeere: 'Périmètre fédéré',
-  public: 'Public (enregistré)',
 };
 
 /**
@@ -284,7 +279,7 @@ export default async function PageDecider() {
                         <Badge variant="info">{LIBELLE_ESPACE[s.espaceType] ?? s.espaceType}</Badge>
                         <Badge variant="default">
                           <IconeVisibilite size={12} aria-hidden="true" />
-                          {LIBELLE_VISIBILITE[s.typeVisibilite] ?? s.typeVisibilite}
+                          {LIBELLE_VISIBILITE_SALLE[s.typeVisibilite] ?? s.typeVisibilite}
                         </Badge>
                       </div>
                       <h3 className="font-display font-bold text-lg text-text-1">{s.nom}</h3>

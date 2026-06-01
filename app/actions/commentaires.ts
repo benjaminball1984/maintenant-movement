@@ -7,7 +7,7 @@
  * aux connecté·es en leur propre nom ; retrait réservé auteurice/modération).
  * Ces actions valident les entrées et revalident la page concernée.
  */
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { type ObjetCommentable, estObjetCommentable } from '@/lib/commentaires';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -39,10 +39,9 @@ export async function poserCommentaireObjet(donneesBrutes: unknown): Promise<Res
   }
   const { objet_type, objet_id, texte, cheminRevalidation } = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour commenter.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour commenter.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { error } = await supabase.from('commentaire_objet').insert({
@@ -76,10 +75,9 @@ export async function retirerCommentaireObjet(donneesBrutes: unknown): Promise<R
   }
   const { id, raison, cheminRevalidation } = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Action réservée aux personnes connectées.' };
-  }
+  const acces = await exigerSession('Action réservée aux personnes connectées.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { error } = await supabase

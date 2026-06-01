@@ -1,5 +1,6 @@
 import { JaugeT99CPEuros } from '@/components/cagnottes/JaugeT99CPEuros';
 import { Badge, Card } from '@/components/ui';
+import { LIBELLE_TYPE_CAGNOTTE } from '@/lib/cagnottes/libelles';
 import type { CagnotteEnrichie } from '@/lib/cagnottes/requetes';
 import { getImageObjet } from '@/lib/images';
 import { cn } from '@/lib/utils';
@@ -10,12 +11,6 @@ interface CarteCagnotteProps {
   cagnotte: CagnotteEnrichie;
   enAvant?: boolean;
 }
-
-const LIBELLE_TYPE: Record<string, string> = {
-  ouverte: 'Cagnotte ouverte',
-  lutte: 'Caisse de lutte',
-  cotisation: 'Cotisation',
-};
 
 export function CarteCagnotte({ cagnotte, enAvant = false }: CarteCagnotteProps) {
   const accroche = extraireAccroche(cagnotte.texte, 200);
@@ -44,7 +39,7 @@ export function CarteCagnotte({ cagnotte, enAvant = false }: CarteCagnotteProps)
 
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={cagnotte.type === 'cotisation' ? 'accent' : 'success'}>
-          {LIBELLE_TYPE[cagnotte.type] ?? cagnotte.type}
+          {LIBELLE_TYPE_CAGNOTTE[cagnotte.type] ?? cagnotte.type}
         </Badge>
         {estSuspendue ? <Badge variant="warning">Suspendue</Badge> : null}
       </header>

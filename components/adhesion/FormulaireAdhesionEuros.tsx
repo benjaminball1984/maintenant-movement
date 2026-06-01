@@ -2,6 +2,7 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button } from '@/components/ui';
+import { formaterEurosEntier } from '@/lib/format-euros';
 import {
   MESSAGES_VALIDATION_ADHESION_DEFAUT,
   type MessagesValidationAdhesion,
@@ -38,12 +39,6 @@ interface FormulaireAdhesionEurosProps {
   messages?: MessagesValidationAdhesion;
 }
 
-const FORMATEUR_EUR = new Intl.NumberFormat('fr-FR', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 0,
-});
-
 export function FormulaireAdhesionEuros({
   adhererEuros,
   libelles = LIBELLES_DEFAUT,
@@ -79,14 +74,14 @@ export function FormulaireAdhesionEuros({
       <p className="text-text-2">
         {libelles.description.replace(
           '{montant}',
-          FORMATEUR_EUR.format(MONTANT_ADHESION_EUR_CENTIMES / 100),
+          formaterEurosEntier(MONTANT_ADHESION_EUR_CENTIMES / 100),
         )}
       </p>
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
       <Button type="submit" disabled={envoiEnCours}>
         {envoiEnCours
           ? libelles.ctaEnCours
-          : `${libelles.ctaSubmitPrefixe} ${FORMATEUR_EUR.format(MONTANT_ADHESION_EUR_CENTIMES / 100)}`}
+          : `${libelles.ctaSubmitPrefixe} ${formaterEurosEntier(MONTANT_ADHESION_EUR_CENTIMES / 100)}`}
       </Button>
     </form>
   );

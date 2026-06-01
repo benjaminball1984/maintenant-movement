@@ -5,7 +5,7 @@
  * V2.5.10.d). Symétrique de la table `relation_reseau` mais pour les espaces.
  */
 
-import { getSession } from '@/lib/auth/session';
+import { exigerSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -37,10 +37,9 @@ export async function basculerAbonnementEspaceAction(donneesBrutes: unknown): Pr
   }
   const donnees = parse.data;
 
-  const session = await getSession();
-  if (session === null) {
-    return { ok: false, message: 'Tu dois être connecté·e pour suivre un espace.' };
-  }
+  const acces = await exigerSession('Tu dois être connecté·e pour suivre un espace.');
+  if (!acces.ok) return acces;
+  const session = acces.session;
 
   const supabase = await getSupabaseServer();
   const { data: existant } = await supabase
