@@ -49,6 +49,11 @@ jobs:
     name: Tests E2E (Playwright)
     runs-on: ubuntu-latest
     needs: lint-typecheck
+    # Garde-fou : borne les exécutions qui s'éternisent. Le serveur de prod
+    # (cf. playwright.config.ts) accélère déjà nettement ; au-delà de cette
+    # limite, le job échoue vite au lieu de tourner des heures. Ne retire
+    # aucune couverture (mêmes specs, mêmes 5 viewports, mêmes retries).
+    timeout-minutes: 45
     # Le site fonctionne en mocks (CLAUDE.md §6). Aucune spec E2E ne tape
     # la vraie BDD : des placeholders syntaxiquement valides suffisent à
     # franchir les getters `lib/supabase/env.ts` (lecture paresseuse) et

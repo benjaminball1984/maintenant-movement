@@ -88,7 +88,13 @@ export default defineConfig({
   },
   projects: projets,
   webServer: {
-    command: 'npm run dev',
+    // En CI : on sert le BUILD de production (`next start`), qui ne recompile
+    // pas les pages à la volée. Beaucoup plus rapide que `next dev` quand on
+    // parcourt tout le site sur 5 viewports, et plus fidèle (on teste
+    // l'artefact réellement déployé). Le job CI exécute `npm run build` juste
+    // avant `npm run test:e2e`. En local : `next dev` pour le confort
+    // (rechargement à chaud, réutilisation d'un serveur déjà lancé).
+    command: process.env.CI !== undefined ? 'npm run start' : 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: process.env.CI === undefined,
     timeout: 120 * 1000,
