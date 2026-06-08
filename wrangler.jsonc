@@ -1,0 +1,23 @@
+{
+  // Configuration Cloudflare Workers pour le déploiement du site Maintenant!
+  // via l'adaptateur OpenNext (@opennextjs/cloudflare).
+  //
+  // - `main` pointe vers le worker généré par OpenNext (dossier .open-next/, non commité).
+  // - `nodejs_compat` est OBLIGATOIRE : le site utilise des API Node (Supabase SSR, etc.).
+  // - `global_fetch_strictly_public` : les appels fetch() sortent vers l'internet public
+  //   (recommandé par OpenNext pour éviter les boucles internes au worker).
+  // - `assets` sert les fichiers statiques (CSS, images, JS client) générés au build.
+  //
+  // Le nom `maintenant-movement` devient le nom du Worker et le préfixe de l'URL de test
+  // (maintenant-movement.<sous-domaine-du-compte>.workers.dev) avant le branchement du
+  // vrai domaine maintenant-le-mouvement.org.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "maintenant-movement",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}

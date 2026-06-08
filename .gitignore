@@ -10,6 +10,11 @@ out/
 build/
 dist/
 
+# Build/adaptateur Cloudflare (OpenNext) — généré, jamais commité
+.open-next/
+.wrangler/
+cloudflare-env.d.ts
+
 # Livrables de revue (zip volumineux, hors dépôt)
 dossier-revue-*.zip
 
