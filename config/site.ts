@@ -43,5 +43,18 @@ export const SITE = {
  * pour le SEO (metadataBase, Open Graph, sitemap).
  */
 export function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? SITE.urlProd;
+  const depuisEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  // Garde-fou production : on n'émet JAMAIS de lien `localhost` dans les emails
+  // (validation d'inscription, lien magique, réinitialisation de mot de passe)
+  // ni dans les redirections d'authentification. Si la variable de build est
+  // restée sur localhost alors qu'on tourne en production, on retombe sur
+  // l'URL canonique du site pour que les liens soient utilisables en ligne.
+  if (
+    depuisEnv === undefined ||
+    depuisEnv === '' ||
+    (process.env.NODE_ENV === 'production' && depuisEnv.includes('localhost'))
+  ) {
+    return SITE.urlProd;
+  }
+  return depuisEnv;
 }
