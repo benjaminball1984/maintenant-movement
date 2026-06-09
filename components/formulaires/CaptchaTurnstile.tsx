@@ -46,6 +46,7 @@ declare global {
           callback: (token: string) => void;
           'expired-callback'?: () => void;
           'error-callback'?: (code: string) => void;
+          appearance?: 'always' | 'execute' | 'interaction-only';
         },
       ) => string;
       reset: (widgetId?: string) => void;
@@ -86,6 +87,10 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
       callback: onChange,
       'expired-callback': onExpire,
       'error-callback': onError,
+      // Garde la case anti-robot toujours visible (et son état) plutôt que de
+      // la laisser se valider en arrière-plan : l'utilisateurice voit toujours
+      // qu'une vérification a lieu et quand elle est terminée.
+      appearance: 'always',
     });
     widgetIdRef.current = id;
 

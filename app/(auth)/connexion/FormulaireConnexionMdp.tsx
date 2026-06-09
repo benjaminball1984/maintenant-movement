@@ -22,6 +22,7 @@ export interface LibellesConnexionMdp {
   labelEmail: string;
   labelMotDePasse: string;
   alertErreurTitre: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesConnexionMdp = {
@@ -31,6 +32,8 @@ const LIBELLES_DEFAUT: LibellesConnexionMdp = {
   labelEmail: 'Email',
   labelMotDePasse: 'Mot de passe',
   alertErreurTitre: 'Connexion impossible',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 /**
@@ -52,11 +55,17 @@ export function FormulaireConnexionMdp({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesConnexionMdp>({
     resolver: zodResolver(creerConnexionMdpSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesConnexionMdp) {
     setErreurServeur(null);
@@ -124,7 +133,13 @@ export function FormulaireConnexionMdp({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button type="submit" disabled={envoiEnCours || !hydrate}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours
           ? libelles.ctaEnCours
           : !hydrate
