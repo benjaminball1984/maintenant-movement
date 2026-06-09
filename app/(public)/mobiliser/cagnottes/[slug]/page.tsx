@@ -47,7 +47,7 @@ const FALLBACKS = {
   sectionPresentation: 'Présentation',
   sectionSoutenir: 'Soutenir',
   cardDonEurosTitre: 'Don en euros',
-  cardDonEurosBadge: 'Frais 5 %',
+  cardDonEurosBadge: 'Frais 3 % + 0,30 €',
   cardDonT99cpTitre: 'Don en 99-coin',
   cardDonT99cpBadge: 'Frais 0 %',
   alertEurosIndisponibleTitre: 'Don en euros indisponible',
@@ -481,7 +481,7 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
                     cle="cagnottes.fiche.card_don_euros_badge"
                     valeurInitiale={cardDonEurosBadge.valeurMd}
                     estAdmin={estAdmin}
-                    libelle="badge frais 5 %"
+                    libelle="badge frais 3 % + 0,30 €"
                     longueurMax={20}
                   >
                     {(t) => <Badge variant="default">{t}</Badge>}

@@ -3,7 +3,7 @@
 import { getSession } from '@/lib/auth/session';
 import { obtenirOuCreerCaisseGlobale, poserEntreeCaisse } from '@/lib/caisse-flux';
 import { envoyerEmailTemplee } from '@/lib/email-templates';
-import { getPaymentService } from '@/lib/payments';
+import { calculerFraisEuros, getPaymentService, totalAvecFraisEuros } from '@/lib/payments';
 import { getSupabaseServer } from '@/lib/supabase';
 import { enregistrerHashConsomme } from '@/lib/t99cp/hashes-consommes';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -122,14 +122,19 @@ export async function adhererEuros(
   // on laisse une valeur factice.
   const stripeAccountId = process.env.STRIPE_TRESORERIE_ACCOUNT_ID ?? 'acct_mock_tresorerie';
 
+  // Frais 3 % + 0,30 € ajoutés au-dessus, à la charge de l'adhérent·e :
+  // l'association reçoit les 12 € pleins, l'adhérent·e règle 12 € + frais.
+  const fraisCentimes = calculerFraisEuros(MONTANT_ADHESION_EUR_CENTIMES);
+  const totalCentimes = totalAvecFraisEuros(MONTANT_ADHESION_EUR_CENTIMES);
+
   const checkout = await getPaymentService().demarrerCheckout({
-    montantTotalCentimes: MONTANT_ADHESION_EUR_CENTIMES,
+    montantTotalCentimes: totalCentimes,
     devise: 'EUR',
     email: session.email,
     urlSucces: `${origine}/agir/adherer/retour?session_id={CHECKOUT_SESSION_ID}&adhesion_id=${adhesion.id}`,
     urlAnnulation: `${origine}/agir/adherer/euros?annule=1`,
     stripeAccountId,
-    fraisPlateformeCentimes: 0,
+    fraisPlateformeCentimes: fraisCentimes,
     metadonnees: { adhesion_id: adhesion.id, personne_id: session.userId },
   });
 

@@ -294,10 +294,10 @@ export async function noterVendeureuse(donneesBrutes: unknown): Promise<Resultat
 /**
  * Initie un achat en ligne. Comportement par monnaie :
  *
- *   - EUR : on calcule les frais (5 %), on crée une session Stripe
- *     Checkout (mock par défaut), on retourne l'URL de redirection. Le
- *     produit passe en `reserve` ; la confirmation est faite par la
- *     route `/dons/retour` ou un webhook (chantier polish).
+ *   - EUR : on calcule les frais (3 % + 0,30 €, ajoutés au-dessus), on crée
+ *     une session Stripe Checkout (mock par défaut), on retourne l'URL de
+ *     redirection. Le produit passe en `reserve` ; la confirmation est faite
+ *     par la route `/dons/retour` ou un webhook (chantier polish).
  *   - T99CP : on attend un `tx_hash` côté front (signature wallet).
  *     Frais 0 %. Le produit passe directement en `vendu` (on suppose
  *     la transaction acceptée ; réconciliation côté admin si besoin).
@@ -370,10 +370,12 @@ export async function acheterProduit(
     const stripeAccountId =
       process.env.STRIPE_MARCHE_ACCOUNT_ID ??
       `acct_mock_marche_${produit.vendeureuse_id.slice(0, 8)}`;
-    // Frais plateforme calculés sur le prix du produit seul : pas de
-    // commission Maintenant! sur le port (CDC marché §Commission).
+    // Frais 3 % + 0,30 € calculés sur le prix du produit seul : pas de
+    // commission Maintenant! sur le port (CDC marché §Commission). Ajoutés
+    // au-dessus, à la charge de l'acheteur·euse : la vendeureuse reçoit le
+    // prix plein (+ le port), l'acheteur·euse règle prix + port + frais.
     const fraisCentimes = calculerFraisEuros(produit.prix_euros_centimes);
-    const montantTotalCentimes = produit.prix_euros_centimes + portCentimes;
+    const montantTotalCentimes = produit.prix_euros_centimes + portCentimes + fraisCentimes;
     const origine = await urlOrigine();
 
     // Réserve immédiatement pour bloquer les double-achats.

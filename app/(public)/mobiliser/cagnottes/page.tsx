@@ -13,7 +13,7 @@ import Link from 'next/link';
 
 const FALLBACKS = {
   intro:
-    'Don en euros (frais 5 % absorbés par la donatrice, paiement sécurisé Stripe) ou en 99-coin (frais 0 %). 3 types : ouvertes, caisses de lutte, cotisations.',
+    'Don en euros (frais 3 % + 0,30 € à la charge du·de la donateur·ice, paiement sécurisé Stripe) ou en 99-coin (frais 0 %). 3 types : ouvertes, caisses de lutte, cotisations.',
   ctaConnecte: 'Créer une cagnotte',
   ctaDeconnecte: 'Connecte-toi pour créer',
   emptyTitre: 'Aucune cagnotte publiée',

@@ -8,6 +8,7 @@ import {
   MESSAGES_VALIDATION_MARCHE_DEFAUT,
   type MessagesValidationMarche,
 } from '@/lib/messages-validation';
+import { calculerFraisEuros } from '@/lib/payments/frais';
 import { type DonneesAcheterProduit, creerAcheterProduitSchema } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -35,7 +36,9 @@ export interface LibellesAchat {
   remiseEnvoiLabel: string;
   /** Gabarit avec {port} (frais de port formaté). */
   remiseEnvoiAide: string;
-  /** Gabarit avec {total} et {port}. */
+  /** Gabarit avec {frais} : frais de transaction Stripe (3 % + 0,30 €). */
+  recapFraisEur: string;
+  /** Gabarit avec {total} : total à payer (prix + frais + port éventuel). */
   recapTotalEur: string;
   /** Gabarit avec {port}. */
   portT99CPNote: string;
@@ -48,8 +51,8 @@ export interface LibellesAchat {
 const LIBELLES_DEFAUT: LibellesAchat = {
   alertErreurTitre: 'Achat impossible',
   legendeMonnaie: 'Choisis la monnaie de paiement',
-  optionEurAide: 'Stripe Checkout. Frais plateforme 5 %.',
-  optionT99CPAide: 'Wallet T99CP. Frais 0 %.',
+  optionEurAide: 'Stripe Checkout. Frais 3 % + 0,30 € (à ta charge).',
+  optionT99CPAide: 'Wallet T99CP. Frais 0 % (hors gaz Polygon).',
   labelTxHash: 'Hash de transaction T99CP',
   placeholderTxHash: '0x... (64 caractères hexadécimaux)',
   hintTxHash:
@@ -67,7 +70,8 @@ const LIBELLES_DEFAUT: LibellesAchat = {
   remiseMainPropreAide: 'Rencontre physique, sans frais de port.',
   remiseEnvoiLabel: 'Envoi postal',
   remiseEnvoiAide: 'Frais de port : {port}, en sus du prix.',
-  recapTotalEur: 'Total à payer : {total} (dont {port} de frais de port).',
+  recapFraisEur: 'Frais de transaction Maintenant! : +{frais} (3 % + 0,30 €).',
+  recapTotalEur: 'Total à payer : {total}.',
   portT99CPNote:
     'Frais de port : {port}, à régler en POL (la monnaie native de Polygon) au taux du moment, en plus du prix en 99-coin.',
   alertePolTitre: 'Prévois du POL',
@@ -162,7 +166,10 @@ export function FormulaireAchat({
   const modeRemise = watch('mode_remise') ?? remiseDefaut;
   // Port effectivement facturé (helper pur partagé avec l'action serveur).
   const portApplique = portFactureCentimes({ modeRemise, envoiPostal, fraisPortCentimes });
-  const totalEurCentimes = prixEurosCentimes + portApplique;
+  // Frais 3 % + 0,30 € sur le prix du produit seul (jamais sur le port, cf. CDC).
+  // Ajoutés au total payé par l'acheteur·euse ; la vendeureuse reçoit prix + port.
+  const fraisEurCentimes = calculerFraisEuros(prixEurosCentimes);
+  const totalEurCentimes = prixEurosCentimes + portApplique + fraisEurCentimes;
 
   async function onSubmit(donnees: DonneesAcheterProduit) {
     setErreur(null);
@@ -278,13 +285,15 @@ export function FormulaireAchat({
         </p>
       ) : null}
 
-      {/* Récapitulatif du coût quand l'envoi facture un port. */}
-      {portApplique > 0 && monnaie === 'EUR' ? (
-        <p className="rounded-sm bg-surface-2 p-3 text-sm font-medium text-text-1">
-          {libelles.recapTotalEur
-            .replace('{total}', formaterEuros(totalEurCentimes))
-            .replace('{port}', formaterEuros(portApplique))}
-        </p>
+      {/* Récapitulatif du coût en euros : frais Maintenant! + total à payer
+          (prix + frais + port éventuel). La vendeureuse reçoit prix + port. */}
+      {monnaie === 'EUR' && aPrixEur ? (
+        <div className="grid gap-0.5 rounded-sm bg-surface-2 p-3 text-sm text-text-2">
+          <p>{libelles.recapFraisEur.replace('{frais}', formaterEuros(fraisEurCentimes))}</p>
+          <p className="font-medium text-text-1">
+            {libelles.recapTotalEur.replace('{total}', formaterEuros(totalEurCentimes))}
+          </p>
+        </div>
       ) : null}
 
       {portApplique > 0 && monnaie === 'T99CP' ? (

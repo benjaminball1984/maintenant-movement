@@ -2,11 +2,12 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button } from '@/components/ui';
-import { formaterEurosEntier } from '@/lib/format-euros';
+import { formaterEurosDecimales, formaterEurosEntier } from '@/lib/format-euros';
 import {
   MESSAGES_VALIDATION_ADHESION_DEFAUT,
   type MessagesValidationAdhesion,
 } from '@/lib/messages-validation';
+import { calculerFraisEuros, totalAvecFraisEuros } from '@/lib/payments/frais';
 import {
   type DonneesAdhererEuros,
   MONTANT_ADHESION_EUR_CENTIMES,
@@ -26,10 +27,19 @@ export interface LibellesAdhesionEuros {
 
 const LIBELLES_DEFAUT: LibellesAdhesionEuros = {
   alertErreurTitre: 'Paiement impossible',
-  description: 'Adhésion annuelle : {montant}. Paiement par carte via Stripe.',
+  description:
+    'Adhésion annuelle : {montant} pour le mouvement. Frais de transaction : +{frais} (3 % + 0,30 €). Total à payer par carte via Stripe : {total}.',
   ctaSubmitPrefixe: 'Payer',
   ctaEnCours: 'Redirection...',
 };
+
+/**
+ * Adhésion à montant fixe : on calcule une fois les frais (3 % + 0,30 €,
+ * à la charge de l'adhérent·e) et le total à payer. L'association reçoit
+ * les 12 € pleins ; l'adhérent·e règle 12 € + frais.
+ */
+const FRAIS_ADHESION_CENTIMES = calculerFraisEuros(MONTANT_ADHESION_EUR_CENTIMES);
+const TOTAL_ADHESION_CENTIMES = totalAvecFraisEuros(MONTANT_ADHESION_EUR_CENTIMES);
 
 interface FormulaireAdhesionEurosProps {
   adhererEuros: (
@@ -72,16 +82,16 @@ export function FormulaireAdhesionEuros({
         </Alert>
       ) : null}
       <p className="text-text-2">
-        {libelles.description.replace(
-          '{montant}',
-          formaterEurosEntier(MONTANT_ADHESION_EUR_CENTIMES / 100),
-        )}
+        {libelles.description
+          .replace('{montant}', formaterEurosEntier(MONTANT_ADHESION_EUR_CENTIMES / 100))
+          .replace('{frais}', formaterEurosDecimales(FRAIS_ADHESION_CENTIMES / 100))
+          .replace('{total}', formaterEurosDecimales(TOTAL_ADHESION_CENTIMES / 100))}
       </p>
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
       <Button type="submit" disabled={envoiEnCours}>
         {envoiEnCours
           ? libelles.ctaEnCours
-          : `${libelles.ctaSubmitPrefixe} ${formaterEurosEntier(MONTANT_ADHESION_EUR_CENTIMES / 100)}`}
+          : `${libelles.ctaSubmitPrefixe} ${formaterEurosDecimales(TOTAL_ADHESION_CENTIMES / 100)}`}
       </Button>
     </form>
   );

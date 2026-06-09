@@ -57,7 +57,8 @@ const LIBELLES_DEFAUT: LibellesCreationProduit = {
   placeholderTitre: 'Exemple : Vélo enfant 6-8 ans, bon état',
   labelDescription: 'Description',
   labelPrixEur: 'Prix en euros (centimes)',
-  hintPrixEur: 'Saisir en centimes : 1500 = 15 €. Frais plateforme 5 %.',
+  hintPrixEur:
+    'Saisir en centimes : 1500 = 15 €. Frais 3 % + 0,30 € à la charge de l’acheteur·euse (tu reçois le prix plein).',
   labelPrixT99CP: 'Prix en 99-coin (plus petites unités)',
   placeholderPrixT99CP: '0',
   hintPrixT99CP: 'Frais plateforme 0 %. Laisser à 0 si pas de prix en T99CP.',

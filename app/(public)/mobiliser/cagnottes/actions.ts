@@ -2,7 +2,7 @@
 
 import { getSession } from '@/lib/auth/session';
 import { obtenirOuCreerCaisseCagnotte, poserEntreeCaisse } from '@/lib/caisse-flux';
-import { calculerFraisEuros, getPaymentService } from '@/lib/payments';
+import { calculerFraisEuros, getPaymentService, totalAvecFraisEuros } from '@/lib/payments';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -163,8 +163,11 @@ export async function faireDonEuros(
     };
   }
 
+  // Frais 3 % + 0,30 € ajoutés au-dessus, à la charge du·de la donateur·ice :
+  // le porteur reçoit le montant plein (`montant_centimes`), le·la donateur·ice
+  // règle `montant + frais` (cf. `totalAvecFraisEuros`).
   const fraisCentimes = calculerFraisEuros(donnees.montant_centimes);
-  const montantNet = donnees.montant_centimes - fraisCentimes;
+  const totalCentimes = totalAvecFraisEuros(donnees.montant_centimes);
 
   const origine = await urlOrigine();
   const emailDon = donnees.email === '' || donnees.email === undefined ? null : donnees.email;
@@ -187,7 +190,7 @@ export async function faireDonEuros(
           ? null
           : donnees.code_postal,
       monnaie: 'EUR',
-      montant_centimes: montantNet,
+      montant_centimes: donnees.montant_centimes,
       frais_centimes: fraisCentimes,
       accepte_newsletter: donnees.accepte_newsletter,
       accepte_contact_createurice: donnees.accepte_contact_createurice,
@@ -204,7 +207,7 @@ export async function faireDonEuros(
   }
 
   const checkout = await getPaymentService().demarrerCheckout({
-    montantTotalCentimes: donnees.montant_centimes,
+    montantTotalCentimes: totalCentimes,
     devise: 'EUR',
     email: emailDon,
     urlSucces: `${origine}/dons/retour?session_id={CHECKOUT_SESSION_ID}&don_id=${donCree.id}`,

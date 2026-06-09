@@ -251,8 +251,8 @@ describe('acheterProduitSchema', () => {
 });
 
 describe('helpers monnaie (lib/marche/config)', () => {
-  it('calculerFraisEuros = 5 %', () => {
-    expect(calculerFraisEuros(10_000)).toBe(500);
+  it('calculerFraisEuros = 3 % + 0,30 €', () => {
+    expect(calculerFraisEuros(10_000)).toBe(330);
     expect(calculerFraisEuros(0)).toBe(0);
   });
 

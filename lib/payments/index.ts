@@ -53,4 +53,10 @@ export function resetPaymentService(): void {
 // `node:crypto`). On réexporte ici pour préserver l'API publique.
 // ============================================================
 
-export { TAUX_FRAIS_EUR, calculerFraisEuros, calculerFraisT99CP } from './frais';
+export {
+  FRAIS_FIXE_EUR_CENTIMES,
+  TAUX_FRAIS_EUR,
+  calculerFraisEuros,
+  calculerFraisT99CP,
+  totalAvecFraisEuros,
+} from './frais';

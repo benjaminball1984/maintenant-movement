@@ -4,7 +4,7 @@ import type { MonnaieMarcheMinimarche } from '@/types/database';
  * Configuration centralisée du Marché solidaire (chantier 4.3).
  *
  * Cf. `docs/specs/01_ARCHITECTURE.md §6F` : 3 onglets, 4 monnaies en
- * physique, 2 en ligne, frais 5 % EUR / 0 % T99CP, modération a
+ * physique, 2 en ligne, frais 3 % + 0,30 € EUR / 0 % T99CP, modération a
  * posteriori, notation 5 étoiles unilatérale.
  *
  * Ajouter une nouveauté = ajouter une ligne ici, pas refactor.
@@ -80,7 +80,7 @@ export const MONNAIES: Record<MonnaieMarcheMinimarche, ConfigMonnaie> = {
     code: 'EUR',
     libelle: 'Euros',
     enLigne: true,
-    aide: 'Stripe Checkout. Frais plateforme 5 %.',
+    aide: 'Stripe Checkout. Frais 3 % + 0,30 € (à la charge de l’acheteur·euse).',
   },
   G1: {
     code: 'G1',
@@ -101,7 +101,7 @@ export const MONNAIES_EN_LIGNE: MonnaieMarcheMinimarche[] = ['T99CP', 'EUR'];
 
 // ============================================================
 // Frais : on réexporte les helpers purs de `lib/payments/frais`
-// (pattern « 5 % EUR / 0 % T99CP », cf. cagnottes chantier 3.3).
+// (pattern « 3 % + 0,30 € EUR / 0 % T99CP », cf. doctrine des frais).
 // On évite `@/lib/payments` (index) pour ne pas tirer le service de
 // paiement côté client (qui dépend de `node:crypto`).
 // ============================================================

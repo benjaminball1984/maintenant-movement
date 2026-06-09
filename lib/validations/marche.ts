@@ -11,7 +11,7 @@ import { z } from 'zod';
  *   - 3 onglets : Produit / Boutique / Minimarché.
  *   - Toggle vente/don sur le même formulaire produit.
  *   - 4 monnaies en physique (T99CP, EUR, Ğ1, MNLC). 2 en ligne (T99CP, EUR).
- *   - Frais 5 % EUR, 0 % T99CP.
+ *   - Frais 3 % + 0,30 € EUR (à la charge de l'acheteur·euse), 0 % T99CP.
  *   - Retrait main propre OU envoi postal (port à la charge acheteureuse).
  *   - Notation 5 étoiles unilatérale acheteureuse → vendeureuse.
  */

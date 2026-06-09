@@ -46,7 +46,7 @@ export default async function PageProduits({ searchParams }: PageProduitsProps) 
           <Heading niveau={1}>Produits</Heading>
           <p className="mt-3 max-w-2xl text-text-2">
             Annonces entre particulier·ères : vente ou don gratuit. Double affichage T99CP/Euros,
-            frais 0 % T99CP, 5 % EUR.
+            frais 0 % T99CP, 3 % + 0,30 € EUR.
           </p>
         </div>
         <Link

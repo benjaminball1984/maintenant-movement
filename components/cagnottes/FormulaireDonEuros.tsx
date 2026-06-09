@@ -8,6 +8,7 @@ import {
   MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,
   type MessagesValidationCagnotte,
 } from '@/lib/messages-validation';
+import { calculerFraisEuros } from '@/lib/payments/frais';
 import { type DonneesFaireDonEuros, creerFaireDonEurosSchema } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -19,8 +20,10 @@ export interface LibellesDonEuros {
   labelMontant: string;
   /** Équivalent 99-coin affiché sous le montant. `{coins}` est remplacé. */
   equivalentCoinsPattern: string;
+  /** Décomposition du don. `{don}` (montant pour la cagnotte) et `{frais}` remplacés. */
   decompositionPattern: string;
   decompositionFraisLabel: string;
+  /** Libellé du total à payer, précédé du montant total (`{total}` implicite). */
   decompositionNetLabel: string;
   labelPrenom: string;
   labelNom: string;
@@ -37,9 +40,10 @@ const LIBELLES_DEFAUT: LibellesDonEuros = {
   alertErreurTitre: 'Don impossible',
   labelMontant: 'Montant en euros',
   equivalentCoinsPattern: 'soit {coins} 99-coin (parité 1 € = 1 99-coin)',
-  decompositionPattern: 'Décomposition : {brut} payés · {frais} de frais Maintenant! (5 %) ·',
-  decompositionFraisLabel: 'frais Maintenant!',
-  decompositionNetLabel: 'pour la cagnotte',
+  decompositionPattern:
+    'Tu donnes {don} à la cagnotte · +{frais} de frais de transaction (3 % + 0,30 €) ·',
+  decompositionFraisLabel: 'frais de transaction',
+  decompositionNetLabel: 'à payer au total',
   labelPrenom: 'Prénom (optionnel)',
   labelNom: 'Nom (optionnel)',
   labelEmail: 'Email (pour le reçu, optionnel)',
@@ -69,11 +73,12 @@ const FORMAT_COINS = new Intl.NumberFormat('fr-FR', {
  * Formulaire de don en euros (Client Component). Redirige vers Stripe
  * Checkout (URL mock ou réelle selon `PAYMENT_PROVIDER`).
  *
- * Le montant est saisi en euros (entiers de €), converti en centimes
- * pour la BDD/Server Action.
+ * Le montant saisi est ce qui revient au porteur (en euros entiers),
+ * converti en centimes pour la BDD/Server Action. Les frais (3 % + 0,30 €)
+ * sont ajoutés au-dessus, à la charge du·de la donateur·ice.
  *
- * Frais : on affiche en clair la décomposition « X € − 5% frais = Y € »
- * pour la cagnotte, conformément à la transparence demandée (spec §5D).
+ * Frais : on affiche en clair la décomposition « tu donnes X € · +Y € de
+ * frais · Z € à payer au total », conformément à la transparence demandée.
  */
 export function FormulaireDonEuros({
   cagnotteId,
@@ -129,8 +134,9 @@ export function FormulaireDonEuros({
     window.location.href = resultat.urlRedirection;
   }
 
-  const frais = Math.round(montantEuros * 100 * 0.05);
-  const net = montantEuros * 100 - frais;
+  const montantCentimes = Math.round(montantEuros * 100);
+  const frais = calculerFraisEuros(montantCentimes);
+  const total = montantCentimes + frais;
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -185,10 +191,10 @@ export function FormulaireDonEuros({
             </p>
             <p className="mt-1 text-xs text-text-3">
               {libelles.decompositionPattern
-                .replace('{brut}', formaterEurosDecimales(montantEuros))
+                .replace('{don}', formaterEurosDecimales(montantEuros))
                 .replace('{frais}', formaterEurosDecimales(frais / 100))}{' '}
               <strong className="text-text-2">
-                {formaterEurosDecimales(net / 100)} {libelles.decompositionNetLabel}
+                {formaterEurosDecimales(total / 100)} {libelles.decompositionNetLabel}
               </strong>
               .
             </p>

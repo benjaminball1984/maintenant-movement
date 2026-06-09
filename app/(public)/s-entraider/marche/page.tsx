@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const FALLBACKS = {
   intro:
-    'Vente ou don gratuit entre particulier·ères, boutiques éphémères, minimarchés physiques. Frais 5 % en euros, 0 % en 99-coin (T99CP). Notation 5 étoiles unilatérale.',
+    'Vente ou don gratuit entre particulier·ères, boutiques éphémères, minimarchés physiques. Frais 3 % + 0,30 € en euros (à la charge de l’acheteur·euse), 0 % en 99-coin (T99CP). Notation 5 étoiles unilatérale.',
   cardLabel: 'Onglet',
   conditionsTitre: "Conditions d'usage du Marché solidaire",
   conditions:

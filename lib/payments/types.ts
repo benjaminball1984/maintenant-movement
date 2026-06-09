@@ -10,7 +10,7 @@
  *   - `stripe_test` (prod test) : Stripe en mode test (clés sk_test_...).
  *   - `stripe_live` (prod réelle) : Stripe en mode live.
  *
- * Les frais sont calculés côté app (5 % sur EUR, 0 % sur T99CP) avant
+ * Les frais sont calculés côté app (3 % + 0,30 € sur EUR, 0 % sur T99CP) avant
  * d'appeler le service.
  */
 

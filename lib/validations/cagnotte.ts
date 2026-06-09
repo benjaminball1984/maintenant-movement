@@ -9,7 +9,7 @@ import { z } from 'zod';
  *
  * Cf. `docs/specs/01_ARCHITECTURE.md §5D` :
  *   3 sous-types (ouverte | lutte | cotisation), Stripe Checkout + Stripe
- *   Connect KYC pour les euros, T99CP via wallet, frais 5%€/0%T99CP.
+ *   Connect KYC pour les euros, T99CP via wallet, frais 3 % + 0,30 € EUR / 0 % T99CP.
  */
 
 // ============================================================
@@ -59,8 +59,10 @@ export type DonneesCreerCagnotte = z.infer<typeof creerCagnotteSchema>;
 /**
  * Don en euros. La donatrice peut être anonyme ou connectée.
  *
- * `montant_centimes` est le **montant total débité** ; les frais (5 %) sont
- * déduits par la Server Action avant insertion (cf. `calculerFraisEuros`).
+ * `montant_centimes` est le **montant destiné au porteur** (ce qu'il reçoit
+ * en plein). Les frais (3 % + 0,30 €) sont **ajoutés au-dessus** par la
+ * Server Action, à la charge du·de la donateur·ice : le total débité vaut
+ * `montant + frais` (cf. `calculerFraisEuros` / `totalAvecFraisEuros`).
  */
 export function creerFaireDonEurosSchema(
   messages: MessagesValidationCagnotte = MESSAGES_VALIDATION_CAGNOTTE_DEFAUT,

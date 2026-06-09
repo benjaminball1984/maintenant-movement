@@ -30,9 +30,9 @@ export default async function PageCreationCagnotte() {
           Créer une cagnotte
         </Heading>
         <p className="mt-3 max-w-2xl text-text-2">
-          Cagnotte ouverte ou caisse de lutte. Don en euros (frais 5 %, paiement Stripe sécurisé) ou
-          en 99-coin (frais 0 %, via wallet). Modération a posteriori : ta cagnotte est en ligne
-          immédiatement, suspendable par l'équipe en cas de problème.
+          Cagnotte ouverte ou caisse de lutte. Don en euros (frais 3 % + 0,30 €, paiement Stripe
+          sécurisé) ou en 99-coin (frais 0 %, via wallet). Modération a posteriori : ta cagnotte est
+          en ligne immédiatement, suspendable par l'équipe en cas de problème.
         </p>
       </header>
 
