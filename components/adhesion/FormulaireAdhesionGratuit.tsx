@@ -9,7 +9,7 @@ import {
 import { type DonneesAdhererGratuit, creerAdhererGratuitSchema } from '@/lib/validations/adhesion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.144). */
@@ -19,6 +19,7 @@ export interface LibellesAdhesionGratuit {
   alertSuccesMessage: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesAdhesionGratuit = {
@@ -28,6 +29,8 @@ const LIBELLES_DEFAUT: LibellesAdhesionGratuit = {
     'Ton adhésion gratuite est active pour 365 jours. On te rappelle pour le renouvellement par mail le moment venu.',
   ctaSubmit: 'Adhérer gratuitement',
   ctaEnCours: 'Adhésion en cours...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireAdhesionGratuitProps {
@@ -50,15 +53,25 @@ export function FormulaireAdhesionGratuit({
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesAdhererGratuit>({
     resolver: zodResolver(creerAdhererGratuitSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesAdhererGratuit) {
     setErreur(null);
@@ -89,10 +102,15 @@ export function FormulaireAdhesionGratuit({
         </Alert>
       ) : null}
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
       {errors.token_turnstile !== undefined ? (
         <p className="text-xs text-danger">{errors.token_turnstile.message}</p>
       ) : null}
-      <Button type="submit" disabled={envoiEnCours}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

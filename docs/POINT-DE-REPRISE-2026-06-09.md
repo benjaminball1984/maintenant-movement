@@ -57,8 +57,8 @@ captcha + redirections OK).
 
 ## 3. En attente / à faire (par ordre logique)
 
-1. **Vérifier le lien magique** (dernier déploiement) : Ben doit redemander un
-   NOUVEAU lien magique et confirmer qu'il pointe bien vers le vrai domaine.
+1. ~~**Vérifier le lien magique**~~ ✅ FAIT (2026-06-09) : Ben a confirmé que le
+   nouveau lien magique fonctionne et pointe bien vers le vrai domaine.
 2. **Stripe (paiements)** — BLOQUÉ : Ben a un compte
    (`lifebenjaminaeron.ball@gmail.com`) mais le 2FA (passkey « Multipass ») ne
    passe pas. Il a lancé la **réinitialisation 2FA Stripe** → email de suivi
@@ -72,8 +72,9 @@ captcha + redirections OK).
 5. **Plan Workers Paid (~5 $/mois)** : recommandé pour la fiabilité (éviter le
    retour de l'erreur 1102 sous charge). Paiement à faire par Ben. Non bloquant
    (les pages répondent actuellement en 200).
-6. **Propager le fix « bouton bloqué tant que captcha non validé »** aux ~30
-   autres formulaires (fait seulement sur la connexion mot de passe).
+6. ~~**Propager le fix « bouton bloqué tant que captcha non validé »**~~ ✅ FAIT
+   (2026-06-09, V2.6.80) : propagé aux 29 formulaires restants. Manifest :
+   `docs/manifests/v2-6-80-propagation-fix-captcha.md`.
 7. **Services encore en stub** : LiveKit (visio), Polygon/99-coin.
 8. **Bucket `justificatifs`** (stockage privé) : à créer + règles d'accès.
 

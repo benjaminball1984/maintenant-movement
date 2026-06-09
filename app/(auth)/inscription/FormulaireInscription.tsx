@@ -45,6 +45,7 @@ export interface LibellesInscription {
   alertDejaInscritTitre: string;
   lienAllerConnexion: string;
   lienResetMdp: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesInscription = {
@@ -69,6 +70,8 @@ const LIBELLES_DEFAUT: LibellesInscription = {
   alertDejaInscritTitre: 'Email déjà inscrit',
   lienAllerConnexion: 'Aller à la connexion',
   lienResetMdp: 'Réinitialiser mon mot de passe',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 /**
@@ -103,6 +106,7 @@ export function FormulaireInscription({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesInscription>({
     resolver: zodResolver(creerInscriptionSchema(messages)),
@@ -111,6 +115,11 @@ export function FormulaireInscription({
       cgu_acceptees: false,
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesInscription) {
     setErreurServeur(null);
@@ -351,8 +360,13 @@ export function FormulaireInscription({
           {errors.token_turnstile.message}
         </p>
       ) : null}
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
 
-      <Button type="submit" disabled={envoiEnCours || !hydrate}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours
           ? libelles.ctaEnCours
           : !hydrate

@@ -11,7 +11,7 @@ import {
 import { calculerFraisEuros } from '@/lib/payments/frais';
 import { type DonneesFaireDonEuros, creerFaireDonEurosSchema } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.145). */
@@ -34,6 +34,7 @@ export interface LibellesDonEuros {
   ctaSubmitPrefixe: string;
   ctaEnCours: string;
   noteStripe: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesDonEuros = {
@@ -54,6 +55,8 @@ const LIBELLES_DEFAUT: LibellesDonEuros = {
   ctaEnCours: 'Redirection vers Stripe...',
   noteStripe:
     'Paiement sécurisé par Stripe. En mode local de développement, le paiement est simulé.',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireDonEurosProps {
@@ -89,11 +92,16 @@ export function FormulaireDonEuros({
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [montantEuros, setMontantEuros] = useState<number>(20);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesFaireDonEuros>({
     resolver: zodResolver(creerFaireDonEurosSchema(messages)),
@@ -109,6 +117,11 @@ export function FormulaireDonEuros({
       token_turnstile: '',
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   function gererMontantChange(e: React.ChangeEvent<HTMLInputElement>) {
     const valeur = Number(e.target.value);
@@ -264,7 +277,16 @@ export function FormulaireDonEuros({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button type="submit" disabled={envoiEnCours || montantEuros < 1}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button
+        type="submit"
+        disabled={envoiEnCours || montantEuros < 1 || !hydrate || !captchaValide}
+      >
         {envoiEnCours
           ? libelles.ctaEnCours
           : `${libelles.ctaSubmitPrefixe} ${formaterEurosDecimales(montantEuros)}`}

@@ -10,7 +10,7 @@ import {
 import { type DonneesCreerMinimarche, creerMinimarcheFactory } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.152). */
@@ -28,6 +28,7 @@ export interface LibellesCreationMinimarche {
   libelleImage: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesCreationMinimarche = {
@@ -45,6 +46,8 @@ const LIBELLES_DEFAUT: LibellesCreationMinimarche = {
   libelleImage: 'Image illustrative (optionnelle)',
   ctaSubmit: 'Annoncer le minimarché',
   ctaEnCours: 'Publication...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireCreationMinimarcheProps {
@@ -63,6 +66,10 @@ export function FormulaireCreationMinimarche({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
@@ -87,6 +94,11 @@ export function FormulaireCreationMinimarche({
   });
 
   const monnaies = watch('monnaies_acceptees');
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   function toggleMonnaie(code: (typeof MONNAIES_PHYSIQUES)[number]) {
     const ensemble = new Set(monnaies);
@@ -226,7 +238,13 @@ export function FormulaireCreationMinimarche({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button type="submit" disabled={envoiEnCours}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

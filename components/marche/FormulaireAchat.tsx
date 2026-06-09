@@ -12,7 +12,7 @@ import { calculerFraisEuros } from '@/lib/payments/frais';
 import { type DonneesAcheterProduit, creerAcheterProduitSchema } from '@/lib/validations/marche';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.150). */
@@ -46,6 +46,7 @@ export interface LibellesAchat {
   alertePolMessage: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesAchat = {
@@ -79,6 +80,8 @@ const LIBELLES_DEFAUT: LibellesAchat = {
     'Les frais de port se paient en POL (la monnaie native du réseau Polygon), au taux du moment, en plus du gaz de transaction. Garde un peu de POL dans ton wallet pour couvrir l’envoi.',
   ctaSubmit: 'Confirmer l’achat',
   ctaEnCours: 'Traitement...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireAchatProps {
@@ -128,6 +131,10 @@ export function FormulaireAchat({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const aPrixEur = prixEurosCentimes > 0;
   let aPrixT99CP = false;
@@ -170,6 +177,11 @@ export function FormulaireAchat({
   // Ajoutés au total payé par l'acheteur·euse ; la vendeureuse reçoit prix + port.
   const fraisEurCentimes = calculerFraisEuros(prixEurosCentimes);
   const totalEurCentimes = prixEurosCentimes + portApplique + fraisEurCentimes;
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesAcheterProduit) {
     setErreur(null);
@@ -353,7 +365,13 @@ export function FormulaireAchat({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button type="submit" disabled={envoiEnCours}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

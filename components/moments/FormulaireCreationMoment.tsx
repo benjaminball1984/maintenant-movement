@@ -13,7 +13,7 @@ import {
 } from '@/lib/validations/moments';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.149). */
@@ -32,6 +32,7 @@ export interface LibellesCreationMoment {
   labelCapacite: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesCreationMoment = {
@@ -50,6 +51,8 @@ const LIBELLES_DEFAUT: LibellesCreationMoment = {
   labelCapacite: 'Capacité maximale (optionnel)',
   ctaSubmit: 'Publier le moment',
   ctaEnCours: 'Publication...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireProps {
@@ -68,6 +71,10 @@ export function FormulaireCreationMoment({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
@@ -94,6 +101,11 @@ export function FormulaireCreationMoment({
   });
 
   const type = watch('type');
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesCreerMomentSolidaire) {
     setErreur(null);
@@ -222,8 +234,13 @@ export function FormulaireCreationMoment({
       </div>
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
 
-      <Button type="submit" disabled={envoiEnCours}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

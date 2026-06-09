@@ -2,7 +2,10 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Input, Label } from '@/components/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const MESSAGE_CAPTCHA_EN_ATTENTE =
+  'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.';
 
 interface BoutonParticiperMomentProps {
   momentId: string;
@@ -20,6 +23,15 @@ export function BoutonParticiperMoment({
   const [erreur, setErreur] = useState<string | null>(null);
   const [succes, setSucces] = useState(false);
   const [enCours, setEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = token !== '';
 
   async function envoyer() {
     setErreur(null);
@@ -81,12 +93,17 @@ export function BoutonParticiperMoment({
         </div>
       </div>
       <CaptchaTurnstile onChange={setToken} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {MESSAGE_CAPTCHA_EN_ATTENTE}
+        </p>
+      ) : null}
       {erreur !== null ? (
         <Alert variant="danger" titre="Inscription impossible">
           {erreur}
         </Alert>
       ) : null}
-      <Button onClick={envoyer} disabled={enCours || token === ''}>
+      <Button onClick={envoyer} disabled={enCours || !hydrate || !captchaValide}>
         {enCours ? 'Envoi...' : 'Je participe'}
       </Button>
     </div>

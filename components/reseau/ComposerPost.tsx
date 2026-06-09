@@ -5,7 +5,14 @@ import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button, Label, Textarea } from '@/components/ui';
 import { ChampImageObjet } from '@/components/ui/ChampImageObjet';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+/**
+ * Message d'attente affiché tant que la vérification anti-robot (captcha
+ * Cloudflare Turnstile) n'a pas fourni son jeton. Texte éditable au besoin.
+ */
+const MESSAGE_CAPTCHA_EN_ATTENTE =
+  'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.';
 
 /**
  * Zone de rédaction d'une publication (réseau social). Sobre, sans captation
@@ -20,6 +27,15 @@ export function ComposerPost() {
   const [enCours, setEnCours] = useState(false);
   // Message d'état annoncé aux lecteurs d'écran (région live masquée).
   const [messageStatut, setMessageStatut] = useState('');
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = token !== '';
 
   const publier = async (evenement: React.FormEvent) => {
     evenement.preventDefault();
@@ -71,9 +87,17 @@ export function ComposerPost() {
         {messageStatut}
       </span>
       <CaptchaTurnstile onChange={setToken} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {MESSAGE_CAPTCHA_EN_ATTENTE}
+        </p>
+      ) : null}
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-text-3">{texte.length}/5000 caractères</p>
-        <Button type="submit" disabled={enCours || texte.trim() === ''}>
+        <Button
+          type="submit"
+          disabled={enCours || texte.trim() === '' || !hydrate || !captchaValide}
+        >
           {enCours ? 'Publication...' : 'Publier'}
         </Button>
       </div>

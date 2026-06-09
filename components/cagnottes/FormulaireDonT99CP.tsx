@@ -10,7 +10,7 @@ import {
 } from '@/lib/messages-validation';
 import { type DonneesFaireDonT99CP, creerFaireDonT99CPSchema } from '@/lib/validations/cagnotte';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.145). */
@@ -32,6 +32,7 @@ export interface LibellesDonT99CP {
   ctaOuvrirWallet: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesDonT99CP = {
@@ -53,6 +54,8 @@ const LIBELLES_DEFAUT: LibellesDonT99CP = {
   ctaOuvrirWallet: 'Ouvrir the99coinproject.org pour payer',
   ctaSubmit: 'Enregistrer le don T99CP',
   ctaEnCours: 'Enregistrement...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireDonT99CPProps {
@@ -87,6 +90,10 @@ export function FormulaireDonT99CP({
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [confirme, setConfirme] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
@@ -136,6 +143,11 @@ export function FormulaireDonT99CP({
     Number.isFinite(coinsSaisis) && coinsSaisis > 0
       ? formaterEurosDepuisCentimes(coinsEnCentimes(coinsSaisis))
       : '';
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -221,8 +233,13 @@ export function FormulaireDonT99CP({
       </div>
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
 
-      <Button type="submit" disabled={envoiEnCours}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

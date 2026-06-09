@@ -2,7 +2,10 @@
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button } from '@/components/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const MESSAGE_CAPTCHA_EN_ATTENTE =
+  'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.';
 
 interface BoutonRejoindreCommuneProps {
   communeId: string;
@@ -35,6 +38,15 @@ export function BoutonRejoindreCommune({
   const [confirme, setConfirme] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = tokenTurnstile !== '';
 
   if (dejaMembre) {
     return (
@@ -100,6 +112,11 @@ export function BoutonRejoindreCommune({
         </label>
       ) : null}
       <CaptchaTurnstile onChange={setTokenTurnstile} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {MESSAGE_CAPTCHA_EN_ATTENTE}
+        </p>
+      ) : null}
       <Button
         onClick={async () => {
           if (palier !== 'direct' && !confirme) {
@@ -116,7 +133,7 @@ export function BoutonRejoindreCommune({
           setEnCours(false);
           if (!resultat.ok) setErreur(resultat.message);
         }}
-        disabled={enCours || tokenTurnstile === ''}
+        disabled={enCours || !hydrate || !captchaValide}
       >
         {enCours ? 'Adhésion en cours...' : 'Rejoindre cette commune'}
       </Button>

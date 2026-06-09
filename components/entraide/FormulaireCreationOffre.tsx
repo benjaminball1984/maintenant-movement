@@ -14,7 +14,7 @@ import {
 import type { TypeOffreEntraide } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.149). */
@@ -36,6 +36,7 @@ export interface LibellesCreationOffre {
   ctaSubmit: string;
   ctaEnCours: string;
   notePublication: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesCreationOffre = {
@@ -57,6 +58,8 @@ const LIBELLES_DEFAUT: LibellesCreationOffre = {
   ctaEnCours: 'Publication...',
   notePublication:
     'Publication immédiate (modération a posteriori). Le contact passe par la messagerie interne du réseau social.',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireCreationOffreProps {
@@ -87,11 +90,16 @@ export function FormulaireCreationOffre({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesCreerOffreEntraide>({
     resolver: zodResolver(creerOffreEntraideFactory(messages)),
@@ -108,6 +116,11 @@ export function FormulaireCreationOffre({
       token_turnstile: '',
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   function gererGeoChange(champ: 'latitude' | 'longitude') {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,8 +269,13 @@ export function FormulaireCreationOffre({
       />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
 
-      <Button type="submit" disabled={envoiEnCours}>
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
       <p className="-mt-2 text-xs text-text-3">{libelles.notePublication}</p>

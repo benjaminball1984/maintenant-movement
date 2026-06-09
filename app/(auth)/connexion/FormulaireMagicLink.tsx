@@ -20,6 +20,7 @@ export interface LibellesMagicLink {
   ctaChargement: string;
   labelEmail: string;
   alertErreurTitre: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesMagicLink = {
@@ -28,6 +29,8 @@ const LIBELLES_DEFAUT: LibellesMagicLink = {
   ctaChargement: 'Chargement…',
   labelEmail: 'Email',
   alertErreurTitre: 'Envoi impossible',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 /**
@@ -50,11 +53,17 @@ export function FormulaireMagicLink({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesMagicLink>({
     resolver: zodResolver(creerMagicLinkSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesMagicLink) {
     setErreurServeur(null);
@@ -105,7 +114,13 @@ export function FormulaireMagicLink({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button variant="ghost" type="submit" disabled={envoiEnCours || !hydrate}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button variant="ghost" type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours
           ? libelles.ctaEnCours
           : !hydrate

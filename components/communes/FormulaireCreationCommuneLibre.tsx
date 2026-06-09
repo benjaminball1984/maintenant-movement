@@ -12,7 +12,7 @@ import {
 } from '@/lib/validations/communes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.149). */
@@ -25,6 +25,7 @@ export interface LibellesCreationCommuneLibre {
   placeholderCodePostal: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesCreationCommuneLibre = {
@@ -36,6 +37,8 @@ const LIBELLES_DEFAUT: LibellesCreationCommuneLibre = {
   placeholderCodePostal: '75020',
   ctaSubmit: 'Créer la commune libre',
   ctaEnCours: 'Création...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireCreationCommuneLibreProps {
@@ -54,11 +57,16 @@ export function FormulaireCreationCommuneLibre({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesCreerCommuneLibre>({
     resolver: zodResolver(creerCommuneLibreFactory(messages)),
@@ -71,6 +79,11 @@ export function FormulaireCreationCommuneLibre({
       token_turnstile: '',
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesCreerCommuneLibre) {
     setErreur(null);
@@ -118,7 +131,12 @@ export function FormulaireCreationCommuneLibre({
         </div>
       </div>
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
-      <Button type="submit" disabled={envoiEnCours}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

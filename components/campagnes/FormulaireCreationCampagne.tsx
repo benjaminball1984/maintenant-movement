@@ -19,7 +19,7 @@ import { type DonneesCreerCampagne, creerCampagneFactory } from '@/lib/validatio
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FileText, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Libelles surchargeables admin via CMS (V2.4.149). */
@@ -33,6 +33,7 @@ export interface LibellesCreationCampagne {
   labelImage: string;
   ctaSubmit: string;
   ctaEnCours: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesCreationCampagne = {
@@ -47,6 +48,8 @@ const LIBELLES_DEFAUT: LibellesCreationCampagne = {
   labelImage: 'Image illustrative (optionnelle)',
   ctaSubmit: 'Soumettre pour modération',
   ctaEnCours: 'Envoi...',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 interface FormulaireCreationCampagneProps {
@@ -77,6 +80,10 @@ export function FormulaireCreationCampagne({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
   const [declarationOrg, setDeclarationOrg] =
     useState<DeclarationOrgInitiatrice>(DECLARATION_ORG_DEFAUT);
   // V2.5.51 : switch Riche/Markdown pour la presentation.
@@ -99,6 +106,11 @@ export function FormulaireCreationCampagne({
       token_turnstile: '',
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesCreerCampagne) {
     setErreur(null);
@@ -248,9 +260,14 @@ export function FormulaireCreationCampagne({
       />
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={envoiEnCours}>
+        <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
           {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
         </Button>
       </div>

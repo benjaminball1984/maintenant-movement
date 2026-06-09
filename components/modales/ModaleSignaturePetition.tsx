@@ -34,6 +34,7 @@ export interface LibellesSignaturePetition {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaAnnuler: string;
+  messageCaptchaEnAttente?: string;
   /** V2.5.6 Phase E : tunnel post-signature. */
   tunnelTitre: string;
   tunnelIntro: string;
@@ -65,6 +66,8 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   ctaSubmit: 'Signer maintenant',
   ctaEnCours: 'Envoi en cours...',
   ctaAnnuler: 'Annuler',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
   tunnelTitre: 'Aller plus loin avec Maintenant!',
   tunnelIntro:
     "Tu viens de t'engager. Si tu veux peser davantage, deux portes simples s'ouvrent à toi :",
@@ -115,11 +118,16 @@ export function ModaleSignaturePetition({
   const [merci, setMerci] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     formState: { errors },
   } = useForm<DonneesSignerPetition>({
@@ -131,6 +139,11 @@ export function ModaleSignaturePetition({
       token_turnstile: '',
     },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   function ouvrir() {
     setMerci(false);
@@ -371,8 +384,14 @@ export function ModaleSignaturePetition({
 
             <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
+            {hydrate && !captchaValide ? (
+              <p className="text-xs text-text-3" aria-live="polite">
+                {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+              </p>
+            ) : null}
+
             <div className="mt-2 flex gap-3">
-              <Button type="submit" disabled={envoiEnCours}>
+              <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
                 {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
               </Button>
               <Button type="button" variant="ghost" onClick={fermer}>

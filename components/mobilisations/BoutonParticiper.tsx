@@ -4,6 +4,13 @@ import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import { Alert, Button } from '@/components/ui';
 import { useEffect, useState } from 'react';
 
+/**
+ * Message d'attente affiché tant que la vérification anti-robot (captcha
+ * Cloudflare Turnstile) n'a pas fourni son jeton. Texte éditable.
+ */
+const MESSAGE_CAPTCHA_EN_ATTENTE =
+  'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.';
+
 interface BoutonParticiperProps {
   mobilisationId: string;
   /** Server Action à appeler pour participer. */
@@ -45,6 +52,15 @@ export function BoutonParticiper({
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [tokenTurnstile, setTokenTurnstile] = useState('');
   const [messageStatut, setMessageStatut] = useState('');
+  const [hydrate, setHydrate] = useState(false);
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = tokenTurnstile !== '';
 
   // Lecture du cookie anonyme au montage (seulement si la personne
   // n'est pas connectée : pour la connectée, la BDD est la source).
@@ -117,7 +133,12 @@ export function BoutonParticiper({
       ) : (
         <>
           <CaptchaTurnstile onChange={setTokenTurnstile} />
-          <Button onClick={participer} disabled={envoiEnCours}>
+          {hydrate && !captchaValide ? (
+            <p className="text-xs text-text-3" aria-live="polite">
+              {MESSAGE_CAPTCHA_EN_ATTENTE}
+            </p>
+          ) : null}
+          <Button onClick={participer} disabled={envoiEnCours || !hydrate || !captchaValide}>
             {envoiEnCours ? 'Enregistrement...' : 'Je participe'}
           </Button>
           <p className="text-xs text-text-3">

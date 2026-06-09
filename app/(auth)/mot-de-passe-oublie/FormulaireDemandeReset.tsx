@@ -20,6 +20,7 @@ export interface LibellesDemandeReset {
   ctaSubmit: string;
   ctaEnCours: string;
   ctaChargement: string;
+  messageCaptchaEnAttente?: string;
 }
 
 const LIBELLES_DEFAUT: LibellesDemandeReset = {
@@ -28,6 +29,8 @@ const LIBELLES_DEFAUT: LibellesDemandeReset = {
   ctaSubmit: 'Recevoir un lien de réinitialisation',
   ctaEnCours: 'Envoi en cours...',
   ctaChargement: 'Chargement…',
+  messageCaptchaEnAttente:
+    'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
 };
 
 /**
@@ -52,11 +55,17 @@ export function FormulaireDemandeReset({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DonneesDemandeReset>({
     resolver: zodResolver(creerDemandeResetSchema(messages)),
     defaultValues: { token_turnstile: '' },
   });
+
+  // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
+  // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
+  // qui échouait silencieusement) et un message explique l'attente.
+  const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
   async function onSubmit(donnees: DonneesDemandeReset) {
     setErreurServeur(null);
@@ -107,7 +116,13 @@ export function FormulaireDemandeReset({
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
-      <Button type="submit" disabled={envoiEnCours || !hydrate}>
+      {hydrate && !captchaValide ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+
+      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
         {envoiEnCours
           ? libelles.ctaEnCours
           : !hydrate
