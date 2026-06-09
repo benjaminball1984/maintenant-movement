@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 /**
  * Composant captcha anti-bot.
@@ -60,47 +60,81 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const conteneurId = useId();
   const widgetIdRef = useRef<string | null>(null);
-  const [scriptCharge, setScriptCharge] = useState(false);
+
+  // Les callbacks sont gardés dans des refs pour que l'effet de montage du
+  // widget ne dépende pas de leur identité. Les formulaires parents passent
+  // souvent des fonctions inline, recréées à chaque rendu : sans ces refs,
+  // l'effet se relancerait en boucle (démontage/remontage du widget).
+  const onChangeRef = useRef(onChange);
+  const onExpireRef = useRef(onExpire);
+  const onErrorRef = useRef(onError);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onExpireRef.current = onExpire;
+    onErrorRef.current = onError;
+  });
 
   // Mode mock : on retourne immédiatement le token fictif.
   useEffect(() => {
     if (provider === 'mock') {
-      onChange(TOKEN_MOCK_VALIDE);
+      onChangeRef.current(TOKEN_MOCK_VALIDE);
     }
-  }, [provider, onChange]);
+  }, [provider]);
 
-  // Mode cloudflare : on monte le widget une fois le script chargé.
+  // Mode cloudflare : on monte le widget dès que l'API Turnstile est prête.
+  //
+  // On NE se repose PAS sur le seul `onLoad` du <Script> : il peut ne pas se
+  // redéclencher en navigation interne (script déjà présent) ou se déclencher
+  // avant que `window.turnstile` soit réellement utilisable. On interroge donc
+  // l'API en boucle courte jusqu'à ce qu'elle réponde. Corrige le bug où le
+  // widget n'apparaissait qu'après un rafraîchissement de la page.
   useEffect(() => {
-    if (provider !== 'cloudflare' || !scriptCharge) {
-      return;
-    }
+    if (provider !== 'cloudflare') return;
     if (siteKey === undefined || siteKey === '') {
-      onError?.('site-key-manquante');
+      onErrorRef.current?.('site-key-manquante');
       return;
     }
-    if (window.turnstile === undefined) {
-      return;
-    }
+    // siteKey est désormais une chaîne non vide ; on la capture pour la closure.
+    const cleSite = siteKey;
 
-    const id = window.turnstile.render(`#${conteneurId.replace(/:/g, '\\:')}`, {
-      sitekey: siteKey,
-      callback: onChange,
-      'expired-callback': onExpire,
-      'error-callback': onError,
-      // Garde la case anti-robot toujours visible (et son état) plutôt que de
-      // la laisser se valider en arrière-plan : l'utilisateurice voit toujours
-      // qu'une vérification a lieu et quand elle est terminée.
-      appearance: 'always',
-    });
-    widgetIdRef.current = id;
+    let annule = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let essais = 0;
+    const MAX_ESSAIS = 50; // ~7,5 s (50 x 150 ms) avant d'abandonner.
+
+    function monterWidget() {
+      if (annule || widgetIdRef.current !== null) return;
+      if (window.turnstile === undefined) {
+        essais += 1;
+        if (essais > MAX_ESSAIS) {
+          onErrorRef.current?.('script-non-charge');
+          return;
+        }
+        timer = setTimeout(monterWidget, 150);
+        return;
+      }
+      widgetIdRef.current = window.turnstile.render(`#${conteneurId.replace(/:/g, '\\:')}`, {
+        sitekey: cleSite,
+        callback: (token) => onChangeRef.current(token),
+        'expired-callback': () => onExpireRef.current?.(),
+        'error-callback': (code) => onErrorRef.current?.(code),
+        // Garde la case anti-robot toujours visible (et son état) plutôt que de
+        // la laisser se valider en arrière-plan : l'utilisateurice voit toujours
+        // qu'une vérification a lieu et quand elle est terminée.
+        appearance: 'always',
+      });
+    }
+    monterWidget();
 
     return () => {
-      if (widgetIdRef.current !== null && window.turnstile !== undefined) {
+      annule = true;
+      if (timer !== undefined) clearTimeout(timer);
+      if (widgetIdRef.current !== null && window.turnstile?.remove !== undefined) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
       }
     };
-  }, [provider, siteKey, scriptCharge, conteneurId, onChange, onExpire, onError]);
+  }, [provider, siteKey, conteneurId]);
 
   if (provider === 'mock') {
     return (
@@ -115,7 +149,6 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
-        onLoad={() => setScriptCharge(true)}
       />
       <div id={conteneurId} />
     </>
