@@ -48,7 +48,10 @@ export class BrevoEmailService implements EmailService {
       },
       body: JSON.stringify({
         sender: {
-          email: process.env.BREVO_SMTP_USER ?? 'noreply@maintenant-le-mouvement.org',
+          // Adresse d'expéditeur des emails du site. Variable dédiée `EMAIL_FROM`
+          // (et non le login SMTP `BREVO_SMTP_USER`, qui n'est pas une adresse
+          // d'expéditeur valide). Doit être un expéditeur vérifié dans Brevo.
+          email: process.env.EMAIL_FROM ?? 'benjamin.ball@maintenant-le-mouvement.org',
           name: 'Maintenant!',
         },
         to: [{ email: email.destinataire }],
