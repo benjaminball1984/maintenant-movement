@@ -1,9 +1,8 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
-import { Badge, Card, Heading } from '@/components/ui';
+import { Badge, Card, Heading, ImageAffiche } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { articleAlaUne } from '@/lib/home/une';
-import Image from 'next/image';
 import Link from 'next/link';
 import { UneSection } from './UneSection';
 
@@ -37,7 +36,7 @@ export async function UneArticle() {
         cleBadge="home.une.article.badge"
         couleur="accent"
         titre={null}
-        voirTousHref="/s-informer/journal"
+        voirTousHref="/s-informer/media"
         voirTousLibelle={voirTous.valeurMd}
         cleVoirTous="home.une.article.voir_tous"
         estAdmin={estAdmin}
@@ -100,17 +99,11 @@ export async function UneArticle() {
       </header>
 
       {article.imageCouvertureUrl !== null ? (
-        <Link
-          href={`/s-informer/media/${article.slug}`}
-          className="relative block aspect-[16/9] overflow-hidden rounded-lg border border-border"
-        >
-          <Image
+        <Link href={`/s-informer/media/${article.slug}`} className="block">
+          <ImageAffiche
             src={article.imageCouvertureUrl}
-            alt=""
-            fill
-            unoptimized
             sizes="(max-width: 768px) 100vw, 720px"
-            className="object-cover"
+            className="aspect-[16/9] rounded-lg border border-border bg-surface-2"
           />
         </Link>
       ) : null}

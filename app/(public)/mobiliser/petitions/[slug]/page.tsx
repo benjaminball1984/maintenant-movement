@@ -9,7 +9,7 @@ import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
-import { Alert, Card, Container, Heading } from '@/components/ui';
+import { Alert, Card, Container, Heading, ImageAffiche } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { prefilSignatureDepuisSession } from '@/lib/auth/prefil-signature';
@@ -20,7 +20,6 @@ import { metadataPourPartage } from '@/lib/og-metadata';
 import { petitionParSlug } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { signerPetition } from '../actions';
@@ -216,16 +215,11 @@ export default async function PagePetition({ params }: PagePetitionProps) {
           ) : null}
 
           {petition.image_url !== null ? (
-            <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
-              <Image
-                src={petition.image_url}
-                alt=""
-                fill
-                unoptimized
-                sizes="(max-width: 768px) 100vw, 720px"
-                className="object-cover"
-              />
-            </div>
+            <ImageAffiche
+              src={petition.image_url}
+              sizes="(max-width: 768px) 100vw, 720px"
+              className="aspect-[16/9] rounded-lg border border-border bg-surface-2"
+            />
           ) : null}
         </header>
 

@@ -19,6 +19,7 @@ export {
 export { Card, type CardProps, type VariantCard } from './Card';
 export { Container, type ContainerProps, type TailleContainer } from './Container';
 export { Heading, type HeadingProps, type NiveauHeading } from './Heading';
+export { ImageAffiche, type ImageAfficheProps } from './ImageAffiche';
 export { IconButton, type IconButtonProps } from './IconButton';
 export { Input, type InputProps } from './Input';
 export { Label, type LabelProps } from './Label';

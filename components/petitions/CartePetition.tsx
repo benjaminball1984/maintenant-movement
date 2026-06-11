@@ -1,9 +1,8 @@
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
-import { Card } from '@/components/ui';
+import { Card, ImageAffiche } from '@/components/ui';
 import { getImageObjet } from '@/lib/images';
 import type { PetitionAvecCompteur } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface CartePetitionProps {
@@ -37,17 +36,11 @@ export function CartePetition({ petition, enAvant = false }: CartePetitionProps)
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-4', enAvant && 'border-brand/40')}
     >
-      <Link
-        href={lien}
-        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
-      >
-        <Image
+      <Link href={lien} className="block">
+        <ImageAffiche
           src={imageSrc}
-          alt=""
-          fill
-          unoptimized
           sizes="(max-width: 768px) 100vw, 600px"
-          className="object-cover"
+          className="aspect-[16/9] w-full rounded-md border border-border bg-surface-2"
         />
       </Link>
 

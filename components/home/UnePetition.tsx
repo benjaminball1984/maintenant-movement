@@ -2,14 +2,13 @@ import { signerPetition } from '@/app/(public)/mobiliser/petitions/actions';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePetition';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
-import { Badge, Card, Heading } from '@/components/ui';
+import { Badge, Card, Heading, ImageAffiche } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { prefilSignatureDepuisSession } from '@/lib/auth/prefil-signature';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getImageObjet } from '@/lib/images';
 import { petitionAlaUne } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
 import { UneSection } from './UneSection';
 
@@ -139,17 +138,11 @@ export async function UnePetition() {
         </TexteEditableAdmin>
       </header>
 
-      <Link
-        href={`/mobiliser/petitions/${petition.slug}`}
-        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
-      >
-        <Image
+      <Link href={`/mobiliser/petitions/${petition.slug}`} className="block">
+        <ImageAffiche
           src={getImageObjet({ image_url: petition.image_url, type_objet: 'petition' })}
-          alt=""
-          fill
-          unoptimized
           sizes="(max-width: 896px) 100vw, 800px"
-          className="object-cover"
+          className="aspect-[16/9] w-full rounded-md border border-border bg-surface-2"
         />
       </Link>
 
