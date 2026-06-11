@@ -134,6 +134,7 @@ export default async function PageAgir() {
           estAdmin={estAdmin}
           libelle="preheader 'Espace' des pages hub (cle partagee)"
           longueurMax={30}
+          bloc
         >
           {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
         </TexteEditableAdmin>
@@ -142,6 +143,7 @@ export default async function PageAgir() {
           valeurInitiale={titre.valeurMd}
           estAdmin={estAdmin}
           libelle="titre de la page agir"
+          bloc
         >
           {(t) => <Heading niveau={1}>{t}</Heading>}
         </TexteEditableAdmin>
@@ -152,6 +154,7 @@ export default async function PageAgir() {
           libelle="intro de la page agir"
           multilignes
           longueurMax={500}
+          bloc
         >
           {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
         </TexteEditableAdmin>

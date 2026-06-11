@@ -6,7 +6,7 @@
  * Mais pour l'affichage des cagnottes mixtes (« 50 € + 100 99-coin »
  * → afficher un total équivalent), on a besoin d'un taux indicatif.
  *
- * Parité (décision Lilou/Ben du 30/05/2026) : 1 99-coin (T99CP) = 1 € =
+ * Parité (décision Lilou/Ben du 11/06/2026) : 1 99-coin (T99CP) = 1 € =
  * 1 minute, soit 100 centimes par 99-coin. Le taux reste un paramètre pour
  * rester pur et testable, mais le défaut suit cette parité.
  */

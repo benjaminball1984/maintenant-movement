@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_MARCHE_DEFAUT,
   type MessagesValidationMarche,
 } from '@/lib/messages-validation';
+import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
 /**
@@ -89,7 +90,13 @@ export function creerProduitMarcheFactory(
           .regex(/^[a-z0-9-]+$/, messages.categorieSlugInvalide)
           .optional()
           .or(z.literal('')),
-        image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+        // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+        image_url: z
+          .string()
+          .url(messages.imageUrl)
+          .refine(estUrlImageDurable, messages.imageUrlEphemere)
+          .optional()
+          .or(z.literal('')),
         lieu: z.string().trim().min(3, messages.lieuRequis).max(200, messages.lieuMax),
         latitude: z.number().min(-90).max(90).nullable().optional(),
         longitude: z.number().min(-180).max(180).nullable().optional(),
@@ -217,7 +224,13 @@ export function creerBoutiqueFactory(
         .min(30, messages.descriptionMin)
         .max(3000, messages.descriptionMax),
       sens: z.enum(['propose', 'cherche']),
-      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+      image_url: z
+        .string()
+        .url(messages.imageUrl)
+        .refine(estUrlImageDurable, messages.imageUrlEphemere)
+        .optional()
+        .or(z.literal('')),
       ouverte_du: z
         .string()
         .datetime({ message: messages.ouverteDuFormat })
@@ -276,7 +289,13 @@ export function creerMinimarcheFactory(
         .trim()
         .min(30, messages.descriptionMin)
         .max(3000, messages.descriptionMax),
-      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+      image_url: z
+        .string()
+        .url(messages.imageUrl)
+        .refine(estUrlImageDurable, messages.imageUrlEphemere)
+        .optional()
+        .or(z.literal('')),
       lieu: z.string().trim().min(3, messages.lieuRequis).max(200),
       latitude: z.number().min(-90).max(90).nullable().optional(),
       longitude: z.number().min(-180).max(180).nullable().optional(),

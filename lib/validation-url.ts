@@ -48,6 +48,43 @@ export function estUrlValide(
 }
 
 /**
+ * Domaines de CDN dont les URLs d'images expirent rapidement (liens signés
+ * Facebook / Instagram). Une image référencée là-bas casse au bout de
+ * quelques jours : on refuse ces URLs dans les champs d'image libre et on
+ * invite à téléverser le fichier directement.
+ */
+export const DOMAINES_IMAGES_EPHEMERES: readonly string[] = [
+  'fbcdn.net',
+  'cdninstagram.com',
+  'fbsbx.com',
+];
+
+/**
+ * Vérifie qu'une URL d'image ne pointe pas vers un CDN éphémère connu
+ * (cf. `DOMAINES_IMAGES_EPHEMERES`), sous-domaines compris
+ * (ex. `scontent-cdg4-1.xx.fbcdn.net`).
+ *
+ * Retourne `true` pour tout le reste, Y COMPRIS les chaînes qui ne sont pas
+ * des URLs valides : ce n'est pas le rôle de ce helper, les autres
+ * validations (`z.string().url()`, `estUrlValide`) s'en chargent.
+ *
+ * @example estUrlImageDurable('https://exemple.org/photo.jpg') → true
+ * @example estUrlImageDurable('https://scontent-cdg4-1.xx.fbcdn.net/p.jpg') → false
+ */
+export function estUrlImageDurable(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url.trim());
+  } catch {
+    return true;
+  }
+  const hostname = parsed.hostname.toLowerCase();
+  return !DOMAINES_IMAGES_EPHEMERES.some(
+    (domaine) => hostname === domaine || hostname.endsWith(`.${domaine}`),
+  );
+}
+
+/**
  * Tente de parser une URL et retourne `null` si invalide.
  * Pratique pour normaliser avant stockage / affichage.
  */

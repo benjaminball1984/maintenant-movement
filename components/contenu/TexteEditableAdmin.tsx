@@ -38,6 +38,15 @@ export interface TexteEditableAdminProps {
   longueurMax?: number;
   /** Label décrivant ce qu'on édite (pour l'aria-label). */
   libelle?: string;
+  /**
+   * Si true, le wrapper admin s'affiche en bloc (pleine largeur) au lieu
+   * d'inline-block. À poser quand le contenu rendu est un élément de bloc
+   * (titre h1, paragraphe d'intro) : sinon, en mode admin, deux contenus
+   * voisins se collent sur la même ligne (« ESPACES'informer », intro qui
+   * s'enroule autour du titre — revue bêta 2026-06-11). Sans effet pour
+   * les visiteurs non admin (aucun wrapper).
+   */
+  bloc?: boolean;
 }
 
 export function TexteEditableAdmin({
@@ -48,6 +57,7 @@ export function TexteEditableAdmin({
   multilignes = false,
   longueurMax = 500,
   libelle,
+  bloc = false,
 }: TexteEditableAdminProps) {
   // Le rendu de children se fait côté serveur ici → ReactNode sérialisable.
   const contenu = children(valeurInitiale);
@@ -57,7 +67,7 @@ export function TexteEditableAdmin({
   }
 
   return (
-    <span className="group relative inline-block">
+    <span className={bloc ? 'group relative block' : 'group relative inline-block'}>
       <BoutonEditerInline
         cle={cle}
         valeurInitiale={valeurInitiale}

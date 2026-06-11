@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_ENTRAIDE_DEFAUT,
   type MessagesValidationEntraide,
 } from '@/lib/messages-validation';
+import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
 /**
@@ -46,7 +47,13 @@ export function creerOffreEntraideFactory(
         .max(180, messages.longitudeFormat)
         .nullable()
         .optional(),
-      image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+      // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+      image_url: z
+        .string()
+        .url(messages.imageUrl)
+        .refine(estUrlImageDurable, messages.imageUrlEphemere)
+        .optional()
+        .or(z.literal('')),
       /**
        * Métadonnées libres (JSONB). Limité à 4 ko pour rester raisonnable.
        */

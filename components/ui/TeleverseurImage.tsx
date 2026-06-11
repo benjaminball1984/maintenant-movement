@@ -1,6 +1,7 @@
 'use client';
 
 import { televerserImage } from '@/app/actions/storage';
+import { redimensionnerImage } from '@/lib/image-redimensionner';
 import { MIME_AUTORISES, type RoleImage, TAILLE_MAX_OCTETS } from '@/lib/storage/types';
 import { cn } from '@/lib/utils';
 import { ImagePlus, Loader2, X } from 'lucide-react';
@@ -119,8 +120,15 @@ export function TeleverseurImage({
 
   const surChangementFichier = useCallback(
     async (evenement: ChangeEvent<HTMLInputElement>) => {
-      const fichier = evenement.target.files?.[0];
-      if (fichier === undefined) return;
+      const fichierBrut = evenement.target.files?.[0];
+      if (fichierBrut === undefined) return;
+
+      // Pipeline images : redimensionnement côté client (côté long ramené à
+      // 1600 px, réencodage) AVANT validation et envoi. La validation
+      // MIME/taille ci-dessous s'applique donc au fichier réellement
+      // téléversé. En cas d'échec de décodage, le helper retourne le fichier
+      // original tel quel (catch silencieux).
+      const fichier = await redimensionnerImage(fichierBrut);
 
       const erreurValidation = validerCote(fichier);
       if (erreurValidation !== null) {

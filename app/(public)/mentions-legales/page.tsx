@@ -37,7 +37,7 @@ Ben (LIFE BENJAMIN BALL), cosec gé, est aujourd'hui mandaté par le collectif p
 
 ## Hébergement
 
-- Frontend : Cloudflare Pages (Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA). Proxy CDN avec terminaison TLS en Union européenne quand possible.
+- Site : Cloudflare Workers (Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA). Proxy CDN avec terminaison TLS en Union européenne quand possible.
 - Base de données et authentification : Supabase Inc. (970 Toa Payoh North, #07-04, Singapore 318992), serveurs hébergés dans la région Francfort (Allemagne).
 - Médias : Supabase Storage, même région.
 

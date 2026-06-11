@@ -4,6 +4,7 @@ import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePet
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
 import { Badge, Card, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { prefilSignatureDepuisSession } from '@/lib/auth/prefil-signature';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { getImageObjet } from '@/lib/images';
 import { petitionAlaUne } from '@/lib/petitions/requetes';
@@ -37,6 +38,7 @@ export async function UnePetition() {
   const [
     petition,
     estAdmin,
+    prefilSignature,
     badge,
     voirTous,
     ctaPrincipal,
@@ -47,6 +49,7 @@ export async function UnePetition() {
   ] = await Promise.all([
     petitionAlaUne(),
     estAdminCourant(),
+    prefilSignatureDepuisSession(),
     lireContenuEditorial('home.une.petition.badge', { valeurMd: FALLBACKS.badge }),
     lireContenuEditorial('home.une.petition.voir_tous', { valeurMd: FALLBACKS.voirTous }),
     lireContenuEditorial('home.une.petition.cta_principal', {
@@ -190,6 +193,7 @@ export async function UnePetition() {
           petitionTitre={petition.titre}
           createuricePrenom={createuricePrenomAffiche}
           signerPetition={signerPetition}
+          prefil={prefilSignature}
           declencheur={
             <TexteEditableAdmin
               cle="home.une.petition.cta_principal"

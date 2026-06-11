@@ -64,6 +64,12 @@ const ORIGINES = {
   liveKitHttps: 'https://*.livekit.cloud',
   liveKitWss: 'wss://*.livekit.cloud',
   tilesOsm: 'https://*.tile.openstreetmap.org',
+  // Fonds de carte raster CARTO (CarteCommunesReference) : MapLibre les
+  // télécharge via fetch(), donc connect-src ET img-src (defense in depth).
+  tilesCarto: 'https://*.basemaps.cartocdn.com',
+  // Glyphs de police MapLibre (étiquettes des clusters de communes),
+  // récupérés en fetch() également.
+  glyphsMaplibre: 'https://demotiles.maplibre.org',
 };
 
 /**
@@ -104,7 +110,7 @@ const directivesCsp = [
   // Images : assets locaux, data URLs (inline base64 utilisés par MapLibre,
   // certains avatars), blob URLs (upload preview), tuiles OSM, médias hébergés
   // sur Supabase Storage.
-  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.supabaseHttps}`,
+  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.tilesCarto} ${ORIGINES.supabaseHttps}`,
 
   // Vocaux et fichiers audio du réseau social (~10 min max, hébergés sur
   // Supabase Storage). Vidéo non hébergée (voir reseau-social-V2.md §3).
@@ -123,7 +129,11 @@ const directivesCsp = [
   // - Stripe pour la création de PaymentIntents et la confirmation.
   // - Turnstile pour la vérification de challenge.
   // - LiveKit pour le signaling visio (HTTPS) + WebRTC (WSS).
-  `connect-src 'self' ${ORIGINES.supabaseHttps} ${ORIGINES.supabaseWss} ${ORIGINES.liveKitHttps} ${ORIGINES.liveKitWss} ${ORIGINES.stripeApi} ${ORIGINES.turnstileChallenges}`,
+  // - Tuiles de carte (OSM + CARTO) et glyphs MapLibre : MapLibre GL les
+  //   télécharge en fetch() (AJAX), pas en <img>, d'où leur présence ici.
+  //   Sans ça, toutes les cartes du site restent blanches (vu en prod le
+  //   2026-06-11 : violations connect-src sur cartocdn et demotiles).
+  `connect-src 'self' ${ORIGINES.supabaseHttps} ${ORIGINES.supabaseWss} ${ORIGINES.liveKitHttps} ${ORIGINES.liveKitWss} ${ORIGINES.stripeApi} ${ORIGINES.turnstileChallenges} ${ORIGINES.tilesOsm} ${ORIGINES.tilesCarto} ${ORIGINES.glyphsMaplibre}`,
 
   // Iframes que nous chargeons :
   // - Turnstile (widget de challenge).

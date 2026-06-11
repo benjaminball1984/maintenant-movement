@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_PETITION_DEFAUT,
   type MessagesValidationPetition,
 } from '@/lib/messages-validation';
+import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
 /**
@@ -78,7 +79,14 @@ function champsContenuPetition(messages: MessagesValidationPetition) {
       .trim()
       .min(5, messages.destinataireMin)
       .max(200, messages.destinataireMax),
-    image_url: z.string().url(messages.imageUrl).optional().or(z.literal('')),
+    // Refus des CDN éphémères (Facebook/Instagram) : ces liens signés
+    // expirent en quelques jours, l'image casserait silencieusement.
+    image_url: z
+      .string()
+      .url(messages.imageUrl)
+      .refine(estUrlImageDurable, messages.imageUrlEphemere)
+      .optional()
+      .or(z.literal('')),
     objectif: z
       .number()
       .int(messages.objectifEntier)

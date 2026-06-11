@@ -129,6 +129,7 @@ export default async function PageMobiliser() {
           estAdmin={estAdmin}
           libelle="preheader 'Espace' des pages hub (cle partagee)"
           longueurMax={30}
+          bloc
         >
           {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
         </TexteEditableAdmin>
@@ -137,6 +138,7 @@ export default async function PageMobiliser() {
           valeurInitiale={titre.valeurMd}
           estAdmin={estAdmin}
           libelle="titre de la page mobiliser"
+          bloc
         >
           {(t) => <Heading niveau={1}>{t}</Heading>}
         </TexteEditableAdmin>
@@ -147,6 +149,7 @@ export default async function PageMobiliser() {
           libelle="intro de la page mobiliser"
           multilignes
           longueurMax={500}
+          bloc
         >
           {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
         </TexteEditableAdmin>

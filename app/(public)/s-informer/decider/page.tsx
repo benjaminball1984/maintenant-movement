@@ -34,10 +34,10 @@ const FALLBACKS = {
     'Les salles seront créées au fur et à mesure que les espaces (communes, fédérations, GT) ouvriront leurs assemblées. Les admins nationaux peuvent en créer depuis la console.',
   sectionRecentes: 'Décisions récentes',
   sectionRecentesSousTitre: 'Dernières réunions terminées avec procès-verbal publié.',
-  liveKitTitre: 'LiveKit pas encore branché',
+  liveKitTitre: 'Visioconférence : bientôt intégrée',
   liveKitAmorce:
-    "L'infrastructure visio (LiveKit self-hosted ou Cloud) sera connectée dans un chantier dédié. En attendant, les réunions sont annoncées ici, les PV publiés, et la visio se fait sur une plateforme externe au choix de chaque collectif. Cf.",
-  liveKitLien: 'gouvernance',
+    "La visioconférence intégrée arrive. En attendant, les réunions sont annoncées ici, les procès-verbaux publiés, et la visio se fait sur l'outil choisi par chaque collectif.",
+  liveKitLien: 'En savoir plus sur la gouvernance',
   agendaLien: "Voir toutes les prochaines réunions dans l'agenda",
 };
 

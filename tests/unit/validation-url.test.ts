@@ -1,4 +1,4 @@
-import { estUrlValide, parserUrl } from '@/lib/validation-url';
+import { estUrlImageDurable, estUrlValide, parserUrl } from '@/lib/validation-url';
 import { describe, expect, it } from 'vitest';
 
 describe('estUrlValide', () => {
@@ -72,5 +72,29 @@ describe('parserUrl', () => {
 
   it('trim avant parsing', () => {
     expect(parserUrl('  https://example.com  ')?.hostname).toBe('example.com');
+  });
+});
+
+describe('estUrlImageDurable', () => {
+  it('refuse les CDN éphémères Facebook/Instagram (domaine exact)', () => {
+    expect(estUrlImageDurable('https://fbcdn.net/photo.jpg')).toBe(false);
+    expect(estUrlImageDurable('https://cdninstagram.com/photo.jpg')).toBe(false);
+    expect(estUrlImageDurable('https://fbsbx.com/photo.jpg')).toBe(false);
+  });
+
+  it('refuse aussi les sous-domaines de ces CDN', () => {
+    expect(estUrlImageDurable('https://scontent-cdg4-1.xx.fbcdn.net/v/photo.jpg')).toBe(false);
+    expect(estUrlImageDurable('https://scontent.cdninstagram.com/photo.jpg')).toBe(false);
+  });
+
+  it('accepte les autres domaines, y compris les noms ressemblants', () => {
+    expect(estUrlImageDurable('https://exemple.org/photo.jpg')).toBe(true);
+    // « monfbcdn.net » n'est PAS un sous-domaine de fbcdn.net : durable.
+    expect(estUrlImageDurable('https://monfbcdn.net/photo.jpg')).toBe(true);
+  });
+
+  it('laisse passer les URLs invalides (gérées par les autres validations)', () => {
+    expect(estUrlImageDurable('pas une URL')).toBe(true);
+    expect(estUrlImageDurable('')).toBe(true);
   });
 });

@@ -19,7 +19,7 @@ const FALLBACKS = {
   cardLabel: 'Onglet',
   conditionsTitre: "Conditions d'usage du Marché solidaire",
   conditions:
-    "- Modération **a posteriori** : publication immédiate, retrait par modé/admin si problème.\n- Fraîcheur : après 3 mois sans interaction, une modale de gestion s'ouvre via la messagerie.\n- Retrait : rencontre physique OU envoi postal (port à la charge de la personne acheteuse).\n- En ligne : seules T99CP et Euros sont acceptées. Ğ1 et monnaies locales complémentaires restent réservées aux minimarchés physiques.\n- Notation 5 étoiles unilatérale : seule l'acheteureuse note la vendeureuse.",
+    "- Modération **a posteriori** : publication immédiate, retrait par modé/admin si problème.\n- Fraîcheur : après 3 mois sans interaction, on te propose par message de renouveler, baisser le prix ou retirer l'annonce.\n- Retrait : rencontre physique OU envoi postal (port à la charge de la personne acheteuse).\n- En ligne : seules T99CP et Euros sont acceptées. Ğ1 et monnaies locales complémentaires restent réservées aux minimarchés physiques.\n- Notation 5 étoiles unilatérale : seule l'acheteureuse note la vendeureuse.",
 };
 
 /**

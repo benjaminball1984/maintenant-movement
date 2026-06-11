@@ -12,6 +12,7 @@ import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Card, Container, Heading } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { prefilSignatureDepuisSession } from '@/lib/auth/prefil-signature';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { idEpingleUneHome } from '@/lib/home/une';
@@ -82,6 +83,7 @@ export default async function PagePetition({ params }: PagePetitionProps) {
   const [
     petition,
     estAdmin,
+    prefilSignature,
     retour,
     preheaderAmorce,
     alertModerationTitre,
@@ -99,6 +101,7 @@ export default async function PagePetition({ params }: PagePetitionProps) {
   ] = await Promise.all([
     petitionParSlug(slug),
     estAdminCourant(),
+    prefilSignatureDepuisSession(),
     lireContenuEditorial('petitions.fiche.retour', { valeurMd: FALLBACKS.retour }),
     lireContenuEditorial('petitions.fiche.preheader_amorce', {
       valeurMd: FALLBACKS.preheaderAmorce,
@@ -335,6 +338,7 @@ export default async function PagePetition({ params }: PagePetitionProps) {
               petitionTitre={petition.titre}
               createuricePrenom={createuricePrenomAffiche}
               signerPetition={signerPetition}
+              prefil={prefilSignature}
               declencheur={
                 <TexteEditableAdmin
                   cle="petitions.fiche.cta_signer"

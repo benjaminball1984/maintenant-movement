@@ -10,6 +10,13 @@ import { defineConfig } from 'vitest/config';
  * Les tests E2E sont gérés séparément par Playwright (cf. `playwright.config.ts`).
  */
 export default defineConfig({
+  // Le tsconfig du projet est en `jsx: preserve` (c'est Next.js qui compile
+  // le JSX en prod). Pour que Vitest puisse rendre des composants `.tsx`
+  // (ex : MarkdownLeger via renderToStaticMarkup), on demande à esbuild
+  // d'utiliser le runtime JSX automatique de React, comme Next.js.
+  esbuild: {
+    jsx: 'automatic',
+  },
   test: {
     environment: 'node',
     include: ['tests/unit/**/*.test.ts'],

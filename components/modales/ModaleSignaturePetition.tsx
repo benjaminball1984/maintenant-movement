@@ -76,6 +76,18 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   tunnelCtaDecouvrir: 'Découvrir les prochaines étapes',
 };
 
+/**
+ * Préremplissage des champs identité pour les personnes connectées : le
+ * site connaît déjà leur prénom/nom/email, inutile de les faire retaper
+ * (revue bêta 2026-06-11). Tous les champs restent éditables.
+ */
+export interface PrefilSignature {
+  prenom?: string;
+  nom?: string;
+  email?: string;
+  code_postal?: string;
+}
+
 interface ModaleSignaturePetitionProps {
   /** ID UUID de la pétition à signer. */
   petitionId: string;
@@ -91,6 +103,8 @@ interface ModaleSignaturePetitionProps {
   libelles?: LibellesSignaturePetition;
   /** Messages de validation Zod surchargeables admin via CMS. */
   messages?: MessagesValidationPetition;
+  /** Préremplissage des champs pour les personnes connectées (optionnel). */
+  prefil?: PrefilSignature;
 }
 
 /**
@@ -113,6 +127,7 @@ export function ModaleSignaturePetition({
   declencheur,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_PETITION_DEFAUT,
+  prefil,
 }: ModaleSignaturePetitionProps) {
   const refDialog = useRef<HTMLDialogElement>(null);
   const [merci, setMerci] = useState(false);
@@ -122,6 +137,23 @@ export function ModaleSignaturePetition({
   useEffect(() => {
     setHydrate(true);
   }, []);
+
+  // Dernier jeton Turnstile reçu du widget. Le widget vit dans le DOM dès le
+  // chargement de la page (le <dialog> existe avant son ouverture) : il se
+  // valide donc souvent AVANT le premier `ouvrir()`. Sans cette ref, le
+  // `reset()` d'ouverture effaçait le jeton déjà livré, et comme le widget ne
+  // rappelle pas son callback, le bouton restait bloqué pour toujours
+  // (bug bloquant constaté en prod le 2026-06-11 : signature impossible).
+  const tokenTurnstileRef = useRef('');
+
+  // Valeurs par défaut des champs identité : préremplies depuis la session
+  // quand la personne est connectée, vides sinon.
+  const valeursIdentite = {
+    prenom: prefil?.prenom ?? '',
+    nom: prefil?.nom ?? '',
+    email: prefil?.email ?? '',
+    code_postal: prefil?.code_postal ?? '',
+  };
 
   const {
     register,
@@ -134,6 +166,7 @@ export function ModaleSignaturePetition({
     resolver: zodResolver(creerSignerPetitionSchema(messages)),
     defaultValues: {
       petition_id: petitionId,
+      ...valeursIdentite,
       accepte_newsletter: false,
       accepte_contact_createurice: false,
       token_turnstile: '',
@@ -150,9 +183,14 @@ export function ModaleSignaturePetition({
     setErreur(null);
     reset({
       petition_id: petitionId,
+      ...valeursIdentite,
       accepte_newsletter: false,
       accepte_contact_createurice: false,
-      token_turnstile: '',
+      // On PRÉSERVE le jeton anti-robot courant : le widget ne re-émet pas
+      // son callback après coup, l'effacer ici condamnerait le bouton.
+      // S'il expire, le widget se relance et nous renvoie un jeton frais
+      // (cf. CaptchaTurnstile, expired-callback).
+      token_turnstile: tokenTurnstileRef.current,
     });
     refDialog.current?.showModal();
     // Bloquer le scroll de fond DÈS l'ouverture. `<dialog>` n'émet pas
@@ -382,7 +420,16 @@ export function ModaleSignaturePetition({
               </span>
             </label>
 
-            <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+            <CaptchaTurnstile
+              onChange={(token) => {
+                tokenTurnstileRef.current = token;
+                setValue('token_turnstile', token, { shouldValidate: true });
+              }}
+              onExpire={() => {
+                tokenTurnstileRef.current = '';
+                setValue('token_turnstile', '', { shouldValidate: true });
+              }}
+            />
 
             {hydrate && !captchaValide ? (
               <p className="text-xs text-text-3" aria-live="polite">

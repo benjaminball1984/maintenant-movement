@@ -22,10 +22,10 @@ const FALLBACKS = {
   sectionEditions: 'Éditions publiées',
   emptyTitre: 'Aucune édition publiée pour le moment',
   emptyCorps:
-    "Quand la rédaction et les communes libres auront publié leurs premières éditions, elles apparaîtront ici. La V1 d'export PDF print-ready arrive avec un chantier dédié.",
-  bandeauModeleTitre: 'Modèle économique (rappel doctrine §4C)',
+    "Quand la rédaction et les communes libres auront publié leurs premières éditions, elles apparaîtront ici. L'export PDF prêt à imprimer arrive bientôt.",
+  bandeauModeleTitre: 'Modèle économique',
   bandeauModeleCorps:
-    "Impression locale gratuite, impression à façon en T99CP ou euros (marge mutualisée), plafond à 100 affiches par commande. Coûts API estimés ~0,023 $ par affiche avec Claude Haiku 4.5 quand l'agent générateur sera branché.",
+    'Impression locale gratuite, impression à façon en T99CP ou euros (marge mutualisée), plafond à 100 affiches par commande.',
 };
 
 /**

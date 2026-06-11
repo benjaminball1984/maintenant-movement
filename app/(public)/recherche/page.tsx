@@ -3,7 +3,7 @@ import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { libelleType, rechercherGlobalement } from '@/lib/recherche-globale';
-import { Search } from 'lucide-react';
+import { Image as ImageIcon, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -271,7 +271,13 @@ export default async function PageRechercheGlobale({ searchParams }: Props) {
                         />
                       </div>
                     ) : (
-                      <div className="h-14 w-14 shrink-0 rounded-md bg-surface-2" />
+                      /* Pas d'image : icône discrète plutôt qu'un carré vide. */
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-surface-2"
+                        aria-hidden="true"
+                      >
+                        <ImageIcon size={20} className="text-text-3" />
+                      </div>
                     )}
                     <div className="grid flex-1 gap-1">
                       <div className="flex flex-wrap items-center gap-2">

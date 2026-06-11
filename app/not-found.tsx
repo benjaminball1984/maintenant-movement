@@ -1,6 +1,16 @@
 import { Container, Heading } from '@/components/ui';
 import Link from 'next/link';
 
+// Les 5 espaces principaux du site, proposés comme portes de sortie
+// depuis la 404 (libellés avec apostrophes typographiques).
+const ESPACES = [
+  { href: '/s-informer', libelle: 'S’informer' },
+  { href: '/mobiliser', libelle: 'Mobiliser' },
+  { href: '/s-entraider', libelle: 'S’entraider' },
+  { href: '/agir', libelle: 'Agir' },
+  { href: '/comprendre', libelle: 'Comprendre' },
+] as const;
+
 /**
  * Page 404 globale.
  *
@@ -28,6 +38,20 @@ export default function PageIntrouvable() {
           Retour à l’accueil
         </Link>
       </p>
+      <nav
+        aria-label="Espaces du site"
+        className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm"
+      >
+        {ESPACES.map((e) => (
+          <Link
+            key={e.href}
+            href={e.href}
+            className="text-text-2 underline-offset-4 hover:text-brand hover:underline"
+          >
+            {e.libelle}
+          </Link>
+        ))}
+      </nav>
     </Container>
   );
 }

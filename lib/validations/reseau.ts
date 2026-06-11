@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_RESEAU_DEFAUT,
   type MessagesValidationReseau,
 } from '@/lib/messages-validation';
+import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
 /**
@@ -18,7 +19,15 @@ export function creerPostFactory(
 ) {
   return z.object({
     texte: z.string().trim().min(1, messages.postTexteMin).max(5000, messages.postTexteMax),
-    image_url: z.string().trim().url(messages.postImageUrl).max(2048).optional().or(z.literal('')),
+    // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+    image_url: z
+      .string()
+      .trim()
+      .url(messages.postImageUrl)
+      .max(2048)
+      .refine(estUrlImageDurable, messages.postImageUrlEphemere)
+      .optional()
+      .or(z.literal('')),
     token_turnstile: z.string().min(1, messages.postTurnstileRequis),
   });
 }

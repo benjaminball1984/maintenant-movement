@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
+import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
 /**
@@ -20,7 +21,13 @@ export function creerSondageFactory(
         .array(z.string().trim().min(1, messages.optionVide).max(200))
         .min(2, messages.optionsMin)
         .max(10, messages.optionsMax),
-      image_url: z.string().url().optional().or(z.literal('')),
+      // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
+      image_url: z
+        .string()
+        .url()
+        .refine(estUrlImageDurable, messages.imageUrlEphemere)
+        .optional()
+        .or(z.literal('')),
       mode: z.enum(['classique', 'pondere']),
       commune_id: z.string().uuid().optional().or(z.literal('')),
       latitude: z.number().min(-90).max(90).nullable().optional(),

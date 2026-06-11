@@ -15,6 +15,18 @@ const FALLBACK_INTRO = 'La pédagogie du mouvement : monnaie, doctrine, FAQ, res
 const FALLBACK_PREHEADER = 'Espace';
 
 /**
+ * Descriptions courtes des 4 cartes (revue bêta 2026-06-11 : la carte
+ * affichait l'URL technique « /comprendre/monnaie » en guise de
+ * description). Microcopy fonctionnel, éditable via CMS.
+ */
+const FALLBACK_DESCRIPTIONS: Record<string, string> = {
+  monnaie: 'La monnaie complémentaire du mouvement : équivalence, usages, wallet.',
+  doctrine: 'Les principes fondateurs du mouvement.',
+  faq: 'Les questions fréquentes : adhésion, fonctionnement, monnaie, données.',
+  ressources: 'Kits militants, textes fondateurs et documents à télécharger.',
+};
+
+/**
  * Page racine de l'espace Comprendre. Contrairement aux 4 autres
  * espaces, on lie ici aux 4 sous-pages parce qu'elles existent
  * (en stub editorial pour 2.1, completion en 2.2).
@@ -28,6 +40,16 @@ export default async function PageComprendre() {
     lireContenuEditorial('comprendre.intro', { valeurMd: FALLBACK_INTRO }),
     lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
   ]);
+  const descriptions = await Promise.all(
+    espace.sousEspaces.map((se) =>
+      lireContenuEditorial(`comprendre.carte.${se.slug}.description`, {
+        valeurMd: FALLBACK_DESCRIPTIONS[se.slug] ?? '',
+      }),
+    ),
+  );
+  const descriptionParSlug = new Map(
+    espace.sousEspaces.map((se, i) => [se.slug, descriptions[i]?.valeurMd ?? '']),
+  );
 
   return (
     <Container taille="lg" className="py-12">
@@ -38,6 +60,7 @@ export default async function PageComprendre() {
           estAdmin={estAdmin}
           libelle="preheader 'Espace' des pages hub (cle partagee)"
           longueurMax={30}
+          bloc
         >
           {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
         </TexteEditableAdmin>
@@ -47,6 +70,7 @@ export default async function PageComprendre() {
           estAdmin={estAdmin}
           libelle="titre de la page comprendre"
           longueurMax={60}
+          bloc
         >
           {(t) => (
             <Heading niveau={1} className="mt-1">
@@ -61,6 +85,7 @@ export default async function PageComprendre() {
           libelle="intro de la page comprendre"
           multilignes
           longueurMax={400}
+          bloc
         >
           {(t) => <p className="mt-2 text-text-2">{t}</p>}
         </TexteEditableAdmin>
@@ -71,7 +96,16 @@ export default async function PageComprendre() {
           <Link key={sousEspace.slug} href={`/comprendre/${sousEspace.slug}`} className="block">
             <Card variant="ombre" className="h-full hover:border-border-dark">
               <p className="font-bold text-text-1">{sousEspace.libelle}</p>
-              <p className="mt-1 font-mono text-xs text-text-3">/comprendre/{sousEspace.slug}</p>
+              <TexteEditableAdmin
+                cle={`comprendre.carte.${sousEspace.slug}.description`}
+                valeurInitiale={descriptionParSlug.get(sousEspace.slug) ?? ''}
+                estAdmin={estAdmin}
+                libelle={`description de la carte ${sousEspace.libelle}`}
+                longueurMax={200}
+                bloc
+              >
+                {(t) => <p className="mt-1 text-sm text-text-2">{t}</p>}
+              </TexteEditableAdmin>
             </Card>
           </Link>
         ))}

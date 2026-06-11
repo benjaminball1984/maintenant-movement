@@ -104,8 +104,8 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
       .ilike('titre', motif)
       .eq('statut', 'publiee')
       .limit(10),
-    supabase.from('commune').select('nom, slug').ilike('nom', motif).limit(10),
-    supabase.from('federation').select('nom, slug').ilike('nom', motif).limit(10),
+    supabase.from('commune').select('nom, slug, image_url').ilike('nom', motif).limit(10),
+    supabase.from('federation').select('nom, slug, image_url').ilike('nom', motif).limit(10),
     supabase
       .from('media')
       .select('titre, slug, vignette_url')
@@ -114,7 +114,7 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
       .limit(10),
     supabase
       .from('sondage')
-      .select('titre, slug, question')
+      .select('titre, slug, question, image_url')
       .ilike('titre', motif)
       .eq('statut', 'ouvert')
       .limit(10),
@@ -174,7 +174,7 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
       titre: c.nom,
       sousTitre: null,
       href: `/agir/communes/${c.slug}`,
-      imageUrl: null,
+      imageUrl: c.image_url,
     });
   }
   for (const f of federationsR.data ?? []) {
@@ -183,7 +183,7 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
       titre: f.nom,
       sousTitre: null,
       href: `/agir/federations/${f.slug}`,
-      imageUrl: null,
+      imageUrl: f.image_url,
     });
   }
   for (const m of mediasR.data ?? []) {
@@ -201,9 +201,10 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
       titre: s.titre,
       sousTitre: s.question,
       href: `/s-informer/sondages/${s.slug}`,
-      imageUrl: null,
+      imageUrl: s.image_url,
     });
   }
+  // La table salle_decider n'a pas de colonne image : pas de vignette possible.
   for (const s of sallesR.data ?? []) {
     resultats.push({
       type: 'salle_decider',

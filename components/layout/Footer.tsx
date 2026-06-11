@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 const FALLBACK_BASELINE = SITE.descriptionCourte;
 const FALLBACK_RESEAUX =
-  'Bientôt : Mastodon, Peertube, autres plateformes éthiques. Pas de Twitter / X, pas de Facebook / Meta.';
+  'Bientôt : Mastodon, PeerTube, autres plateformes éthiques. Pas de Twitter / X, pas de Facebook / Meta.';
 const FALLBACK_RGPD =
   'Données hébergées en région UE (Supabase Francfort). Pas de cookie publicitaire, pas de traceur tiers, pas de bandeau de consentement (cookies strictement techniques).';
 

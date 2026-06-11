@@ -77,7 +77,7 @@ export default async function PageAgenda({ searchParams }: PageAgendaProps) {
     lireContenuEditorial('agenda.titre', { valeurMd: 'Agenda' }),
     lireContenuEditorial('agenda.intro', {
       valeurMd:
-        "Tout ce qui est public et daté sur Maintenant!. Filtres dans l'URL : `?jour=YYYY-MM-DD`, `?departement=75`, `?type=mobilisation`.",
+        "Tout ce qui est public et daté sur Maintenant!. Filtre par jour, par département ou par type d'événement.",
     }),
     lireContenuEditorial('agenda.empty_titre', { valeurMd: 'Aucun événement' }),
     lireContenuEditorial('agenda.empty_corps', {
@@ -87,7 +87,7 @@ export default async function PageAgenda({ searchParams }: PageAgendaProps) {
     lireContenuEditorial('agenda.footer_amorce', { valeurMd: 'Voir aussi la' }),
     lireContenuEditorial('agenda.footer_lien', { valeurMd: 'carte unifiée' }),
     lireContenuEditorial('agenda.footer_fin', {
-      valeurMd: '— même périmètre, vue spatiale. Cf. doctrine §8.',
+      valeurMd: ': même périmètre, vue spatiale.',
     }),
   ]);
 

@@ -113,6 +113,7 @@ export interface MessagesValidationPetition {
   destinataireMin: string;
   destinataireMax: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   objectifEntier: string;
   objectifMin: string;
   objectifMax: string;
@@ -136,6 +137,8 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
   destinataireMin: 'Le destinataire est requis (institution, élu·e, entreprise...).',
   destinataireMax: 'Le destinataire doit faire 200 caractères maximum.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   objectifEntier: 'L’objectif doit être un nombre entier.',
   objectifMin: 'L’objectif minimum est 100 signataires.',
   objectifMax: 'L’objectif maximum est 10 000 000 signataires.',
@@ -169,6 +172,7 @@ export interface MessagesValidationCagnotte {
   texteMin: string;
   texteMax: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   objectifEntier: string;
   objectifMin: string;
   objectifMax: string;
@@ -193,6 +197,8 @@ export const MESSAGES_VALIDATION_CAGNOTTE_DEFAUT: MessagesValidationCagnotte = {
   texteMin: 'Le texte doit comporter au moins 100 caractères.',
   texteMax: 'Le texte doit faire 5000 caractères maximum.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   objectifEntier: 'L’objectif doit être un nombre entier (en euros).',
   objectifMin: 'L’objectif ne peut pas être négatif.',
   objectifMax: 'L’objectif maximum est 1 000 000 €.',
@@ -221,6 +227,7 @@ export interface MessagesValidationCampagne {
   texteMin: string;
   texteMax: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   turnstileRequis: string;
   raisonRejetRequise: string;
   modulePayloadIncoherent: string;
@@ -232,6 +239,8 @@ export const MESSAGES_VALIDATION_CAMPAGNE_DEFAUT: MessagesValidationCampagne = {
   texteMin: 'Le texte doit comporter au moins 100 caractères.',
   texteMax: 'Le texte doit faire 5000 caractères maximum.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   turnstileRequis: 'Vérification anti-bot requise.',
   raisonRejetRequise:
     'Une raison de rejet d’au moins 10 caractères est requise pour rejeter une campagne.',
@@ -275,6 +284,7 @@ export interface MessagesValidationEntraide {
   latitudeFormat: string;
   longitudeFormat: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   latLngEnsemble: string;
   turnstileRequis: string;
   retraitRaisonMin: string;
@@ -290,6 +300,8 @@ export const MESSAGES_VALIDATION_ENTRAIDE_DEFAUT: MessagesValidationEntraide = {
   latitudeFormat: 'Latitude invalide.',
   longitudeFormat: 'Longitude invalide.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   latLngEnsemble: 'Latitude et longitude doivent être fournies ensemble (ou aucune).',
   turnstileRequis: 'Vérification anti-bot requise.',
   retraitRaisonMin: 'La raison du retrait doit comporter au moins 10 caractères.',
@@ -309,6 +321,7 @@ export interface MessagesValidationMobilisation {
   latitudeFormat: string;
   longitudeFormat: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   dateDebutFormat: string;
   dateFinFormat: string;
   dateCoherence: string;
@@ -330,6 +343,8 @@ export const MESSAGES_VALIDATION_MOBILISATION_DEFAUT: MessagesValidationMobilisa
   latitudeFormat: 'Latitude invalide.',
   longitudeFormat: 'Longitude invalide.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   dateDebutFormat: 'Date de début invalide (format ISO 8601 attendu).',
   dateFinFormat: 'Date de fin invalide (format ISO 8601 attendu).',
   dateCoherence: 'La date de fin doit être postérieure ou égale à la date de début.',
@@ -387,6 +402,7 @@ export interface MessagesValidationSondages {
   optionVide: string;
   optionsMin: string;
   optionsMax: string;
+  imageUrlEphemere: string;
   latLngEnsemble: string;
   optionIndexEntier: string;
   optionIndexInvalide: string;
@@ -402,6 +418,8 @@ export const MESSAGES_VALIDATION_SONDAGES_DEFAUT: MessagesValidationSondages = {
   optionVide: 'Option vide.',
   optionsMin: 'Au moins 2 options.',
   optionsMax: 'Maximum 10 options.',
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   latLngEnsemble: 'Latitude et longitude doivent être fournies ensemble.',
   optionIndexEntier: 'L’option doit être un index entier.',
   optionIndexInvalide: 'Option invalide.',
@@ -449,6 +467,7 @@ export interface MessagesValidationReseau {
   postTexteMin: string;
   postTexteMax: string;
   postImageUrl: string;
+  postImageUrlEphemere: string;
   postTurnstileRequis: string;
   publicationUuid: string;
   commentaireMin: string;
@@ -465,6 +484,8 @@ export const MESSAGES_VALIDATION_RESEAU_DEFAUT: MessagesValidationReseau = {
   postTexteMin: 'Écris quelque chose avant de publier.',
   postTexteMax: 'Une publication fait au maximum 5000 caractères.',
   postImageUrl: 'Le lien de l’image semble incorrect.',
+  postImageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   postTurnstileRequis: 'Vérification anti-bot manquante.',
   publicationUuid: 'Publication invalide.',
   commentaireMin: 'Le commentaire est vide.',
@@ -587,6 +608,7 @@ export interface MessagesValidationMarche {
   fraisPortSansEnvoi: string;
   categorieSlugInvalide: string;
   imageUrl: string;
+  imageUrlEphemere: string;
   lieuRequis: string;
   lieuMax: string;
   retraitChoix: string;
@@ -629,6 +651,8 @@ export const MESSAGES_VALIDATION_MARCHE_DEFAUT: MessagesValidationMarche = {
   fraisPortSansEnvoi: 'Pour facturer des frais de port, active la remise par envoi postal.',
   categorieSlugInvalide: 'Slug de catégorie invalide.',
   imageUrl: "URL d'image invalide.",
+  imageUrlEphemere:
+    "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   lieuRequis: 'Le lieu de retrait est requis.',
   lieuMax: 'Le lieu doit faire 200 caractères maximum.',
   retraitChoix: 'Au moins un mode de retrait doit être sélectionné.',

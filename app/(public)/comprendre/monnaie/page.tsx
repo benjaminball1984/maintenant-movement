@@ -29,7 +29,7 @@ ${LOREM_LONG}
 
 ## Contrat Polygon
 
-Adresse du contrat : 0x7275cfc83f486d53ca1379fc1f8025490bdcc79a (testnet Mumbai en dev, Polygon mainnet en prod).
+Adresse du contrat : 0x7275cfc83f486d53ca1379fc1f8025490bdcc79a (réseau Polygon).
 
 ${LOREM_LONG}
 `;

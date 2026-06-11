@@ -24,7 +24,7 @@ export const SOUS_ESPACES: Record<TypeOffreEntraide, ConfigSousEspace> = {
     slug: 'hebergement',
     titre: 'Hébergement solidaire',
     description:
-      'Fiches d’offre d’hébergement entre particulier·ères. Géolocalisé. Contact par email du créateur·ice (messagerie interne au chantier 7.5).',
+      'Fiches d’offre d’hébergement entre particulier·ères. Géolocalisé. Contact direct avec la personne qui propose.',
     verbeOffre: "J'héberge",
     verbeDemande: 'Je cherche un hébergement',
   },
@@ -42,7 +42,7 @@ export const SOUS_ESPACES: Record<TypeOffreEntraide, ConfigSousEspace> = {
     slug: 'qui-prete-tout',
     titre: 'Qui prête tout',
     description:
-      "Prêt d'objets entre particulier·ères. Outils, équipements, livres. (Repair Café : sous-feature à venir.)",
+      "Prêt d'objets entre particulier·ères. Outils, équipements, livres. (Repair Café : bientôt.)",
     verbeOffre: 'Je prête',
     verbeDemande: 'Je cherche à emprunter',
   },
@@ -51,7 +51,7 @@ export const SOUS_ESPACES: Record<TypeOffreEntraide, ConfigSousEspace> = {
     slug: 'fruits-de-la-terre',
     titre: 'Fruits de la terre',
     description:
-      'Alimentation circuit court : surplus de récoltes, paniers, troc. (Frigos solidaires : sous-feature à venir.)',
+      'Alimentation circuit court : surplus de récoltes, paniers, troc. (Frigos solidaires : bientôt.)',
     verbeOffre: "J'offre / je donne",
     verbeDemande: 'Je cherche à recevoir',
   },

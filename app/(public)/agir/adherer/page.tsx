@@ -27,6 +27,7 @@ const FALLBACKS = {
   cheminT99cpLabel: 'Chemin 3',
   cheminT99cpDescription:
     'Transaction T99CP (Polygon). Pour les personnes déjà équipées en wallet.',
+  ctaCarte: 'Choisir ce chemin →',
   renouvellementTitre: 'Renouvellement automatique',
   renouvellementCorps:
     "L'adhésion dure 365 jours. Un mail de rappel est envoyé à l'approche de l'échéance. Aucun prélèvement récurrent : on revient ici pour renouveler par le chemin de son choix.",
@@ -62,6 +63,7 @@ export default async function PageAdherer() {
     cheminT99cpDescription,
     renouvellementTitre,
     renouvellementCorps,
+    ctaCarte,
   ] = await Promise.all([
     session !== null ? adhesionActive(session.userId) : Promise.resolve(null),
     estAdminCourant(),
@@ -92,6 +94,9 @@ export default async function PageAdherer() {
     }),
     lireContenuEditorial('agir.adherer.renouvellement_corps', {
       valeurMd: FALLBACKS.renouvellementCorps,
+    }),
+    lireContenuEditorial('agir.adherer.cta_carte', {
+      valeurMd: FALLBACKS.ctaCarte,
     }),
   ]);
 
@@ -154,7 +159,7 @@ export default async function PageAdherer() {
             href="/agir/adherer/gratuit"
             className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <Card variant="ombre" className="flex h-full flex-col gap-2">
+            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
               <TexteEditableAdmin
                 cle="agir.adherer.chemin_gratuit.label"
                 valeurInitiale={cheminGratuitLabel.valeurMd}
@@ -179,6 +184,18 @@ export default async function PageAdherer() {
               >
                 {(t) => <p className="text-sm text-text-2">{t}</p>}
               </TexteEditableAdmin>
+              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
+              <div className="mt-auto pt-2">
+                <TexteEditableAdmin
+                  cle="agir.adherer.cta_carte"
+                  valeurInitiale={ctaCarte.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="CTA commun aux 3 cartes chemin"
+                  longueurMax={60}
+                >
+                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
+                </TexteEditableAdmin>
+              </div>
             </Card>
           </Link>
         </li>
@@ -187,7 +204,7 @@ export default async function PageAdherer() {
             href="/agir/adherer/euros"
             className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <Card variant="ombre" className="flex h-full flex-col gap-2">
+            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
               <TexteEditableAdmin
                 cle="agir.adherer.chemin_euros.label"
                 valeurInitiale={cheminEurosLabel.valeurMd}
@@ -210,6 +227,18 @@ export default async function PageAdherer() {
               >
                 {(t) => <p className="text-sm text-text-2">{t}</p>}
               </TexteEditableAdmin>
+              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
+              <div className="mt-auto pt-2">
+                <TexteEditableAdmin
+                  cle="agir.adherer.cta_carte"
+                  valeurInitiale={ctaCarte.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="CTA commun aux 3 cartes chemin"
+                  longueurMax={60}
+                >
+                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
+                </TexteEditableAdmin>
+              </div>
             </Card>
           </Link>
         </li>
@@ -218,7 +247,7 @@ export default async function PageAdherer() {
             href="/agir/adherer/t99cp"
             className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <Card variant="ombre" className="flex h-full flex-col gap-2">
+            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
               <TexteEditableAdmin
                 cle="agir.adherer.chemin_t99cp.label"
                 valeurInitiale={cheminT99cpLabel.valeurMd}
@@ -241,6 +270,18 @@ export default async function PageAdherer() {
               >
                 {(t) => <p className="text-sm text-text-2">{t}</p>}
               </TexteEditableAdmin>
+              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
+              <div className="mt-auto pt-2">
+                <TexteEditableAdmin
+                  cle="agir.adherer.cta_carte"
+                  valeurInitiale={ctaCarte.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="CTA commun aux 3 cartes chemin"
+                  longueurMax={60}
+                >
+                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
+                </TexteEditableAdmin>
+              </div>
             </Card>
           </Link>
         </li>

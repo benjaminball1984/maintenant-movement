@@ -9,7 +9,7 @@ import { UneSection } from './UneSection';
 
 const FALLBACKS = {
   badge: 'Article éditorial',
-  voirTous: 'Voir tout le média',
+  voirTous: 'Voir Maintenant Médias',
   emptyText: 'Aucun article publié pour le moment.',
   emptyLien: 'Découvrir Maintenant Médias',
 };
@@ -88,7 +88,7 @@ export async function UneArticle() {
           cle="home.une.article.voir_tous"
           valeurInitiale={voirTous.valeurMd}
           estAdmin={estAdmin}
-          libelle="libelle du lien Voir tout le media"
+          libelle="libelle du lien Voir Maintenant Médias"
           longueurMax={60}
         >
           {(t) => (

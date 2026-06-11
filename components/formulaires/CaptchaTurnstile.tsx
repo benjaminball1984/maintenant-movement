@@ -116,7 +116,16 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
       widgetIdRef.current = window.turnstile.render(`#${conteneurId.replace(/:/g, '\\:')}`, {
         sitekey: cleSite,
         callback: (token) => onChangeRef.current(token),
-        'expired-callback': () => onExpireRef.current?.(),
+        'expired-callback': () => {
+          onExpireRef.current?.();
+          // Le jeton Turnstile expire au bout de ~5 minutes. Sans relance,
+          // le formulaire garderait un jeton mort (soumission refusée côté
+          // serveur) ou resterait bloqué « en attente ». On relance donc le
+          // challenge : `callback` ci-dessus sera rappelé avec un jeton frais.
+          if (widgetIdRef.current !== null) {
+            window.turnstile?.reset(widgetIdRef.current);
+          }
+        },
         'error-callback': (code) => onErrorRef.current?.(code),
         // Garde la case anti-robot toujours visible (et son état) plutôt que de
         // la laisser se valider en arrière-plan : l'utilisateurice voit toujours

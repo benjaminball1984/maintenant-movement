@@ -1,6 +1,7 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
+import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { compter } from '@/lib/pluriel';
 import { getSupabaseServer } from '@/lib/supabase';
@@ -16,6 +17,7 @@ const FALLBACK_INTRO =
 // Microcopy editable admin : preheader, chips CTA, et Alert «  pas encore
 // connecte ?  ». Decoupage de l'Alert : titre, amorce avant le lien, libelle
 // du lien, fin apres le lien. Le lien lui-meme reste en dur (URL fixe).
+// L'Alert n'est rendue qu'aux visiteurs non connectes (session === null).
 const FALLBACK_PREHEADER = 'Espace';
 const FALLBACK_CTA_RECHERCHE = 'Recherche globale';
 const FALLBACK_CTA_AGENDA = 'Agenda agrégé';
@@ -97,19 +99,29 @@ export default async function PageSInformer() {
     ),
   ]);
 
-  // Microcopy editable, lecture en parallele.
-  const [preheader, ctaRecherche, ctaAgenda, alertTitre, alertAmorce, alertLienLabel, alertFin] =
-    await Promise.all([
-      lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
-      lireContenuEditorial('s-informer.cta.recherche', { valeurMd: FALLBACK_CTA_RECHERCHE }),
-      lireContenuEditorial('s-informer.cta.agenda', { valeurMd: FALLBACK_CTA_AGENDA }),
-      lireContenuEditorial('s-informer.alert.titre', { valeurMd: FALLBACK_ALERT_TITRE }),
-      lireContenuEditorial('s-informer.alert.amorce', { valeurMd: FALLBACK_ALERT_AMORCE }),
-      lireContenuEditorial('s-informer.alert.lien_label', {
-        valeurMd: FALLBACK_ALERT_LIEN_LABEL,
-      }),
-      lireContenuEditorial('s-informer.alert.fin', { valeurMd: FALLBACK_ALERT_FIN }),
-    ]);
+  // Microcopy editable + session, lecture en parallele. La session sert a
+  // masquer l'Alert « pas encore connecte ? » aux personnes deja connectees.
+  const [
+    preheader,
+    ctaRecherche,
+    ctaAgenda,
+    alertTitre,
+    alertAmorce,
+    alertLienLabel,
+    alertFin,
+    session,
+  ] = await Promise.all([
+    lireContenuEditorial('hub.preheader.espace', { valeurMd: FALLBACK_PREHEADER }),
+    lireContenuEditorial('s-informer.cta.recherche', { valeurMd: FALLBACK_CTA_RECHERCHE }),
+    lireContenuEditorial('s-informer.cta.agenda', { valeurMd: FALLBACK_CTA_AGENDA }),
+    lireContenuEditorial('s-informer.alert.titre', { valeurMd: FALLBACK_ALERT_TITRE }),
+    lireContenuEditorial('s-informer.alert.amorce', { valeurMd: FALLBACK_ALERT_AMORCE }),
+    lireContenuEditorial('s-informer.alert.lien_label', {
+      valeurMd: FALLBACK_ALERT_LIEN_LABEL,
+    }),
+    lireContenuEditorial('s-informer.alert.fin', { valeurMd: FALLBACK_ALERT_FIN }),
+    getSession(),
+  ]);
 
   const descriptionParSlug = new Map<string, string>(
     slugsDescriptions.map((slug, i) => [slug, descriptionsLues[i]?.valeurMd ?? '']),
@@ -189,6 +201,7 @@ export default async function PageSInformer() {
           estAdmin={estAdmin}
           libelle="preheader 'Espace' des pages hub (cle partagee)"
           longueurMax={30}
+          bloc
         >
           {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
         </TexteEditableAdmin>
@@ -197,6 +210,7 @@ export default async function PageSInformer() {
           valeurInitiale={titre.valeurMd}
           estAdmin={estAdmin}
           libelle="titre de la page s-informer"
+          bloc
         >
           {(t) => <Heading niveau={1}>{t}</Heading>}
         </TexteEditableAdmin>
@@ -207,6 +221,7 @@ export default async function PageSInformer() {
           libelle="intro de la page s-informer"
           multilignes
           longueurMax={800}
+          bloc
         >
           {(t) => <p className="mt-3 max-w-2xl text-text-2">{t}</p>}
         </TexteEditableAdmin>
@@ -281,54 +296,56 @@ export default async function PageSInformer() {
         })}
       </section>
 
-      <Alert
-        variant="info"
-        titre={
+      {session === null ? (
+        <Alert
+          variant="info"
+          titre={
+            <TexteEditableAdmin
+              cle="s-informer.alert.titre"
+              valeurInitiale={alertTitre.valeurMd}
+              estAdmin={estAdmin}
+              libelle="titre de l'Alert bas de page s-informer"
+              longueurMax={80}
+            >
+              {(t) => <>{t}</>}
+            </TexteEditableAdmin>
+          }
+          className="mt-8"
+        >
           <TexteEditableAdmin
-            cle="s-informer.alert.titre"
-            valeurInitiale={alertTitre.valeurMd}
+            cle="s-informer.alert.amorce"
+            valeurInitiale={alertAmorce.valeurMd}
             estAdmin={estAdmin}
-            libelle="titre de l'Alert bas de page s-informer"
-            longueurMax={80}
+            libelle="amorce avant le lien dans l'Alert s-informer"
+            multilignes
+            longueurMax={300}
+          >
+            {(t) => <>{t}</>}
+          </TexteEditableAdmin>{' '}
+          <TexteEditableAdmin
+            cle="s-informer.alert.lien_label"
+            valeurInitiale={alertLienLabel.valeurMd}
+            estAdmin={estAdmin}
+            libelle="libelle du lien dans l'Alert s-informer"
+            longueurMax={50}
+          >
+            {(t) => (
+              <Link href="/inscription" className="underline">
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>{' '}
+          <TexteEditableAdmin
+            cle="s-informer.alert.fin"
+            valeurInitiale={alertFin.valeurMd}
+            estAdmin={estAdmin}
+            libelle="fin apres le lien dans l'Alert s-informer"
+            longueurMax={200}
           >
             {(t) => <>{t}</>}
           </TexteEditableAdmin>
-        }
-        className="mt-8"
-      >
-        <TexteEditableAdmin
-          cle="s-informer.alert.amorce"
-          valeurInitiale={alertAmorce.valeurMd}
-          estAdmin={estAdmin}
-          libelle="amorce avant le lien dans l'Alert s-informer"
-          multilignes
-          longueurMax={300}
-        >
-          {(t) => <>{t}</>}
-        </TexteEditableAdmin>{' '}
-        <TexteEditableAdmin
-          cle="s-informer.alert.lien_label"
-          valeurInitiale={alertLienLabel.valeurMd}
-          estAdmin={estAdmin}
-          libelle="libelle du lien dans l'Alert s-informer"
-          longueurMax={50}
-        >
-          {(t) => (
-            <Link href="/inscription" className="underline">
-              {t}
-            </Link>
-          )}
-        </TexteEditableAdmin>{' '}
-        <TexteEditableAdmin
-          cle="s-informer.alert.fin"
-          valeurInitiale={alertFin.valeurMd}
-          estAdmin={estAdmin}
-          libelle="fin apres le lien dans l'Alert s-informer"
-          longueurMax={200}
-        >
-          {(t) => <>{t}</>}
-        </TexteEditableAdmin>
-      </Alert>
+        </Alert>
+      ) : null}
     </Container>
   );
 }
