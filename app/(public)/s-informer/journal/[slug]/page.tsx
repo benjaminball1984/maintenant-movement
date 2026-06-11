@@ -1,13 +1,11 @@
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
-import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
-import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Metadata } from 'next';
@@ -45,13 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (e === null) return { title: 'Édition introuvable' };
   return metadataPourPartage({
     objet: {
-      titre: `${e.titre} (n°${e.numero}) · Maintenant Médias`,
-      description: e.sous_titre ?? 'Le journal-affiche de Maintenant Médias.',
+      titre: `${e.titre} (n°${e.numero}) · Le Peuple à l'Affiche`,
+      description: e.sous_titre ?? "Le Peuple à l'Affiche, le journal-affiche du mouvement.",
       image_url: e.image_couverture_url,
       type_objet: 'article',
     },
     cheminPage: `/s-informer/journal/${e.slug}`,
-    // Article éditorial Maintenant Médias : doit porter og:type=article
+    // Édition du Peuple à l'Affiche : doit porter og:type=article
     // (les autres pages partageables restent en og:type=website par défaut).
     ogType: 'article',
   });
@@ -74,9 +72,9 @@ export default async function PageEditionJournal({ params }: Props) {
   ]);
   if (e === null) notFound();
 
-  // V2.6.19 : épinglage « à la une » de la home (admin, éditions publiées).
-  const estEpingleUne =
-    estAdmin && e.statut === 'publie' ? (await idEpingleUneHome('article')) === e.id : false;
+  // L'épinglage « à la une » de la home (emplacement 'article') a migré vers
+  // les articles Maintenant Médias (clarification du 2026-06-11) : les
+  // éditions du Peuple à l'Affiche ne s'épinglent plus sur la home.
 
   return (
     <Container taille="md" className="py-12">
@@ -98,13 +96,6 @@ export default async function PageEditionJournal({ params }: Props) {
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <Heading niveau={1}>{e.titre}</Heading>
         <span className="flex flex-wrap items-center gap-2">
-          {estAdmin && e.statut === 'publie' ? (
-            <BoutonMettreALaUne
-              emplacement="article"
-              objetId={e.id}
-              estEpingleInitial={estEpingleUne}
-            />
-          ) : null}
           <BoutonAdminEditer href="/admin/national">Admin</BoutonAdminEditer>
         </span>
       </div>

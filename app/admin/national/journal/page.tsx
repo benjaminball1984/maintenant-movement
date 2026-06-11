@@ -11,11 +11,11 @@ import { FormulaireCreerEdition } from './FormulaireCreerEdition';
 import { LigneEditionAdmin } from './LigneEditionAdmin';
 
 export const metadata: Metadata = {
-  title: 'Maintenant Médias : Console admin',
+  title: "Le Peuple à l'Affiche : Console admin",
 };
 
 /**
- * Console admin / Maintenant Médias (V2.4.13).
+ * Console admin / Le Peuple à l'Affiche, le journal-affiche (V2.4.13).
  *
  * Liste toutes les éditions (tous statuts confondus), permet de créer
  * une nouvelle édition + bascule de statut brouillon/publié/archivé.
@@ -34,7 +34,7 @@ export default async function PageAdminJournal() {
   const [estAdmin, titre, intro] = await Promise.all([
     estAdminCourant(),
     lireContenuEditorial('admin.national.journal.titre', {
-      valeurMd: 'Maintenant Médias : Console admin',
+      valeurMd: "Le Peuple à l'Affiche : Console admin",
     }),
     lireContenuEditorial('admin.national.journal.intro', {
       valeurMd: 'Gestion des éditions du journal-affiche. Création, publication, archivage.',

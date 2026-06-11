@@ -130,7 +130,7 @@ export default async function PageSInformer() {
   const sousEspaces: CarteSousEspace[] = [
     {
       slug: 'media',
-      titre: 'Média Maintenant',
+      titre: 'Maintenant Médias',
       description: descriptionParSlug.get('media') ?? '',
       icone: Newspaper,
       href: '/s-informer/media',
@@ -147,7 +147,7 @@ export default async function PageSInformer() {
     },
     {
       slug: 'journal',
-      titre: 'Maintenant Médias',
+      titre: "Le Peuple à l'Affiche",
       description: descriptionParSlug.get('journal') ?? '',
       icone: FileText,
       href: '/s-informer/journal',

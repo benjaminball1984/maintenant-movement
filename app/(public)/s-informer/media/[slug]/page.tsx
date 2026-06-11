@@ -3,10 +3,12 @@ import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { Alert, Badge, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { formaterTempsLecture } from '@/lib/temps-lecture';
@@ -93,6 +95,11 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
   if (media === null) notFound();
   if (media.statut !== 'publie') notFound();
 
+  // Épinglage « à la une » de la home : depuis la clarification du 2026-06-11,
+  // l'emplacement 'article' de la home pointe sur les articles Maintenant
+  // Médias (le bouton vivait avant sur les éditions du journal-affiche).
+  const estEpingleUne = estAdmin ? (await idEpingleUneHome('article')) === media.id : false;
+
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
@@ -117,9 +124,18 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
             <Badge variant={media.type === 'edito' ? 'brand' : 'default'}>
               {LIBELLE_TYPE[media.type]}
             </Badge>
-            <BoutonAdminEditer href={`/admin/moderation/media?id=${media.id}`}>
-              Admin
-            </BoutonAdminEditer>
+            <span className="flex flex-wrap items-center gap-2">
+              {estAdmin ? (
+                <BoutonMettreALaUne
+                  emplacement="article"
+                  objetId={media.id}
+                  estEpingleInitial={estEpingleUne}
+                />
+              ) : null}
+              <BoutonAdminEditer href={`/admin/moderation/media?id=${media.id}`}>
+                Admin
+              </BoutonAdminEditer>
+            </span>
           </div>
           <Heading niveau={1}>{media.titre}</Heading>
           <p className="text-sm text-text-3">

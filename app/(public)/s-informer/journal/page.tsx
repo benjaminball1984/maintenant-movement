@@ -11,7 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Maintenant Médias : journal-affiche',
+  title: "Le Peuple à l'Affiche : journal-affiche",
   description:
     'Édition locale d’un journal-affiche imprimable. Patchwork de modules existants. Format A3/A4.',
 };
@@ -31,8 +31,9 @@ const FALLBACKS = {
 /**
  * Page `/s-informer/journal` V2.4.11.
  *
- * Maintenant Médias : journal-affiche. Liste les éditions publiées par
- * le mouvement, classées par numéro décroissant.
+ * Le Peuple à l'Affiche : le journal-affiche du mouvement (distinct du
+ * média Maintenant Médias). Liste les éditions publiées, classées par
+ * numéro décroissant.
  *
  * L'export PDF print-ready (Paged.js + Puppeteer) viendra dans un
  * chantier dédié.
@@ -77,7 +78,7 @@ export default async function PageJournal() {
           <p className="text-xs font-bold uppercase tracking-cap text-text-3">S'informer</p>
           <Heading niveau={1}>
             <FileText size={26} className="-mt-1 mr-2 inline" aria-hidden="true" />
-            Maintenant Médias
+            Le Peuple à l'Affiche
           </Heading>
           <TexteEditableAdmin
             cle="s-informer.journal.intro"

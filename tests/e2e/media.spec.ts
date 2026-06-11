@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Média Maintenant', () => {
+test.describe('Maintenant Médias', () => {
   test('rend /s-informer/media', async ({ page }) => {
     const reponse = await page.goto('/s-informer/media');
     expect(reponse?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1, name: 'Média Maintenant' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Maintenant Médias' })).toBeVisible();
   });
 
   test('a 10 onglets (Tous + 9 types)', async ({ page }) => {

@@ -34,9 +34,9 @@ export const ESPACES: ReadonlyArray<Espace> = [
     libelle: 'S’informer',
     verbe: 's’informer',
     sousEspaces: [
-      { slug: 'media', libelle: 'Média Maintenant' },
+      { slug: 'media', libelle: 'Maintenant Médias' },
       { slug: 'radio', libelle: 'Maintenant Radio' },
-      { slug: 'journal', libelle: 'Maintenant Médias' },
+      { slug: 'journal', libelle: "Le Peuple à l'Affiche" },
       { slug: 'reseau', libelle: 'Réseau social' },
       { slug: 'sondages', libelle: 'Sondages' },
       { slug: 'decider', libelle: 'Décider' },

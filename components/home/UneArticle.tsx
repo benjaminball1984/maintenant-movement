@@ -17,8 +17,8 @@ const FALLBACKS = {
 /**
  * Une « article éditorial » de la page d'accueil (chantier V2.6.19).
  *
- * Branche sur l'édition du journal mise à la une : l'épinglée par l'admin si
- * elle existe, sinon la dernière publiée. État vide propre sinon.
+ * Branche sur les articles de Maintenant Médias (table media) : l'épinglé
+ * par l'admin s'il existe, sinon le dernier publié. État vide propre sinon.
  */
 export async function UneArticle() {
   const [article, estAdmin, badge, voirTous, emptyText, emptyLien] = await Promise.all([
@@ -60,7 +60,7 @@ export async function UneArticle() {
               longueurMax={60}
             >
               {(t) => (
-                <Link href="/s-informer/journal" className="text-brand hover:underline">
+                <Link href="/s-informer/media" className="text-brand hover:underline">
                   {t}
                 </Link>
               )}
@@ -92,7 +92,7 @@ export async function UneArticle() {
           longueurMax={60}
         >
           {(t) => (
-            <Link href="/s-informer/journal" className="text-xs text-text-3 hover:text-brand">
+            <Link href="/s-informer/media" className="text-xs text-text-3 hover:text-brand">
               {t}
             </Link>
           )}
@@ -101,7 +101,7 @@ export async function UneArticle() {
 
       {article.imageCouvertureUrl !== null ? (
         <Link
-          href={`/s-informer/journal/${article.slug}`}
+          href={`/s-informer/media/${article.slug}`}
           className="relative block aspect-[16/9] overflow-hidden rounded-lg border border-border"
         >
           <Image
@@ -117,7 +117,7 @@ export async function UneArticle() {
 
       <Heading niveau={2} apparenceComme={3} className="text-2xl">
         <Link
-          href={`/s-informer/journal/${article.slug}`}
+          href={`/s-informer/media/${article.slug}`}
           className="text-text-1 underline-offset-4 hover:underline"
         >
           {article.titre}

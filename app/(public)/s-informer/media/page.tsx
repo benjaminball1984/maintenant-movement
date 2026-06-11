@@ -22,7 +22,7 @@ const FALLBACKS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Média Maintenant',
+  title: 'Maintenant Médias',
   description:
     'Éditos, tribunes, articles, brèves Reuters/AP, dessins, podcasts, vidéos, lives, newsletter.',
 };
@@ -79,7 +79,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
     <Container taille="lg" className="py-12">
       <header className="mb-8">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">S'informer</p>
-        <Heading niveau={1}>Média Maintenant</Heading>
+        <Heading niveau={1}>Maintenant Médias</Heading>
         <p className="mt-3 max-w-2xl text-text-2">
           <TexteEditableAdmin
             cle="s-informer.media.intro_amorce"
@@ -104,7 +104,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
             {(t) => <>{t}</>}
           </TexteEditableAdmin>{' '}
           <Link href="/s-informer/journal" className="underline">
-            Maintenant Médias (journal-affiche)
+            Le Peuple à l'Affiche (journal-affiche)
           </Link>
           <TexteEditableAdmin
             cle="s-informer.media.intro_fin"

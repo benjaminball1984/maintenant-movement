@@ -236,7 +236,8 @@ const MODULES: ReadonlyArray<ModuleAdmin> = [
   {
     slug: 'journal',
     titre: 'Journal-affiche',
-    description: 'Gestion des éditions Maintenant Médias : créer, publier, brouillon, archiver.',
+    description:
+      "Gestion des éditions du Peuple à l'Affiche : créer, publier, brouillon, archiver.",
     href: '/admin/national/journal',
   },
   {
