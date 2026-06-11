@@ -1,0 +1,12 @@
+// Worker minimal : déclencheur cron de l'import quotidien de
+// L'Agenda Militant Indépendant. Chaque matin à 04:30 UTC (06:30 Paris
+// en été), il appelle l'endpoint protégé du site avec le secret CRON_SECRET
+// (posé via `wrangler secret put CRON_SECRET --config infra/cron-agenda/wrangler.jsonc`).
+{
+  "name": "maintenant-cron-agenda",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    "crons": ["30 4 * * *"]
+  }
+}

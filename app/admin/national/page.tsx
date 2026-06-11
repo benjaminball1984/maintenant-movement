@@ -164,6 +164,13 @@ interface ModuleAdmin {
 
 const MODULES: ReadonlyArray<ModuleAdmin> = [
   {
+    slug: 'une',
+    titre: 'À la une de l’accueil',
+    description:
+      'Choisir ce qui s’affiche dans les 4 blocs « à la une » de la page d’accueil : pétition, article, mobilisation, cagnotte.',
+    href: '/admin/national/une',
+  },
+  {
     slug: 'personnes',
     titre: 'Personnes',
     description:
