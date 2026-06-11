@@ -7,7 +7,8 @@
 > suivante ; ce fichier est la version lisible côté humain.
 
 **Branche** : `feature/phase-0-chantier-0.1-deploiement-cloudflare`
-**Dernier commit** : `97d9747` (tout est committé, rien en suspens).
+**Dernier commit** : `b3ab56d` (V2.6.80) — tout committé, arbre propre.
+**Déployé en ligne** : oui, version Worker `2c2f6abe` (2026-06-09) ; accueil + connexion répondent 200.
 
 ---
 
