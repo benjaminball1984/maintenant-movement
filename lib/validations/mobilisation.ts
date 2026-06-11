@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
   type MessagesValidationMobilisation,
 } from '@/lib/messages-validation';
+import { TYPES_MOBILISATION, type TypeMobilisation } from '@/lib/mobilisations/type-mobilisation';
 import { estUrlImageDurable } from '@/lib/validation-url';
 import { z } from 'zod';
 
@@ -69,6 +70,11 @@ export function creerMobilisationFactory(
         date_fin: z
           .string()
           .datetime({ message: messages.dateFinFormat })
+          .optional()
+          .or(z.literal('')),
+        /** 2026-06-11 : type d'action (pictogramme). Optionnel. */
+        type_mobilisation: z
+          .enum(TYPES_MOBILISATION as readonly [TypeMobilisation, ...TypeMobilisation[]])
           .optional()
           .or(z.literal('')),
         token_turnstile: z.string().min(1, messages.turnstileRequis),

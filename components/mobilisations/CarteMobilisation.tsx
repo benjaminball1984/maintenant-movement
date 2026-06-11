@@ -1,10 +1,11 @@
-import { Badge, Card } from '@/components/ui';
+import { PictoTypeMobilisation } from '@/components/mobilisations/PictoTypeMobilisation';
+import { Badge, Card, ImageAffiche } from '@/components/ui';
 import { getImageObjet } from '@/lib/images';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import type { MobilisationEnrichie } from '@/lib/mobilisations/requetes';
+import { typeMobilisationOuNull } from '@/lib/mobilisations/type-mobilisation';
 import { cn } from '@/lib/utils';
 import { Calendar, MapPin, Users } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface CarteMobilisationProps {
@@ -22,28 +23,29 @@ export function CarteMobilisation({ mobilisation, enAvant = false }: CarteMobili
   const relative = formaterRelativeAVenir(mobilisation.date_debut);
   const lien = `/mobiliser/mobilisations/${mobilisation.slug}`;
   const imageSrc = getImageObjet({ image_url: mobilisation.image_url, type_objet: 'mobilisation' });
+  // Pictogramme par type d'action (revue 2026-06-11) ; badge générique en
+  // l'absence de type (mobilisations antérieures à la colonne).
+  const typeMobilisation = typeMobilisationOuNull(mobilisation.type_mobilisation);
 
   return (
     <Card
       variant={enAvant ? 'eleve' : 'ombre'}
       className={cn('flex flex-col gap-3', enAvant && 'border-brand/40')}
     >
-      <Link
-        href={lien}
-        className="relative block aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-surface-2"
-      >
-        <Image
+      <Link href={lien} className="block">
+        <ImageAffiche
           src={imageSrc}
-          alt=""
-          fill
-          unoptimized
           sizes="(max-width: 768px) 100vw, 600px"
-          className="object-cover"
+          className="aspect-[16/9] w-full rounded-md border border-border bg-surface-2"
         />
       </Link>
 
       <header className="flex items-center justify-between gap-2">
-        <Badge variant="brand">Mobilisation</Badge>
+        {typeMobilisation !== null ? (
+          <PictoTypeMobilisation type={typeMobilisation} />
+        ) : (
+          <Badge variant="brand">Mobilisation</Badge>
+        )}
         <span className="text-xs font-bold uppercase tracking-cap text-text-3">{relative}</span>
       </header>
 

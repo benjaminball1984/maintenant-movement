@@ -1385,6 +1385,8 @@ export type Database = {
           slug: string;
           statut: string;
           titre: string;
+          /** 2026-06-11 — type d'action pour le pictogramme (nullable). */
+          type_mobilisation: string | null;
           updated_at: string;
         };
         Insert: {
@@ -1405,6 +1407,7 @@ export type Database = {
           slug: string;
           statut?: string;
           titre: string;
+          type_mobilisation?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -1425,6 +1428,7 @@ export type Database = {
           slug?: string;
           statut?: string;
           titre?: string;
+          type_mobilisation?: string | null;
           updated_at?: string;
         };
         Relationships: [

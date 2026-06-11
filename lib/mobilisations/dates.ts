@@ -5,27 +5,33 @@
  * réutilisables par l'agenda agrégé (`/agenda`, chantier 8.2) le jour
  * où celui-ci arrivera.
  *
- * Convention : tout est en `fr-FR`, fuseau de l'utilisateurice (le
- * serveur n'a pas accès à la timezone du client, donc on délègue le
- * rendu au navigateur via Intl quand c'est possible).
+ * Convention : tout est en `fr-FR`, fuseau **Europe/Paris** épinglé.
+ * Ces helpers tournent côté serveur (Worker Cloudflare, fuseau UTC) :
+ * sans fuseau explicite, « 19h00 à Paris » s'affichait « 17:00 »
+ * (constaté en prod le 2026-06-11 sur les mobilisations importées).
  */
+
+const FUSEAU = 'Europe/Paris';
 
 const FORMAT_DATE = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
+  timeZone: FUSEAU,
 });
 
 const FORMAT_DATE_COURT = new Intl.DateTimeFormat('fr-FR', {
   day: 'numeric',
   month: 'short',
   year: 'numeric',
+  timeZone: FUSEAU,
 });
 
 const FORMAT_HEURE = new Intl.DateTimeFormat('fr-FR', {
   hour: '2-digit',
   minute: '2-digit',
+  timeZone: FUSEAU,
 });
 
 /**
@@ -64,11 +70,9 @@ export function formaterPlage(dateDebutIso: string, dateFinIso: string | null): 
 
   const fin = new Date(dateFinIso);
 
-  // Même jour calendaire ?
-  const memeJour =
-    debut.getUTCFullYear() === fin.getUTCFullYear() &&
-    debut.getUTCMonth() === fin.getUTCMonth() &&
-    debut.getUTCDate() === fin.getUTCDate();
+  // Même jour calendaire, vu depuis Paris (pas depuis UTC : un événement
+  // de 23h à 1h du matin heure de Paris change de jour UTC à 22h).
+  const memeJour = FORMAT_DATE_COURT.format(debut) === FORMAT_DATE_COURT.format(fin);
 
   if (memeJour) {
     return `${FORMAT_DATE.format(debut)}, ${FORMAT_HEURE.format(debut)} → ${FORMAT_HEURE.format(fin)}`;

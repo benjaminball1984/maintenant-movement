@@ -78,6 +78,8 @@ export async function creerMobilisation(
       image_url: donnees.image_url === '' ? null : (donnees.image_url ?? null),
       date_debut: donnees.date_debut,
       date_fin: dateFin,
+      type_mobilisation:
+        donnees.type_mobilisation === '' ? null : (donnees.type_mobilisation ?? null),
       createurice_id: session.userId,
       // statut default = 'publiee' (modération a posteriori, cf. migration 014)
     })

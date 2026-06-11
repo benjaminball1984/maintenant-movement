@@ -7,11 +7,12 @@ import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { BoutonParticiper } from '@/components/mobilisations/BoutonParticiper';
+import { PictoTypeMobilisation } from '@/components/mobilisations/PictoTypeMobilisation';
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
-import { Alert, Card, Container, Heading } from '@/components/ui';
+import { Alert, Card, Container, Heading, ImageAffiche } from '@/components/ui';
 import { getSiteUrl } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
@@ -19,10 +20,10 @@ import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { formaterPlage, formaterRelativeAVenir } from '@/lib/mobilisations/dates';
 import { dejaParticipante, mobilisationParSlug } from '@/lib/mobilisations/requetes';
+import { typeMobilisationOuNull } from '@/lib/mobilisations/type-mobilisation';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { Calendar, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { participerMobilisation } from '../actions';
@@ -183,6 +184,14 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
             </div>
           </div>
           <Heading niveau={1}>{mobilisation.titre}</Heading>
+          {(() => {
+            const typeMobilisation = typeMobilisationOuNull(mobilisation.type_mobilisation);
+            return typeMobilisation !== null ? (
+              <p>
+                <PictoTypeMobilisation type={typeMobilisation} />
+              </p>
+            ) : null;
+          })()}
           <BlocOrganisationPorteuse objetType="mobilisation" objetId={mobilisation.id} />
 
           {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur mobilisation. */}
@@ -198,16 +207,11 @@ export default async function PageMobilisationDetail({ params }: PageDetailProps
           ) : null}
 
           {mobilisation.image_url !== null ? (
-            <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
-              <Image
-                src={mobilisation.image_url}
-                alt=""
-                fill
-                unoptimized
-                sizes="(max-width: 768px) 100vw, 720px"
-                className="object-cover"
-              />
-            </div>
+            <ImageAffiche
+              src={mobilisation.image_url}
+              sizes="(max-width: 768px) 100vw, 720px"
+              className="aspect-[16/9] rounded-lg border border-border bg-surface-2"
+            />
           ) : null}
         </header>
 

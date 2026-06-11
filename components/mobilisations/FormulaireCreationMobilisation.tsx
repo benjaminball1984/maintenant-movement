@@ -12,6 +12,10 @@ import {
   MESSAGES_VALIDATION_MOBILISATION_DEFAUT,
   type MessagesValidationMobilisation,
 } from '@/lib/messages-validation';
+import {
+  LIBELLE_TYPE_MOBILISATION,
+  TYPES_MOBILISATION,
+} from '@/lib/mobilisations/type-mobilisation';
 import type { OrganisationGeree } from '@/lib/organisations/liaisons';
 import {
   type DonneesCreerMobilisation,
@@ -31,6 +35,9 @@ export interface LibellesCreationMobilisation {
   placeholderDescription: string;
   labelLieu: string;
   placeholderLieu: string;
+  /** 2026-06-11 : type d'action (pictogramme). Optionnels pour compat. */
+  labelType?: string;
+  placeholderType?: string;
   labelLatitude: string;
   placeholderLatitude: string;
   labelLongitude: string;
@@ -54,6 +61,8 @@ const LIBELLES_DEFAUT: LibellesCreationMobilisation = {
     "Décris l'événement, le déroulé, ce qu'il faut savoir. 50 à 3000 caractères.",
   labelLieu: 'Lieu',
   placeholderLieu: 'Exemple : Place de la République, Paris 11e',
+  labelType: "Type d'action (pictogramme)",
+  placeholderType: 'Choisir un type (optionnel)',
   labelLatitude: 'Latitude (optionnel)',
   placeholderLatitude: '48.8676',
   labelLongitude: 'Longitude (optionnel)',
@@ -126,6 +135,7 @@ export function FormulaireCreationMobilisation({
       image_url: '',
       date_debut: '',
       date_fin: '',
+      type_mobilisation: '',
       token_turnstile: '',
     },
   });
@@ -233,6 +243,26 @@ export function FormulaireCreationMobilisation({
         <Input id="mob-lieu" placeholder={libelles.placeholderLieu} {...register('lieu')} />
         {errors.lieu !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.lieu.message}</p>
+        ) : null}
+      </div>
+
+      <div>
+        <Label htmlFor="mob-type">{libelles.labelType ?? LIBELLES_DEFAUT.labelType}</Label>
+        <select
+          id="mob-type"
+          className="h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-text-1"
+          defaultValue=""
+          {...register('type_mobilisation')}
+        >
+          <option value="">{libelles.placeholderType ?? LIBELLES_DEFAUT.placeholderType}</option>
+          {TYPES_MOBILISATION.map((t) => (
+            <option key={t} value={t}>
+              {LIBELLE_TYPE_MOBILISATION[t]}
+            </option>
+          ))}
+        </select>
+        {errors.type_mobilisation !== undefined ? (
+          <p className="mt-1 text-xs text-danger">{errors.type_mobilisation.message}</p>
         ) : null}
       </div>
 
