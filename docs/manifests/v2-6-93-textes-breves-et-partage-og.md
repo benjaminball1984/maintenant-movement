@@ -63,12 +63,10 @@ Corrections des manques :
 
 ## Non livré (et pourquoi)
 
-- [ ] **4 brèves restent sous les 6 lignes** : 2 Libération (Stellantis,
-  Coupe du monde) + 2 New York Times (Hockney, SpaceX). Leurs pages article
-  sont inaccessibles aux robots (403) et leurs flux ne donnent pas plus de
-  texte. ARBITRAGE BEN : les supprimer (règle stricte) ou les garder (elles
-  ont leur vraie image depuis V2.6.92 et le nouveau format annexe/important
-  les affiche correctement). En attendant, elles restent en ligne.
+- [x] **4 brèves sous les 6 lignes : ARBITRÉ par Ben le 2026-06-12**
+  (« supprime et remplace ») : les 2 Libération et 2 NYT supprimées, puis
+  revue de presse complétée à 72 brèves via `scripts/completer-breves.ts`
+  (voir CLAUDE.md V2.6.95).
 - [ ] **Cache de Facebook** : le mauvais aperçu Messenger constaté par Ben
   sur la pétition Cuba venait vraisemblablement du cache du robot Facebook
   (la pétition a été recréée le jour même ; Facebook garde son aperçu ~30
