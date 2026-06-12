@@ -238,15 +238,23 @@ export function MosaiqueMedias({ une, redaction = [], medias }: MosaiqueMediasPr
         </section>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {medias.map((media) =>
-          estImportant(media) ? (
-            <CarteImportante key={media.id} media={media} />
-          ) : (
-            <CarteAnnexe key={media.id} media={media} />
-          ),
-        )}
-      </div>
+      {/* Séparateur net entre la rédaction et la revue de presse (demande
+          Ben 2026-06-12 : qu'on ne croie jamais que les brèves des autres
+          médias sont de la rédaction de Maintenant!). */}
+      {medias.length > 0 ? (
+        <section className="grid gap-3 border-t border-border pt-6">
+          <h2 className="text-xs font-bold uppercase tracking-cap text-text-3">Revue de presse</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {medias.map((media) =>
+              estImportant(media) ? (
+                <CarteImportante key={media.id} media={media} />
+              ) : (
+                <CarteAnnexe key={media.id} media={media} />
+              ),
+            )}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
