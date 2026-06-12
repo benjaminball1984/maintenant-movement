@@ -1,3 +1,4 @@
+import { geocoderLieuFr } from '@/lib/geocodage';
 import type { TypeMobilisation } from '@/lib/mobilisations/type-mobilisation';
 
 /**
@@ -281,6 +282,12 @@ export async function importerAgendaMilitant(maxNouveaux = 8): Promise<RapportIm
       if (new Date(candidate).getTime() >= new Date(debutIso).getTime()) finIso = candidate;
     }
 
+    // Coordonnées pour la carte unifiée (revue 2026-06-12 : les événements
+    // importés n'avaient aucun point). Géocodage Nominatim borné à
+    // 2 tentatives pour rester dans le budget de sous-requêtes du Worker ;
+    // un échec n'est pas bloquant, l'événement est importé sans point.
+    const position = ev.lieu === '' ? null : await geocoderLieuFr(ev.lieu, 2);
+
     const rIns = await fetch(`${urlSb}/rest/v1/mobilisation`, {
       method: 'POST',
       headers: { ...entetes, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
@@ -295,6 +302,8 @@ export async function importerAgendaMilitant(maxNouveaux = 8): Promise<RapportIm
           type_mobilisation: devinerType(ev.titre, ev.description),
           image_url: `${urlSb}/storage/v1/object/public/media/${cheminBucket}`,
           createurice_id: CREATEURICE_ID,
+          latitude: position?.latitude ?? null,
+          longitude: position?.longitude ?? null,
         },
       ]),
     });

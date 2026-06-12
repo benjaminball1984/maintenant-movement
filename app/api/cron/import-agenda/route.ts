@@ -9,9 +9,11 @@ import { NextResponse } from 'next/server';
  * (voir infra/cron-agenda/). Protégé par le secret `CRON_SECRET` (secret
  * Worker) : sans le bon en-tête Authorization, 401.
  *
- * L'import est borné (8 nouveaux événements maximum par exécution) pour
- * rester sous la limite de sous-requêtes du Worker ; le surplus éventuel
- * est rattrapé aux exécutions suivantes.
+ * L'import est borné (7 nouveaux événements maximum par exécution) pour
+ * rester sous la limite de 50 sous-requêtes du Worker (plan Free) : chaque
+ * événement coûte désormais jusqu'à 6 fetch (page, affiche, upload, insert,
+ * et 2 tentatives de géocodage Nominatim pour le point carte), plus 2 fetch
+ * fixes. Le surplus éventuel est rattrapé aux exécutions suivantes.
  */
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +25,7 @@ export async function GET(requete: Request): Promise<NextResponse> {
     return NextResponse.json({ ok: false, message: 'Non autorisé.' }, { status: 401 });
   }
 
-  const rapport = await importerAgendaMilitant(8);
+  const rapport = await importerAgendaMilitant(7);
   return NextResponse.json({
     ok: true,
     crees: rapport.crees,

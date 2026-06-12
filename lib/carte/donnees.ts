@@ -63,6 +63,11 @@ const FORMATEUR_DATE_COURT = new Intl.DateTimeFormat('fr-FR', {
 export async function chargerPointsCarte(): Promise<PointCarte[]> {
   const supabase = await getSupabaseServer();
 
+  // Mobilisations : uniquement celles à venir, ou encore en cours (décision
+  // Lilou/Ben 2026-06-12 : les mobilisations passées disparaissent de la
+  // carte pour ne pas la saturer).
+  const maintenantIso = new Date().toISOString();
+
   const [
     { data: mobilisations },
     { data: offres },
@@ -78,6 +83,7 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
       .from('mobilisation')
       .select('id, titre, slug, latitude, longitude, lieu, date_debut')
       .eq('statut', 'publiee')
+      .or(`date_debut.gte.${maintenantIso},date_fin.gte.${maintenantIso}`)
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
       .order('date_debut', { ascending: true })
