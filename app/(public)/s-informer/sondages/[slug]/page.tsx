@@ -101,6 +101,11 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
   const dejaVote = session !== null ? await aVotePersonne(sondage.id, session.userId) : false;
   const pluriel = sondage.total_votes > 1 ? 's' : '';
 
+  // Revue 2026-06-12 (Ben) : les résultats ne s'affichent JAMAIS avant
+  // d'avoir voté (pas d'influence sur le vote) ; après le vote, ou quand le
+  // sondage est clos, ils deviennent la vue principale.
+  const montrerResultats = dejaVote || sondage.statut !== 'ouvert';
+
   return (
     <Container taille="md" className="py-12">
       <p className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3">
@@ -229,47 +234,49 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
           </Alert>
         ) : null}
 
-        <section className="grid gap-3">
-          <TexteEditableAdmin
-            cle="sondages.fiche.section_resultats"
-            valeurInitiale={sectionResultats.valeurMd}
-            estAdmin={estAdmin}
-            libelle="titre section resultats"
-            longueurMax={40}
-          >
-            {(t) => (
-              <Heading niveau={2} apparenceComme={3}>
-                {t}
-              </Heading>
-            )}
-          </TexteEditableAdmin>
-          <p className="text-sm text-text-3">
-            {sondage.total_votes}{' '}
+        {montrerResultats ? (
+          <section className="grid gap-3">
             <TexteEditableAdmin
-              cle="sondages.fiche.vote_label"
-              valeurInitiale={voteLabel.valeurMd}
+              cle="sondages.fiche.section_resultats"
+              valeurInitiale={sectionResultats.valeurMd}
               estAdmin={estAdmin}
-              libelle="label 'vote' (singulier, 's' ajoute automatiquement)"
-              longueurMax={20}
+              libelle="titre section resultats"
+              longueurMax={40}
             >
               {(t) => (
-                <>
+                <Heading niveau={2} apparenceComme={3}>
                   {t}
-                  {pluriel}
-                </>
+                </Heading>
               )}
             </TexteEditableAdmin>
-          </p>
-          <ResultatsSondage
-            options={sondage.options}
-            optionsImages={sondage.options_images}
-            resultatsBruts={sondage.resultats_par_option}
-            totalBrut={sondage.total_votes}
-            resultatsPonderes={sondage.resultats_ponderes}
-            totalPondere={sondage.total_pondere}
-            pondereDisponible={sondage.pondere_disponible}
-          />
-        </section>
+            <p className="text-sm text-text-3">
+              {sondage.total_votes}{' '}
+              <TexteEditableAdmin
+                cle="sondages.fiche.vote_label"
+                valeurInitiale={voteLabel.valeurMd}
+                estAdmin={estAdmin}
+                libelle="label 'vote' (singulier, 's' ajoute automatiquement)"
+                longueurMax={20}
+              >
+                {(t) => (
+                  <>
+                    {t}
+                    {pluriel}
+                  </>
+                )}
+              </TexteEditableAdmin>
+            </p>
+            <ResultatsSondage
+              options={sondage.options}
+              optionsImages={sondage.options_images}
+              resultatsBruts={sondage.resultats_par_option}
+              totalBrut={sondage.total_votes}
+              resultatsPonderes={sondage.resultats_ponderes}
+              totalPondere={sondage.total_pondere}
+              pondereDisponible={sondage.pondere_disponible}
+            />
+          </section>
+        ) : null}
 
         {sondage.createurice_id !== null ? (
           <footer className="border-t border-border pt-4 text-sm text-text-3">

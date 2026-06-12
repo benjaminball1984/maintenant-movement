@@ -58,6 +58,17 @@
   `data-migration/creer-sondage-presidentielle.mjs` (gitignoré), crédits
   sources dans `data-migration/sondage-presidentielle/credits-sondage.json`.
 
+## Correctif post-livraison (même journée, signalement Ben)
+
+- [x] **Vote bloqué** : en rendant le bloc sociodémo toujours visible, le
+  sélecteur de tranche d'âge non renseigné envoyait `''` que le schéma de
+  vote refusait (enum strict) : tout vote échouait. Corrigé (`''` accepté
+  puis converti en null côté action) + test de régression.
+- [x] **Résultats cachés avant le vote** (décision Ben) : la section
+  Résultats ne s'affiche plus que si la personne a voté, ou si le sondage
+  est clos. Avant le vote : uniquement le formulaire (pas d'influence) ;
+  après : uniquement les résultats (le formulaire disparaît, comme avant).
+
 ## Contenus à arbitrer
 
 - [ ] **Méthodologie de pondération** (`lib/sondages/ponderation.ts`) :

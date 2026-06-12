@@ -118,7 +118,8 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
     option_index: donnees.option_index,
     code_postal:
       donnees.code_postal === '' || donnees.code_postal === undefined ? null : donnees.code_postal,
-    tranche_age: donnees.tranche_age ?? null,
+    tranche_age:
+      donnees.tranche_age === '' || donnees.tranche_age === undefined ? null : donnees.tranche_age,
     pronom: donnees.pronom === '' || donnees.pronom === undefined ? null : donnees.pronom,
     genre_declare:
       donnees.genre_declare === '' || donnees.genre_declare === undefined

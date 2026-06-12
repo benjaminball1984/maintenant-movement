@@ -87,7 +87,12 @@ export function creerVoterSondageSchema(
         .regex(/^\d{5}$/, messages.codePostalFormat)
         .optional()
         .or(z.literal('')),
-      tranche_age: z.enum(['moins_18', '18_24', '25_34', '35_49', '50_64', '65_plus']).optional(),
+      // `''` accepté : le sélecteur du formulaire envoie une chaîne vide
+      // quand la personne ne déclare pas sa tranche (converti en null côté action).
+      tranche_age: z
+        .enum(['moins_18', '18_24', '25_34', '35_49', '50_64', '65_plus'])
+        .optional()
+        .or(z.literal('')),
       pronom: z.string().trim().max(30).optional().or(z.literal('')),
       genre_declare: z.string().trim().max(100).optional().or(z.literal('')),
       token_turnstile: z.string().min(1, messages.turnstileRequis),

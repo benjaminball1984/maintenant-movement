@@ -87,6 +87,10 @@ describe('voterSondageSchema', () => {
     );
   });
 
+  it('accepte une tranche d’âge VIDE (sélecteur non renseigné, bug du 2026-06-12)', () => {
+    expect(voterSondageSchema.safeParse({ ...base, tranche_age: '' }).success).toBe(true);
+  });
+
   it('refuse un code postal mal formé', () => {
     expect(voterSondageSchema.safeParse({ ...base, code_postal: '7507' }).success).toBe(false);
   });
