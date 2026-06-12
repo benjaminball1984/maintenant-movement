@@ -19,27 +19,130 @@ export interface ArticleFlux {
   imageUrl: string | null;
 }
 
-/** Décode les entités HTML/XML courantes des flux. */
+/**
+ * Entités HTML nommées rencontrées dans les flux de presse (typographie
+ * et accents français inclus). Constat Ben 2026-06-12 : des brèves
+ * affichaient « d&rsquo;herbicide » au lieu de « d'herbicide », parce que
+ * le décodeur ne connaissait que les entités de base.
+ */
+const ENTITES_NOMMEES: Record<string, string> = {
+  amp: '&',
+  quot: '"',
+  apos: "'",
+  lt: '<',
+  gt: '>',
+  nbsp: ' ',
+  shy: '',
+  rsquo: '’',
+  lsquo: '‘',
+  rdquo: '”',
+  ldquo: '“',
+  bdquo: '„',
+  laquo: '«',
+  raquo: '»',
+  hellip: '…',
+  ndash: '–',
+  mdash: '—',
+  eacute: 'é',
+  egrave: 'è',
+  ecirc: 'ê',
+  euml: 'ë',
+  agrave: 'à',
+  aacute: 'á',
+  acirc: 'â',
+  auml: 'ä',
+  icirc: 'î',
+  iuml: 'ï',
+  iacute: 'í',
+  ocirc: 'ô',
+  ouml: 'ö',
+  oacute: 'ó',
+  ugrave: 'ù',
+  ucirc: 'û',
+  uuml: 'ü',
+  uacute: 'ú',
+  ccedil: 'ç',
+  ntilde: 'ñ',
+  aelig: 'æ',
+  oelig: 'œ',
+  szlig: 'ß',
+  Eacute: 'É',
+  Egrave: 'È',
+  Ecirc: 'Ê',
+  Agrave: 'À',
+  Acirc: 'Â',
+  Ccedil: 'Ç',
+  Ocirc: 'Ô',
+  OElig: 'Œ',
+  AElig: 'Æ',
+  copy: '©',
+  reg: '®',
+  trade: '™',
+  deg: '°',
+  euro: '€',
+  pound: '£',
+  sect: '§',
+  middot: '·',
+  bull: '•',
+  times: '×',
+  divide: '÷',
+  plusmn: '±',
+  frac12: '½',
+  frac14: '¼',
+  frac34: '¾',
+  sup2: '²',
+  sup3: '³',
+  micro: 'µ',
+};
+
+/**
+ * Décode les entités HTML/XML des flux : numériques (`&#8217;`,
+ * `&#x2019;`) et nommées (table ci-dessus). DEUX passes, parce que les
+ * flux de presse double-encodent parfois (`&amp;rsquo;` doit donner « ' »,
+ * pas rester « &rsquo; »). Une entité inconnue est laissée telle quelle.
+ */
 export function decoderEntitesXml(s: string): string {
-  return s
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, n: string) => String.fromCodePoint(Number.parseInt(n, 16)))
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
+  const decoderUnePasse = (t: string) =>
+    t
+      .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, n: string) =>
+        String.fromCodePoint(Number.parseInt(n, 16)),
+      )
+      .replace(/&([a-zA-Z][a-zA-Z0-9]*);/g, (tout, nom: string) => ENTITES_NOMMEES[nom] ?? tout);
+  const sansCdata = s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+  return decoderUnePasse(decoderUnePasse(sansCdata));
 }
 
-/** Retire les balises HTML et normalise les espaces. */
+/**
+ * Retire les balises HTML et normalise les espaces. Les légendes d'images
+ * (`<figcaption>`, crédits photo type « © Untel/Agence ») sont retirées
+ * AVEC leur contenu : insérées au milieu d'un extrait, elles donnent un
+ * texte incohérent (constat Ben 2026-06-12).
+ */
 export function texteDepuisHtml(html: string): string {
   return decoderEntitesXml(html)
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<(script|style|figcaption)[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Texte des paragraphes `<p>` d'une page d'article : sert à ÉTOFFER une
+ * brève quand la description du flux est trop courte (règle Ben
+ * 2026-06-12 : aucune brève sous ~6 lignes). Les blocs hors article
+ * (scripts, navigation, légendes) et les miettes (boutons, mentions)
+ * sont écartés.
+ */
+export function extraireParagraphes(html: string, longueurMinParagraphe = 60): string {
+  const sansBlocs = html.replace(
+    /<(script|style|figcaption|aside|nav|header|footer)[\s\S]*?<\/\1>/gi,
+    ' ',
+  );
+  return [...sansBlocs.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+    .map((m) => texteDepuisHtml(m[1] ?? ''))
+    .filter((t) => t.length >= longueurMinParagraphe)
+    .join(' ');
 }
 
 function premierMatch(bloc: string, motifs: RegExp[]): string | null {

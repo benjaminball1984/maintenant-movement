@@ -3,6 +3,7 @@ import {
   type ArticleFlux,
   analyserFlux,
   decoderEntitesXml,
+  extraireParagraphes,
   extrairePremieresLignes,
 } from '@/lib/import-breves/rss';
 import {
@@ -32,6 +33,14 @@ const USER_AGENT =
   'Mozilla/5.0 (compatible; MaintenantRevueDePresse/1.0; +https://maintenant-le-mouvement.org)';
 
 const TAILLE_MAX_IMAGE_OCTETS = 4_000_000;
+
+/**
+ * Longueur minimale de l'extrait d'une brève (décision Ben 2026-06-12 :
+ * « aucune brève ne doit avoir moins de 6 lignes de texte ») : à ~60
+ * caractères par ligne affichée sur les cartes de la mosaïque, 360
+ * caractères garantissent 6 lignes pleines.
+ */
+export const MIN_CARACTERES_EXTRAIT = 360;
 
 export interface BreveCandidate {
   source: SourceBreve;
@@ -142,6 +151,25 @@ export async function chercherImageSpecialisee(lien: string): Promise<string | n
   try {
     const chasseur = CHASSEURS_PAR_HOTE[new URL(lien).hostname];
     return chasseur !== undefined ? await chasseur(lien) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Étoffe le texte d'une brève quand la description du flux est trop
+ * courte (règle Ben 2026-06-12 : minimum ~6 lignes) : lit la page de
+ * l'article et concatène ses paragraphes. Échoue proprement (null) si le
+ * site bloque les robots ou si la page ne donne pas assez de texte.
+ */
+export async function chercherTexteArticle(lien: string): Promise<string | null> {
+  try {
+    const r = await fetch(lien, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html' },
+    });
+    if (!r.ok) return null;
+    const texte = extraireParagraphes((await r.text()).slice(0, 400_000));
+    return texte.length >= MIN_CARACTERES_EXTRAIT ? texte : null;
   } catch {
     return null;
   }
@@ -295,9 +323,17 @@ export async function telechargerEtInsererBreve(
     return { ok: false, message: 'déjà importée' };
   }
 
-  const extrait = extrairePremieresLignes(article.description);
-  if (extrait.length < 40) {
-    return { ok: false, message: 'description trop courte pour une brève' };
+  // Texte de la brève : description du flux, étoffée depuis la page de
+  // l'article si elle ne suffit pas. Règle Ben 2026-06-12 : AUCUNE brève
+  // sous ~6 lignes ; un article dont on ne peut pas tirer assez de texte
+  // est écarté (une autre source sera tirée).
+  let extrait = extrairePremieresLignes(article.description);
+  if (extrait.length < MIN_CARACTERES_EXTRAIT) {
+    const textePage = await chercherTexteArticle(article.lien);
+    if (textePage !== null) extrait = extrairePremieresLignes(textePage);
+  }
+  if (extrait.length < MIN_CARACTERES_EXTRAIT) {
+    return { ok: false, message: 'texte trop court pour une brève (minimum ~6 lignes)' };
   }
 
   const slugBase = slugifier(article.titre).slice(0, 70).replace(/-+$/, '');
@@ -421,6 +457,9 @@ export async function importerBreveHoraire(
     essayees.add(source.nom);
     try {
       const articles = await lireFlux(source);
+      // Pré-filtre volontairement bas (40) : une description courte peut
+      // encore être étoffée depuis la page de l'article. La règle finale
+      // des ~6 lignes est tranchée dans `telechargerEtInsererBreve`.
       const nouveau = articles.find(
         (a) => !existants.has(a.lien) && a.publieLe !== null && a.description.length >= 40,
       );

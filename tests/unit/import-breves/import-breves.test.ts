@@ -1,5 +1,11 @@
 import { extraireImageLocSitemap, selectionnerPourUnJour } from '@/lib/import-breves/importer';
-import { analyserFlux, extrairePremieresLignes, texteDepuisHtml } from '@/lib/import-breves/rss';
+import {
+  analyserFlux,
+  decoderEntitesXml,
+  extraireParagraphes,
+  extrairePremieresLignes,
+  texteDepuisHtml,
+} from '@/lib/import-breves/rss';
 import {
   SOURCES_COMPLEMENTAIRES,
   SOURCES_PRIORITAIRES,
@@ -59,9 +65,41 @@ describe('analyserFlux', () => {
   });
 });
 
-describe('texteDepuisHtml / extrairePremieresLignes', () => {
+describe('decoderEntitesXml', () => {
+  it('décode les entités nommées typographiques et accentuées (cas Ben 2026-06-12)', () => {
+    expect(decoderEntitesXml('d&rsquo;herbicide')).toBe('d’herbicide');
+    expect(decoderEntitesXml('&laquo;&nbsp;t&eacute;moignage&nbsp;&raquo;&hellip;')).toBe(
+      '« témoignage »…',
+    );
+  });
+
+  it('résout les doubles encodages des flux (&amp;rsquo; → apostrophe)', () => {
+    expect(decoderEntitesXml('d&amp;rsquo;herbicide')).toBe('d’herbicide');
+    expect(decoderEntitesXml('d&amp;#8217;herbicide')).toBe('d’herbicide');
+  });
+
+  it('laisse intactes les entités inconnues et les esperluettes nues', () => {
+    expect(decoderEntitesXml('&inconnue; pile & face')).toBe('&inconnue; pile & face');
+  });
+});
+
+describe('texteDepuisHtml / extraireParagraphes / extrairePremieresLignes', () => {
   it('retire balises et entités, normalise les espaces', () => {
     expect(texteDepuisHtml('<p>Un &amp; <b>deux</b>\n trois</p>')).toBe('Un & deux trois');
+  });
+
+  it('retire les légendes figcaption AVEC leur contenu (crédits photo)', () => {
+    expect(
+      texteDepuisHtml(
+        '<p>Un champ.</p><figcaption>© Esteban Grépinet/Vert</figcaption><p>Un tracteur.</p>',
+      ),
+    ).toBe('Un champ. Un tracteur.');
+  });
+
+  it('extraireParagraphes garde les vrais paragraphes, écarte miettes et légendes', () => {
+    const phrase = 'Ceci est un vrai paragraphe d’article qui dépasse largement la borne fixée.';
+    const html = `<header><p>${phrase}</p></header><p>OK</p><p>${phrase}</p><figcaption>© Crédit</figcaption><p>${phrase}</p>`;
+    expect(extraireParagraphes(html)).toBe(`${phrase} ${phrase}`);
   });
 
   it('laisse un texte court intact et coupe un texte long sur un mot avec ellipse', () => {
