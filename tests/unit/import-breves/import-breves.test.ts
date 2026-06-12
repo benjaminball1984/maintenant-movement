@@ -138,6 +138,12 @@ describe('texteDepuisHtml / extraireParagraphes / extrairePremieresLignes', () =
     expect(extraireParagraphes(html)).toBe(`${phrase} ${phrase}`);
   });
 
+  it('extraireParagraphes écarte les invites de site (cas Jeune Afrique, Ben 2026-06-12)', () => {
+    const phrase = 'Investissements lourds, partenariats internationaux et feuille de route 2030.';
+    const html = `<p>Complétez votre profil en quelques secondes pour recevoir nos newsletters et télécharger notre appli.</p><p>${phrase}</p><p>Abonnez-vous pour soutenir un journalisme indépendant et recevoir nos enquêtes.</p>`;
+    expect(extraireParagraphes(html)).toBe(phrase);
+  });
+
   it('laisse un texte court intact et coupe un texte long sur un mot avec ellipse', () => {
     expect(extrairePremieresLignes('Court.')).toBe('Court.');
     const long = 'mot '.repeat(300);

@@ -128,11 +128,24 @@ export function texteDepuisHtml(html: string): string {
 }
 
 /**
+ * Invites de SITE (pas du contenu d'article) à écarter de l'étoffage :
+ * newsletters, création de compte, applis, abonnement, dons, cookies.
+ * Constat Ben 2026-06-12 : « Complétez votre profil en quelques secondes
+ * pour recevoir nos newsletters et télécharger notre appli » (Jeune
+ * Afrique) importé en tête de plusieurs brèves.
+ */
+export function estParagrapheParasite(texte: string): boolean {
+  return /compl[ée]tez votre profil|newsletter|t[ée]l[ée]charge[rz][^.]{0,25}appli|abonnez-vous|r[ée]serv[ée]e? aux abonn[ée]|inscrivez-vous|cr[ée]e[rz] (un|votre) compte|connectez-vous|identifiez-vous|faire un don|soutenez-nous|cookies|politique de confidentialit[ée]|acc[èe]s illimit[ée]|offre d['’]abonnement|premier mois offert|sign up|subscribe|already a member|^publi[ée] le |mis(e)? [àa] jour le|modifi[ée] (le |hier|aujourd)/i.test(
+    texte,
+  );
+}
+
+/**
  * Texte des paragraphes `<p>` d'une page d'article : sert à ÉTOFFER une
  * brève quand la description du flux est trop courte (règle Ben
  * 2026-06-12 : aucune brève sous ~6 lignes). Les blocs hors article
- * (scripts, navigation, légendes) et les miettes (boutons, mentions)
- * sont écartés.
+ * (scripts, navigation, légendes), les miettes (boutons, mentions) et
+ * les invites de site (newsletter, abonnement...) sont écartés.
  */
 export function extraireParagraphes(html: string, longueurMinParagraphe = 60): string {
   const sansBlocs = html.replace(
@@ -141,7 +154,7 @@ export function extraireParagraphes(html: string, longueurMinParagraphe = 60): s
   );
   return [...sansBlocs.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
     .map((m) => texteDepuisHtml(m[1] ?? ''))
-    .filter((t) => t.length >= longueurMinParagraphe)
+    .filter((t) => t.length >= longueurMinParagraphe && !estParagrapheParasite(t))
     .join(' ');
 }
 
