@@ -153,6 +153,16 @@ function premierMatch(bloc: string, motifs: RegExp[]): string | null {
   return null;
 }
 
+/**
+ * Images « techniques » à ne JAMAIS prendre pour vignette d'article :
+ * émojis WordPress (`s.w.org/images/core/emoji/`, le « doigt jaune » 👉
+ * des brèves Regards, constat Ben 2026-06-12), smileys, pictos, pixels
+ * de mesure, avatars.
+ */
+export function estImageTechnique(src: string): boolean {
+  return /emoji|smilie|smiley|logo|\/icons?\/|spacer|pixel|avatar|gravatar|\.svg(\?|$)/i.test(src);
+}
+
 function extraireImage(bloc: string): string | null {
   const direct = premierMatch(bloc, [
     /<enclosure[^>]+url="([^"]+)"[^>]*type="image\/[^"]*"/i,
@@ -161,10 +171,14 @@ function extraireImage(bloc: string): string | null {
     /<media:content[^>]+url="([^"]+)"[^>]+medium="image"/i,
     /<media:thumbnail[^>]+url="([^"]+)"/i,
   ]);
-  if (direct !== null) return decoderEntitesXml(direct);
-  // Première <img> du contenu encodé (description ou content:encoded).
-  const contenu = bloc.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return contenu?.[1] !== undefined ? decoderEntitesXml(contenu[1]) : null;
+  if (direct !== null && !estImageTechnique(direct)) return decoderEntitesXml(direct);
+  // Première <img> NON technique du contenu encodé (description ou
+  // content:encoded) : les émojis et pictos sont sautés.
+  for (const m of bloc.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+    const src = m[1] ?? '';
+    if (src !== '' && !estImageTechnique(src)) return decoderEntitesXml(src);
+  }
+  return null;
 }
 
 function extraireLien(bloc: string): string | null {

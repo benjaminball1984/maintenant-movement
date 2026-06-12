@@ -2,6 +2,7 @@ import { extraireImageLocSitemap, selectionnerPourUnJour } from '@/lib/import-br
 import {
   analyserFlux,
   decoderEntitesXml,
+  estImageTechnique,
   extraireParagraphes,
   extrairePremieresLignes,
   texteDepuisHtml,
@@ -62,6 +63,41 @@ describe('analyserFlux', () => {
     expect(articles).toHaveLength(1);
     expect(articles[0]?.lien).toBe('https://exemple.org/atom-1');
     expect(articles[0]?.description).toBe("Résumé de l'entrée.");
+  });
+
+  it('saute les émojis WordPress dans le contenu (cas Regards « doigt jaune », Ben 2026-06-12)', () => {
+    const flux = `<?xml version="1.0"?><rss version="2.0"><channel><item>
+      <title>Article Regards</title>
+      <link>https://exemple.org/regards</link>
+      <description><![CDATA[<p>Texte <img src="https://s.w.org/images/core/emoji/17.0.2/72x72/1f449.png" alt=""/> suite
+        <img src="https://exemple.org/wp-content/uploads/2026/06/Image-9-1024x576.jpg"/></p>]]></description>
+      <pubDate>Fri, 12 Jun 2026 08:00:00 +0200</pubDate>
+    </item></channel></rss>`;
+    const articles = analyserFlux(flux);
+    expect(articles[0]?.imageUrl).toBe(
+      'https://exemple.org/wp-content/uploads/2026/06/Image-9-1024x576.jpg',
+    );
+  });
+});
+
+describe('estImageTechnique', () => {
+  it('reconnaît émojis, smileys, pictos, pixels, avatars et SVG', () => {
+    expect(estImageTechnique('https://s.w.org/images/core/emoji/17.0.2/72x72/1f449.png')).toBe(
+      true,
+    );
+    expect(estImageTechnique('https://exemple.org/wp-includes/images/smilies/icon_wink.gif')).toBe(
+      true,
+    );
+    expect(estImageTechnique('https://exemple.org/theme/icons/fleche.png')).toBe(true);
+    expect(estImageTechnique('https://exemple.org/logo-site.svg')).toBe(true);
+    expect(
+      estImageTechnique(
+        'https://regards.fr/wp-content/uploads/2023/06/logoregards_blanc-jaune.png',
+      ),
+    ).toBe(true);
+    expect(
+      estImageTechnique('https://exemple.org/wp-content/uploads/2026/06/Image-9-1024x576.jpg'),
+    ).toBe(false);
   });
 });
 

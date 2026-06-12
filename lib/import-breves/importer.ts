@@ -3,6 +3,7 @@ import {
   type ArticleFlux,
   analyserFlux,
   decoderEntitesXml,
+  estImageTechnique,
   extraireParagraphes,
   extrairePremieresLignes,
 } from '@/lib/import-breves/rss';
@@ -176,6 +177,38 @@ export async function chercherTexteArticle(lien: string): Promise<string | null>
 }
 
 /**
+ * Avant-dernière chasse (juste avant le logo) : la PREMIÈRE image du
+ * CORPS de la page de l'article. Restreinte aux téléversements WordPress
+ * (`/wp-content/uploads/`), le standard de la plupart de nos sources
+ * indépendantes : on évite ainsi de ramasser une publicité ou un picto.
+ * Utile pour les sites SANS og:image, comme Regards (constat Ben
+ * 2026-06-12 : l'émoji « doigt jaune » 👉 du flux passait pour l'image
+ * de l'article).
+ */
+export async function chercherImageCorpsArticle(lien: string): Promise<string | null> {
+  try {
+    const r = await fetch(lien, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html' },
+    });
+    if (!r.ok) return null;
+    const html = (await r.text()).slice(0, 400_000);
+    for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+      const src = m[1] ?? '';
+      if (
+        src.startsWith('http') &&
+        src.includes('/wp-content/uploads/') &&
+        !estImageTechnique(src)
+      ) {
+        return src;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Logo du média source, en DERNIER recours (« mets le logo du média
  * source mais n'en abuse pas ») : favicon haute taille via le service
  * public de Google, copié dans le bucket une fois par source.
@@ -341,9 +374,11 @@ export async function telechargerEtInsererBreve(
 
   // Chasse à l'image, dans l'ordre (décision Ben : une image pour CHAQUE
   // brève, le logo du média seulement en dernier recours) :
-  //   1. image du flux RSS ; 2. og:image de la page de l'article ;
+  //   1. image du flux RSS (émojis et pictos filtrés) ;
+  //   2. og:image de la page de l'article ;
   //   3. chasseur spécialisé du domaine (sitemap Arc, oEmbed) ;
-  //   4. logo du média source. L'image est copiée dans le bucket
+  //   4. première image WordPress du corps de la page ;
+  //   5. logo du média source. L'image est copiée dans le bucket
   //   (anti-hotlink). Seules les vraies images d'article rendent la
   //   brève « importante » (le logo reste un format annexe).
   let vignetteUrl: string | null = null;
@@ -381,6 +416,13 @@ export async function telechargerEtInsererBreve(
     const imageSpecialisee = await chercherImageSpecialisee(article.lien);
     if (imageSpecialisee !== null) {
       vignetteUrl = await copierImage(imageSpecialisee, `breves/${slug}.jpg`);
+      imageReelle = vignetteUrl !== null;
+    }
+  }
+  if (vignetteUrl === null) {
+    const imageCorps = await chercherImageCorpsArticle(article.lien);
+    if (imageCorps !== null) {
+      vignetteUrl = await copierImage(imageCorps, `breves/${slug}.jpg`);
       imageReelle = vignetteUrl !== null;
     }
   }
