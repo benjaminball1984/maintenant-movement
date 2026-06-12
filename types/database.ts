@@ -2320,6 +2320,44 @@ export type Database = {
           },
         ];
       };
+      profil_qualification: {
+        Row: {
+          created_at: string;
+          id: string;
+          personne_id: string;
+          question_cle: string;
+          reponse: string;
+          reponse_secondaire: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          personne_id: string;
+          question_cle: string;
+          reponse: string;
+          reponse_secondaire?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          personne_id?: string;
+          question_cle?: string;
+          reponse?: string;
+          reponse_secondaire?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profil_qualification_personne_id_fkey';
+            columns: ['personne_id'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       reponse_sondage: {
         Row: {
           code_postal: string | null;

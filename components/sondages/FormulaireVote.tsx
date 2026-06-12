@@ -1,11 +1,12 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Input, Label } from '@/components/ui';
+import { Alert, Button, Label } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
+import { OPTIONS_GENRE } from '@/lib/sondages/qualification';
 import {
   type DonneesVoterSondage,
   type DonneesVoterSondageEntree,
@@ -20,9 +21,6 @@ import { useForm } from 'react-hook-form';
 export interface LibellesVote {
   alertErreurTitre: string;
   legendeVote: string;
-  detailsTitre: string;
-  labelCodePostal: string;
-  placeholderCodePostal: string;
   labelAge: string;
   ageMoins18: string;
   age18_24: string;
@@ -30,8 +28,6 @@ export interface LibellesVote {
   age35_49: string;
   age50_64: string;
   age65Plus: string;
-  labelPronom: string;
-  placeholderPronom: string;
   labelGenre: string;
   hintPondere: string;
   ctaSubmit: string;
@@ -42,21 +38,16 @@ export interface LibellesVote {
 const LIBELLES_DEFAUT: LibellesVote = {
   alertErreurTitre: 'Vote impossible',
   legendeVote: 'Ton vote',
-  detailsTitre: 'Variables sociodémo (optionnel — méthode des quotas)',
-  labelCodePostal: 'Code postal',
-  placeholderCodePostal: '75020',
-  labelAge: "Tranche d'âge",
+  labelAge: "Tranche d'âge (optionnel)",
   ageMoins18: 'Moins de 18 ans',
   age18_24: '18-24 ans',
   age25_34: '25-34 ans',
   age35_49: '35-49 ans',
   age50_64: '50-64 ans',
   age65Plus: '65 ans et plus',
-  labelPronom: 'Pronom',
-  placeholderPronom: 'iel / il / elle / ...',
-  labelGenre: 'Genre déclaré',
+  labelGenre: 'Genre (optionnel)',
   hintPondere:
-    'Toutes ces variables sont optionnelles. Elles permettent la pondération par quotas (méthode redressement) dès 300 répondant·es.',
+    'Ces deux réponses, comme le code postal déjà présent dans ton profil, servent uniquement à fiabiliser les résultats (méthode des quotas).',
   ctaSubmit: 'Voter',
   ctaEnCours: 'Vote en cours...',
   messageCaptchaEnAttente:
@@ -107,8 +98,6 @@ export function FormulaireVote({
     // inacceptable), la validation exige un choix explicite.
     defaultValues: {
       sondage_id: sondageId,
-      code_postal: '',
-      pronom: '',
       genre_declare: '',
       token_turnstile: '',
     },
@@ -181,50 +170,43 @@ export function FormulaireVote({
         ) : null}
       </fieldset>
 
-      <details className="rounded-md border border-border bg-surface-2 p-3">
-        <summary className="cursor-pointer text-sm font-bold text-text-1">
-          {libelles.detailsTitre}
-        </summary>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="vote-cp">{libelles.labelCodePostal}</Label>
-            <Input
-              id="vote-cp"
-              placeholder={libelles.placeholderCodePostal}
-              {...register('code_postal')}
-            />
-          </div>
-          <div>
-            <Label htmlFor="vote-age">{libelles.labelAge}</Label>
-            <select
-              id="vote-age"
-              {...register('tranche_age')}
-              className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
-            >
-              <option value="">—</option>
-              <option value="moins_18">{libelles.ageMoins18}</option>
-              <option value="18_24">{libelles.age18_24}</option>
-              <option value="25_34">{libelles.age25_34}</option>
-              <option value="35_49">{libelles.age35_49}</option>
-              <option value="50_64">{libelles.age50_64}</option>
-              <option value="65_plus">{libelles.age65Plus}</option>
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="vote-pronom">{libelles.labelPronom}</Label>
-            <Input
-              id="vote-pronom"
-              placeholder={libelles.placeholderPronom}
-              {...register('pronom')}
-            />
-          </div>
-          <div>
-            <Label htmlFor="vote-genre">{libelles.labelGenre}</Label>
-            <Input id="vote-genre" {...register('genre_declare')} />
-          </div>
+      {/* Revue 2026-06-12 (Ben) : deux champs optionnels seulement, sans
+          friction. Le code postal n'est PAS demandé (il vient du profil,
+          la personne étant connectée pour voter). */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="vote-genre">{libelles.labelGenre}</Label>
+          <select
+            id="vote-genre"
+            {...register('genre_declare')}
+            className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
+          >
+            <option value="">—</option>
+            {OPTIONS_GENRE.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
-        <p className="mt-2 text-xs text-text-3">{libelles.hintPondere}</p>
-      </details>
+        <div>
+          <Label htmlFor="vote-age">{libelles.labelAge}</Label>
+          <select
+            id="vote-age"
+            {...register('tranche_age')}
+            className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
+          >
+            <option value="">—</option>
+            <option value="moins_18">{libelles.ageMoins18}</option>
+            <option value="18_24">{libelles.age18_24}</option>
+            <option value="25_34">{libelles.age25_34}</option>
+            <option value="35_49">{libelles.age35_49}</option>
+            <option value="50_64">{libelles.age50_64}</option>
+            <option value="65_plus">{libelles.age65Plus}</option>
+          </select>
+        </div>
+      </div>
+      <p className="text-xs text-text-3">{libelles.hintPondere}</p>
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

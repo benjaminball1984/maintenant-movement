@@ -1,5 +1,6 @@
 import { voterSondage } from '@/app/(public)/s-informer/sondages/actions';
 import { fermerSondageAction } from '@/app/actions/archivage';
+import { prochaineQuestionQualification, repondreQualification } from '@/app/actions/qualification';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
 import { BoutonArchiverEntite } from '@/components/admin/BoutonArchiverEntite';
 import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite';
@@ -8,6 +9,7 @@ import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
+import { QualificationProgressive } from '@/components/sondages/QualificationProgressive';
 import { ResultatsSondage } from '@/components/sondages/ResultatsSondage';
 import { Alert, Badge, Card, Container, Heading, ImageAffiche } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
@@ -105,6 +107,14 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
   // d'avoir voté (pas d'influence sur le vote) ; après le vote, ou quand le
   // sondage est clos, ils deviennent la vue principale.
   const montrerResultats = dejaVote || sondage.statut !== 'ouvert';
+
+  // Qualification progressive (§6) : juste après le vote, une question du
+  // panel est proposée immédiatement (tirée côté serveur, zéro friction).
+  let questionQualification = null;
+  if (dejaVote) {
+    const tirage = await prochaineQuestionQualification();
+    if (tirage.ok) questionQualification = tirage.question;
+  }
 
   return (
     <Container taille="md" className="py-12">
@@ -243,6 +253,13 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
               {(t) => <>{t}</>}
             </TexteEditableAdmin>
           </Alert>
+        ) : null}
+
+        {dejaVote && sondage.statut === 'ouvert' ? (
+          <QualificationProgressive
+            questionInitiale={questionQualification}
+            repondre={repondreQualification}
+          />
         ) : null}
 
         {montrerResultats ? (

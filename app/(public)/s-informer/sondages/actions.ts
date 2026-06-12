@@ -2,6 +2,7 @@
 
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
+import { trancheAgeDepuisDateNaissance } from '@/lib/sondages/qualification';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
@@ -112,25 +113,50 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
     return { ok: false, message: 'Option hors plage pour ce sondage.' };
   }
 
+  // Données « gratuites » du profil (revue 2026-06-12, Ben) : le code
+  // postal n'est plus demandé au vote, il vient du profil de la personne
+  // connectée ; la tranche d'âge est déduite de la date de naissance
+  // quand elle n'est pas déclarée dans le formulaire.
+  const { data: profil } = await supabase
+    .from('personne')
+    .select('code_postal, date_naissance')
+    .eq('id', session.userId)
+    .maybeSingle();
+  const trancheDeclaree =
+    donnees.tranche_age === '' || donnees.tranche_age === undefined ? null : donnees.tranche_age;
+  const trancheAge =
+    trancheDeclaree ?? trancheAgeDepuisDateNaissance(profil?.date_naissance ?? null);
+  const genreDeclare =
+    donnees.genre_declare === '' || donnees.genre_declare === undefined
+      ? null
+      : donnees.genre_declare;
+
   const { error } = await supabase.from('reponse_sondage').insert({
     sondage_id: sondage.id,
     personne_id: session.userId,
     option_index: donnees.option_index,
-    code_postal:
-      donnees.code_postal === '' || donnees.code_postal === undefined ? null : donnees.code_postal,
-    tranche_age:
-      donnees.tranche_age === '' || donnees.tranche_age === undefined ? null : donnees.tranche_age,
-    pronom: donnees.pronom === '' || donnees.pronom === undefined ? null : donnees.pronom,
-    genre_declare:
-      donnees.genre_declare === '' || donnees.genre_declare === undefined
-        ? null
-        : donnees.genre_declare,
+    code_postal: profil?.code_postal ?? null,
+    tranche_age: trancheAge,
+    pronom: null,
+    genre_declare: genreDeclare,
   });
   if (error !== null) {
     if (error.code === '23505') {
       return { ok: false, message: 'Tu as déjà voté pour ce sondage.' };
     }
     return { ok: false, message: `Vote impossible : ${error.message}` };
+  }
+
+  // Le genre déclaré au vote alimente aussi le profil de qualification
+  // (best-effort : on ne re-posera pas la question du panel). Dégradation
+  // propre tant que la table n'existe pas sur le distant.
+  if (genreDeclare !== null) {
+    await supabase
+      .from('profil_qualification')
+      .upsert(
+        { personne_id: session.userId, question_cle: 'genre', reponse: genreDeclare },
+        { onConflict: 'personne_id,question_cle' },
+      );
   }
 
   revalidatePath('/s-informer/sondages');
