@@ -11,6 +11,7 @@ import {
   chargerSalleParSlug,
 } from '@/lib/decider';
 import { formaterDateLongueHeure } from '@/lib/format-date';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { ArrowLeft, CalendarRange, FileText } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -28,10 +29,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     chargerReunionParId(reunionId),
   ]);
   if (salle === null || reunion === null) return { title: 'Réunion introuvable' };
-  return {
-    title: `${reunion.titre} : ${salle.nom}`,
-    description: reunion.ordreJourMd.slice(0, 200),
-  };
+  // Partage complet (titre + description + image, audit Ben 2026-06-12).
+  return metadataPourPartage({
+    objet: {
+      titre: `${reunion.titre} : ${salle.nom}`,
+      description: reunion.ordreJourMd,
+      image_url: null,
+      type_objet: 'generique',
+    },
+    cheminPage: `/s-informer/decider/${salle.slug}/${reunionId}`,
+  });
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   listerReunionsSalle,
 } from '@/lib/decider';
 import { formaterDateLongueHeure } from '@/lib/format-date';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import { CalendarRange, FileText, Video } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -35,10 +36,17 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const salle = await chargerSalleParSlug(slug);
-  return {
-    title: salle !== null ? `Décider : ${salle.nom}` : 'Salle introuvable',
-    description: salle?.description ?? undefined,
-  };
+  if (salle === null) return { title: 'Salle introuvable' };
+  // Partage complet (titre + description + image, audit Ben 2026-06-12).
+  return metadataPourPartage({
+    objet: {
+      titre: `Décider : ${salle.nom}`,
+      description: salle.description ?? '',
+      image_url: null,
+      type_objet: 'generique',
+    },
+    cheminPage: `/s-informer/decider/${salle.slug}`,
+  });
 }
 
 /**

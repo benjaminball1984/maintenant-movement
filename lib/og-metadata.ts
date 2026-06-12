@@ -53,6 +53,18 @@ const LONGUEUR_DESCRIPTION_OG = 200;
 const LONGUEUR_DESCRIPTION_TWITTER = 200;
 
 /**
+ * Les robots de partage (Facebook/Messenger, X, LinkedIn, WhatsApp) ne
+ * savent PAS afficher une image SVG. Quand l'image résolue est un SVG
+ * (défauts `profil.svg` et `generique.svg`), on sert le logo raster du
+ * mouvement à la place (audit partage, demande Ben 2026-06-12).
+ */
+const IMAGE_OG_SECOURS = '/logo/maintenant.png';
+
+function imagePartageable(chemin: string): string {
+  return chemin.toLowerCase().endsWith('.svg') ? IMAGE_OG_SECOURS : chemin;
+}
+
+/**
  * Convertit un chemin relatif (`/uploads/xxx.jpg` ou `/defaults/xxx.svg`)
  * en URL absolue en utilisant `SITE.urlProd`. Si le chemin est déjà absolu
  * (commence par `http`), on le retourne tel quel.
@@ -100,7 +112,7 @@ export function metadataPourPartage(options: MetadataPartageOptions): Metadata {
     image_url: objet.image_url ?? null,
     type_objet: objet.type_objet,
   });
-  const imageAbsolue = enUrlAbsolue(imageRelative);
+  const imageAbsolue = enUrlAbsolue(imagePartageable(imageRelative));
 
   const urlCanonique = enUrlAbsolue(cheminPage);
 

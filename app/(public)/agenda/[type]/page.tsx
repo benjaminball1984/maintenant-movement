@@ -1,5 +1,6 @@
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { type FiltreAgenda, chargerEvenementsAgenda } from '@/lib/agenda/donnees';
+import { metadataPourPartage } from '@/lib/og-metadata';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -45,10 +46,16 @@ function estTypeRoute(v: string): v is TypeRoute {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { type } = await params;
   if (!estTypeRoute(type)) return { title: 'Agenda introuvable' };
-  return {
-    title: `Agenda : ${MAPPING_TYPE[type].libelle}`,
-    description: `Agenda dédié aux ${MAPPING_TYPE[type].libelle.toLowerCase()}.`,
-  };
+  // Partage complet (titre + description + image, audit Ben 2026-06-12).
+  return metadataPourPartage({
+    objet: {
+      titre: `Agenda : ${MAPPING_TYPE[type].libelle}`,
+      description: `Agenda dédié aux ${MAPPING_TYPE[type].libelle.toLowerCase()}.`,
+      image_url: null,
+      type_objet: 'generique',
+    },
+    cheminPage: `/agenda/${type}`,
+  });
 }
 
 /**

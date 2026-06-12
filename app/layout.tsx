@@ -20,8 +20,26 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE.nom,
     description: SITE.descriptionCourte,
+    siteName: SITE.nom,
     locale: 'fr_FR',
     type: 'website',
+    // Image par défaut de TOUT le site (audit partage, Ben 2026-06-12) :
+    // sans elle, les pages sans Open Graph propre donnaient un aperçu de
+    // partage sans visuel sur Messenger/WhatsApp/X.
+    images: [
+      {
+        url: `${SITE.urlProd}/logo/maintenant.png`,
+        width: 1147,
+        height: 1371,
+        alt: SITE.nom,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE.nom,
+    description: SITE.descriptionCourte,
+    images: [`${SITE.urlProd}/logo/maintenant.png`],
   },
   alternates: {
     types: {
