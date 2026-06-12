@@ -12,7 +12,9 @@ import Link from 'next/link';
  *   - Les contenus MAISON (éditos, tribunes, articles publiés par
  *     l'admin) : toujours affichés au format « important ».
  *   - Les brèves de la revue de presse : « importantes » (image + titre +
- *     5-7 lignes) ou « annexes » (titre + 3-4 lignes, format réduit).
+ *     5-7 lignes) ou « annexes » (logo du média en grand + titre + texte
+ *     généreux : demande Ben 2026-06-12, « si pas d'image mettre le logo
+ *     plus gros, et un peu plus de texte », jamais de grand blanc).
  *
  * Classement antichronologique. « Lire la suite » d'une brève mène au
  * site source (nouvel onglet) ; un contenu maison mène à sa fiche.
@@ -185,29 +187,36 @@ function CarteImportante({ media }: { media: MediaEnrichi }) {
 
 function CarteAnnexe({ media }: { media: MediaEnrichi }) {
   return (
-    <article className="flex h-full flex-col gap-1.5 rounded-md border border-border bg-surface-2 p-3">
+    <article className="flex h-full flex-col gap-2 rounded-md border border-border bg-surface-2 p-3">
       <SurTitre media={media} />
       <div className="flex items-start gap-3">
         {media.vignette_url !== null ? (
           <LienMedia media={media} className="shrink-0">
-            {/* Vignette compacte (logo du média en dernier recours). */}
+            {/* Logo du média (ou vignette de secours) en GRAND format :
+                demande Ben 2026-06-12, « si pas d'image mettre le logo
+                plus gros ». */}
             <img
               src={media.vignette_url}
               alt=""
-              width={64}
-              height={64}
+              width={96}
+              height={96}
               loading="lazy"
-              className="h-16 w-16 rounded-sm border border-border object-cover"
+              className="h-24 w-24 rounded-md border border-border bg-surface object-cover p-1"
             />
           </LienMedia>
         ) : null}
         <LienMedia media={media} className="hover:underline">
-          <h3 className="text-sm font-bold leading-snug text-text-1">{media.titre}</h3>
+          <h3 className="text-base font-bold leading-snug text-text-1">{media.titre}</h3>
         </LienMedia>
       </div>
-      <p className="line-clamp-4 text-xs leading-relaxed text-text-2">{media.corps}</p>
-      <div className="mt-auto">
+      {/* Texte généreux (jusqu'à 9 lignes au lieu de 3-4) : remplit la
+          hauteur de la rangée, plus de grand blanc sous la brève. */}
+      <p className="line-clamp-[9] text-sm leading-relaxed text-text-2">{media.corps}</p>
+      <div className="mt-auto grid gap-2">
         <Provenance media={media} />
+        <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
+          {estBreveExterne(media) ? 'Lire la suite ↗' : 'Lire la suite'}
+        </LienMedia>
       </div>
     </article>
   );

@@ -1,4 +1,4 @@
-import { selectionnerPourUnJour } from '@/lib/import-breves/importer';
+import { extraireImageLocSitemap, selectionnerPourUnJour } from '@/lib/import-breves/importer';
 import { analyserFlux, extrairePremieresLignes, texteDepuisHtml } from '@/lib/import-breves/rss';
 import {
   SOURCES_COMPLEMENTAIRES,
@@ -101,6 +101,30 @@ describe('assignerTags', () => {
   it('la banque expose des tags uniques et non vides', () => {
     expect(new Set(TAGS_BREVES).size).toBe(TAGS_BREVES.length);
     expect(TAGS_BREVES.every((t) => t.trim() !== '')).toBe(true);
+  });
+});
+
+describe('extraireImageLocSitemap', () => {
+  const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url><loc>https://exemple.org/article-sans-image/</loc><lastmod>2026-06-12</lastmod></url>
+  <url><loc>https://exemple.org/article-avec-image/</loc>
+    <image:image>
+      <image:loc>https://exemple.org/resizer/photo.jpg?auth=abc&amp;width=1024</image:loc>
+      <image:caption><![CDATA[Une légende.]]></image:caption>
+    </image:image>
+  </url>
+</urlset>`;
+
+  it("retourne l'image du bloc <url> de l'article, entités décodées", () => {
+    expect(extraireImageLocSitemap(SITEMAP, 'https://exemple.org/article-avec-image/')).toBe(
+      'https://exemple.org/resizer/photo.jpg?auth=abc&width=1024',
+    );
+  });
+
+  it("retourne null si l'article n'a pas d'image ou n'est pas dans le sitemap", () => {
+    expect(extraireImageLocSitemap(SITEMAP, 'https://exemple.org/article-sans-image/')).toBeNull();
+    expect(extraireImageLocSitemap(SITEMAP, 'https://exemple.org/article-inconnu/')).toBeNull();
   });
 });
 

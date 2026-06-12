@@ -1,5 +1,10 @@
 import { slugifier } from '@/lib/helpers-purs';
-import { type ArticleFlux, analyserFlux, extrairePremieresLignes } from '@/lib/import-breves/rss';
+import {
+  type ArticleFlux,
+  analyserFlux,
+  decoderEntitesXml,
+  extrairePremieresLignes,
+} from '@/lib/import-breves/rss';
 import {
   SOURCES_COMPLEMENTAIRES,
   SOURCES_PRIORITAIRES,
@@ -61,6 +66,82 @@ export async function chercherImageArticle(lien: string): Promise<string | null>
       html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
     const url = m?.[1] ?? null;
     return url?.startsWith('http') === true ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Partie pure du chasseur « sitemap Arc » : trouve, dans le XML du
+ * sitemap, le bloc `<url>` qui référence l'article, et en extrait
+ * l'adresse de son image (`image:loc`), entités XML décodées.
+ */
+export function extraireImageLocSitemap(xml: string, lien: string): string | null {
+  const bloc = xml.split('</url>').find((b) => b.includes(lien));
+  if (bloc === undefined) return null;
+  const m = bloc.match(/<image:loc>([^<]+)<\/image:loc>/i);
+  const url = m?.[1] !== undefined ? decoderEntitesXml(m[1]).trim() : null;
+  return url?.startsWith('http') === true ? url : null;
+}
+
+/**
+ * Chasseur « sitemap Arc Publishing » (Libération) : la page article
+ * répond 403 aux robots (donc pas d'og:image lisible), mais le sitemap
+ * public du même site liste les articles récents AVEC leur image.
+ */
+export async function chercherImageSitemapArc(lien: string): Promise<string | null> {
+  try {
+    const origine = new URL(lien).origin;
+    const r = await fetch(`${origine}/arc/outboundfeeds/sitemap/?outputType=xml`, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/xml, text/xml, */*' },
+    });
+    if (!r.ok) return null;
+    return extraireImageLocSitemap(await r.text(), lien);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Chasseur « oEmbed » (The New York Times) : la page article répond 403
+ * aux robots, mais l'endpoint oEmbed du site (prévu justement pour les
+ * intégrations automatiques) renvoie la vignette de l'article.
+ */
+export async function chercherImageOembed(
+  lien: string,
+  baseOembed: string,
+): Promise<string | null> {
+  try {
+    const r = await fetch(`${baseOembed}${encodeURIComponent(lien)}`, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    });
+    if (!r.ok) return null;
+    const corps = (await r.json()) as { thumbnail_url?: unknown };
+    const url = typeof corps.thumbnail_url === 'string' ? corps.thumbnail_url : null;
+    return url?.startsWith('http') === true ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Chasseurs d'image SPÉCIALISÉS, par nom d'hôte (constat Ben 2026-06-12 :
+ * brèves Libération et New York Times retombées sur le logo alors que
+ * l'article source a une image). Ces sites bloquent la lecture de leurs
+ * pages article par les robots, mais publient l'image de l'article à un
+ * autre endroit accessible. Essayés APRÈS l'og:image, AVANT le logo.
+ */
+const CHASSEURS_PAR_HOTE: Record<string, (lien: string) => Promise<string | null>> = {
+  'www.liberation.fr': chercherImageSitemapArc,
+  'www.nytimes.com': (lien) =>
+    chercherImageOembed(lien, 'https://www.nytimes.com/svc/oembed/json/?url='),
+};
+
+/** Applique le chasseur spécialisé du domaine de l'article, s'il existe. */
+export async function chercherImageSpecialisee(lien: string): Promise<string | null> {
+  try {
+    const chasseur = CHASSEURS_PAR_HOTE[new URL(lien).hostname];
+    return chasseur !== undefined ? await chasseur(lien) : null;
   } catch {
     return null;
   }
@@ -225,7 +306,8 @@ export async function telechargerEtInsererBreve(
   // Chasse à l'image, dans l'ordre (décision Ben : une image pour CHAQUE
   // brève, le logo du média seulement en dernier recours) :
   //   1. image du flux RSS ; 2. og:image de la page de l'article ;
-  //   3. logo du média source. L'image est copiée dans le bucket
+  //   3. chasseur spécialisé du domaine (sitemap Arc, oEmbed) ;
+  //   4. logo du média source. L'image est copiée dans le bucket
   //   (anti-hotlink). Seules les vraies images d'article rendent la
   //   brève « importante » (le logo reste un format annexe).
   let vignetteUrl: string | null = null;
@@ -256,6 +338,13 @@ export async function telechargerEtInsererBreve(
     const ogImage = await chercherImageArticle(article.lien);
     if (ogImage !== null) {
       vignetteUrl = await copierImage(ogImage, `breves/${slug}.jpg`);
+      imageReelle = vignetteUrl !== null;
+    }
+  }
+  if (vignetteUrl === null) {
+    const imageSpecialisee = await chercherImageSpecialisee(article.lien);
+    if (imageSpecialisee !== null) {
+      vignetteUrl = await copierImage(imageSpecialisee, `breves/${slug}.jpg`);
       imageReelle = vignetteUrl !== null;
     }
   }
