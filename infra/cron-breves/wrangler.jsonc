@@ -1,0 +1,9 @@
+{
+  "name": "maintenant-cron-breves",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    // Toutes les heures, à la 12e minute (évite la congestion de l'heure pile).
+    "crons": ["12 * * * *"]
+  }
+}

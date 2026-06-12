@@ -1227,6 +1227,8 @@ export type Database = {
       };
       media: {
         Row: {
+          importante: boolean;
+          langue: string | null;
           auteurice_id: string | null;
           corps: string;
           created_at: string;
@@ -1251,6 +1253,8 @@ export type Database = {
           corps: string;
           created_at?: string;
           id?: string;
+          importante?: boolean;
+          langue?: string | null;
           media_url?: string | null;
           provenance_externe?: string | null;
           publie_le?: string | null;
@@ -1271,6 +1275,8 @@ export type Database = {
           corps?: string;
           created_at?: string;
           id?: string;
+          importante?: boolean;
+          langue?: string | null;
           media_url?: string | null;
           provenance_externe?: string | null;
           publie_le?: string | null;

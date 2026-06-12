@@ -42,6 +42,38 @@ export async function listerMediasPublies(type?: TypeMedia, limite = 50): Promis
   return hydrater(supabase, (data ?? []) as Media[]);
 }
 
+/**
+ * Flux de la page Maintenant Médias (revue 2026-06-12) : tous les
+ * contenus publiés (articles maison ET brèves de la revue de presse),
+ * antichronologique, filtrables par tag.
+ */
+export async function listerFluxMedias(tag?: string, limite = 150): Promise<MediaEnrichi[]> {
+  const supabase = await getSupabaseServer();
+  let q = supabase
+    .from('media')
+    .select('*')
+    .eq('statut', 'publie')
+    .order('publie_le', { ascending: false })
+    .limit(limite);
+  if (tag !== undefined && tag !== '') q = q.contains('tags', [tag]);
+  const { data } = await q;
+  return hydrater(supabase, (data ?? []) as Media[]);
+}
+
+/** Media publié par id (article épinglé à la une de la page Médias). */
+export async function mediaPublieParId(id: string): Promise<MediaEnrichi | null> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from('media')
+    .select('*')
+    .eq('id', id)
+    .eq('statut', 'publie')
+    .maybeSingle();
+  if (data === null) return null;
+  const [h] = await hydrater(supabase, [data as Media]);
+  return h ?? null;
+}
+
 export async function mediaParSlug(slug: string): Promise<MediaEnrichi | null> {
   const supabase = await getSupabaseServer();
   const { data } = await supabase.from('media').select('*').eq('slug', slug).maybeSingle();

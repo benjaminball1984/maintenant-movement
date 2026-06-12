@@ -1,9 +1,12 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { MosaiqueMedias } from '@/components/media/MosaiqueMedias';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
-import { listerMediasPublies } from '@/lib/media/requetes';
+import { idEpingleUneHome } from '@/lib/home/une';
+import { TAGS_BREVES } from '@/lib/import-breves/tags';
+import { listerFluxMedias, listerMediasPublies, mediaPublieParId } from '@/lib/media/requetes';
 import { cn } from '@/lib/utils';
 import type { TypeMedia } from '@/types/database';
 import type { Metadata } from 'next';
@@ -11,10 +14,10 @@ import Link from 'next/link';
 
 const FALLBACKS = {
   introAmorce:
-    'Éditos, tribunes, articles, brèves Reuters/AP, dessins, podcasts, vidéos, lives, newsletter. Voir aussi',
+    'Les articles de la rédaction et la revue de presse de Maintenant! : brèves des médias indépendants et internationaux, dans leur langue, reliées à leur source. Voir aussi',
   introMilieu: 'et',
   introFin: '.',
-  ongletTous: 'Tous',
+  ongletTous: 'À la une',
   emptyTitre: 'Aucun média publié pour ce filtre',
   emptyCorps:
     "La rédaction publiera bientôt. Les éditos et la newsletter sont produits par l'équipe nationale ; tribunes et articles sont ouverts à toustes (modération a posteriori).",
@@ -24,11 +27,11 @@ const FALLBACKS = {
 export const metadata: Metadata = {
   title: 'Maintenant Médias',
   description:
-    'Éditos, tribunes, articles, brèves Reuters/AP, dessins, podcasts, vidéos, lives, newsletter.',
+    'Articles de la rédaction et revue de presse des médias indépendants et internationaux.',
 };
 
 interface PageMediaProps {
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; tag?: string }>;
 }
 
 const LIBELLE_TYPE: Record<TypeMedia, string> = {
@@ -43,11 +46,15 @@ const LIBELLE_TYPE: Record<TypeMedia, string> = {
   newsletter: 'Newsletter',
 };
 
-const LISTE_TYPES: TypeMedia[] = [
+/**
+ * Onglets affichés : l'espace « Brèves » dédié est supprimé (revue
+ * 2026-06-12, Ben) : la revue de presse vit dans la vue principale,
+ * mêlée aux contenus maison.
+ */
+const TYPES_ONGLETS: TypeMedia[] = [
   'edito',
   'tribune',
   'article',
-  'breve',
   'dessin',
   'podcast',
   'video',
@@ -55,16 +62,19 @@ const LISTE_TYPES: TypeMedia[] = [
   'newsletter',
 ];
 
+const LISTE_TYPES: TypeMedia[] = [...TYPES_ONGLETS, 'breve'];
+
 function estTypeValide(v: string | undefined): v is TypeMedia {
   return v !== undefined && (LISTE_TYPES as string[]).includes(v);
 }
 
 export default async function PageMedia({ searchParams }: PageMediaProps) {
-  const { type } = await searchParams;
+  const { type, tag } = await searchParams;
   const filtre = estTypeValide(type) ? type : undefined;
-  const [medias, estAdmin, introAmorce, introMilieu, introFin, ongletTous, emptyTitre, emptyCorps] =
+  const tagActif = tag !== undefined && TAGS_BREVES.includes(tag) ? tag : undefined;
+
+  const [estAdmin, introAmorce, introMilieu, introFin, ongletTous, emptyTitre, emptyCorps] =
     await Promise.all([
-      listerMediasPublies(filtre),
       estAdminCourant(),
       lireContenuEditorial('s-informer.media.intro_amorce', { valeurMd: FALLBACKS.introAmorce }),
       lireContenuEditorial('s-informer.media.intro_milieu', { valeurMd: FALLBACKS.introMilieu }),
@@ -73,6 +83,20 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
       lireContenuEditorial('s-informer.media.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
       lireContenuEditorial('s-informer.media.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
     ]);
+
+  // Vue principale (mosaïque) ou vue filtrée par type (grille classique).
+  let medias: Awaited<ReturnType<typeof listerMediasPublies>> = [];
+  let une: Awaited<ReturnType<typeof mediaPublieParId>> = null;
+  if (filtre !== undefined) {
+    medias = await listerMediasPublies(filtre);
+  } else {
+    const [flux, idUne] = await Promise.all([
+      listerFluxMedias(tagActif),
+      idEpingleUneHome('article'),
+    ]);
+    une = idUne !== null && tagActif === undefined ? await mediaPublieParId(idUne) : null;
+    medias = flux.filter((m) => m.id !== une?.id);
+  }
   const ongletActif = filtre ?? 'tous';
 
   return (
@@ -139,7 +163,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
             </Link>
           )}
         </TexteEditableAdmin>
-        {LISTE_TYPES.map((t) => (
+        {TYPES_ONGLETS.map((t) => (
           <Link
             key={t}
             href={`/s-informer/media?type=${t}`}
@@ -154,7 +178,39 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
         ))}
       </nav>
 
-      {medias.length === 0 ? (
+      {filtre === undefined ? (
+        <nav aria-label="Filtrer par tag" className="mb-6 flex flex-wrap items-center gap-2">
+          <Link
+            href="/s-informer/media"
+            className={cn(
+              'rounded-pill border px-3 py-1 text-xs',
+              tagActif === undefined
+                ? 'border-brand bg-brand text-white'
+                : 'border-border bg-surface text-text-2 hover:bg-surface-2',
+            )}
+          >
+            Tous
+          </Link>
+          {TAGS_BREVES.map((t) => (
+            <Link
+              key={t}
+              href={`/s-informer/media?tag=${encodeURIComponent(t)}`}
+              className={cn(
+                'rounded-pill border px-3 py-1 text-xs',
+                tagActif === t
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-border bg-surface text-text-2 hover:bg-surface-2',
+              )}
+            >
+              {t}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+
+      {filtre === undefined && (medias.length > 0 || une !== null) ? (
+        <MosaiqueMedias une={une} medias={medias} />
+      ) : medias.length === 0 ? (
         <Alert
           variant="info"
           titre={
