@@ -1,5 +1,5 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
-import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { Alert, Badge, Card, Container, Heading, ImageAffiche } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -10,12 +10,13 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Sondages',
-  description: 'Sondages Maintenant! : vote connecté obligatoire, 2 modes (classique + pondéré).',
+  description:
+    'Sondages Maintenant! : vote connecté obligatoire, résultats pondérés par quotas dès 300 répondant·es.',
 };
 
 const FALLBACKS = {
   intro:
-    'Vote connecté obligatoire. 2 modes : classique (vote brut) ou pondéré (méthode des quotas dès 300 répondant·es).',
+    'Vote connecté obligatoire. Les résultats s’affichent en brut, puis pondérés (méthode des quotas) dès 300 répondant·es ; chaque visiteur·euse choisit sa vue.',
   ctaConnecte: 'Créer un sondage',
   ctaDeconnecte: 'Connecte-toi pour créer',
   emptyTitre: 'Aucun sondage publié pour le moment',
@@ -112,12 +113,21 @@ export default async function PageSondages() {
           {sondages.map((s) => (
             <li key={s.id}>
               <Card variant="ombre" className="flex h-full flex-col gap-2">
-                <header className="flex items-center justify-between gap-2">
-                  <Badge variant={s.mode === 'pondere' ? 'accent' : 'brand'}>
-                    {s.mode === 'pondere' ? 'Pondéré' : 'Classique'}
-                  </Badge>
-                  {s.statut === 'ferme' ? <Badge variant="default">Fermé</Badge> : null}
-                </header>
+                {/* Revue 2026-06-12 : plus de badge de mode (l'affichage
+                    bascule automatiquement en pondéré dès 300 répondant·es). */}
+                {s.statut === 'ferme' ? (
+                  <header className="flex items-center justify-between gap-2">
+                    <Badge variant="default">Fermé</Badge>
+                  </header>
+                ) : null}
+                {s.image_url !== null ? (
+                  <ImageAffiche
+                    src={s.image_url}
+                    alt=""
+                    className="aspect-[1200/630] w-full rounded-md border border-border"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  />
+                ) : null}
                 <h2 className="text-lg font-bold leading-tight text-text-1">
                   <Link
                     href={`/s-informer/sondages/${s.slug}`}

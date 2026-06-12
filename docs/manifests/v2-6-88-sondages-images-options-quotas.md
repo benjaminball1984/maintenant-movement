@@ -69,6 +69,25 @@
   est clos. Avant le vote : uniquement le formulaire (pas d'influence) ;
   après : uniquement les résultats (le formulaire disparaît, comme avant).
 
+## Correctif post-livraison n°2 (même journée, signalement Ben)
+
+- [x] **Vote toujours bloqué (« Invalid input »)** : vraie cause trouvée :
+  sur des boutons radio, le `valueAsNumber` de react-hook-form renvoie NaN
+  (la propriété DOM n'existe que pour les champs numériques), et Zod v4
+  refusait avec son message générique. Corrigé : le schéma accepte
+  chaîne OU nombre (union + transform + pipe), le formulaire n'utilise
+  plus `valueAsNumber`, et plus AUCUNE option n'est précochée (un choix
+  explicite est exigé, message « Choisis une option pour voter. »).
+  3 tests de régression ajoutés (chaîne « 2 » acceptée et convertie,
+  vote sans choix refusé).
+- [x] **Badge « Pondéré » retiré de la liste des sondages** + intro et
+  description mises à jour (plus de « 2 modes »).
+- [x] **Mosaïque affichée** : en grand sous le titre de la page du sondage
+  (ImageAffiche, image entière sur fond flouté) et en vignette sur les
+  cartes de la liste. La miniature de partage (og:image) pointait déjà
+  vers la mosaïque (vérifié dans le HTML) : les réseaux sociaux mettent
+  leurs aperçus en cache, utiliser leurs outils de re-scrape au besoin.
+
 ## Contenus à arbitrer
 
 - [ ] **Méthodologie de pondération** (`lib/sondages/ponderation.ts`) :

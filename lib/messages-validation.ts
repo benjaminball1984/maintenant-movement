@@ -407,6 +407,7 @@ export interface MessagesValidationSondages {
   latLngEnsemble: string;
   optionIndexEntier: string;
   optionIndexInvalide: string;
+  optionRequise: string;
   codePostalFormat: string;
   turnstileRequis: string;
 }
@@ -426,6 +427,7 @@ export const MESSAGES_VALIDATION_SONDAGES_DEFAUT: MessagesValidationSondages = {
   latLngEnsemble: 'Latitude et longitude doivent être fournies ensemble.',
   optionIndexEntier: 'L’option doit être un index entier.',
   optionIndexInvalide: 'Option invalide.',
+  optionRequise: 'Choisis une option pour voter.',
   codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
   turnstileRequis: 'Vérification anti-bot requise.',
 };

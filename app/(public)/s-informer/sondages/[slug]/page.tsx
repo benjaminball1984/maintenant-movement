@@ -9,7 +9,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { ResultatsSondage } from '@/components/sondages/ResultatsSondage';
-import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { Alert, Badge, Card, Container, Heading, ImageAffiche } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
@@ -139,6 +139,17 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
             </BoutonAdminEditer>
           </div>
           <Heading niveau={1}>{sondage.titre}</Heading>
+
+          {/* Image de couverture (sert aussi d'aperçu de partage). */}
+          {sondage.image_url !== null ? (
+            <ImageAffiche
+              src={sondage.image_url}
+              alt=""
+              className="aspect-[1200/630] w-full rounded-lg border border-border"
+              sizes="(min-width: 768px) 768px, 100vw"
+            />
+          ) : null}
+
           <p className="text-text-2">{sondage.question}</p>
 
           {/* V2.5.11.c — bouton admin "Intégrer à une campagne" sur sondage. */}

@@ -72,11 +72,22 @@ export function creerVoterSondageSchema(
   return z
     .object({
       sondage_id: z.string().uuid(),
+      // Les boutons radio HTML envoient une CHAÎNE (« 2 »), et le
+      // `valueAsNumber` de react-hook-form renvoie NaN sur des radios
+      // (bug du vote vu en prod le 2026-06-12 : « Invalid input »). On
+      // accepte donc chaîne OU nombre, converti puis borné en nombre.
       option_index: z
-        .number()
-        .int(messages.optionIndexEntier)
-        .min(0, messages.optionIndexInvalide)
-        .max(19, messages.optionIndexInvalide),
+        .union([z.number(), z.string().min(1, messages.optionRequise)], {
+          error: messages.optionRequise,
+        })
+        .transform((v) => (typeof v === 'string' ? Number(v) : v))
+        .pipe(
+          z
+            .number({ error: messages.optionRequise })
+            .int(messages.optionIndexEntier)
+            .min(0, messages.optionIndexInvalide)
+            .max(19, messages.optionIndexInvalide),
+        ),
       /**
        * Variables sociodémo optionnelles (mode pondéré).
        * La personne peut refuser de les renseigner.
@@ -102,3 +113,11 @@ export function creerVoterSondageSchema(
 export const voterSondageSchema = creerVoterSondageSchema();
 
 export type DonneesVoterSondage = z.infer<typeof voterSondageSchema>;
+
+/**
+ * Type d'ENTRÉE du formulaire de vote (avant transformation Zod) :
+ * `option_index` y est encore une chaîne de bouton radio ou un nombre.
+ * À utiliser comme `TFieldValues` de react-hook-form, la sortie validée
+ * restant `DonneesVoterSondage`.
+ */
+export type DonneesVoterSondageEntree = z.input<typeof voterSondageSchema>;

@@ -6,7 +6,11 @@ import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
-import { type DonneesVoterSondage, creerVoterSondageSchema } from '@/lib/validations/sondages';
+import {
+  type DonneesVoterSondage,
+  type DonneesVoterSondageEntree,
+  creerVoterSondageSchema,
+} from '@/lib/validations/sondages';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -96,11 +100,13 @@ export function FormulaireVote({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<DonneesVoterSondage>({
+  } = useForm<DonneesVoterSondageEntree, unknown, DonneesVoterSondage>({
     resolver: zodResolver(creerVoterSondageSchema(messages)),
+    // Pas de valeur par défaut pour `option_index` : aucune option n'est
+    // précochée (un vote pour la première option « par accident » serait
+    // inacceptable), la validation exige un choix explicite.
     defaultValues: {
       sondage_id: sondageId,
-      option_index: 0,
       code_postal: '',
       pronom: '',
       genre_declare: '',
@@ -146,10 +152,13 @@ export function FormulaireVote({
                 key={`${index}-${opt}`}
                 className="flex cursor-pointer items-center gap-3 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2"
               >
+                {/* Pas de `valueAsNumber` : sur des radios il renvoie NaN
+                    (vote bloqué, vu en prod le 2026-06-12). La conversion
+                    chaîne -> nombre est faite par le schéma Zod. */}
                 <input
                   type="radio"
                   value={index}
-                  {...register('option_index', { valueAsNumber: true })}
+                  {...register('option_index')}
                   className="accent-brand"
                 />
                 {image !== null ? (

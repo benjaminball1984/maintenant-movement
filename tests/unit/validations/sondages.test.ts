@@ -69,6 +69,17 @@ describe('voterSondageSchema', () => {
     expect(voterSondageSchema.safeParse(base).success).toBe(true);
   });
 
+  it('accepte option_index en CHAÎNE « 2 » (radios HTML) et la convertit en nombre', () => {
+    const parse = voterSondageSchema.safeParse({ ...base, option_index: '2' });
+    expect(parse.success).toBe(true);
+    if (parse.success) expect(parse.data.option_index).toBe(2);
+  });
+
+  it('refuse un vote sans option choisie (option_index absent)', () => {
+    const { option_index: _ignore, ...sansOption } = base;
+    expect(voterSondageSchema.safeParse(sansOption).success).toBe(false);
+  });
+
   it('refuse option_index négatif', () => {
     expect(voterSondageSchema.safeParse({ ...base, option_index: -1 }).success).toBe(false);
   });
