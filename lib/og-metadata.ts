@@ -79,7 +79,10 @@ function enUrlAbsolue(chemin: string): string {
 }
 
 function tronquer(texte: string, longueurMax: number): string {
-  const propre = texte.trim();
+  // Espaces normalisés : un retour à la ligne dans la description ferait
+  // une balise <meta> multi-lignes (valide mais fragile pour certains
+  // robots de partage, et double espace dans l'aperçu).
+  const propre = texte.replace(/\s+/g, ' ').trim();
   if (propre.length <= longueurMax) return propre;
   return `${propre.slice(0, longueurMax - 1).trimEnd()}…`;
 }
