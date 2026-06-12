@@ -6,7 +6,12 @@ import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { TAGS_BREVES } from '@/lib/import-breves/tags';
-import { listerFluxMedias, listerMediasPublies, mediaPublieParId } from '@/lib/media/requetes';
+import {
+  listerFluxMedias,
+  listerMediasMaison,
+  listerMediasPublies,
+  mediaPublieParId,
+} from '@/lib/media/requetes';
 import { cn } from '@/lib/utils';
 import type { TypeMedia } from '@/types/database';
 import type { Metadata } from 'next';
@@ -86,16 +91,26 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
 
   // Vue principale (mosaïque) ou vue filtrée par type (grille classique).
   let medias: Awaited<ReturnType<typeof listerMediasPublies>> = [];
+  let redaction: Awaited<ReturnType<typeof listerMediasMaison>> = [];
   let une: Awaited<ReturnType<typeof mediaPublieParId>> = null;
   if (filtre !== undefined) {
     medias = await listerMediasPublies(filtre);
   } else {
-    const [flux, idUne] = await Promise.all([
+    const [flux, maison, idUne] = await Promise.all([
       listerFluxMedias(tagActif),
+      listerMediasMaison(),
       idEpingleUneHome('article'),
     ]);
-    une = idUne !== null && tagActif === undefined ? await mediaPublieParId(idUne) : null;
-    medias = flux.filter((m) => m.id !== une?.id);
+    if (tagActif === undefined) {
+      // La une appartient à la rédaction : l'épingle admin si elle existe,
+      // sinon le contenu maison le plus récent (JAMAIS une brève importée).
+      const epingle = idUne !== null ? await mediaPublieParId(idUne) : null;
+      une = epingle !== null && epingle.type !== 'breve' ? epingle : (maison[0] ?? null);
+      redaction = maison.filter((m) => m.id !== une?.id);
+      medias = flux.filter((m) => m.type === 'breve');
+    } else {
+      medias = flux.filter((m) => m.id !== une?.id);
+    }
   }
   const ongletActif = filtre ?? 'tous';
 
@@ -208,8 +223,8 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
         </nav>
       ) : null}
 
-      {filtre === undefined && (medias.length > 0 || une !== null) ? (
-        <MosaiqueMedias une={une} medias={medias} />
+      {filtre === undefined && (medias.length > 0 || une !== null || redaction.length > 0) ? (
+        <MosaiqueMedias une={une} redaction={redaction} medias={medias} />
       ) : medias.length === 0 ? (
         <Alert
           variant="info"

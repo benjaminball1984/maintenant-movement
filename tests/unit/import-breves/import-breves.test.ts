@@ -118,8 +118,8 @@ describe('selectionnerPourUnJour', () => {
 
   it('plafonne au maximum demandé et privilégie les prioritaires', () => {
     const pool = [
-      ...Array.from({ length: 30 }, (_, i) => candidate(i % 5, 'prioritaire', i)),
-      ...Array.from({ length: 30 }, (_, i) => candidate(i % 5, 'complementaire', 100 + i)),
+      ...Array.from({ length: 30 }, (_, i) => candidate(i, 'prioritaire', i)),
+      ...Array.from({ length: 30 }, (_, i) => candidate(i, 'complementaire', 100 + i)),
     ];
     const retenues = selectionnerPourUnJour(pool, 24);
     expect(retenues).toHaveLength(24);
@@ -136,10 +136,10 @@ describe('selectionnerPourUnJour', () => {
     expect(retenues).toHaveLength(3);
   });
 
-  it('assure la diversité : 2 par source maximum au premier passage', () => {
+  it('RÈGLE Ben 2026-06-12 : jamais deux brèves de la même source dans la journée', () => {
     const pool = Array.from({ length: 10 }, (_, i) => candidate(0, 'prioritaire', i));
-    const retenues = selectionnerPourUnJour(pool, 4);
-    expect(retenues).toHaveLength(4);
+    const retenues = selectionnerPourUnJour(pool, 24);
+    expect(retenues).toHaveLength(1);
   });
 });
 

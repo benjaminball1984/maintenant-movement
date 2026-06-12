@@ -62,10 +62,14 @@ export interface ArticleUne {
  */
 export async function articleAlaUne(): Promise<ArticleUne | null> {
   const supabase = await getSupabaseServer();
+  // Les brèves de la revue de presse (contenus externes imposés par le
+  // flux RSS) ne peuvent JAMAIS prendre la une automatique : la une
+  // appartient à la rédaction de Maintenant! (revue 2026-06-12, Ben).
   const { data } = await supabase
     .from('media')
     .select('id, slug, titre, corps, vignette_url, publie_le')
     .eq('statut', 'publie')
+    .neq('type', 'breve')
     .order('publie_le', { ascending: false })
     .limit(60);
   if (data === null || data.length === 0) return null;

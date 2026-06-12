@@ -66,6 +66,28 @@ prioritaire, 20 % sources du Portail des médias indépendants de Basta!).
 - [x] Vérifié en prod : page 200 avec une, tags, 148 liens sources
   externes, images servies depuis le bucket.
 
+## Correctifs post-livraison (même journée, signalements Ben)
+
+- [x] **Les 4 articles maison semblaient « supprimés »** : ils n'avaient
+  jamais bougé de la base, mais étaient noyés sous les brèves plus
+  récentes, et la une automatique de la home prenait désormais une brève.
+  Corrigé : la une (home ET page Médias) ne peut JAMAIS être une brève
+  (repli = contenu maison le plus récent, ici Bagayoko) ; nouveau bandeau
+  « La rédaction » en tête de page : TOUS les contenus maison, toujours
+  visibles, quelle que soit leur date.
+- [x] **Badge « Brève » retiré**, remplacé par le NOM DU MÉDIA SOURCE en
+  sur-titre de carte (les tags restent dessous).
+- [x] **Une image pour chaque brève** : chasse renforcée (image du flux,
+  puis og:image de la page de l'article, puis logo du média en dernier
+  recours, qui laisse la brève au format annexe). Backfill exécuté :
+  10 vraies images récupérées, 3 logos seulement. Les cartes annexes
+  affichent désormais une vignette compacte.
+- [x] **Règle 1 brève par source par 24 h** (seule la rédaction
+  Maintenant! y échappe) : appliquée à la sélection initiale, au cron
+  horaire (sources des dernières 24 h exclues du tirage), et à
+  l'existant : 27 doublons supprimés (dont 5 des 8 Jeune Afrique qui
+  créaient l'effet « pile » signalé), 40 brèves restantes.
+
 ## Contenus à arbitrer
 
 - [ ] Intro de la page (fallback réécrit : « Les articles de la rédaction

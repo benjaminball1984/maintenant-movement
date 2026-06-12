@@ -60,6 +60,24 @@ export async function listerFluxMedias(tag?: string, limite = 150): Promise<Medi
   return hydrater(supabase, (data ?? []) as Media[]);
 }
 
+/**
+ * Contenus MAISON publiés (tout sauf les brèves importées) : toujours
+ * affichés sur la page Médias, quelle que soit leur date (revue
+ * 2026-06-12, Ben : « il faut mettre tous les articles que l'admin
+ * choisira de sélectionner »).
+ */
+export async function listerMediasMaison(limite = 40): Promise<MediaEnrichi[]> {
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from('media')
+    .select('*')
+    .eq('statut', 'publie')
+    .neq('type', 'breve')
+    .order('publie_le', { ascending: false })
+    .limit(limite);
+  return hydrater(supabase, (data ?? []) as Media[]);
+}
+
 /** Media publié par id (article épinglé à la une de la page Médias). */
 export async function mediaPublieParId(id: string): Promise<MediaEnrichi | null> {
   const supabase = await getSupabaseServer();

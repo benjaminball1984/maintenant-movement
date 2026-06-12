@@ -38,6 +38,44 @@ export interface RecolteInitiale {
   rapportSources: string[];
 }
 
+/**
+ * Chasse à l'image (décision Ben 2026-06-12 : « il faut absolument des
+ * images pour chaque article, il faut vraiment chercher les images ») :
+ * quand le flux n'en fournit pas, on va lire la PAGE de l'article et on
+ * prend son `og:image` (ou `twitter:image`).
+ */
+export async function chercherImageArticle(lien: string): Promise<string | null> {
+  try {
+    const r = await fetch(lien, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html' },
+    });
+    if (!r.ok) return null;
+    const html = (await r.text()).slice(0, 200_000);
+    const m =
+      html.match(
+        /<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]+content=["']([^"']+)["']/i,
+      ) ??
+      html.match(
+        /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image(?::secure_url)?["']/i,
+      ) ??
+      html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    const url = m?.[1] ?? null;
+    return url?.startsWith('http') === true ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Logo du média source, en DERNIER recours (« mets le logo du média
+ * source mais n'en abuse pas ») : favicon haute taille via le service
+ * public de Google, copié dans le bucket une fois par source.
+ */
+export function urlLogoSource(source: SourceBreve): string {
+  const domaine = new URL(source.flux).hostname.replace(/^(www|api|feeds|rss)\./, '');
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domaine)}&sz=256`;
+}
+
 /** Récupère et analyse un flux ; [] et rapport en cas d'échec. */
 export async function lireFlux(source: SourceBreve): Promise<ArticleFlux[]> {
   const reponse = await fetch(source.flux, {
@@ -61,9 +99,11 @@ function jourParis(epochMs: number): string {
 }
 
 /**
- * Sélectionne les brèves d'un jour : priorité aux sources prioritaires,
- * diversité d'abord (2 par source maximum au premier passage), puis
- * remplissage par fraîcheur, jusqu'à `maxParJour`.
+ * Sélectionne les brèves d'un jour. RÈGLE DURE (Ben, 2026-06-12) :
+ * jamais deux brèves de la même source par tranche de 24 heures (seule la
+ * rédaction de Maintenant! échappe à la règle, et elle ne passe pas par
+ * cet importeur). Priorité aux sources prioritaires, complément par le
+ * Portail, dans la limite de `maxParJour`.
  */
 export function selectionnerPourUnJour(
   candidates: BreveCandidate[],
@@ -76,27 +116,22 @@ export function selectionnerPourUnJour(
   const complementaires = triees.filter((c) => c.source.famille === 'complementaire');
 
   const retenues: BreveCandidate[] = [];
-  const parSource = new Map<string, number>();
+  const sourcesUtilisees = new Set<string>();
   const dejaRetenue = new Set<string>();
 
-  const passe = (liste: BreveCandidate[], capParSource: number) => {
+  const passe = (liste: BreveCandidate[]) => {
     for (const c of liste) {
       if (retenues.length >= maxParJour) return;
       if (dejaRetenue.has(c.article.lien)) continue;
-      const compte = parSource.get(c.source.nom) ?? 0;
-      if (compte >= capParSource) continue;
+      if (sourcesUtilisees.has(c.source.nom)) continue; // 1 par source par 24 h.
       retenues.push(c);
       dejaRetenue.add(c.article.lien);
-      parSource.set(c.source.nom, compte + 1);
+      sourcesUtilisees.add(c.source.nom);
     }
   };
 
-  // 1. Diversité des sources prioritaires, 2. davantage de prioritaires,
-  // 3. complément par le Portail si la journée n'est pas remplie.
-  passe(prioritaires, 2);
-  passe(prioritaires, 6);
-  passe(complementaires, 2);
-  passe(complementaires, 6);
+  passe(prioritaires);
+  passe(complementaires);
 
   return retenues.sort((a, b) => (b.article.publieLe ?? 0) - (a.article.publieLe ?? 0));
 }
@@ -187,34 +222,46 @@ export async function telechargerEtInsererBreve(
   const slugBase = slugifier(article.titre).slice(0, 70).replace(/-+$/, '');
   const slug = `${slugBase}-${(article.publieLe ?? Date.now()).toString(36)}`;
 
-  // Image : copiée dans le bucket (anti-hotlink), brève sans image sinon.
+  // Chasse à l'image, dans l'ordre (décision Ben : une image pour CHAQUE
+  // brève, le logo du média seulement en dernier recours) :
+  //   1. image du flux RSS ; 2. og:image de la page de l'article ;
+  //   3. logo du média source. L'image est copiée dans le bucket
+  //   (anti-hotlink). Seules les vraies images d'article rendent la
+  //   brève « importante » (le logo reste un format annexe).
   let vignetteUrl: string | null = null;
-  if (article.imageUrl !== null) {
+  let imageReelle = false;
+  const copierImage = async (urlImage: string, cheminBucket: string): Promise<string | null> => {
     try {
-      const rImg = await fetch(article.imageUrl, { headers: { 'User-Agent': USER_AGENT } });
+      const rImg = await fetch(urlImage, { headers: { 'User-Agent': USER_AGENT } });
       const typeMime = rImg.headers.get('content-type') ?? '';
-      if (rImg.ok && typeMime.startsWith('image/')) {
-        const octets = new Uint8Array(await rImg.arrayBuffer());
-        if (octets.length > 0 && octets.length <= TAILLE_MAX_IMAGE_OCTETS) {
-          const extension = typeMime.includes('png')
-            ? 'png'
-            : typeMime.includes('webp')
-              ? 'webp'
-              : typeMime.includes('gif')
-                ? 'gif'
-                : 'jpg';
-          const chemin = `breves/${slug}.${extension}`;
-          const rUp = await fetch(`${urlSb}/storage/v1/object/media/${chemin}`, {
-            method: 'POST',
-            headers: { ...entetes, 'Content-Type': typeMime, 'x-upsert': 'true' },
-            body: octets,
-          });
-          if (rUp.ok) vignetteUrl = `${urlSb}/storage/v1/object/public/media/${chemin}`;
-        }
-      }
+      if (!rImg.ok || !typeMime.startsWith('image/')) return null;
+      const octets = new Uint8Array(await rImg.arrayBuffer());
+      if (octets.length === 0 || octets.length > TAILLE_MAX_IMAGE_OCTETS) return null;
+      const rUp = await fetch(`${urlSb}/storage/v1/object/media/${cheminBucket}`, {
+        method: 'POST',
+        headers: { ...entetes, 'Content-Type': typeMime, 'x-upsert': 'true' },
+        body: octets,
+      });
+      return rUp.ok ? `${urlSb}/storage/v1/object/public/media/${cheminBucket}` : null;
     } catch {
-      // Image inaccessible : la brève part sans visuel (annexe).
+      return null;
     }
+  };
+
+  if (article.imageUrl !== null) {
+    vignetteUrl = await copierImage(article.imageUrl, `breves/${slug}.jpg`);
+    imageReelle = vignetteUrl !== null;
+  }
+  if (vignetteUrl === null) {
+    const ogImage = await chercherImageArticle(article.lien);
+    if (ogImage !== null) {
+      vignetteUrl = await copierImage(ogImage, `breves/${slug}.jpg`);
+      imageReelle = vignetteUrl !== null;
+    }
+  }
+  if (vignetteUrl === null) {
+    const slugSource = slugifier(source.nom).slice(0, 40);
+    vignetteUrl = await copierImage(urlLogoSource(source), `breves/logos/${slugSource}.png`);
   }
 
   const ligne = {
@@ -230,9 +277,9 @@ export async function telechargerEtInsererBreve(
     vignette_url: vignetteUrl,
     tags: assignerTags(`${article.titre} ${extrait}`),
     langue: source.langue,
-    // Mosaïque (décision Ben) : une brève illustrée est « importante »
-    // (5-7 lignes), une brève sans visuel est « annexe » (3-4 lignes).
-    importante: vignetteUrl !== null,
+    // Mosaïque (décision Ben) : une brève avec une VRAIE image d'article
+    // est « importante » (5-7 lignes) ; logo de secours = format annexe.
+    importante: imageReelle,
   };
 
   const rIns = await fetch(`${urlSb}/rest/v1/media`, {
@@ -258,12 +305,30 @@ export async function importerBreveHoraire(
   tirerSource: () => SourceBreve,
   maxEssaisSources = 4,
 ): Promise<ResultatInsertionBreve & { source?: string }> {
+  const entetes = { apikey: cle, Authorization: `Bearer ${cle}` };
   const existants = await lienSourcesExistants(urlSb, cle);
-  const essayees = new Set<string>();
 
-  for (let essai = 0; essai < maxEssaisSources; essai += 1) {
+  // RÈGLE 1 source / 24 h (Ben, 2026-06-12) : les sources déjà publiées
+  // dans les dernières 24 heures sont exclues du tirage de cette heure.
+  const depuis = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const rRecentes = await fetch(
+    `${urlSb}/rest/v1/media?type=eq.breve&publie_le=gte.${encodeURIComponent(depuis)}&select=provenance_externe`,
+    { headers: entetes },
+  );
+  const sourcesRecentes = new Set<string>(
+    rRecentes.ok
+      ? ((await rRecentes.json()) as Array<{ provenance_externe: string | null }>)
+          .map((l) => l.provenance_externe)
+          .filter((s): s is string => s !== null)
+      : [],
+  );
+
+  const essayees = new Set<string>();
+  for (let essai = 0; essai < maxEssaisSources * 3; essai += 1) {
     const source = tirerSource();
     if (essayees.has(source.nom)) continue;
+    if (sourcesRecentes.has(source.nom)) continue;
+    if (essayees.size >= maxEssaisSources) break;
     essayees.add(source.nom);
     try {
       const articles = await lireFlux(source);

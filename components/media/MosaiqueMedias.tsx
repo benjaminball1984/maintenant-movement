@@ -21,7 +21,12 @@ import Link from 'next/link';
 interface MosaiqueMediasProps {
   /** Article épinglé à la une (affiché en tête, exclu du flux). */
   une: MediaEnrichi | null;
-  /** Flux antichronologique (sans la une). */
+  /**
+   * Contenus de la rédaction (hors une) : TOUJOURS affichés en tête,
+   * quelle que soit leur date (revue 2026-06-12, Ben).
+   */
+  redaction?: MediaEnrichi[];
+  /** Flux antichronologique (sans la une ni la rédaction). */
   medias: MediaEnrichi[];
 }
 
@@ -46,19 +51,32 @@ function estImportant(media: MediaEnrichi): boolean {
   return media.type !== 'breve' || media.importante;
 }
 
-/** Ligne de provenance : source externe OU auteur·ice maison, + heure. */
+/**
+ * Sur-titre de carte : pour une brève, le NOM DU MÉDIA SOURCE (décision
+ * Ben 2026-06-12 : « enlève les badges brève et remplace par le nom du
+ * média source ») ; pour un contenu maison, le type éditorial.
+ */
+function SurTitre({ media }: { media: MediaEnrichi }) {
+  const texte =
+    media.type === 'breve'
+      ? (media.provenance_externe ?? 'Revue de presse')
+      : (LIBELLE_TYPE[media.type] ?? media.type);
+  return <p className="text-[11px] font-bold uppercase tracking-cap text-text-3">{texte}</p>;
+}
+
+/** Ligne de provenance : auteur·ice maison s'il y a lieu, heure, langue. */
 function Provenance({ media }: { media: MediaEnrichi }) {
   const heure = media.publie_le !== null ? formaterRelativePassee(media.publie_le) : '';
-  const origine =
-    media.provenance_externe ??
-    ([media.auteurice_prenom, media.auteurice_nom]
-      .filter((s) => s !== null && s !== '')
-      .join(' ') ||
-      'Maintenant!');
+  const auteurice =
+    media.provenance_externe !== null
+      ? ''
+      : [media.auteurice_prenom, media.auteurice_nom]
+          .filter((s) => s !== null && s !== '')
+          .join(' ') || 'Maintenant!';
   return (
     <p className="text-xs text-text-3">
-      <span className="font-bold text-text-2">{origine}</span>
-      {heure !== '' ? ` · ${heure}` : ''}
+      {auteurice !== '' ? <span className="font-bold text-text-2">{auteurice} · </span> : null}
+      {heure}
       {media.langue !== null && media.langue !== 'fr' ? ` · ${media.langue.toUpperCase()}` : ''}
     </p>
   );
@@ -149,9 +167,7 @@ function CarteImportante({ media }: { media: MediaEnrichi }) {
           />
         </LienMedia>
       ) : null}
-      <p className="text-[11px] font-bold uppercase tracking-cap text-text-3">
-        {LIBELLE_TYPE[media.type] ?? media.type}
-      </p>
+      <SurTitre media={media} />
       <LienMedia media={media} className="hover:underline">
         <h3 className="text-lg font-bold leading-snug text-text-1">{media.titre}</h3>
       </LienMedia>
@@ -170,9 +186,25 @@ function CarteImportante({ media }: { media: MediaEnrichi }) {
 function CarteAnnexe({ media }: { media: MediaEnrichi }) {
   return (
     <article className="flex h-full flex-col gap-1.5 rounded-md border border-border bg-surface-2 p-3">
-      <LienMedia media={media} className="hover:underline">
-        <h3 className="text-sm font-bold leading-snug text-text-1">{media.titre}</h3>
-      </LienMedia>
+      <SurTitre media={media} />
+      <div className="flex items-start gap-3">
+        {media.vignette_url !== null ? (
+          <LienMedia media={media} className="shrink-0">
+            {/* Vignette compacte (logo du média en dernier recours). */}
+            <img
+              src={media.vignette_url}
+              alt=""
+              width={64}
+              height={64}
+              loading="lazy"
+              className="h-16 w-16 rounded-sm border border-border object-cover"
+            />
+          </LienMedia>
+        ) : null}
+        <LienMedia media={media} className="hover:underline">
+          <h3 className="text-sm font-bold leading-snug text-text-1">{media.titre}</h3>
+        </LienMedia>
+      </div>
       <p className="line-clamp-4 text-xs leading-relaxed text-text-2">{media.corps}</p>
       <div className="mt-auto">
         <Provenance media={media} />
@@ -181,10 +213,22 @@ function CarteAnnexe({ media }: { media: MediaEnrichi }) {
   );
 }
 
-export function MosaiqueMedias({ une, medias }: MosaiqueMediasProps) {
+export function MosaiqueMedias({ une, redaction = [], medias }: MosaiqueMediasProps) {
   return (
     <div className="grid gap-6">
       {une !== null ? <CarteUne media={une} /> : null}
+
+      {redaction.length > 0 ? (
+        <section className="grid gap-3">
+          <h2 className="text-xs font-bold uppercase tracking-cap text-brand">La rédaction</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {redaction.map((media) => (
+              <CarteImportante key={media.id} media={media} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {medias.map((media) =>
           estImportant(media) ? (
