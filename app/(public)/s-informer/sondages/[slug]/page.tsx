@@ -8,6 +8,7 @@ import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
+import { ResultatsSondage } from '@/components/sondages/ResultatsSondage';
 import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -44,8 +45,9 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
     objet: {
       titre: sondage.titre,
       description: sondage.question,
-      // Pas d'image_url en V1 sur sondage : on tombe sur l'image par défaut.
-      image_url: null,
+      // Image de couverture du sondage comme image de partage (revue
+      // 2026-06-12) ; fallback sur l'image par défaut si absente.
+      image_url: sondage.image_url,
       type_objet: 'sondage',
     },
     cheminPage: `/s-informer/sondages/${slug}`,
@@ -121,9 +123,8 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
         <header className="grid gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={sondage.mode === 'pondere' ? 'accent' : 'brand'}>
-                {sondage.mode === 'pondere' ? 'Pondéré' : 'Classique'}
-              </Badge>
+              {/* Revue 2026-06-12 : plus de badge de mode, l'affichage bascule
+                  automatiquement en pondéré dès 300 répondant·es. */}
               {sondage.statut !== 'ouvert' ? (
                 <Badge variant="default">{sondage.statut}</Badge>
               ) : null}
@@ -194,7 +195,7 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
             <FormulaireVote
               sondageId={sondage.id}
               options={sondage.options}
-              mode={sondage.mode}
+              optionsImages={sondage.options_images}
               voterSondage={voterSondage}
             />
           </Card>
@@ -258,37 +259,16 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
                 </>
               )}
             </TexteEditableAdmin>
-            {sondage.pondere_disponible
-              ? ' · seuil 300 atteint, pondération par quotas applicable.'
-              : sondage.mode === 'pondere'
-                ? ` · seuil 300 non atteint (${sondage.total_votes}/300), résultats bruts pour l'instant.`
-                : ''}
           </p>
-          <ul className="grid gap-2">
-            {sondage.options.map((opt, index) => {
-              const compte = sondage.resultats_par_option[index] ?? 0;
-              const pct =
-                sondage.total_votes === 0 ? 0 : Math.round((compte / sondage.total_votes) * 100);
-              return (
-                <li key={`${index}-${opt}`}>
-                  <Card variant="ombre" className="grid gap-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="font-bold text-text-1">{opt}</p>
-                      <span className="text-sm text-text-3">
-                        {compte} ({pct}%)
-                      </span>
-                    </div>
-                    <progress
-                      value={pct}
-                      max={100}
-                      className="h-2 w-full overflow-hidden rounded-pill bg-surface-2 [&::-webkit-progress-bar]:bg-surface-2 [&::-webkit-progress-value]:bg-grad-r [&::-moz-progress-bar]:bg-grad-r"
-                      aria-label={`${opt} : ${pct}%`}
-                    />
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
+          <ResultatsSondage
+            options={sondage.options}
+            optionsImages={sondage.options_images}
+            resultatsBruts={sondage.resultats_par_option}
+            totalBrut={sondage.total_votes}
+            resultatsPonderes={sondage.resultats_ponderes}
+            totalPondere={sondage.total_pondere}
+            pondereDisponible={sondage.pondere_disponible}
+          />
         </section>
 
         {sondage.createurice_id !== null ? (

@@ -1,22 +1,31 @@
+import { SEUIL_PONDERATION, pondererResultats } from '@/lib/sondages/ponderation';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Sondage, SondageResultats } from '@/types/database';
 
 /**
- * Couche de requêtes des Sondages (chantier 7.4).
+ * Couche de requêtes des Sondages (chantier 7.4, étendu revue 2026-06-12).
  *
  * `listerSondages` renvoie les sondages ouverts.
- * `sondageParSlugAvecResultats` renvoie le sondage + l'agrégat des votes.
+ * `sondageParSlugAvecResultats` renvoie le sondage + l'agrégat des votes,
+ * bruts ET pondérés (méthode des quotas sur l'âge, cf. spec §4D).
  *
- * Mode pondéré (cf. spec §4D « méthode des quotas dès 300 répondant·es ») :
- * en v1 on retourne les résultats bruts, le calcul pondéré sera fait
- * dans un job dédié (chantier polish quand on aura les premières
- * réponses à pondérer).
+ * Affichage (décision Lilou/Ben 2026-06-12) : brut d'office sous
+ * 300 répondant·es, pondéré d'office au-delà, bascule offerte au visiteur.
+ * Le mode stocké en base est conservé (historique) mais n'influence plus
+ * l'affichage.
  */
 
 export interface SondageAvecResultats extends Sondage {
   total_votes: number;
   resultats_par_option: number[];
-  /** Pour le mode pondéré, seuil 300 répondant·es de la spec. */
+  /**
+   * Compteurs redressés par quotas (fractionnaires), ou null si la vue
+   * d'agrégat par tranche n'est pas disponible.
+   */
+  resultats_ponderes: number[] | null;
+  /** Somme des compteurs pondérés (base des pourcentages pondérés). */
+  total_pondere: number;
+  /** Vrai dès que le seuil de répondant·es (300) est atteint. */
   pondere_disponible: boolean;
   /** Prénom du créateur·ice (crédit auteur cliquable vers le réseau). */
   createurice_prenom: string | null;
@@ -77,11 +86,35 @@ export async function sondageParSlugAvecResultats(
     }
   }
 
+  // Résultats pondérés (quotas sur l'âge) depuis l'agrégat par tranche.
+  // Dégradation propre : si la vue n'existe pas encore sur le distant
+  // (migration pas appliquée), on retombe sur null (vue brute seule).
+  let resultatsPonderes: number[] | null = null;
+  let totalPondere = 0;
+  const { data: parTranche, error: erreurTranche } = await supabase
+    .from('sondage_resultats_par_tranche')
+    .select('option_index, tranche_age, nombre_votes')
+    .eq('sondage_id', sondageNarrowed.id);
+  if (erreurTranche === null && parTranche !== null) {
+    const lignes = parTranche
+      .filter((l) => l.option_index !== null && l.nombre_votes !== null)
+      .map((l) => ({
+        option_index: l.option_index as number,
+        tranche_age: l.tranche_age,
+        nombre_votes: l.nombre_votes as number,
+      }));
+    const pondere = pondererResultats(lignes, sondageNarrowed.options.length);
+    resultatsPonderes = pondere.compteurs;
+    totalPondere = pondere.total;
+  }
+
   return {
     ...sondageNarrowed,
     total_votes: total,
     resultats_par_option: compteurs,
-    pondere_disponible: sondageNarrowed.mode === 'pondere' && total >= 300,
+    resultats_ponderes: resultatsPonderes,
+    total_pondere: totalPondere,
+    pondere_disponible: total >= SEUIL_PONDERATION && resultatsPonderes !== null,
     createurice_prenom: createuricePrenom,
     createurice_nom: createuriceNom,
   };

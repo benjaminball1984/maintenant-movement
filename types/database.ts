@@ -2516,6 +2516,7 @@ export type Database = {
           longitude: number | null;
           mode: string;
           options: string[];
+          options_images: (string | null)[] | null;
           question: string;
           slug: string;
           statut: string;
@@ -2533,6 +2534,7 @@ export type Database = {
           longitude?: number | null;
           mode?: string;
           options: string[];
+          options_images?: (string | null)[] | null;
           question: string;
           slug: string;
           statut?: string;
@@ -2550,6 +2552,7 @@ export type Database = {
           longitude?: number | null;
           mode?: string;
           options?: string[];
+          options_images?: (string | null)[] | null;
           question?: string;
           slug?: string;
           statut?: string;
@@ -4131,6 +4134,23 @@ export type Database = {
           nombre_votes: number | null;
           option_index: number | null;
           sondage_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reponse_sondage_sondage_id_fkey';
+            columns: ['sondage_id'];
+            isOneToOne: false;
+            referencedRelation: 'sondage';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      sondage_resultats_par_tranche: {
+        Row: {
+          nombre_votes: number | null;
+          option_index: number | null;
+          sondage_id: string | null;
+          tranche_age: string | null;
         };
         Relationships: [
           {

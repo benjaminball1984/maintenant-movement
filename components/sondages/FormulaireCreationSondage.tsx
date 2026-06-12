@@ -1,7 +1,15 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, ChampImageObjet, Input, Label, Textarea } from '@/components/ui';
+import {
+  Alert,
+  Button,
+  ChampImageObjet,
+  Input,
+  Label,
+  TeleverseurImage,
+  Textarea,
+} from '@/components/ui';
 import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
@@ -12,6 +20,17 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+/** Bornes du nombre d'options (alignées sur le CHECK SQL et le schéma Zod). */
+const OPTIONS_MIN = 2;
+const OPTIONS_MAX = 20;
+
+/**
+ * Rôle de rangement des images d'options dans le bucket (prop `role` de
+ * TeleverseurImage, qui n'est PAS un rôle ARIA : passé via constante pour
+ * que le lint a11y ne le confonde pas avec l'attribut HTML `role`).
+ */
+const ROLE_IMAGE_OPTION = 'vignette' as const;
+
 /** Libelles surchargeables admin via CMS (V2.4.151). */
 export interface LibellesCreationSondage {
   alertErreurTitre: string;
@@ -20,11 +39,8 @@ export interface LibellesCreationSondage {
   labelQuestion: string;
   labelOptions: string;
   placeholderOptions: string;
-  legendeMode: string;
-  modeClassiqueTitre: string;
-  modeClassiqueAide: string;
-  modePondereTitre: string;
-  modePondereAide: string;
+  titreImagesOptions: string;
+  aideImagesOptions: string;
   labelImage: string;
   ctaSubmit: string;
   ctaEnCours: string;
@@ -33,17 +49,15 @@ export interface LibellesCreationSondage {
 
 const LIBELLES_DEFAUT: LibellesCreationSondage = {
   alertErreurTitre: 'Création impossible',
-  erreurOptionsHorsLimites: 'Indique entre 2 et 10 options, une par ligne.',
+  erreurOptionsHorsLimites: 'Indique entre 2 et 20 options, une par ligne.',
   labelTitre: 'Titre',
   labelQuestion: 'Question',
-  labelOptions: 'Options (une par ligne, 2 à 10)',
+  labelOptions: 'Options (une par ligne, 2 à 20)',
   placeholderOptions: 'Option 1\nOption 2\nOption 3',
-  legendeMode: 'Mode',
-  modeClassiqueTitre: 'Classique',
-  modeClassiqueAide: 'Vote brut.',
-  modePondereTitre: 'Pondéré',
-  modePondereAide: 'Méthode des quotas appliquée dès 300 répondant·es.',
-  labelImage: 'Image illustrative (optionnelle)',
+  titreImagesOptions: 'Illustrer les options (optionnel)',
+  aideImagesOptions:
+    'Chaque option peut recevoir une image. Stabilise d’abord ta liste d’options ci-dessus : les images suivent l’ordre des lignes.',
+  labelImage: 'Image de couverture (optionnelle, sert aussi au partage)',
   ctaSubmit: 'Publier le sondage',
   ctaEnCours: 'Publication...',
   messageCaptchaEnAttente:
@@ -58,6 +72,12 @@ interface FormulaireCreationSondageProps {
   messages?: MessagesValidationSondages;
 }
 
+/**
+ * Formulaire de création de sondage. Revue 2026-06-12 :
+ *   - jusqu'à 20 options, chacune illustrable par une image téléversée ;
+ *   - plus de choix de mode : l'affichage bascule automatiquement en
+ *     pondéré dès 300 répondant·es (le visiteur garde une bascule de vue).
+ */
 export function FormulaireCreationSondage({
   creerSondage,
   libelles = LIBELLES_DEFAUT,
@@ -67,6 +87,8 @@ export function FormulaireCreationSondage({
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [optionsTexte, setOptionsTexte] = useState('');
+  // Images d'options, indexées sur la POSITION de la ligne (null = sans image).
+  const [imagesOptions, setImagesOptions] = useState<Record<number, string>>({});
   const [hydrate, setHydrate] = useState(false);
   useEffect(() => {
     setHydrate(true);
@@ -85,7 +107,6 @@ export function FormulaireCreationSondage({
       question: '',
       options: [],
       image_url: '',
-      mode: 'classique',
       commune_id: '',
       latitude: null,
       longitude: null,
@@ -98,20 +119,27 @@ export function FormulaireCreationSondage({
   // qui échouait silencieusement) et un message explique l'attente.
   const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
+  // Options parsées en continu : alimentent la liste des téléverseurs d'images.
+  const optionsParsees = optionsTexte
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l !== '');
+
   async function onSubmit(donnees: DonneesCreerSondage) {
     setErreur(null);
     setEnvoiEnCours(true);
-    // Parse les options depuis la textarea (une ligne par option).
-    const options = optionsTexte
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l !== '');
-    if (options.length < 2 || options.length > 10) {
+    if (optionsParsees.length < OPTIONS_MIN || optionsParsees.length > OPTIONS_MAX) {
       setErreur(libelles.erreurOptionsHorsLimites);
       setEnvoiEnCours(false);
       return;
     }
-    const resultat = await creerSondage({ ...donnees, options });
+    // Tableau d'images PARALLÈLE aux options (null = option sans image).
+    const optionsImages = optionsParsees.map((_, index) => imagesOptions[index] ?? null);
+    const resultat = await creerSondage({
+      ...donnees,
+      options: optionsParsees,
+      options_images: optionsImages,
+    });
     setEnvoiEnCours(false);
     if (!resultat.ok) {
       setErreur(resultat.message);
@@ -157,37 +185,41 @@ export function FormulaireCreationSondage({
           placeholder={libelles.placeholderOptions}
         />
       </div>
-      <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">
-          {libelles.legendeMode}
-        </legend>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
-            <input
-              type="radio"
-              value="classique"
-              {...register('mode')}
-              className="mt-0.5 accent-brand"
-            />
-            <div>
-              <p className="font-bold text-text-1">{libelles.modeClassiqueTitre}</p>
-              <p className="text-xs text-text-3">{libelles.modeClassiqueAide}</p>
-            </div>
-          </label>
-          <label className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2">
-            <input
-              type="radio"
-              value="pondere"
-              {...register('mode')}
-              className="mt-0.5 accent-brand"
-            />
-            <div>
-              <p className="font-bold text-text-1">{libelles.modePondereTitre}</p>
-              <p className="text-xs text-text-3">{libelles.modePondereAide}</p>
-            </div>
-          </label>
-        </div>
-      </fieldset>
+
+      {optionsParsees.length >= OPTIONS_MIN ? (
+        <fieldset className="rounded-md border border-border bg-surface-2 p-3">
+          <legend className="px-1 font-body text-sm font-medium text-text-2">
+            {libelles.titreImagesOptions}
+          </legend>
+          <p className="mb-3 text-xs text-text-3">{libelles.aideImagesOptions}</p>
+          <ul className="grid gap-3">
+            {optionsParsees.map((option, index) => (
+              <li
+                key={`option-image-${index}-${option}`}
+                className="flex flex-wrap items-center gap-3 rounded-sm border border-border bg-surface p-2"
+              >
+                <span className="min-w-0 flex-1 break-words text-sm font-bold text-text-1">
+                  {index + 1}. {option}
+                </span>
+                <TeleverseurImage
+                  role={ROLE_IMAGE_OPTION}
+                  prefixeChemin="sondages/options"
+                  valeurInitiale={imagesOptions[index] ?? null}
+                  onChange={(url) =>
+                    setImagesOptions((courant) => {
+                      const suivant = { ...courant };
+                      if (url === null) delete suivant[index];
+                      else suivant[index] = url;
+                      return suivant;
+                    })
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ) : null}
+
       <ChampImageObjet
         name="image_url"
         libelle={libelles.labelImage}

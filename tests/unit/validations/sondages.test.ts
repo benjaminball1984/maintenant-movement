@@ -6,7 +6,6 @@ describe('creerSondageSchema', () => {
     titre: 'Sondage sur le quartier',
     question: 'Quelle priorité pour le quartier ?',
     options: ['Espaces verts', 'Sécurité', 'Transports', 'Logement'],
-    mode: 'classique' as const,
     token_turnstile: 'mock-valid-token',
   };
 
@@ -18,11 +17,42 @@ describe('creerSondageSchema', () => {
     expect(creerSondageSchema.safeParse({ ...base, options: ['Une seule'] }).success).toBe(false);
   });
 
-  it('refuse plus de 10 options', () => {
+  it('accepte 20 options (revue 2026-06-12)', () => {
     expect(
       creerSondageSchema.safeParse({
         ...base,
-        options: Array.from({ length: 11 }, (_, i) => `O${i}`),
+        options: Array.from({ length: 20 }, (_, i) => `O${i}`),
+      }).success,
+    ).toBe(true);
+  });
+
+  it('refuse plus de 20 options', () => {
+    expect(
+      creerSondageSchema.safeParse({
+        ...base,
+        options: Array.from({ length: 21 }, (_, i) => `O${i}`),
+      }).success,
+    ).toBe(false);
+  });
+
+  it("refuse l'ancien champ mode (retiré : affichage automatique)", () => {
+    expect(creerSondageSchema.safeParse({ ...base, mode: 'classique' }).success).toBe(false);
+  });
+
+  it('accepte des images d’options alignées (null = option sans image)', () => {
+    expect(
+      creerSondageSchema.safeParse({
+        ...base,
+        options_images: ['https://exemple.org/a.jpg', null, null, 'https://exemple.org/d.jpg'],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('refuse des images d’options de longueur différente des options', () => {
+    expect(
+      creerSondageSchema.safeParse({
+        ...base,
+        options_images: ['https://exemple.org/a.jpg', null],
       }).success,
     ).toBe(false);
   });
@@ -41,6 +71,14 @@ describe('voterSondageSchema', () => {
 
   it('refuse option_index négatif', () => {
     expect(voterSondageSchema.safeParse({ ...base, option_index: -1 }).success).toBe(false);
+  });
+
+  it('accepte option_index 19 (20 options possibles)', () => {
+    expect(voterSondageSchema.safeParse({ ...base, option_index: 19 }).success).toBe(true);
+  });
+
+  it('refuse option_index 20 (hors plage)', () => {
+    expect(voterSondageSchema.safeParse({ ...base, option_index: 20 }).success).toBe(false);
   });
 
   it('accepte une tranche d’âge', () => {

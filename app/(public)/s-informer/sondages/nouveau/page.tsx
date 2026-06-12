@@ -18,8 +18,9 @@ export default async function PageNouveauSondage() {
       </p>
       <Heading niveau={1}>Créer un sondage</Heading>
       <p className="mt-3 max-w-2xl text-text-2">
-        Vote connecté obligatoire (cf. doctrine §4D). Choisis entre le mode classique (vote brut) ou
-        pondéré (méthode des quotas dès 300 répondant·es).
+        Vote connecté obligatoire (cf. doctrine §4D). Les résultats s’affichent en brut tant qu’il
+        n’y a pas assez de répondant·es, puis en pondéré (méthode des quotas) dès 300 répondant·es ;
+        chaque visiteur·euse peut basculer entre les deux vues.
       </p>
       <div className="mt-8">
         <FormulaireCreationSondage creerSondage={creerSondage} />

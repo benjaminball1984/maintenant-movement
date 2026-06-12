@@ -50,14 +50,21 @@ export async function creerSondage(
   const supabase = await getSupabaseServer();
   const slug = await genererSlugUniqueSondage(donnees.titre, supabase);
 
+  // Images d'options : on ne pose la colonne que si au moins une option est
+  // réellement illustrée (sinon null, comme un sondage texte classique).
+  const optionsImages =
+    donnees.options_images?.some((u) => u !== null) === true ? donnees.options_images : null;
+
+  // NB : pas de champ `mode` (revue 2026-06-12) : la colonne garde son défaut
+  // en base, l'affichage bascule automatiquement selon le nombre de votes.
   const { error } = await supabase.from('sondage').insert({
     slug,
     titre: donnees.titre,
     question: donnees.question,
     options: donnees.options,
+    options_images: optionsImages,
     image_url:
       donnees.image_url === '' || donnees.image_url === undefined ? null : donnees.image_url,
-    mode: donnees.mode,
     commune_id:
       donnees.commune_id === '' || donnees.commune_id === undefined ? null : donnees.commune_id,
     latitude: donnees.latitude ?? null,

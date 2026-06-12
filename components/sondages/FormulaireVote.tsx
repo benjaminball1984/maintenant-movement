@@ -7,7 +7,6 @@ import {
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
 import { type DonneesVoterSondage, creerVoterSondageSchema } from '@/lib/validations/sondages';
-import type { ModeSondage } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -63,20 +62,22 @@ const LIBELLES_DEFAUT: LibellesVote = {
 interface FormulaireVoteProps {
   sondageId: string;
   options: string[];
-  mode: ModeSondage;
+  /** Images des options (tableau parallèle, null = pas d'image), ou null. */
+  optionsImages?: (string | null)[] | null;
   voterSondage: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   libelles?: LibellesVote;
   messages?: MessagesValidationSondages;
 }
 
 /**
- * Formulaire de vote. En mode pondéré, on affiche aussi les champs
- * sociodémo optionnels (la personne peut refuser).
+ * Formulaire de vote. Les champs sociodémo optionnels sont toujours
+ * proposés (revue 2026-06-12 : la pondération s'applique automatiquement
+ * dès 300 répondant·es, ce n'est plus un mode choisi à la création).
  */
 export function FormulaireVote({
   sondageId,
   options,
-  mode,
+  optionsImages = null,
   voterSondage,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
@@ -138,72 +139,83 @@ export function FormulaireVote({
           {libelles.legendeVote}
         </legend>
         <div className="grid gap-2">
-          {options.map((opt, index) => (
-            <label
-              key={`${index}-${opt}`}
-              className="flex cursor-pointer items-start gap-2 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2"
-            >
-              <input
-                type="radio"
-                value={index}
-                {...register('option_index', { valueAsNumber: true })}
-                className="mt-0.5 accent-brand"
-              />
-              <span>{opt}</span>
-            </label>
-          ))}
+          {options.map((opt, index) => {
+            const image = optionsImages?.[index] ?? null;
+            return (
+              <label
+                key={`${index}-${opt}`}
+                className="flex cursor-pointer items-center gap-3 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2"
+              >
+                <input
+                  type="radio"
+                  value={index}
+                  {...register('option_index', { valueAsNumber: true })}
+                  className="accent-brand"
+                />
+                {image !== null ? (
+                  <img
+                    src={image}
+                    alt=""
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    className="h-12 w-12 shrink-0 rounded-sm border border-border object-cover"
+                  />
+                ) : null}
+                <span>{opt}</span>
+              </label>
+            );
+          })}
         </div>
         {errors.option_index !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.option_index.message}</p>
         ) : null}
       </fieldset>
 
-      {mode === 'pondere' ? (
-        <details className="rounded-md border border-border bg-surface-2 p-3">
-          <summary className="cursor-pointer text-sm font-bold text-text-1">
-            {libelles.detailsTitre}
-          </summary>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="vote-cp">{libelles.labelCodePostal}</Label>
-              <Input
-                id="vote-cp"
-                placeholder={libelles.placeholderCodePostal}
-                {...register('code_postal')}
-              />
-            </div>
-            <div>
-              <Label htmlFor="vote-age">{libelles.labelAge}</Label>
-              <select
-                id="vote-age"
-                {...register('tranche_age')}
-                className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
-              >
-                <option value="">—</option>
-                <option value="moins_18">{libelles.ageMoins18}</option>
-                <option value="18_24">{libelles.age18_24}</option>
-                <option value="25_34">{libelles.age25_34}</option>
-                <option value="35_49">{libelles.age35_49}</option>
-                <option value="50_64">{libelles.age50_64}</option>
-                <option value="65_plus">{libelles.age65Plus}</option>
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="vote-pronom">{libelles.labelPronom}</Label>
-              <Input
-                id="vote-pronom"
-                placeholder={libelles.placeholderPronom}
-                {...register('pronom')}
-              />
-            </div>
-            <div>
-              <Label htmlFor="vote-genre">{libelles.labelGenre}</Label>
-              <Input id="vote-genre" {...register('genre_declare')} />
-            </div>
+      <details className="rounded-md border border-border bg-surface-2 p-3">
+        <summary className="cursor-pointer text-sm font-bold text-text-1">
+          {libelles.detailsTitre}
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="vote-cp">{libelles.labelCodePostal}</Label>
+            <Input
+              id="vote-cp"
+              placeholder={libelles.placeholderCodePostal}
+              {...register('code_postal')}
+            />
           </div>
-          <p className="mt-2 text-xs text-text-3">{libelles.hintPondere}</p>
-        </details>
-      ) : null}
+          <div>
+            <Label htmlFor="vote-age">{libelles.labelAge}</Label>
+            <select
+              id="vote-age"
+              {...register('tranche_age')}
+              className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
+            >
+              <option value="">—</option>
+              <option value="moins_18">{libelles.ageMoins18}</option>
+              <option value="18_24">{libelles.age18_24}</option>
+              <option value="25_34">{libelles.age25_34}</option>
+              <option value="35_49">{libelles.age35_49}</option>
+              <option value="50_64">{libelles.age50_64}</option>
+              <option value="65_plus">{libelles.age65Plus}</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="vote-pronom">{libelles.labelPronom}</Label>
+            <Input
+              id="vote-pronom"
+              placeholder={libelles.placeholderPronom}
+              {...register('pronom')}
+            />
+          </div>
+          <div>
+            <Label htmlFor="vote-genre">{libelles.labelGenre}</Label>
+            <Input id="vote-genre" {...register('genre_declare')} />
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-text-3">{libelles.hintPondere}</p>
+      </details>
 
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 

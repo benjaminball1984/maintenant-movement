@@ -402,6 +402,7 @@ export interface MessagesValidationSondages {
   optionVide: string;
   optionsMin: string;
   optionsMax: string;
+  optionsImagesIncoherentes: string;
   imageUrlEphemere: string;
   latLngEnsemble: string;
   optionIndexEntier: string;
@@ -417,7 +418,9 @@ export const MESSAGES_VALIDATION_SONDAGES_DEFAUT: MessagesValidationSondages = {
   questionMax: 'La question doit faire 500 caractères maximum.',
   optionVide: 'Option vide.',
   optionsMin: 'Au moins 2 options.',
-  optionsMax: 'Maximum 10 options.',
+  optionsMax: 'Maximum 20 options.',
+  optionsImagesIncoherentes:
+    'Les images des options ne correspondent pas à la liste des options (recharge la page et réessaie).',
   imageUrlEphemere:
     "Cette URL d'image expire vite (CDN Facebook/Instagram) : téléverse plutôt l'image directement.",
   latLngEnsemble: 'Latitude et longitude doivent être fournies ensemble.',

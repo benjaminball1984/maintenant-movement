@@ -20,7 +20,16 @@ export function creerSondageFactory(
       options: z
         .array(z.string().trim().min(1, messages.optionVide).max(200))
         .min(2, messages.optionsMin)
-        .max(10, messages.optionsMax),
+        .max(20, messages.optionsMax),
+      /**
+       * Images optionnelles des options : tableau PARALLÈLE à `options`
+       * (même longueur, null pour une option sans image). Absent = aucune
+       * option illustrée. Cohérence des longueurs vérifiée plus bas.
+       */
+      options_images: z
+        .array(z.string().url().refine(estUrlImageDurable, messages.imageUrlEphemere).nullable())
+        .max(20, messages.optionsMax)
+        .optional(),
       // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
       image_url: z
         .string()
@@ -28,7 +37,9 @@ export function creerSondageFactory(
         .refine(estUrlImageDurable, messages.imageUrlEphemere)
         .optional()
         .or(z.literal('')),
-      mode: z.enum(['classique', 'pondere']),
+      // NB : plus de champ `mode` (revue 2026-06-12) : l'affichage bascule
+      // automatiquement en pondéré dès 300 répondant·es, le visiteur choisit
+      // sa vue. La colonne reste en base (historique) avec son défaut.
       commune_id: z.string().uuid().optional().or(z.literal('')),
       latitude: z.number().min(-90).max(90).nullable().optional(),
       longitude: z.number().min(-180).max(180).nullable().optional(),
@@ -45,7 +56,11 @@ export function creerSondageFactory(
         message: messages.latLngEnsemble,
         path: ['latitude'],
       },
-    );
+    )
+    .refine((d) => d.options_images === undefined || d.options_images.length === d.options.length, {
+      message: messages.optionsImagesIncoherentes,
+      path: ['options_images'],
+    });
 }
 export const creerSondageSchema = creerSondageFactory();
 
@@ -61,7 +76,7 @@ export function creerVoterSondageSchema(
         .number()
         .int(messages.optionIndexEntier)
         .min(0, messages.optionIndexInvalide)
-        .max(9, messages.optionIndexInvalide),
+        .max(19, messages.optionIndexInvalide),
       /**
        * Variables sociodémo optionnelles (mode pondéré).
        * La personne peut refuser de les renseigner.
