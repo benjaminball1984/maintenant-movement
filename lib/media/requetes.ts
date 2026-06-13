@@ -49,11 +49,15 @@ export async function listerMediasPublies(type?: TypeMedia, limite = 50): Promis
  */
 export async function listerFluxMedias(tag?: string, limite = 150): Promise<MediaEnrichi[]> {
   const supabase = await getSupabaseServer();
+  // Tri par ORDRE D'ARRIVÉE dans la revue (created_at), pas par date de
+  // publication de l'article (revue 2026-06-13, Ben : « flux vivant »).
+  // Un podcast publié il y a 5 h mais importé à l'instant doit remonter en
+  // tête : sinon le flux paraît figé alors qu'il s'alimente chaque heure.
   let q = supabase
     .from('media')
     .select('*')
     .eq('statut', 'publie')
-    .order('publie_le', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(limite);
   if (tag !== undefined && tag !== '') q = q.contains('tags', [tag]);
   const { data } = await q;

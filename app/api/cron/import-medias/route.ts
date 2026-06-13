@@ -50,9 +50,21 @@ export async function GET(requete: Request): Promise<NextResponse> {
   }
 
   const heure = new Date().getUTCHours();
-  const format = ROTATION_FORMATS[heure % ROTATION_FORMATS.length] as FormatMedia;
-  // Un seul contenu de ce format cette heure-ci. La rotation des sources
-  // varie d'un jour à l'autre via le quantième.
-  const r = await importerFormat(format, urlSb, cle, 1, jourDeLAnnee());
-  return NextResponse.json({ ok: true, format, crees: r.crees, echecs: r.echecs });
+  const debut = heure % ROTATION_FORMATS.length;
+  // Ordre d'essai : le format de l'heure, puis les autres en repli. Ainsi
+  // CHAQUE heure ajoute bien un contenu multi-format, même si le format
+  // prévu est temporairement épuisé (cas des lives : seulement 9 sources,
+  // toutes bloquées par la règle « 1 source / 24 h » après un peuplement
+  // récent). La rotation garde l'équilibre sur la durée.
+  const ordre = ROTATION_FORMATS.map(
+    (_, i) => ROTATION_FORMATS[(debut + i) % ROTATION_FORMATS.length] as FormatMedia,
+  );
+  const offset = jourDeLAnnee();
+  for (const format of ordre) {
+    const r = await importerFormat(format, urlSb, cle, 1, offset);
+    if (r.crees.length > 0) {
+      return NextResponse.json({ ok: true, format, crees: r.crees, echecs: r.echecs });
+    }
+  }
+  return NextResponse.json({ ok: true, format: null, message: 'aucun format n’avait de neuf' });
 }
