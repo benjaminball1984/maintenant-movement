@@ -55,18 +55,29 @@ const LIBELLE_TYPE: Record<TypeMedia, string> = {
  * 2026-06-12, Ben) : la revue de presse vit dans la vue principale,
  * mêlée aux contenus maison.
  */
-const TYPES_ONGLETS: TypeMedia[] = [
+/**
+ * Onglets de format de la revue de presse (contenus externes). Les
+ * contenus MAISON (édito, tribune, article, newsletter) ne sont plus des
+ * onglets séparés : ils sont regroupés dans l'onglet « Rédaction »
+ * (demande Ben 2026-06-13).
+ */
+const TYPES_ONGLETS: TypeMedia[] = ['dessin', 'podcast', 'video', 'live'];
+
+/** Tous les types acceptés en paramètre `?type=` (liens directs inclus). */
+const LISTE_TYPES: TypeMedia[] = [
   'edito',
   'tribune',
   'article',
-  'dessin',
-  'podcast',
-  'video',
-  'live',
   'newsletter',
+  'breve',
+  ...TYPES_ONGLETS,
 ];
 
-const LISTE_TYPES: TypeMedia[] = [...TYPES_ONGLETS, 'breve'];
+/** Pseudo-vue « Rédaction » : tous les contenus maison, par date. */
+const VUE_REDACTION = 'redaction';
+
+/** Nombre d'articles de la rédaction affichés sur la page générale (Ben). */
+const MAX_REDACTION_GENERALE = 3;
 
 function estTypeValide(v: string | undefined): v is TypeMedia {
   return v !== undefined && (LISTE_TYPES as string[]).includes(v);
@@ -74,6 +85,7 @@ function estTypeValide(v: string | undefined): v is TypeMedia {
 
 export default async function PageMedia({ searchParams }: PageMediaProps) {
   const { type, tag } = await searchParams;
+  const vueRedaction = type === VUE_REDACTION;
   const filtre = estTypeValide(type) ? type : undefined;
   const tagActif = tag !== undefined && TAGS_BREVES.includes(tag) ? tag : undefined;
 
@@ -98,9 +110,17 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
   let medias: Awaited<ReturnType<typeof listerMediasPublies>> = [];
   let redaction: Awaited<ReturnType<typeof listerMediasMaison>> = [];
   let une: Awaited<ReturnType<typeof mediaPublieParId>> = null;
-  if (filtre !== undefined) {
-    // Onglet d'un format précis (brèves, dessins, podcasts, vidéos,
-    // lives, ou un type maison). On partitionne maison / revue de presse.
+  if (vueRedaction) {
+    // Onglet « Rédaction » : TOUS les contenus maison, du plus récent au
+    // plus ancien (demande Ben 2026-06-13). La une en tête, le reste sous
+    // « La rédaction », pas de section « Revue de presse ».
+    const maison = await listerMediasMaison(250);
+    une = maison[0] ?? null;
+    redaction = maison.slice(1);
+    medias = [];
+  } else if (filtre !== undefined) {
+    // Onglet d'un format précis (dessins, podcasts, vidéos, lives, ou un
+    // type maison via lien direct). On partitionne maison / revue de presse.
     const tousDuType = await listerMediasPublies(filtre, 250);
     const maisonDuType = tousDuType.filter((m) => m.provenance_externe === null);
     une = maisonDuType[0] ?? null;
@@ -115,10 +135,11 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
       // maison le plus récent (jamais une brève importée).
       const epingle = idUneEpingle !== null ? await mediaPublieParId(idUneEpingle) : null;
       une = epingle ?? maison[0] ?? null;
-      redaction = maison.filter((m) => m.id !== une?.id);
-      // Flux principal VARIÉ (Ben 2026-06-13) : tout le flux externe mêlé
-      // (brèves + dessins + vidéos + lives + podcasts), antichronologique,
-      // pas seulement les brèves.
+      // Page générale : la rédaction est BORNÉE (Ben 2026-06-13, 3 max) ;
+      // tout le reste de la rédaction est dans l'onglet « Rédaction ».
+      redaction = maison.filter((m) => m.id !== une?.id).slice(0, MAX_REDACTION_GENERALE);
+      // Flux principal VARIÉ : tout le flux externe mêlé (brèves + dessins
+      // + vidéos + lives + podcasts), antichronologique.
       medias = flux.filter((m) => m.provenance_externe !== null && m.id !== une?.id);
     } else {
       // Filtre par tag : juste le flux externe correspondant (la une et le
@@ -126,7 +147,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
       medias = flux.filter((m) => m.provenance_externe !== null);
     }
   }
-  const ongletActif = filtre ?? 'tous';
+  const ongletActif = vueRedaction ? VUE_REDACTION : (filtre ?? 'tous');
 
   return (
     <Container taille="lg" className="py-12">
@@ -192,6 +213,17 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
             </Link>
           )}
         </TexteEditableAdmin>
+        {/* Onglet « Rédaction » : tous les contenus maison (Ben 2026-06-13). */}
+        <Link
+          href={`/s-informer/media?type=${VUE_REDACTION}`}
+          className={
+            ongletActif === VUE_REDACTION
+              ? 'border-b-2 border-brand px-3 py-2 text-sm text-brand'
+              : 'border-b-2 border-transparent px-3 py-2 text-sm text-text-3 hover:text-text-1'
+          }
+        >
+          Rédaction
+        </Link>
         {TYPES_ONGLETS.map((t) => (
           <Link
             key={t}
@@ -207,7 +239,7 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
         ))}
       </nav>
 
-      {filtre === undefined ? (
+      {filtre === undefined && !vueRedaction ? (
         <nav aria-label="Filtrer par tag" className="mb-6 flex flex-wrap items-center gap-2">
           <Link
             href="/s-informer/media"

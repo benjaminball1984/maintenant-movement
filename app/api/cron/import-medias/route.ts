@@ -3,13 +3,11 @@ import type { FormatMedia } from '@/lib/import-medias/sources-medias';
 import { NextResponse } from 'next/server';
 
 /**
- * Endpoint d'import HORAIRE d'UN contenu multi-format (demande Ben
- * 2026-06-13 : « toutes les heures, soit un dessin, soit un live, soit
- * une vidéo, soit un podcast » pour un flux vivant et équilibré).
- *
- * Le format tourne avec l'heure : podcast, vidéo, live, dessin, podcast…
- * Sur 24 h, chaque format reçoit donc 6 nouveaux contenus. Une source
- * par contenu, en sautant ce qui est déjà importé et les sources déjà
+ * Endpoint d'import HORAIRE de la revue de presse multi-format (demande
+ * Ben 2026-06-13 : « 4 brèves, un podcast, une vidéo, un live et un
+ * dessin par heure »). Chaque heure, on importe UN contenu de CHAQUE
+ * format (les brèves sont gérées par `import-breves`). Une source par
+ * contenu, en sautant ce qui est déjà importé et les sources déjà
  * servies dans les 24 h. La rotation des SOURCES (par jour) évite de
  * toujours puiser en tête de liste.
  *
@@ -20,11 +18,8 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-/**
- * Rotation horaire des formats : l'heure UTC modulo 4 choisit le format.
- * podcast (0,4,8…), vidéo (1,5,9…), live (2,6,10…), dessin (3,7,11…).
- */
-const ROTATION_FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
+/** Un contenu de chacun de ces formats est importé à chaque heure. */
+const FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
 
 /** Quantième du jour (1-366), pour faire tourner l'ordre des sources. */
 function jourDeLAnnee(): number {
@@ -49,22 +44,14 @@ export async function GET(requete: Request): Promise<NextResponse> {
     );
   }
 
-  const heure = new Date().getUTCHours();
-  const debut = heure % ROTATION_FORMATS.length;
-  // Ordre d'essai : le format de l'heure, puis les autres en repli. Ainsi
-  // CHAQUE heure ajoute bien un contenu multi-format, même si le format
-  // prévu est temporairement épuisé (cas des lives : seulement 9 sources,
-  // toutes bloquées par la règle « 1 source / 24 h » après un peuplement
-  // récent). La rotation garde l'équilibre sur la durée.
-  const ordre = ROTATION_FORMATS.map(
-    (_, i) => ROTATION_FORMATS[(debut + i) % ROTATION_FORMATS.length] as FormatMedia,
-  );
+  // Un contenu de chaque format cette heure-ci. Un format temporairement
+  // épuisé (ex. lives : 9 sources, parfois toutes servies dans les 24 h)
+  // renvoie simplement 0 ; les autres passent quand même.
   const offset = jourDeLAnnee();
-  for (const format of ordre) {
+  const rapports: Record<string, { crees: number; echecs: number }> = {};
+  for (const format of FORMATS) {
     const r = await importerFormat(format, urlSb, cle, 1, offset);
-    if (r.crees.length > 0) {
-      return NextResponse.json({ ok: true, format, crees: r.crees, echecs: r.echecs });
-    }
+    rapports[format] = { crees: r.crees.length, echecs: r.echecs.length };
   }
-  return NextResponse.json({ ok: true, format: null, message: 'aucun format n’avait de neuf' });
+  return NextResponse.json({ ok: true, rapports });
 }
