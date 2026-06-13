@@ -1,5 +1,6 @@
 'use client';
 
+import { televerserImage } from '@/app/actions/storage';
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
 import {
   Alert,
@@ -14,6 +15,7 @@ import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
+import { genererMosaiqueSondage } from '@/lib/sondages/mosaique-canvas';
 import { type DonneesCreerSondage, creerSondageFactory } from '@/lib/validations/sondages';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -42,6 +44,7 @@ export interface LibellesCreationSondage {
   titreImagesOptions: string;
   aideImagesOptions: string;
   labelImage: string;
+  aideCouverture: string;
   ctaSubmit: string;
   ctaEnCours: string;
   messageCaptchaEnAttente?: string;
@@ -57,7 +60,9 @@ const LIBELLES_DEFAUT: LibellesCreationSondage = {
   titreImagesOptions: 'Illustrer les options (optionnel)',
   aideImagesOptions:
     'Chaque option peut recevoir une image. Stabilise d’abord ta liste d’options ci-dessus : les images suivent l’ordre des lignes.',
-  labelImage: 'Image de couverture (optionnelle, sert aussi au partage)',
+  labelImage: 'Image de couverture (optionnelle) — sinon une mosaïque est créée automatiquement',
+  aideCouverture:
+    'Laisse vide : une mosaïque (titre + tuiles des options) est générée automatiquement et sert de couverture, de miniature et d’aperçu de partage. Téléverse une image seulement si tu veux la remplacer.',
   ctaSubmit: 'Publier le sondage',
   ctaEnCours: 'Publication...',
   messageCaptchaEnAttente:
@@ -90,6 +95,8 @@ export function FormulaireCreationSondage({
   // Images d'options, indexées sur la POSITION de la ligne (null = sans image).
   const [imagesOptions, setImagesOptions] = useState<Record<number, string>>({});
   const [hydrate, setHydrate] = useState(false);
+  // Message d'avancement pendant la génération automatique de la mosaïque.
+  const [statutGeneration, setStatutGeneration] = useState<string | null>(null);
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -125,6 +132,34 @@ export function FormulaireCreationSondage({
     .map((l) => l.trim())
     .filter((l) => l !== '');
 
+  /**
+   * Génère la mosaïque de couverture dans le navigateur (canvas) puis la
+   * téléverse via le même canal que les autres images. Renvoie l'URL
+   * téléversée, ou '' en cas d'échec (la création retombera sur l'image par
+   * défaut du sondage). Ne lève jamais : la création ne doit pas échouer
+   * parce qu'une couverture n'a pas pu être fabriquée.
+   */
+  async function genererEtTeleverserMosaique(
+    titre: string,
+    options: string[],
+    optionsImages: (string | null)[],
+  ): Promise<string> {
+    try {
+      setStatutGeneration('Création de la couverture (mosaïque)…');
+      const blob = await genererMosaiqueSondage({ titre, options, optionsImages });
+      if (blob === null) return '';
+      const fichier = new File([blob], 'mosaique-sondage.jpg', { type: 'image/jpeg' });
+      const formData = new FormData();
+      formData.append('fichier', fichier);
+      formData.append('role', 'couverture');
+      formData.append('prefixeChemin', 'sondages/couvertures');
+      const resultat = await televerserImage(formData);
+      return resultat.ok ? resultat.url : '';
+    } catch {
+      return '';
+    }
+  }
+
   async function onSubmit(donnees: DonneesCreerSondage) {
     setErreur(null);
     setEnvoiEnCours(true);
@@ -135,12 +170,27 @@ export function FormulaireCreationSondage({
     }
     // Tableau d'images PARALLÈLE aux options (null = option sans image).
     const optionsImages = optionsParsees.map((_, index) => imagesOptions[index] ?? null);
+
+    // Couverture systématique (demande Ben 2026-06-13) : sans image
+    // téléversée, on fabrique la mosaïque automatiquement. Une image fournie
+    // par la personne reste prioritaire (l'alternative voulue).
+    let imageCouverture = (donnees.image_url ?? '').trim();
+    if (imageCouverture === '') {
+      imageCouverture = await genererEtTeleverserMosaique(
+        donnees.titre,
+        optionsParsees,
+        optionsImages,
+      );
+    }
+
     const resultat = await creerSondage({
       ...donnees,
       options: optionsParsees,
       options_images: optionsImages,
+      image_url: imageCouverture,
     });
     setEnvoiEnCours(false);
+    setStatutGeneration(null);
     if (!resultat.ok) {
       setErreur(resultat.message);
       return;
@@ -220,15 +270,24 @@ export function FormulaireCreationSondage({
         </fieldset>
       ) : null}
 
-      <ChampImageObjet
-        name="image_url"
-        libelle={libelles.labelImage}
-        onChange={(url) => setValue('image_url', url ?? '')}
-      />
+      <div className="grid gap-2">
+        <p className="text-xs text-text-3">{libelles.aideCouverture}</p>
+        <ChampImageObjet
+          name="image_url"
+          libelle={libelles.labelImage}
+          prefixeChemin="sondages/couvertures"
+          onChange={(url) => setValue('image_url', url ?? '')}
+        />
+      </div>
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
       {hydrate && !captchaValide ? (
         <p className="text-xs text-text-3" aria-live="polite">
           {libelles.messageCaptchaEnAttente ?? LIBELLES_DEFAUT.messageCaptchaEnAttente}
+        </p>
+      ) : null}
+      {statutGeneration !== null ? (
+        <p className="text-xs text-text-3" aria-live="polite">
+          {statutGeneration}
         </p>
       ) : null}
       <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
