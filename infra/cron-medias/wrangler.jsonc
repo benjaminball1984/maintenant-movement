@@ -1,0 +1,9 @@
+{
+  "name": "maintenant-cron-medias",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    // Une fois par jour, à 05h17 UTC (creux de trafic, décalé des autres crons).
+    "crons": ["17 5 * * *"]
+  }
+}

@@ -76,6 +76,12 @@ const ORIGINES = {
   // Glyphs de police MapLibre (étiquettes des clusters de communes),
   // récupérés en fetch() également.
   glyphsMaplibre: 'https://demotiles.maplibre.org',
+  // Lecteur YouTube sans cookie pour la revue de presse vidéo/lives
+  // (embeds intégrés dans Maintenant Médias, demande Ben 2026-06-13).
+  youtubeNoCookie: 'https://www.youtube-nocookie.com',
+  // Miniatures des vidéos YouTube (servies en repli si la copie bucket
+  // échoue) et pochettes de podcasts hébergées chez les diffuseurs.
+  youtubeImg: 'https://i.ytimg.com',
 };
 
 /**
@@ -116,7 +122,7 @@ const directivesCsp = [
   // Images : assets locaux, data URLs (inline base64 utilisés par MapLibre,
   // certains avatars), blob URLs (upload preview), tuiles OSM, médias hébergés
   // sur Supabase Storage.
-  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.tilesOsmNu} ${ORIGINES.tilesCarto} ${ORIGINES.supabaseHttps}`,
+  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.tilesOsmNu} ${ORIGINES.tilesCarto} ${ORIGINES.supabaseHttps} ${ORIGINES.youtubeImg}`,
 
   // Vocaux et fichiers audio du réseau social (~10 min max, hébergés sur
   // Supabase Storage). Vidéo non hébergée (voir reseau-social-V2.md §3).
@@ -144,7 +150,8 @@ const directivesCsp = [
   // Iframes que nous chargeons :
   // - Turnstile (widget de challenge).
   // - Stripe (Checkout, Elements, 3DS hosted fields).
-  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks}`,
+  // - YouTube sans cookie (embeds vidéo/lives de la revue de presse).
+  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks} ${ORIGINES.youtubeNoCookie}`,
 
   // Fonts : auto-hébergées ; data: pour fonts inline éventuelles.
   "font-src 'self' data:",

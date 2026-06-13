@@ -1,9 +1,8 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { MosaiqueMedias } from '@/components/media/MosaiqueMedias';
-import { Alert, Badge, Card, Container, Heading } from '@/components/ui';
+import { Alert, Container, Heading } from '@/components/ui';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
-import { formaterDateMoyenne } from '@/lib/format-date';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { TAGS_BREVES } from '@/lib/import-breves/tags';
 import {
@@ -89,12 +88,20 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
       lireContenuEditorial('s-informer.media.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
     ]);
 
-  // Vue principale (mosaïque) ou vue filtrée par type (grille classique).
+  // Toutes les vues (principale ET onglets par format) suivent les 3
+  // logiques : une, bandeau « La rédaction », séparateur « Revue de
+  // presse » avant les contenus externes (demande Ben 2026-06-13).
   let medias: Awaited<ReturnType<typeof listerMediasPublies>> = [];
   let redaction: Awaited<ReturnType<typeof listerMediasMaison>> = [];
   let une: Awaited<ReturnType<typeof mediaPublieParId>> = null;
   if (filtre !== undefined) {
-    medias = await listerMediasPublies(filtre);
+    // Onglet d'un format précis (brèves, dessins, podcasts, vidéos,
+    // lives, ou un type maison). On partitionne maison / revue de presse.
+    const tousDuType = await listerMediasPublies(filtre, 250);
+    const maisonDuType = tousDuType.filter((m) => m.provenance_externe === null);
+    une = maisonDuType[0] ?? null;
+    redaction = maisonDuType.slice(1);
+    medias = tousDuType.filter((m) => m.provenance_externe !== null);
   } else {
     const [flux, maison, idUne] = await Promise.all([
       listerFluxMedias(tagActif),
@@ -223,9 +230,9 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
         </nav>
       ) : null}
 
-      {filtre === undefined && (medias.length > 0 || une !== null || redaction.length > 0) ? (
+      {medias.length > 0 || une !== null || redaction.length > 0 ? (
         <MosaiqueMedias une={une} redaction={redaction} medias={medias} />
-      ) : medias.length === 0 ? (
+      ) : (
         <Alert
           variant="info"
           titre={
@@ -251,44 +258,6 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
             {(t) => <>{t}</>}
           </TexteEditableAdmin>
         </Alert>
-      ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {medias.map((m) => (
-            <li key={m.id}>
-              <Card variant="ombre" className={cn('flex h-full flex-col gap-2')}>
-                <header className="flex items-center justify-between gap-2">
-                  <Badge
-                    variant={
-                      m.type === 'edito' ? 'brand' : m.type === 'breve' ? 'accent' : 'default'
-                    }
-                  >
-                    {LIBELLE_TYPE[m.type]}
-                  </Badge>
-                  {m.provenance_externe !== null ? (
-                    <span className="text-xs text-text-3">via {m.provenance_externe}</span>
-                  ) : null}
-                </header>
-                <h2 className="text-lg font-bold leading-tight text-text-1">
-                  <Link
-                    href={`/s-informer/media/${m.slug}`}
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {m.titre}
-                  </Link>
-                </h2>
-                <p className="line-clamp-3 text-sm text-text-2">{m.corps.slice(0, 240)}</p>
-                <footer className="mt-auto flex items-center justify-between text-xs text-text-3">
-                  <span>
-                    {[m.auteurice_prenom, m.auteurice_nom]
-                      .filter((s) => s !== null && s.trim() !== '')
-                      .join(' ') || 'Rédaction'}
-                  </span>
-                  {m.publie_le !== null ? <span>{formaterDateMoyenne(m.publie_le)}</span> : null}
-                </footer>
-              </Card>
-            </li>
-          ))}
-        </ul>
       )}
     </Container>
   );

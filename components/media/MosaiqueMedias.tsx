@@ -1,3 +1,4 @@
+import { MediaEmbed } from '@/components/media/MediaEmbed';
 import { ImageAffiche } from '@/components/ui';
 import type { MediaEnrichi } from '@/lib/media/requetes';
 import { formaterRelativePassee } from '@/lib/mobilisations/dates';
@@ -44,13 +45,81 @@ const LIBELLE_TYPE: Record<string, string> = {
   newsletter: 'Newsletter',
 };
 
-function estBreveExterne(media: MediaEnrichi): boolean {
-  return media.type === 'breve' && media.source_url !== null;
+/** Contenu importé d'une source externe (lien sortant), tous formats. */
+function estExterne(media: MediaEnrichi): boolean {
+  return media.provenance_externe !== null && media.source_url !== null;
+}
+
+/** Vidéo ou live avec embed jouable sur place. */
+function estVideoEmbed(media: MediaEnrichi): boolean {
+  return (media.type === 'video' || media.type === 'live') && media.media_url !== null;
+}
+
+/** Podcast avec fichier audio jouable sur place. */
+function estPodcastJouable(media: MediaEnrichi): boolean {
+  return media.type === 'podcast' && media.media_url !== null;
 }
 
 function estImportant(media: MediaEnrichi): boolean {
-  // Contenus maison toujours en grand ; brèves selon leur drapeau.
-  return media.type !== 'breve' || media.importante;
+  // Contenus maison toujours en grand ; contenus externes selon leur
+  // drapeau (une vraie image / vidéo / audio = format important).
+  return !estExterne(media) || media.importante;
+}
+
+/**
+ * Libellé du lien sortant selon le format (demande Ben : toujours un
+ * renvoi vers le site source).
+ */
+function libelleAction(media: MediaEnrichi): string {
+  if (!estExterne(media)) return 'Lire la suite';
+  switch (media.type) {
+    case 'podcast':
+      return 'Écouter sur le site source ↗';
+    case 'video':
+    case 'live':
+      return 'Regarder sur le site source ↗';
+    case 'dessin':
+      return 'Voir sur le site source ↗';
+    default:
+      return 'Lire la suite ↗';
+  }
+}
+
+/**
+ * Visuel en tête de carte selon le format :
+ *   - vidéo / live : lecteur embed (façade → iframe au clic) ;
+ *   - dessin : l'image en entier (object-contain, ne pas couper le dessin) ;
+ *   - podcast / brève / article : image de couverture (recadrée).
+ */
+function VisuelMedia({ media, ratio }: { media: MediaEnrichi; ratio: string }) {
+  if (estVideoEmbed(media) && media.media_url !== null) {
+    return (
+      <MediaEmbed
+        type={media.type}
+        mediaUrl={media.media_url}
+        vignetteUrl={media.vignette_url}
+        titre={media.titre}
+      />
+    );
+  }
+  if (media.vignette_url === null) return null;
+  if (media.type === 'dessin') {
+    return (
+      <LienMedia media={media}>
+        <img
+          src={media.vignette_url}
+          alt={media.titre}
+          loading="lazy"
+          className={`${ratio} w-full rounded-md border border-border bg-surface-2 object-contain`}
+        />
+      </LienMedia>
+    );
+  }
+  return (
+    <LienMedia media={media}>
+      <ImageAffiche src={media.vignette_url} alt="" className={`${ratio} w-full rounded-md`} />
+    </LienMedia>
+  );
 }
 
 /**
@@ -101,7 +170,7 @@ function Etiquettes({ media }: { media: MediaEnrichi }) {
   );
 }
 
-/** Lien de l'item : fiche interne (maison) ou site source (brève). */
+/** Lien de l'item : site source (contenu importé) ou fiche interne (maison). */
 function LienMedia({
   media,
   className,
@@ -111,7 +180,7 @@ function LienMedia({
   className?: string;
   children: React.ReactNode;
 }) {
-  if (estBreveExterne(media) && media.source_url !== null) {
+  if (estExterne(media) && media.source_url !== null) {
     return (
       <a href={media.source_url} target="_blank" rel="noopener noreferrer" className={className}>
         {children}
@@ -126,30 +195,32 @@ function LienMedia({
 }
 
 function CarteUne({ media }: { media: MediaEnrichi }) {
+  const aVisuel = media.vignette_url !== null || estVideoEmbed(media);
   return (
     <article className="grid gap-4 rounded-lg border border-border bg-surface p-4 md:grid-cols-5 md:p-6">
-      {media.vignette_url !== null ? (
-        <LienMedia media={media} className="md:col-span-3">
-          <ImageAffiche
-            src={media.vignette_url}
-            alt=""
-            className="aspect-[16/10] w-full rounded-md"
-            sizes="(min-width: 1024px) 640px, 100vw"
-          />
-        </LienMedia>
+      {aVisuel ? (
+        <div className="md:col-span-3">
+          <VisuelMedia media={media} ratio="aspect-[16/10]" />
+        </div>
       ) : null}
-      <div
-        className={`grid content-start gap-3 ${media.vignette_url !== null ? 'md:col-span-2' : 'md:col-span-5'}`}
-      >
+      <div className={`grid content-start gap-3 ${aVisuel ? 'md:col-span-2' : 'md:col-span-5'}`}>
         <p className="text-xs font-bold uppercase tracking-cap text-brand">À la une</p>
         <LienMedia media={media} className="hover:underline">
           <h2 className="text-2xl font-bold leading-tight text-text-1">{media.titre}</h2>
         </LienMedia>
+        {estPodcastJouable(media) && media.media_url !== null ? (
+          <MediaEmbed
+            type="podcast"
+            mediaUrl={media.media_url}
+            vignetteUrl={media.vignette_url}
+            titre={media.titre}
+          />
+        ) : null}
         <p className="line-clamp-[10] text-sm leading-relaxed text-text-2">{media.corps}</p>
         <Provenance media={media} />
         <Etiquettes media={media} />
         <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {estBreveExterne(media) ? 'Lire la suite ↗' : 'Lire la suite'}
+          {libelleAction(media)}
         </LienMedia>
       </div>
     </article>
@@ -159,26 +230,25 @@ function CarteUne({ media }: { media: MediaEnrichi }) {
 function CarteImportante({ media }: { media: MediaEnrichi }) {
   return (
     <article className="flex h-full flex-col gap-2 rounded-lg border border-border bg-surface p-3">
-      {media.vignette_url !== null ? (
-        <LienMedia media={media}>
-          <ImageAffiche
-            src={media.vignette_url}
-            alt=""
-            className="aspect-[16/9] w-full rounded-md"
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          />
-        </LienMedia>
-      ) : null}
+      <VisuelMedia media={media} ratio="aspect-[16/9]" />
       <SurTitre media={media} />
       <LienMedia media={media} className="hover:underline">
         <h3 className="text-lg font-bold leading-snug text-text-1">{media.titre}</h3>
       </LienMedia>
+      {estPodcastJouable(media) && media.media_url !== null ? (
+        <MediaEmbed
+          type="podcast"
+          mediaUrl={media.media_url}
+          vignetteUrl={media.vignette_url}
+          titre={media.titre}
+        />
+      ) : null}
       <p className="line-clamp-[7] text-sm leading-relaxed text-text-2">{media.corps}</p>
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
         <Etiquettes media={media} />
         <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {estBreveExterne(media) ? 'Lire la suite ↗' : 'Lire la suite'}
+          {libelleAction(media)}
         </LienMedia>
       </div>
     </article>
@@ -215,7 +285,7 @@ function CarteAnnexe({ media }: { media: MediaEnrichi }) {
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
         <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {estBreveExterne(media) ? 'Lire la suite ↗' : 'Lire la suite'}
+          {libelleAction(media)}
         </LienMedia>
       </div>
     </article>
