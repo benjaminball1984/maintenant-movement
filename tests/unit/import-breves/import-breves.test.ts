@@ -217,6 +217,8 @@ describe('selectionnerPourUnJour', () => {
       description: 'desc',
       publieLe: 1_000_000 + n,
       imageUrl: null,
+      audioUrl: null,
+      videoId: null,
     },
   });
 

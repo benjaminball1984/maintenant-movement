@@ -17,6 +17,16 @@ export interface ArticleFlux {
   publieLe: number | null;
   /** URL d'image candidate, ou null. */
   imageUrl: string | null;
+  /**
+   * URL du fichier audio (`<enclosure type="audio/...">`), pour les flux
+   * de podcasts. null si le flux n'est pas un podcast.
+   */
+  audioUrl: string | null;
+  /**
+   * Identifiant de vidéo YouTube (`<yt:videoId>`), pour les flux de
+   * chaînes YouTube. Sert à construire l'embed. null sinon.
+   */
+  videoId: string | null;
 }
 
 /**
@@ -183,6 +193,8 @@ function extraireImage(bloc: string): string | null {
     /<media:content[^>]+url="([^"]+\.(?:jpe?g|png|webp|gif)[^"]*)"/i,
     /<media:content[^>]+url="([^"]+)"[^>]+medium="image"/i,
     /<media:thumbnail[^>]+url="([^"]+)"/i,
+    // itunes:image (podcasts) : niveau item de préférence.
+    /<itunes:image[^>]+href="([^"]+)"/i,
   ]);
   if (direct !== null && !estImageTechnique(direct)) return decoderEntitesXml(direct);
   // Première <img> NON technique du contenu encodé (description ou
@@ -192,6 +204,20 @@ function extraireImage(bloc: string): string | null {
     if (src !== '' && !estImageTechnique(src)) return decoderEntitesXml(src);
   }
   return null;
+}
+
+/** URL audio d'un podcast : `<enclosure type="audio/...">`. */
+function extraireAudio(bloc: string): string | null {
+  const m =
+    bloc.match(/<enclosure[^>]+url="([^"]+)"[^>]*type="audio\/[^"]*"/i) ??
+    bloc.match(/<enclosure[^>]+type="audio\/[^"]*"[^>]+url="([^"]+)"/i);
+  return m?.[1] !== undefined ? decoderEntitesXml(m[1]) : null;
+}
+
+/** Identifiant de vidéo YouTube : `<yt:videoId>`. */
+function extraireVideoId(bloc: string): string | null {
+  const m = bloc.match(/<yt:videoId>([^<]+)<\/yt:videoId>/i);
+  return m?.[1] !== undefined ? m[1].trim() : null;
 }
 
 function extraireLien(bloc: string): string | null {
@@ -248,6 +274,8 @@ export function analyserFlux(xml: string): ArticleFlux[] {
       description: texteDepuisHtml(descriptionBrute),
       publieLe: Number.isNaN(horodatage) ? null : horodatage,
       imageUrl: extraireImage(bloc),
+      audioUrl: extraireAudio(bloc),
+      videoId: extraireVideoId(bloc),
     });
   }
 
