@@ -2,7 +2,7 @@
 
 **Date de fin** : 2026-06-13
 **Branche** : feature/phase-0-chantier-0.1-deploiement-cloudflare
-**Commit final** : (à venir)
+**Commit final** : 1ce9dcc (déployé ; worker version 07dd35af)
 **Durée approximative** : 1 session Claude Code
 
 ## Contexte (demande Ben, 2026-06-13)
@@ -84,16 +84,20 @@ générée couvre donc les trois d'un coup, sans rien changer à l'affichage.
 
 ## Reste / à arbitrer
 
-- [ ] Sondages DÉJÀ en ligne : le présidentielle garde sa mosaïque actuelle.
-  Les éventuels autres sondages publiés avant ce chantier sans couverture ne
-  sont pas rétro-générés (pas de flux d'édition). Un script de rattrapage
-  (écriture sur le distant = porte, feu vert Ben requis) peut les couvrir d'un
-  coup ; à faire sur demande.
+- [x] Sondages DÉJÀ en ligne : vérifié le 2026-06-13, **0 sondage sans
+  couverture** (image_url null), donc rien à rétro-générer (le présidentielle
+  et les autres ont déjà leur image, aucune couverture existante écrasée).
+  Script de rattrapage prêt si un sondage sans couverture apparaît :
+  `data-migration/generer-mosaiques-sondages.mjs` (`--lister` / `--appliquer`,
+  rendu via `sharp` répliquant la même géométrie ; gitignoré).
 - [ ] Le sous-titre « Sondage · maintenant-le-mouvement.org » incrusté dans
   l'image n'est pas éditable via CMS (c'est du contenu d'image, comme la
   mosaïque présidentielle). Réglable dans la constante `SOUS_TITRE` du module.
-- [ ] Déploiement : implémenté et vérifié EN LOCAL, pas encore commité ni
-  déployé. `cf:deploy` vers maintenant-le-mouvement.org au feu vert de Ben.
+- [x] Déploiement : fait le 2026-06-13 (`cf:deploy`, commit 1ce9dcc, worker
+  version 07dd35af). maintenant-le-mouvement.org/s-informer/sondages répond
+  200. Vérification visuelle d'un sondage réel en ligne (avec captcha + photos
+  d'options servies par Supabase Storage) : à confirmer au premier sondage créé
+  (point CORS noté ci-dessus, repli tuiles texte si besoin).
 
 ## Notes pour les chantiers suivants
 
