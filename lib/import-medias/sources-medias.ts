@@ -325,6 +325,152 @@ export const SOURCES_VIDEOS: SourceMedia[] = [
     langue: 'en',
     format: 'video',
   },
+  // === Lives étoffés (validés par Ben 2026-06-13 : personnalités
+  // politiques, syndicats de gauche hors CFDT, ONG/assos/collectifs,
+  // international). Channel_id vérifiés actifs. ===
+  // Syndicats de gauche.
+  { nom: 'La CGT', flux: fluxYoutube('UCXbA6-9E-w1m5SwUVuC9VQw'), langue: 'fr', format: 'live' },
+  {
+    nom: 'Union syndicale Solidaires',
+    flux: fluxYoutube('UCrhskh-RXjJPUXlfCMui6Cw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  { nom: 'FSU', flux: fluxYoutube('UCS5yhSOqIFUQY8H-UAWHODQ'), langue: 'fr', format: 'live' },
+  {
+    nom: 'Confédération paysanne',
+    flux: fluxYoutube('UCbWqDhRCUHRuZkZYvYga4Og'),
+    langue: 'fr',
+    format: 'live',
+  },
+  { nom: 'SUD-Rail', flux: fluxYoutube('UCnJQN4DOteKb4B6l9RHxaWg'), langue: 'fr', format: 'live' },
+  {
+    nom: 'SUD éducation',
+    flux: fluxYoutube('UCojHfRNjWh6S30smdLLWYkw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Réseau Salariat',
+    flux: fluxYoutube('UCwdrNdnPSkE7HEAiuRG8Tcw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  // Partis et mouvements.
+  {
+    nom: 'Révolution Permanente',
+    flux: fluxYoutube('UCwLLr_Fo9dpdJ9UHq4A7PjA'),
+    langue: 'fr',
+    format: 'live',
+  },
+  { nom: 'NPA', flux: fluxYoutube('UCAKzgWr5laB3Yf44hvqqZZQ'), langue: 'fr', format: 'live' },
+  {
+    nom: 'Sandrine Rousseau',
+    flux: fluxYoutube('UCA8JG3JY883RjCmAU9lABzw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Clémentine Autain / L’Après',
+    flux: fluxYoutube('UCZgJ_r_Ewlu1Ck-RzNCHuUQ'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'François Ruffin',
+    flux: fluxYoutube('UCIQGSp79vVch0vO3Efqif_w'),
+    langue: 'fr',
+    format: 'live',
+  },
+  { nom: 'Debout !', flux: fluxYoutube('UCQcOjAB27zVvTq7WPost9hA'), langue: 'fr', format: 'live' },
+  {
+    nom: 'Lutte Ouvrière',
+    flux: fluxYoutube('UCZsh-MrJftAOP_-ZgRgLScw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  // ONG, associations, collectifs.
+  {
+    nom: 'Les Soulèvements de la Terre',
+    flux: fluxYoutube('UC4FwrM-0Zr3okIUs8DW9SMA'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Attac France',
+    flux: fluxYoutube('UCe0hOiy0uE2ck3zSYkBV1UA'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Extinction Rebellion France',
+    flux: fluxYoutube('UCSJFmDCxyjkxVsZNJUymZWQ'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Oxfam France',
+    flux: fluxYoutube('UCf1p5jaYrOEUG5j0wzGPckw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'ATD Quart Monde',
+    flux: fluxYoutube('UCIGpedPUvBjyLJ4rba2QvzA'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Banlieues Climat',
+    flux: fluxYoutube('UCJl9enlQdVCHfFoCCfrhUzw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  // Personnalités et médias engagés.
+  {
+    nom: 'Camille Étienne',
+    flux: fluxYoutube('UCyjXo7RjhDQ1oX7Q7CPUUIQ'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Reporterre',
+    flux: fluxYoutube('UCDn6zvBZNEWUv44xjgELicA'),
+    langue: 'fr',
+    format: 'live',
+  },
+  { nom: 'Politis', flux: fluxYoutube('UCtjc5x0RIiTsdYS4IFMjCGQ'), langue: 'fr', format: 'live' },
+  {
+    nom: 'Off Investigation',
+    flux: fluxYoutube('UCEFGCs68E9Vr5te5qZuJsbg'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Thinkerview',
+    flux: fluxYoutube('UCQgWpmt02UtJkyO32HGUASQ'),
+    langue: 'fr',
+    format: 'live',
+  },
+  {
+    nom: 'Radio Nova',
+    flux: fluxYoutube('UCGvjUWz3mGV9cssraATuEsw'),
+    langue: 'fr',
+    format: 'live',
+  },
+  // International.
+  {
+    nom: 'Alexandria Ocasio-Cortez',
+    flux: fluxYoutube('UCElqfal0wzzpLsHlRuqZjaA'),
+    langue: 'en',
+    format: 'live',
+  },
+  {
+    nom: 'Bernie Sanders',
+    flux: fluxYoutube('UCH1dpzjCEiGAt8CXkryhkZg'),
+    langue: 'en',
+    format: 'live',
+  },
 ];
 
 /** 27 sources de dessins de presse et BD (20 FR, 7 internationaux). */
