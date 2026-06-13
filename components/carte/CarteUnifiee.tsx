@@ -81,13 +81,40 @@ const TOUS_LES_TYPES: TypePoint[] = [
  * pourra basculer sur un style vectoriel libre (ex : OpenFreeMap) ou
  * self-hosted.
  */
+/** Identifiant de la source GeoJSON clusterisée. */
+const SOURCE = 'points';
+
+/** Construit le GeoJSON des points filtrés par type actif. */
+function versGeoJson(
+  points: PointCarte[],
+  typesActifs: Set<TypePoint>,
+): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  return {
+    type: 'FeatureCollection',
+    features: points
+      .filter((p) => typesActifs.has(p.type))
+      .map((p) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [p.longitude, p.latitude] },
+        properties: {
+          type: p.type,
+          couleur: COULEUR_PAR_TYPE[p.type],
+          libelle: LIBELLE_PAR_TYPE[p.type],
+          titre: p.titre,
+          sousTitre: p.sous_titre ?? '',
+          href: p.href,
+        },
+      })),
+  };
+}
+
 export function CarteUnifiee({ points }: CarteUnifieeProps) {
   const conteneurRef = useRef<HTMLDivElement>(null);
   const carteRef = useRef<maplibregl.Map | null>(null);
-  const marqueursRef = useRef<maplibregl.Marker[]>([]);
+  const [pret, setPret] = useState(false);
   const [typesActifs, setTypesActifs] = useState<Set<TypePoint>>(new Set(TOUS_LES_TYPES));
 
-  // Initialisation MapLibre une seule fois.
+  // Initialisation MapLibre + clustering, une seule fois.
   useEffect(() => {
     if (conteneurRef.current === null) return;
     if (carteRef.current !== null) return;
@@ -96,6 +123,8 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
       container: conteneurRef.current,
       style: {
         version: 8,
+        // Glyphs nécessaires au compteur des clusters (symbol layer text).
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {
           osm: {
             type: 'raster',
@@ -114,53 +143,111 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
     carte.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     carte.addControl(new maplibregl.AttributionControl({ compact: true }));
 
+    carte.on('load', () => {
+      // Source clusterisée : MapLibre regroupe les points proches/superposés
+      // (lieux militants récurrents qui accueillent beaucoup d'événements).
+      carte.addSource(SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+        cluster: true,
+        clusterRadius: 45,
+        clusterMaxZoom: 15,
+      });
+
+      // Cercle des clusters (taille croissante selon le nombre de points).
+      carte.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: SOURCE,
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': '#e85d75',
+          'circle-opacity': 0.85,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2,
+          'circle-radius': ['step', ['get', 'point_count'], 16, 10, 22, 50, 30],
+        },
+      });
+      // Compteur au centre du cluster.
+      carte.addLayer({
+        id: 'clusters-count',
+        type: 'symbol',
+        source: SOURCE,
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': ['get', 'point_count_abbreviated'],
+          'text-font': ['Open Sans Bold'],
+          'text-size': 13,
+        },
+        paint: { 'text-color': '#ffffff' },
+      });
+      // Points individuels (non regroupés), couleur selon le type.
+      carte.addLayer({
+        id: 'points-unite',
+        type: 'circle',
+        source: SOURCE,
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': ['get', 'couleur'],
+          'circle-radius': 7,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 2,
+        },
+      });
+
+      // Clic sur un cluster : on zoome pour l'éclater.
+      carte.on('click', 'clusters', (e) => {
+        const f = carte.queryRenderedFeatures(e.point, { layers: ['clusters'] })[0];
+        const clusterId = f?.properties?.cluster_id;
+        const source = carte.getSource(SOURCE) as maplibregl.GeoJSONSource | undefined;
+        if (clusterId === undefined || source === undefined) return;
+        source.getClusterExpansionZoom(clusterId).then((zoom) => {
+          const geom = f?.geometry;
+          if (geom?.type === 'Point') {
+            carte.easeTo({ center: geom.coordinates as [number, number], zoom });
+          }
+        });
+      });
+
+      // Clic sur un point individuel : popup de la fiche.
+      carte.on('click', 'points-unite', (e) => {
+        const f = e.features?.[0];
+        if (f === undefined || f.geometry.type !== 'Point') return;
+        const p = f.properties ?? {};
+        new maplibregl.Popup({ offset: 12, closeButton: false })
+          .setLngLat(f.geometry.coordinates as [number, number])
+          .setHTML(renduPopupProps(p))
+          .addTo(carte);
+      });
+
+      for (const couche of ['clusters', 'points-unite']) {
+        carte.on('mouseenter', couche, () => {
+          carte.getCanvas().style.cursor = 'pointer';
+        });
+        carte.on('mouseleave', couche, () => {
+          carte.getCanvas().style.cursor = '';
+        });
+      }
+
+      setPret(true);
+    });
+
     carteRef.current = carte;
 
     return () => {
       carte.remove();
       carteRef.current = null;
+      setPret(false);
     };
   }, []);
 
-  // Re-rendu des marqueurs quand `points` ou `typesActifs` changent.
+  // Met à jour les données (donc les clusters) quand points/filtres changent.
   useEffect(() => {
     const carte = carteRef.current;
-    if (carte === null) return;
-
-    // Vide les marqueurs existants.
-    for (const m of marqueursRef.current) {
-      m.remove();
-    }
-    marqueursRef.current = [];
-
-    for (const point of points) {
-      if (!typesActifs.has(point.type)) continue;
-
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.setAttribute('aria-label', `${point.titre} (${LIBELLE_PAR_TYPE[point.type]})`);
-      el.style.background = 'transparent';
-      el.style.border = 'none';
-      el.style.padding = '0';
-      el.style.cursor = 'pointer';
-      el.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="10" cy="10" r="7" fill="${COULEUR_PAR_TYPE[point.type]}" stroke="white" stroke-width="2"/>
-        </svg>
-      `;
-
-      const popup = new maplibregl.Popup({ offset: 12, closeButton: false }).setHTML(
-        renduPopup(point),
-      );
-
-      const marqueur = new maplibregl.Marker({ element: el })
-        .setLngLat([point.longitude, point.latitude])
-        .setPopup(popup)
-        .addTo(carte);
-
-      marqueursRef.current.push(marqueur);
-    }
-  }, [points, typesActifs]);
+    if (carte === null || !pret) return;
+    const source = carte.getSource(SOURCE) as maplibregl.GeoJSONSource | undefined;
+    source?.setData(versGeoJson(points, typesActifs));
+  }, [points, typesActifs, pret]);
 
   function basculer(type: TypePoint) {
     setTypesActifs((set) => {
@@ -220,17 +307,19 @@ export function CarteUnifiee({ points }: CarteUnifieeProps) {
  * en mode clair comme en mode sombre, sans dépendre de Tailwind (le
  * popup est rendu dans un conteneur MapLibre hors du flux principal).
  */
-function renduPopup(point: PointCarte): string {
-  const titre = echapperHtml(point.titre);
-  const sousTitre = point.sous_titre !== null ? echapperHtml(point.sous_titre) : '';
+function renduPopupProps(props: Record<string, unknown>): string {
+  const libelle = echapperHtml(String(props.libelle ?? ''));
+  const titre = echapperHtml(String(props.titre ?? ''));
+  const sousTitre = echapperHtml(String(props.sousTitre ?? ''));
+  const href = String(props.href ?? '#');
   return `
     <div style="font-family: var(--font-body, system-ui); min-width: 200px; background: var(--surface); color: var(--text-1);">
       <p style="margin: 0; font-size: 0.7rem; text-transform: uppercase; color: var(--text-3);">
-        ${echapperHtml(LIBELLE_PAR_TYPE[point.type])}
+        ${libelle}
       </p>
       <p style="margin: 0.25rem 0; font-weight: 700; color: var(--text-1);">${titre}</p>
       ${sousTitre !== '' ? `<p style="margin: 0; font-size: 0.85rem; color: var(--text-2);">${sousTitre}</p>` : ''}
-      <a href="${point.href}" style="display: inline-block; margin-top: 0.5rem; color: var(--brand); text-decoration: underline;">
+      <a href="${echapperHtml(href)}" style="display: inline-block; margin-top: 0.5rem; color: var(--brand); text-decoration: underline;">
         Voir la fiche
       </a>
     </div>
