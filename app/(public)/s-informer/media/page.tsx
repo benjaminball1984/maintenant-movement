@@ -91,6 +91,10 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
   // Toutes les vues (principale ET onglets par format) suivent les 3
   // logiques : une, bandeau « La rédaction », séparateur « Revue de
   // presse » avant les contenus externes (demande Ben 2026-06-13).
+  // Épingle de la une (partagée avec la home, emplacement « article ») :
+  // sert à l'état du bouton admin sur chaque carte, sur toutes les vues.
+  const idUneEpingle = await idEpingleUneHome('article');
+
   let medias: Awaited<ReturnType<typeof listerMediasPublies>> = [];
   let redaction: Awaited<ReturnType<typeof listerMediasMaison>> = [];
   let une: Awaited<ReturnType<typeof mediaPublieParId>> = null;
@@ -103,20 +107,23 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
     redaction = maisonDuType.slice(1);
     medias = tousDuType.filter((m) => m.provenance_externe !== null);
   } else {
-    const [flux, maison, idUne] = await Promise.all([
-      listerFluxMedias(tagActif),
-      listerMediasMaison(),
-      idEpingleUneHome('article'),
-    ]);
+    const [flux, maison] = await Promise.all([listerFluxMedias(tagActif), listerMediasMaison()]);
     if (tagActif === undefined) {
-      // La une appartient à la rédaction : l'épingle admin si elle existe,
-      // sinon le contenu maison le plus récent (JAMAIS une brève importée).
-      const epingle = idUne !== null ? await mediaPublieParId(idUne) : null;
-      une = epingle !== null && epingle.type !== 'breve' ? epingle : (maison[0] ?? null);
+      // La une : l'épingle admin si elle existe (N'IMPORTE QUEL contenu,
+      // podcast/dessin/vidéo ou même une brève choisie explicitement,
+      // demande Ben 2026-06-13) ; sinon, en automatique, le contenu
+      // maison le plus récent (jamais une brève importée).
+      const epingle = idUneEpingle !== null ? await mediaPublieParId(idUneEpingle) : null;
+      une = epingle ?? maison[0] ?? null;
       redaction = maison.filter((m) => m.id !== une?.id);
-      medias = flux.filter((m) => m.type === 'breve');
+      // Flux principal VARIÉ (Ben 2026-06-13) : tout le flux externe mêlé
+      // (brèves + dessins + vidéos + lives + podcasts), antichronologique,
+      // pas seulement les brèves.
+      medias = flux.filter((m) => m.provenance_externe !== null && m.id !== une?.id);
     } else {
-      medias = flux.filter((m) => m.id !== une?.id);
+      // Filtre par tag : juste le flux externe correspondant (la une et le
+      // bandeau rédaction, non filtrés, n'ont pas de sens ici).
+      medias = flux.filter((m) => m.provenance_externe !== null);
     }
   }
   const ongletActif = filtre ?? 'tous';
@@ -231,7 +238,13 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
       ) : null}
 
       {medias.length > 0 || une !== null || redaction.length > 0 ? (
-        <MosaiqueMedias une={une} redaction={redaction} medias={medias} />
+        <MosaiqueMedias
+          une={une}
+          redaction={redaction}
+          medias={medias}
+          estAdmin={estAdmin}
+          idUneEpingle={idUneEpingle}
+        />
       ) : (
         <Alert
           variant="info"

@@ -1,7 +1,7 @@
 /**
- * Worker cron : import QUOTIDIEN de la revue de presse multi-format
- * (podcasts, vidéos, lives, dessins). 9 nouveaux contenus par format et
- * par jour. Appelle l'endpoint protégé du site avec le secret partagé.
+ * Worker cron : import HORAIRE d'un contenu multi-format de la revue de
+ * presse (podcast, vidéo, live ou dessin, en rotation selon l'heure).
+ * Appelle l'endpoint protégé du site avec le secret partagé.
  *
  * Déploiement : `npx wrangler deploy` dans ce dossier, puis poser le
  * secret CRON_SECRET (même valeur que sur le Worker du site et le Worker

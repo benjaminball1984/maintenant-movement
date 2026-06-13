@@ -68,11 +68,16 @@ export async function listerFluxMedias(tag?: string, limite = 150): Promise<Medi
  */
 export async function listerMediasMaison(limite = 40): Promise<MediaEnrichi[]> {
   const supabase = await getSupabaseServer();
+  // MAISON = produit par la rédaction : provenance_externe NULL. Le filtre
+  // `type != breve` ne suffit plus depuis la revue de presse multi-format
+  // (2026-06-13) : podcasts/vidéos/lives/dessins importés ont aussi un
+  // type != breve mais une provenance externe, et noyaient les vrais
+  // articles maison dans le bandeau « La rédaction » (bug signalé par Ben).
   const { data } = await supabase
     .from('media')
     .select('*')
     .eq('statut', 'publie')
-    .neq('type', 'breve')
+    .is('provenance_externe', null)
     .order('publie_le', { ascending: false })
     .limit(limite);
   return hydrater(supabase, (data ?? []) as Media[]);

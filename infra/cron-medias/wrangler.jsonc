@@ -3,7 +3,8 @@
   "main": "worker.js",
   "compatibility_date": "2026-01-01",
   "triggers": {
-    // Une fois par jour, à 05h17 UTC (creux de trafic, décalé des autres crons).
-    "crons": ["17 5 * * *"]
+    // Chaque heure, à la 32e minute (décalé des brèves, à la 12e) : 1
+    // contenu multi-format par heure, format tournant (Ben 2026-06-13).
+    "crons": ["32 * * * *"]
   }
 }

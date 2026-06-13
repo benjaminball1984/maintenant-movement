@@ -1,3 +1,4 @@
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { MediaEmbed } from '@/components/media/MediaEmbed';
 import { ImageAffiche } from '@/components/ui';
 import type { MediaEnrichi } from '@/lib/media/requetes';
@@ -31,6 +32,10 @@ interface MosaiqueMediasProps {
   redaction?: MediaEnrichi[];
   /** Flux antichronologique (sans la une ni la rédaction). */
   medias: MediaEnrichi[];
+  /** Admin connecté·e : affiche le bouton « Mettre à la une » sur chaque carte. */
+  estAdmin?: boolean;
+  /** Id du contenu actuellement épinglé à la une (pour l'état du bouton). */
+  idUneEpingle?: string | null;
 }
 
 const LIBELLE_TYPE: Record<string, string> = {
@@ -123,16 +128,33 @@ function VisuelMedia({ media, ratio }: { media: MediaEnrichi; ratio: string }) {
 }
 
 /**
- * Sur-titre de carte : pour une brève, le NOM DU MÉDIA SOURCE (décision
- * Ben 2026-06-12 : « enlève les badges brève et remplace par le nom du
- * média source ») ; pour un contenu maison, le type éditorial.
+ * Sur-titre de carte :
+ *   - brève externe : le NOM DU MÉDIA SOURCE seul (décision Ben 2026-06-12 :
+ *     pas de badge « brève », juste le média) ;
+ *   - dessin / podcast / vidéo / live externe : le BADGE de format suivi
+ *     du nom du média source (demande Ben 2026-06-13 : « les badges
+ *     dessins, live, vidéo c'est bien, rajouter à côté le nom du média
+ *     source comme pour les brèves ») ;
+ *   - contenu maison : le type éditorial seul.
  */
 function SurTitre({ media }: { media: MediaEnrichi }) {
-  const texte =
-    media.type === 'breve'
-      ? (media.provenance_externe ?? 'Revue de presse')
-      : (LIBELLE_TYPE[media.type] ?? media.type);
-  return <p className="text-[11px] font-bold uppercase tracking-cap text-text-3">{texte}</p>;
+  const libelleType = LIBELLE_TYPE[media.type] ?? media.type;
+  if (estExterne(media) && media.provenance_externe !== null) {
+    if (media.type === 'breve') {
+      return (
+        <p className="text-[11px] font-bold uppercase tracking-cap text-text-3">
+          {media.provenance_externe}
+        </p>
+      );
+    }
+    return (
+      <p className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold uppercase tracking-cap">
+        <span className="rounded-sm bg-brand/10 px-1.5 py-0.5 text-brand">{libelleType}</span>
+        <span className="text-text-3">{media.provenance_externe}</span>
+      </p>
+    );
+  }
+  return <p className="text-[11px] font-bold uppercase tracking-cap text-text-3">{libelleType}</p>;
 }
 
 /** Ligne de provenance : auteur·ice maison s'il y a lieu, heure, langue. */
@@ -170,6 +192,28 @@ function Etiquettes({ media }: { media: MediaEnrichi }) {
   );
 }
 
+/** Options admin propagées aux cartes (bouton « Mettre à la une »). */
+interface OptionsAdmin {
+  estAdmin: boolean;
+  idUneEpingle: string | null;
+}
+
+/**
+ * Bouton admin « Mettre à la une » d'une carte (demande Ben 2026-06-13 :
+ * pouvoir épingler N'IMPORTE QUEL contenu, y compris les brèves/podcasts/
+ * dessins externes auxquels on n'accède pas par une fiche interne).
+ */
+function BoutonUne({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin }) {
+  if (admin?.estAdmin !== true) return null;
+  return (
+    <BoutonMettreALaUne
+      emplacement="article"
+      objetId={media.id}
+      estEpingleInitial={media.id === admin.idUneEpingle}
+    />
+  );
+}
+
 /** Lien de l'item : site source (contenu importé) ou fiche interne (maison). */
 function LienMedia({
   media,
@@ -194,7 +238,7 @@ function LienMedia({
   );
 }
 
-function CarteUne({ media }: { media: MediaEnrichi }) {
+function CarteUne({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin }) {
   const aVisuel = media.vignette_url !== null || estVideoEmbed(media);
   return (
     <article className="grid gap-4 rounded-lg border border-border bg-surface p-4 md:grid-cols-5 md:p-6">
@@ -219,15 +263,18 @@ function CarteUne({ media }: { media: MediaEnrichi }) {
         <p className="line-clamp-[10] text-sm leading-relaxed text-text-2">{media.corps}</p>
         <Provenance media={media} />
         <Etiquettes media={media} />
-        <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {libelleAction(media)}
-        </LienMedia>
+        <div className="flex flex-wrap items-center gap-3">
+          <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
+            {libelleAction(media)}
+          </LienMedia>
+          <BoutonUne media={media} admin={admin} />
+        </div>
       </div>
     </article>
   );
 }
 
-function CarteImportante({ media }: { media: MediaEnrichi }) {
+function CarteImportante({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin }) {
   return (
     <article className="flex h-full flex-col gap-2 rounded-lg border border-border bg-surface p-3">
       <VisuelMedia media={media} ratio="aspect-[16/9]" />
@@ -247,15 +294,18 @@ function CarteImportante({ media }: { media: MediaEnrichi }) {
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
         <Etiquettes media={media} />
-        <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {libelleAction(media)}
-        </LienMedia>
+        <div className="flex flex-wrap items-center gap-3">
+          <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
+            {libelleAction(media)}
+          </LienMedia>
+          <BoutonUne media={media} admin={admin} />
+        </div>
       </div>
     </article>
   );
 }
 
-function CarteAnnexe({ media }: { media: MediaEnrichi }) {
+function CarteAnnexe({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin }) {
   return (
     <article className="flex h-full flex-col gap-2 rounded-md border border-border bg-surface-2 p-3">
       <SurTitre media={media} />
@@ -284,25 +334,35 @@ function CarteAnnexe({ media }: { media: MediaEnrichi }) {
       <p className="line-clamp-[9] text-sm leading-relaxed text-text-2">{media.corps}</p>
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
-        <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
-          {libelleAction(media)}
-        </LienMedia>
+        <div className="flex flex-wrap items-center gap-3">
+          <LienMedia media={media} className="text-sm font-bold text-brand hover:underline">
+            {libelleAction(media)}
+          </LienMedia>
+          <BoutonUne media={media} admin={admin} />
+        </div>
       </div>
     </article>
   );
 }
 
-export function MosaiqueMedias({ une, redaction = [], medias }: MosaiqueMediasProps) {
+export function MosaiqueMedias({
+  une,
+  redaction = [],
+  medias,
+  estAdmin = false,
+  idUneEpingle = null,
+}: MosaiqueMediasProps) {
+  const admin: OptionsAdmin = { estAdmin, idUneEpingle };
   return (
     <div className="grid gap-6">
-      {une !== null ? <CarteUne media={une} /> : null}
+      {une !== null ? <CarteUne media={une} admin={admin} /> : null}
 
       {redaction.length > 0 ? (
         <section className="grid gap-3">
           <h2 className="text-xs font-bold uppercase tracking-cap text-brand">La rédaction</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {redaction.map((media) => (
-              <CarteImportante key={media.id} media={media} />
+              <CarteImportante key={media.id} media={media} admin={admin} />
             ))}
           </div>
         </section>
@@ -317,9 +377,9 @@ export function MosaiqueMedias({ une, redaction = [], medias }: MosaiqueMediasPr
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {medias.map((media) =>
               estImportant(media) ? (
-                <CarteImportante key={media.id} media={media} />
+                <CarteImportante key={media.id} media={media} admin={admin} />
               ) : (
-                <CarteAnnexe key={media.id} media={media} />
+                <CarteAnnexe key={media.id} media={media} admin={admin} />
               ),
             )}
           </div>

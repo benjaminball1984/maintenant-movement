@@ -3,26 +3,28 @@ import type { FormatMedia } from '@/lib/import-medias/sources-medias';
 import { NextResponse } from 'next/server';
 
 /**
- * Endpoint d'import QUOTIDIEN de la revue de presse multi-format (demande
- * Ben 2026-06-13) : chaque jour, 9 nouveaux contenus par format
- * (podcasts, vidéos, lives, dessins), une source par contenu, en sautant
- * ce qui est déjà importé et les sources déjà servies dans les 24 h.
+ * Endpoint d'import HORAIRE d'UN contenu multi-format (demande Ben
+ * 2026-06-13 : « toutes les heures, soit un dessin, soit un live, soit
+ * une vidéo, soit un podcast » pour un flux vivant et équilibré).
  *
- * Appelé par le Worker cron `maintenant-cron-medias` (infra/cron-medias/).
- * Protégé par le secret `CRON_SECRET` : sans le bon en-tête Authorization,
- * 401.
+ * Le format tourne avec l'heure : podcast, vidéo, live, dessin, podcast…
+ * Sur 24 h, chaque format reçoit donc 6 nouveaux contenus. Une source
+ * par contenu, en sautant ce qui est déjà importé et les sources déjà
+ * servies dans les 24 h. La rotation des SOURCES (par jour) évite de
+ * toujours puiser en tête de liste.
  *
- * Une rotation déterministe (jour de l'année) varie les sources servies
- * d'un jour à l'autre, pour ne pas toujours puiser dans les mêmes têtes
- * de liste.
+ * Appelé chaque heure par le Worker cron `maintenant-cron-medias`
+ * (infra/cron-medias/). Protégé par le secret `CRON_SECRET`.
  */
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-/** Nombre de nouveaux contenus visés par format et par jour (Ben). */
-const CIBLE_PAR_FORMAT = 9;
-const FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
+/**
+ * Rotation horaire des formats : l'heure UTC modulo 4 choisit le format.
+ * podcast (0,4,8…), vidéo (1,5,9…), live (2,6,10…), dessin (3,7,11…).
+ */
+const ROTATION_FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
 
 /** Quantième du jour (1-366), pour faire tourner l'ordre des sources. */
 function jourDeLAnnee(): number {
@@ -47,12 +49,10 @@ export async function GET(requete: Request): Promise<NextResponse> {
     );
   }
 
-  const offset = jourDeLAnnee();
-  const rapports: Record<string, { crees: number; echecs: number }> = {};
-  for (const format of FORMATS) {
-    const r = await importerFormat(format, urlSb, cle, CIBLE_PAR_FORMAT, offset);
-    rapports[format] = { crees: r.crees.length, echecs: r.echecs.length };
-  }
-
-  return NextResponse.json({ ok: true, rapports });
+  const heure = new Date().getUTCHours();
+  const format = ROTATION_FORMATS[heure % ROTATION_FORMATS.length] as FormatMedia;
+  // Un seul contenu de ce format cette heure-ci. La rotation des sources
+  // varie d'un jour à l'autre via le quantième.
+  const r = await importerFormat(format, urlSb, cle, 1, jourDeLAnnee());
+  return NextResponse.json({ ok: true, format, crees: r.crees, echecs: r.echecs });
 }

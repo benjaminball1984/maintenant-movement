@@ -369,8 +369,17 @@ function normaliser(texte: string): string {
 }
 
 /**
+ * Tag de repli quand aucun mot-clé ne matche (demande Ben 2026-06-13 :
+ * « il en faut au moins 1 »). « Politique » est le tag parapluie d'un
+ * mouvement politique citoyen : le moins arbitraire pour un contenu de la
+ * revue de presse qu'on n'a pas su classer plus finement.
+ */
+export const TAG_PAR_DEFAUT = 'Politique';
+
+/**
  * Attribue les tags d'une brève d'après son titre + extrait.
- * Retourne au plus MAX_TAGS_PAR_BREVE tags, ordre éditorial de la banque.
+ * Retourne au plus MAX_TAGS_PAR_BREVE tags, ordre éditorial de la banque,
+ * et AU MOINS un (repli parapluie) : toute carte a une pastille (Ben).
  */
 export function assignerTags(texte: string): string[] {
   const corps = ` ${normaliser(texte)} `;
@@ -381,5 +390,5 @@ export function assignerTags(texte: string): string[] {
       tags.push(regle.tag);
     }
   }
-  return tags;
+  return tags.length > 0 ? tags : [TAG_PAR_DEFAUT];
 }
