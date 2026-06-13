@@ -1,5 +1,5 @@
 import { slugifier } from '@/lib/helpers-purs';
-import { chercherImageArticle } from '@/lib/import-breves/importer';
+import { chercherDescriptionArticle, chercherImageArticle } from '@/lib/import-breves/importer';
 import { type ArticleFlux, analyserFlux, extrairePremieresLignes } from '@/lib/import-breves/rss';
 import { assignerTags } from '@/lib/import-breves/tags';
 import {
@@ -36,6 +36,21 @@ const TAILLE_MAX_IMAGE_OCTETS = 6_000_000;
 /** Embed YouTube respectueux de la vie privée (pas de cookie avant lecture). */
 export function urlEmbedYoutube(videoId: string): string {
   return `https://www.youtube-nocookie.com/embed/${videoId}`;
+}
+
+/**
+ * Marqueurs de direct dans un titre. Le flux RSS YouTube n'indique PAS le
+ * statut « live » : on ne classe en `live` que si le TITRE le signale (🔴,
+ * « en direct », « live », « [direct] »), sinon en `video` (constat Ben
+ * 2026-06-13 : « plein de vidéos classées live alors que ce ne sont pas des
+ * lives »). Une chaîne déclarée `live` dans les sources publie en réalité
+ * surtout des vidéos : c'est le titre qui tranche, contenu par contenu.
+ */
+const MARQUEURS_LIVE = /🔴|\ben\s+direct\b|\blive\b|\[direct\]|\bdirect\b\s*[:–-]/i;
+
+/** Vrai si le titre signale un direct (ou le replay d'un direct). */
+export function estLiveDApresTitre(titre: string): boolean {
+  return MARQUEURS_LIVE.test(titre);
 }
 
 /** Récupère et analyse le flux d'une source ; lève si le flux est en échec. */
@@ -238,6 +253,17 @@ export async function telechargerEtInsererMedia(
 
   let corps = extrairePremieresLignes(article.description, 650);
 
+  // Texte trop court (fréquent pour les dessins) : on prend la méta
+  // `og:description` de la page (résumé PROPRE exposé par le site), pas les
+  // paragraphes bruts qui ramassent le chrome (encarts de don, « à lire
+  // aussi »). Constat Ben 2026-06-13 : « il devrait y avoir du texte ».
+  if (corps.length < 200) {
+    const desc = await chercherDescriptionArticle(article.lien);
+    if (desc !== null && desc.length > corps.length) {
+      corps = extrairePremieresLignes(desc, 650);
+    }
+  }
+
   // Doublon vidéo/brève (V2.6.113) : si une brève récente de la même source
   // porte ce sujet, la vidéo absorbe son texte (6-7 lignes sous la vidéo) et
   // la brève sera retirée après l'insertion.
@@ -250,11 +276,18 @@ export async function telechargerEtInsererMedia(
     }
   }
 
+  // Type RÉEL (V2.6.114) : une chaîne déclarée « live » publie surtout des
+  // vidéos normales ; on ne garde « live » que si le titre signale un direct.
+  let typeStocke: FormatMedia = format;
+  if (format === 'video' || format === 'live') {
+    typeStocke = estLiveDApresTitre(article.titre) ? 'live' : 'video';
+  }
+
   const ligne = {
     slug,
     titre: article.titre.slice(0, 200),
     corps,
-    type: format,
+    type: typeStocke,
     statut: 'publie',
     publie_le: new Date(article.publieLe ?? Date.now()).toISOString(),
     auteurice_id: null,

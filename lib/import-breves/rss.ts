@@ -258,6 +258,10 @@ export function analyserFlux(xml: string): ArticleFlux[] {
         /<description[^>]*>([\s\S]*?)<\/description>/i,
         /<summary[^>]*>([\s\S]*?)<\/summary>/i,
         /<content[^>]*>([\s\S]*?)<\/content>/i,
+        // Flux YouTube (Atom + media RSS) : le texte est dans
+        // <media:description>. Sans ça les vidéos/lives n'ont aucun corps
+        // (constat Ben 2026-06-13 : « il devrait y avoir du texte »).
+        /<media:description[^>]*>([\s\S]*?)<\/media:description>/i,
       ]) ?? '';
 
     const dateBrute = premierMatch(bloc, [

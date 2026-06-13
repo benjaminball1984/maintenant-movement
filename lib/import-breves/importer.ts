@@ -83,6 +83,31 @@ export async function chercherImageArticle(lien: string): Promise<string | null>
 }
 
 /**
+ * Description PROPRE d'un article : la méta `og:description` (ou
+ * `twitter:description`, ou `<meta name="description">`) de la page. C'est le
+ * résumé que le site expose volontairement, contrairement aux paragraphes
+ * `<p>` bruts qui ramassent le chrome de la page (encarts de don, « à lire
+ * aussi »…). Utilisé pour donner un texte aux dessins/articles dont le flux
+ * n'en fournit pas (constat Ben 2026-06-13 : « il devrait y avoir du texte »).
+ */
+export async function chercherDescriptionArticle(lien: string): Promise<string | null> {
+  try {
+    const r = await fetch(lien, { headers: { 'User-Agent': USER_AGENT, Accept: 'text/html' } });
+    if (!r.ok) return null;
+    const html = (await r.text()).slice(0, 200_000);
+    const m =
+      html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']*)["']/i) ??
+      html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:description["']/i) ??
+      html.match(/<meta[^>]+name=["']twitter:description["'][^>]+content=["']([^"']*)["']/i) ??
+      html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i);
+    const desc = m?.[1] !== undefined ? decoderEntitesXml(m[1]).trim() : '';
+    return desc.length > 0 ? desc : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Partie pure du chasseur « sitemap Arc » : trouve, dans le XML du
  * sitemap, le bloc `<url>` qui référence l'article, et en extrait
  * l'adresse de son image (`image:loc`), entités XML décodées.
