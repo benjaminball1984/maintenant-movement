@@ -49,15 +49,16 @@ export async function listerMediasPublies(type?: TypeMedia, limite = 50): Promis
  */
 export async function listerFluxMedias(tag?: string, limite = 150): Promise<MediaEnrichi[]> {
   const supabase = await getSupabaseServer();
-  // Tri par ORDRE D'ARRIVÉE dans la revue (created_at), pas par date de
-  // publication de l'article (revue 2026-06-13, Ben : « flux vivant »).
-  // Un podcast publié il y a 5 h mais importé à l'instant doit remonter en
-  // tête : sinon le flux paraît figé alors qu'il s'alimente chaque heure.
+  // Tri par DATE DE PUBLICATION décroissante : les contenus les plus
+  // récents d'abord (revue 2026-06-13, Ben). Le flux reste vivant parce
+  // que l'import n'accepte plus que des contenus récents (cf.
+  // `lib/import-medias` filtre anti-vieux) : un contenu fraîchement
+  // importé a donc une date de publication récente et remonte en tête.
   let q = supabase
     .from('media')
     .select('*')
     .eq('statut', 'publie')
-    .order('created_at', { ascending: false })
+    .order('publie_le', { ascending: false })
     .limit(limite);
   if (tag !== undefined && tag !== '') q = q.contains('tags', [tag]);
   const { data } = await q;

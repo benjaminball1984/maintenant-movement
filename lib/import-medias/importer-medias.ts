@@ -32,6 +32,21 @@ const USER_AGENT =
   'Mozilla/5.0 (compatible; MaintenantRevueDePresse/1.0; +https://maintenant-le-mouvement.org)';
 const TAILLE_MAX_IMAGE_OCTETS = 6_000_000;
 
+/**
+ * Âge maximal d'un contenu importable (revue 2026-06-13, Ben : « classer
+ * par dates les plus récents d'abord » ; on n'importe plus de vieux
+ * contenus qui polluaient le flux, ex. un dessin d'il y a 1 an). 45 jours
+ * couvre les sources peu actives (dessinateurices, podcasts mensuels)
+ * sans laisser entrer du contenu périmé.
+ */
+export const AGE_MAX_JOURS = 45;
+const AGE_MAX_MS = AGE_MAX_JOURS * 24 * 3600 * 1000;
+
+/** Le contenu est-il assez récent pour la revue de presse (actu) ? */
+export function estAssezRecent(publieLe: number | null, maintenantMs: number): boolean {
+  return publieLe !== null && maintenantMs - publieLe <= AGE_MAX_MS;
+}
+
 /** Embed YouTube respectueux de la vie privée (pas de cookie avant lecture). */
 export function urlEmbedYoutube(videoId: string): string {
   return `https://www.youtube-nocookie.com/embed/${videoId}`;
@@ -265,12 +280,19 @@ export async function importerFormat(
     if (recentes.has(source.nom)) continue;
     try {
       const articles = await lireFluxMedia(source);
-      // Candidats : articles non encore importés et a priori exploitables,
+      // Candidats : articles non encore importés, assez RÉCENTS (Ben
+      // 2026-06-13 : pas de vieux contenu dans le flux) et exploitables,
       // du plus récent au plus ancien. On en essaie plusieurs (au plus 5)
       // car le plus récent peut échouer (image introuvable pour un dessin,
       // par exemple) alors que le suivant passe.
+      const maintenantMs = Date.now();
       const candidats = articles
-        .filter((a) => !existants.has(a.lien) && articleExploitable(format, a))
+        .filter(
+          (a) =>
+            !existants.has(a.lien) &&
+            estAssezRecent(a.publieLe, maintenantMs) &&
+            articleExploitable(format, a),
+        )
         .slice(0, 5);
       if (candidats.length === 0) {
         echecs.push(`[${source.nom}] rien de neuf à importer`);
