@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { connecterAvecMotDePasse } from '../actions';
+import { connecterAvecMotDePasse, renvoyerVerificationEmail } from '../actions';
 
 /** Libelles surchargeables admin via CMS (V2.4.135 + V2.4.137). */
 export interface LibellesConnexionMdp {
@@ -50,6 +50,9 @@ export function FormulaireConnexionMdp({
   // Incrémenté après chaque tentative pour régénérer le jeton Turnstile
   // (usage unique) : sans ça, une 2ᵉ tentative échoue « anti-bot ».
   const [resetCaptcha, setResetCaptcha] = useState(0);
+  // État du recours « email non vérifié » : bouton de renvoi du mail.
+  const [emailNonVerifie, setEmailNonVerifie] = useState(false);
+  const [renvoiEtat, setRenvoiEtat] = useState<'idle' | 'en-cours' | 'envoye' | 'erreur'>('idle');
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -72,12 +75,15 @@ export function FormulaireConnexionMdp({
 
   async function onSubmit(donnees: DonneesConnexionMdp) {
     setErreurServeur(null);
+    setEmailNonVerifie(false);
+    setRenvoiEtat('idle');
     setEnvoiEnCours(true);
     const resultat = await connecterAvecMotDePasse(donnees);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {
       setErreurServeur(resultat.message);
+      if (resultat.emailNonVerifie === true) setEmailNonVerifie(true);
       // Jeton consommé : on en régénère un pour permettre une nouvelle
       // tentative sans recharger la page.
       setValue('token_turnstile', '');
@@ -89,6 +95,14 @@ export function FormulaireConnexionMdp({
     }
   }
 
+  async function renvoyerEmail() {
+    const email = (watch('email') ?? '').trim();
+    if (email === '') return;
+    setRenvoiEtat('en-cours');
+    const r = await renvoyerVerificationEmail(email);
+    setRenvoiEtat(r.ok ? 'envoye' : 'erreur');
+  }
+
   return (
     <form
       noValidate
@@ -98,7 +112,43 @@ export function FormulaireConnexionMdp({
     >
       {erreurServeur !== null ? (
         <Alert variant="danger" titre={libelles.alertErreurTitre}>
-          {erreurServeur}
+          <p>{erreurServeur}</p>
+          {emailNonVerifie ? (
+            <div className="mt-2 text-sm" aria-live="polite">
+              {renvoiEtat === 'envoye' ? (
+                <p className="font-bold text-text-2">
+                  Mail de vérification renvoyé. Regarde ta boîte (et les spams).
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={renvoyerEmail}
+                  disabled={renvoiEtat === 'en-cours'}
+                  className="font-bold text-brand underline underline-offset-2 disabled:opacity-60"
+                >
+                  {renvoiEtat === 'en-cours'
+                    ? 'Envoi en cours…'
+                    : 'Renvoyer le mail de vérification'}
+                </button>
+              )}
+              {renvoiEtat === 'erreur' ? (
+                <p className="mt-1 text-danger">L’envoi a échoué. Réessaie dans un instant.</p>
+              ) : null}
+              {/* Voie de secours pour ne décourager personne (demande Ben
+                  2026-06-13) : le lien magique connecte directement ET
+                  valide l'email d'un seul clic. */}
+              <p className="mt-2 text-text-2">
+                Tu n’as pas reçu le mail ? Utilise le «&nbsp;
+                <a
+                  href="#lien-magique"
+                  className="font-bold text-brand underline underline-offset-2"
+                >
+                  Lien magique par email
+                </a>
+                &nbsp;» plus bas&nbsp;: un seul clic dans le mail te connecte directement.
+              </p>
+            </div>
+          ) : null}
         </Alert>
       ) : null}
 

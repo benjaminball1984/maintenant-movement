@@ -227,6 +227,12 @@ export const SOURCES_COMPLEMENTAIRES: SourceBreve[] = [
     langue: 'fr',
     famille: 'complementaire',
   },
+  {
+    nom: 'Le Chiffon',
+    flux: 'https://www.lechiffon.fr/feed/',
+    langue: 'fr',
+    famille: 'complementaire',
+  },
 ];
 
 export const TOUTES_LES_SOURCES: SourceBreve[] = [

@@ -35,7 +35,7 @@ import { redirect } from 'next/navigation';
 
 export type ResultatAction =
   | { ok: true; redirectVers?: string }
-  | { ok: false; message: string; dejaInscrit?: boolean };
+  | { ok: false; message: string; dejaInscrit?: boolean; emailNonVerifie?: boolean };
 
 /**
  * Wrapper de vérification Turnstile. Centralisé pour éviter la
@@ -186,11 +186,39 @@ export async function connecterAvecMotDePasse(donneesBrutes: unknown): Promise<R
   });
 
   if (error !== null) {
-    return { ok: false, message: traduireErreurAuth(error.message) };
+    // Email pas encore confirmé : on le signale au formulaire pour qu'il
+    // propose de renvoyer le mail de vérification (demande Ben 2026-06-13).
+    const emailNonVerifie = error.message.toLowerCase().includes('email not confirmed');
+    return { ok: false, message: traduireErreurAuth(error.message), emailNonVerifie };
   }
 
   revalidatePath('/', 'layout');
   return { ok: true, redirectVers: '/profil/dashboard' };
+}
+
+/**
+ * Renvoie le mail de vérification d'un compte dont l'email n'est pas encore
+ * confirmé (demande Ben 2026-06-13 : « mettre une option pour renvoyer le
+ * mail de vérification »). Appelé depuis le formulaire de connexion quand
+ * l'erreur « email non vérifié » survient.
+ */
+export async function renvoyerVerificationEmail(email: string): Promise<ResultatAction> {
+  const emailNettoye = email.trim().toLowerCase();
+  if (emailNettoye === '' || !emailNettoye.includes('@')) {
+    return { ok: false, message: 'Adresse email invalide.' };
+  }
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email: emailNettoye,
+    options: {
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
+    },
+  });
+  if (error !== null) {
+    return { ok: false, message: traduireErreurAuth(error.message) };
+  }
+  return { ok: true };
 }
 
 // ============================================================

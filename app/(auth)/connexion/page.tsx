@@ -206,7 +206,7 @@ export default async function PageConnexion({
         </p>
       </Card>
 
-      <Card variant="ombre">
+      <Card variant="ombre" id="lien-magique" className="scroll-mt-20">
         <TexteEditableAdmin
           cle="connexion.section.magic"
           valeurInitiale={sectionMagic.valeurMd}
