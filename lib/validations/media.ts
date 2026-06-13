@@ -61,6 +61,42 @@ export const publierMediaSchema = z
 
 export type DonneesPublierMedia = z.infer<typeof publierMediaSchema>;
 
+/**
+ * Édition d'un média par un·e admin (chantier V2.6.109, demande Ben :
+ * « en mode admin il faut pouvoir modifier tous les contenus »). Tous les
+ * champs de contenu sont éditables ; le `media_id` identifie la fiche.
+ */
+export function creerMettreAJourMediaSchema(
+  messages: MessagesValidationMedia = MESSAGES_VALIDATION_MEDIA_DEFAUT,
+) {
+  return z
+    .object({
+      media_id: z.string().uuid(),
+      titre: z.string().trim().min(5, messages.titreMin).max(200, messages.titreMax),
+      corps: z.string().trim().min(10, messages.corpsMin).max(50_000, messages.corpsMax),
+      type: z.enum([
+        'edito',
+        'tribune',
+        'article',
+        'breve',
+        'dessin',
+        'podcast',
+        'video',
+        'live',
+        'newsletter',
+      ]),
+      vignette_url: z.string().url().optional().or(z.literal('')),
+      media_url: z.string().url().optional().or(z.literal('')),
+      tags: z.array(z.string().trim().max(60)).max(20).optional(),
+      provenance_externe: z.string().trim().max(200).optional().or(z.literal('')),
+      source_url: z.string().url().optional().or(z.literal('')),
+    })
+    .strict();
+}
+export const mettreAJourMediaSchema = creerMettreAJourMediaSchema();
+
+export type DonneesMettreAJourMedia = z.infer<typeof mettreAJourMediaSchema>;
+
 export function creerRetirerMediaSchema(
   messages: MessagesValidationMedia = MESSAGES_VALIDATION_MEDIA_DEFAUT,
 ) {

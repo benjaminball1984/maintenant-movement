@@ -132,8 +132,11 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
                   estEpingleInitial={estEpingleUne}
                 />
               ) : null}
+              <BoutonAdminEditer href={`/admin/national/medias/${media.id}`}>
+                Modifier
+              </BoutonAdminEditer>
               <BoutonAdminEditer href={`/admin/moderation/media?id=${media.id}`}>
-                Admin
+                Modérer
               </BoutonAdminEditer>
             </span>
           </div>

@@ -1,13 +1,16 @@
 'use server';
 
+import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesCreerMedia,
+  type DonneesMettreAJourMedia,
   type DonneesPublierMedia,
   type DonneesRetirerMedia,
   creerMediaSchema,
+  mettreAJourMediaSchema,
   publierMediaSchema,
   retirerMediaSchema,
 } from '@/lib/validations/media';
@@ -78,6 +81,57 @@ export async function creerMedia(
 
   revalidatePath('/s-informer/media');
   return { ok: true, slug };
+}
+
+/**
+ * Édition du contenu d'un média par un·e admin (demande Ben 2026-06-13 :
+ * « en mode admin il faut pouvoir modifier tous les contenus »). Met à
+ * jour titre, corps, type, image, tags, et provenance/source pour les
+ * contenus de la revue de presse. Réservé aux admins.
+ */
+export async function mettreAJourMedia(
+  donneesBrutes: unknown,
+): Promise<ResultatAction<{ slug: string }>> {
+  const parse = mettreAJourMediaSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesMettreAJourMedia = parse.data;
+
+  if (!(await estAdminCourant())) {
+    return { ok: false, message: 'Réservé à l’administration.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const videEnNull = (v: string | undefined): string | null =>
+    v === undefined || v === '' ? null : v;
+
+  const { data: maj, error } = await supabase
+    .from('media')
+    .update({
+      titre: donnees.titre,
+      corps: donnees.corps,
+      type: donnees.type,
+      vignette_url: videEnNull(donnees.vignette_url),
+      media_url: videEnNull(donnees.media_url),
+      tags: donnees.tags ?? null,
+      provenance_externe: videEnNull(donnees.provenance_externe),
+      source_url: videEnNull(donnees.source_url),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', donnees.media_id)
+    .select('slug')
+    .maybeSingle();
+  if (error !== null || maj === null) {
+    return {
+      ok: false,
+      message: `Modification impossible : ${error?.message ?? 'média introuvable'}`,
+    };
+  }
+
+  revalidatePath('/s-informer/media');
+  revalidatePath(`/s-informer/media/${maj.slug}`);
+  return { ok: true, slug: maj.slug };
 }
 
 export async function publierMedia(donneesBrutes: unknown): Promise<ResultatAction> {
