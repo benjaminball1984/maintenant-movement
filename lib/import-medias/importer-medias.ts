@@ -7,6 +7,7 @@ import {
   SOURCES_PAR_FORMAT,
   type SourceMedia,
 } from '@/lib/import-medias/sources-medias';
+import { comparerTitres } from '@/lib/media/doublons';
 
 /**
  * Moteur d'import multi-format de la revue de presse (demande Ben
@@ -71,6 +72,44 @@ export function articleExploitable(format: FormatMedia, article: ArticleFlux): b
 }
 
 export type ResultatInsertionMedia = { ok: true; slug: string } | { ok: false; message: string };
+
+/** Seuils de la détection de doublon vidéo/brève (mêmes valeurs que doublons.ts). */
+const DOUBLON_SEUIL = 0.75;
+const DOUBLON_MIN_COMMUNS = 4;
+const DOUBLON_FENETRE_MS = 4 * 24 * 3600 * 1000;
+
+/**
+ * Cherche une brève RÉCENTE de la même source portant le même sujet que la
+ * vidéo/live qu'on importe (V2.6.113, demande Ben). Si trouvée, la vidéo
+ * absorbe son texte et la brève est retirée après insertion (évite la double
+ * carte vidéo + brève). Best-effort : erreur réseau → `null`.
+ */
+async function chercherBreveMemeSujet(
+  titre: string,
+  sourceNom: string,
+  urlSb: string,
+  cle: string,
+): Promise<{ id: string; corps: string | null } | null> {
+  const entetes = { apikey: cle, Authorization: `Bearer ${cle}` };
+  const depuis = new Date(Date.now() - DOUBLON_FENETRE_MS).toISOString();
+  try {
+    const r = await fetch(
+      `${urlSb}/rest/v1/media?type=eq.breve&statut=eq.publie&provenance_externe=eq.${encodeURIComponent(sourceNom)}&publie_le=gte.${encodeURIComponent(depuis)}&select=id,titre,corps&limit=50`,
+      { headers: entetes },
+    );
+    if (!r.ok) return null;
+    const breves = (await r.json()) as Array<{ id: string; titre: string; corps: string | null }>;
+    for (const b of breves) {
+      const { score, communs } = comparerTitres(titre, b.titre);
+      if (score >= DOUBLON_SEUIL && communs >= DOUBLON_MIN_COMMUNS) {
+        return { id: b.id, corps: b.corps };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 /** Liens source déjà importés pour un format (idempotence). */
 export async function liensExistantsFormat(
@@ -197,7 +236,19 @@ export async function telechargerEtInsererMedia(
   else if (format === 'video' || format === 'live')
     mediaUrl = article.videoId !== null ? urlEmbedYoutube(article.videoId) : null;
 
-  const corps = extrairePremieresLignes(article.description, 650);
+  let corps = extrairePremieresLignes(article.description, 650);
+
+  // Doublon vidéo/brève (V2.6.113) : si une brève récente de la même source
+  // porte ce sujet, la vidéo absorbe son texte (6-7 lignes sous la vidéo) et
+  // la brève sera retirée après l'insertion.
+  let breveAabsorber: string | null = null;
+  if (format === 'video' || format === 'live') {
+    const breve = await chercherBreveMemeSujet(article.titre, source.nom, urlSb, cle);
+    if (breve !== null) {
+      if ((breve.corps?.length ?? 0) > corps.length) corps = breve.corps ?? corps;
+      breveAabsorber = breve.id;
+    }
+  }
 
   const ligne = {
     slug,
@@ -225,6 +276,20 @@ export async function telechargerEtInsererMedia(
   if (!rIns.ok) {
     return { ok: false, message: `insert ${rIns.status} ${await rIns.text()}` };
   }
+
+  // Retire la brève doublon (réversible) : la vidéo porte désormais le texte.
+  if (breveAabsorber !== null) {
+    await fetch(`${urlSb}/rest/v1/media?id=eq.${breveAabsorber}`, {
+      method: 'PATCH',
+      headers: { ...entetes, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        statut: 'retire',
+        retire_le: new Date().toISOString(),
+        raison_retrait: `Doublon fusionné avec la vidéo « ${article.titre.slice(0, 120)} ».`,
+      }),
+    });
+  }
+
   return { ok: true, slug };
 }
 

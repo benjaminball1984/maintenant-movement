@@ -135,12 +135,20 @@ const BANQUE_TAGS: ReglesTag[] = [
       'ecolog',
       'climat',
       'pesticide',
+      'nitrate',
       'pollu',
       'biodiversite',
       ' pfas ',
       'petrole',
       ' gaz ',
-      'agricol',
+      // « agricol » (nu) matchait « site agricole », « exploitation agricole »
+      // hors sujet écolo (faux positif signalé par Ben 2026-06-13). On cible
+      // l'agriculture COMME SUJET (mot entier) et l'agro-industrie.
+      ' agriculture ',
+      'agro industrie',
+      'agro alimentaire',
+      'agrochimie',
+      'monoculture',
       'environnement',
       'energies renouvelables',
       'nucleaire',

@@ -26,6 +26,7 @@ interface LigneMedia {
   corps: string;
   type: string;
   tags: string[] | null;
+  provenance_externe: string | null;
 }
 
 async function main(): Promise<void> {
@@ -38,18 +39,34 @@ async function main(): Promise<void> {
   const entetes = { apikey: cle, Authorization: `Bearer ${cle}` };
 
   const r = await fetch(
-    `${urlSb}/rest/v1/media?statut=eq.publie&select=id,titre,corps,type,tags&limit=2000`,
+    `${urlSb}/rest/v1/media?statut=eq.publie&select=id,titre,corps,type,tags,provenance_externe&limit=2000`,
     { headers: entetes },
   );
   if (!r.ok) throw new Error(`Lecture media : ${r.status}`);
   const medias = (await r.json()) as LigneMedia[];
-  const sansTag = medias.filter((m) => m.tags === null || m.tags.length === 0);
-  console.log(`${medias.length} médias publiés, ${sansTag.length} sans tag.`);
+
+  // --tout : recalcule les tags de TOUTE la revue de presse (contenus à
+  // provenance externe), en écrasant les tags existants qui diffèrent du
+  // recalcul (corrige les mauvaises catégories, ex. « Écologie » plaqué sur
+  // un fait divers). Sans --tout : seulement les contenus SANS tag, sans
+  // jamais toucher aux tags éditoriaux choisis par l'admin (contenus maison).
+  const estTout = process.argv.includes('--tout');
+  const cibles = estTout
+    ? medias.filter((m) => m.provenance_externe !== null)
+    : medias.filter((m) => m.tags === null || m.tags.length === 0);
+  console.log(
+    `${medias.length} médias publiés ; ${cibles.length} ${estTout ? 'contenu(s) revue de presse à vérifier' : 'sans tag'}.`,
+  );
 
   let traites = 0;
-  for (const m of sansTag) {
+  let changements = 0;
+  for (const m of cibles) {
     const tags = assignerTags(`${m.titre} ${m.corps}`);
-    console.log(`[${m.type}] ${m.titre.slice(0, 60)} → ${JSON.stringify(tags)}`);
+    const actuel = JSON.stringify(m.tags ?? []);
+    const recalcule = JSON.stringify(tags);
+    if (estTout && actuel === recalcule) continue; // déjà bon : rien à écrire
+    changements += 1;
+    console.log(`[${m.type}] ${m.titre.slice(0, 56)} : ${actuel} → ${recalcule}`);
     if (!estConfirme) continue;
     const rMaj = await fetch(`${urlSb}/rest/v1/media?id=eq.${m.id}`, {
       method: 'PATCH',
@@ -60,7 +77,11 @@ async function main(): Promise<void> {
     else console.log(`  ÉCHEC PATCH ${rMaj.status}`);
   }
 
-  console.log(estConfirme ? `\n${traites} médias re-tagués.` : '\n[DRY-RUN] Aucune écriture.');
+  console.log(
+    estConfirme
+      ? `\n${traites}/${changements} médias re-tagués.`
+      : `\n[DRY-RUN] ${changements} changement(s) prévu(s), aucune écriture.`,
+  );
 }
 
 main().catch((e) => {

@@ -13,6 +13,7 @@ import {
   type SourceBreve,
 } from '@/lib/import-breves/sources';
 import { assignerTags } from '@/lib/import-breves/tags';
+import { comparerTitres } from '@/lib/media/doublons';
 
 /**
  * Moteur d'import des brèves (revue de presse, demande Ben 2026-06-12).
@@ -333,6 +334,54 @@ export async function lienSourcesExistants(urlSb: string, cle: string): Promise<
   return new Set(lignes.map((l) => l.source_url).filter((u): u is string => u !== null));
 }
 
+/** Seuils de la détection de doublon vidéo/brève (mêmes valeurs que doublons.ts). */
+const DOUBLON_SEUIL = 0.75;
+const DOUBLON_MIN_COMMUNS = 4;
+const DOUBLON_FENETRE_MS = 4 * 24 * 3600 * 1000;
+
+/**
+ * Prévention des doublons vidéo/brève (V2.6.113, demande Ben) : si une vidéo
+ * ou un live RÉCENT de la même source porte le même sujet que la brève qu'on
+ * s'apprête à créer, on verse le texte de la brève sous cette vidéo (champ
+ * `corps`, affiché en 6-7 lignes) et on renonce à créer une 2ᵉ carte.
+ * Retourne la vidéo trouvée (déjà enrichie) ou `null`. Best-effort : toute
+ * erreur réseau renvoie `null` (la brève sera alors créée normalement).
+ */
+export async function fusionnerDansVideoMemeSujet(
+  titre: string,
+  sourceNom: string,
+  extrait: string,
+  urlSb: string,
+  cle: string,
+): Promise<{ id: string; titre: string } | null> {
+  const entetes = { apikey: cle, Authorization: `Bearer ${cle}` };
+  const depuis = new Date(Date.now() - DOUBLON_FENETRE_MS).toISOString();
+  try {
+    const r = await fetch(
+      `${urlSb}/rest/v1/media?type=in.(video,live)&statut=eq.publie&provenance_externe=eq.${encodeURIComponent(sourceNom)}&publie_le=gte.${encodeURIComponent(depuis)}&select=id,titre,corps&limit=50`,
+      { headers: entetes },
+    );
+    if (!r.ok) return null;
+    const videos = (await r.json()) as Array<{ id: string; titre: string; corps: string | null }>;
+    for (const v of videos) {
+      const { score, communs } = comparerTitres(titre, v.titre);
+      if (score >= DOUBLON_SEUIL && communs >= DOUBLON_MIN_COMMUNS) {
+        if ((v.corps?.length ?? 0) < extrait.length) {
+          await fetch(`${urlSb}/rest/v1/media?id=eq.${v.id}`, {
+            method: 'PATCH',
+            headers: { ...entetes, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            body: JSON.stringify({ corps: extrait }),
+          });
+        }
+        return { id: v.id, titre: v.titre };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Télécharge l'image de l'article (si présente et raisonnable), la copie
  * dans le bucket, puis insère la brève publiée. Idempotent par
@@ -367,6 +416,22 @@ export async function telechargerEtInsererBreve(
   }
   if (extrait.length < MIN_CARACTERES_EXTRAIT) {
     return { ok: false, message: 'texte trop court pour une brève (minimum ~6 lignes)' };
+  }
+
+  // Doublon vidéo/brève (V2.6.113) : si la même source a déjà publié ce sujet
+  // en vidéo/live, on verse le texte sous la vidéo et on ne crée pas la brève.
+  const videoMemeSujet = await fusionnerDansVideoMemeSujet(
+    article.titre,
+    source.nom,
+    extrait,
+    urlSb,
+    cle,
+  );
+  if (videoMemeSujet !== null) {
+    return {
+      ok: false,
+      message: `doublon de la vidéo « ${videoMemeSujet.titre.slice(0, 60)} » : texte versé sous la vidéo`,
+    };
   }
 
   const slugBase = slugifier(article.titre).slice(0, 70).replace(/-+$/, '');
