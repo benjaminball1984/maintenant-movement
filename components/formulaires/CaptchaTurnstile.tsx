@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Composant captcha anti-bot.
@@ -14,6 +14,14 @@ import { useEffect, useId, useRef } from 'react';
  *
  * - `cloudflare` : charge le script Cloudflare Turnstile, monte le widget
  *   et expose le token réel via `onChange`.
+ *
+ * Robustesse mobile (revue Ben 2026-06-13 : « le captcha ne fonctionne pas
+ * sur mobile, je ne peux pas créer de compte ») : si le widget échoue à se
+ * charger ou à rendre (fréquent sur Safari iOS avec la prévention du
+ * pistage, ou sur réseau lent), le composant affiche un message clair et un
+ * bouton « Réessayer » qui relance le challenge, AU LIEU de laisser
+ * l'utilisateurice coincé·e avec un bouton de soumission grisé sans
+ * explication.
  *
  * Dans tous les cas, **la vérification serveur passe par `TurnstileService`**
  * (cf. `lib/turnstile/`). Le mock retourne `success: true`, le réel
@@ -46,7 +54,9 @@ declare global {
           callback: (token: string) => void;
           'expired-callback'?: () => void;
           'error-callback'?: (code: string) => void;
+          'timeout-callback'?: () => void;
           appearance?: 'always' | 'execute' | 'interaction-only';
+          retry?: 'auto' | 'never';
         },
       ) => string;
       reset: (widgetId?: string) => void;
@@ -58,8 +68,11 @@ declare global {
 export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnstileProps) {
   const provider = process.env.NEXT_PUBLIC_TURNSTILE_PROVIDER ?? 'mock';
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  const conteneurId = useId();
+  const conteneurRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  // Incrémenté par « Réessayer » pour forcer un remontage propre du widget.
+  const [tentative, setTentative] = useState(0);
+  const [enErreur, setEnErreur] = useState(false);
 
   // Les callbacks sont gardés dans des refs pour que l'effet de montage du
   // widget ne dépende pas de leur identité. Les formulaires parents passent
@@ -81,52 +94,80 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
     }
   }, [provider]);
 
+  /** Réessayer : remonte le widget proprement (bouton après échec). */
+  const reessayer = useCallback(() => {
+    if (widgetIdRef.current !== null && window.turnstile?.remove !== undefined) {
+      try {
+        window.turnstile.remove(widgetIdRef.current);
+      } catch {
+        // widget déjà retiré : sans effet.
+      }
+    }
+    widgetIdRef.current = null;
+    setEnErreur(false);
+    setTentative((n) => n + 1);
+  }, []);
+
   // Mode cloudflare : on monte le widget dès que l'API Turnstile est prête.
   //
   // On NE se repose PAS sur le seul `onLoad` du <Script> : il peut ne pas se
   // redéclencher en navigation interne (script déjà présent) ou se déclencher
   // avant que `window.turnstile` soit réellement utilisable. On interroge donc
-  // l'API en boucle courte jusqu'à ce qu'elle réponde. Corrige le bug où le
-  // widget n'apparaissait qu'après un rafraîchissement de la page.
+  // l'API en boucle courte jusqu'à ce qu'elle réponde.
   useEffect(() => {
     if (provider !== 'cloudflare') return;
     if (siteKey === undefined || siteKey === '') {
       onErrorRef.current?.('site-key-manquante');
+      setEnErreur(true);
       return;
     }
-    // siteKey est désormais une chaîne non vide ; on la capture pour la closure.
     const cleSite = siteKey;
 
     let annule = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let essais = 0;
-    const MAX_ESSAIS = 50; // ~7,5 s (50 x 150 ms) avant d'abandonner.
+    // Mobile lent : on patiente plus longtemps qu'avant (~20 s) avant
+    // d'afficher le recours « Réessayer ».
+    const MAX_ESSAIS = 130; // ~20 s (130 x 150 ms).
 
     function monterWidget() {
       if (annule || widgetIdRef.current !== null) return;
-      if (window.turnstile === undefined) {
+      const conteneur = conteneurRef.current;
+      if (window.turnstile === undefined || conteneur === null) {
         essais += 1;
         if (essais > MAX_ESSAIS) {
           onErrorRef.current?.('script-non-charge');
+          setEnErreur(true);
           return;
         }
         timer = setTimeout(monterWidget, 150);
         return;
       }
-      widgetIdRef.current = window.turnstile.render(`#${conteneurId.replace(/:/g, '\\:')}`, {
+      // On passe l'ÉLÉMENT DOM (pas un sélecteur CSS) : plus robuste que
+      // `#:r0:` généré par useId (deux-points à échapper, fragile selon les
+      // navigateurs mobiles).
+      widgetIdRef.current = window.turnstile.render(conteneur, {
         sitekey: cleSite,
-        callback: (token) => onChangeRef.current(token),
+        callback: (token) => {
+          setEnErreur(false);
+          onChangeRef.current(token);
+        },
         'expired-callback': () => {
           onExpireRef.current?.();
-          // Le jeton Turnstile expire au bout de ~5 minutes. Sans relance,
-          // le formulaire garderait un jeton mort (soumission refusée côté
-          // serveur) ou resterait bloqué « en attente ». On relance donc le
-          // challenge : `callback` ci-dessus sera rappelé avec un jeton frais.
           if (widgetIdRef.current !== null) {
             window.turnstile?.reset(widgetIdRef.current);
           }
         },
-        'error-callback': (code) => onErrorRef.current?.(code),
+        'error-callback': (code) => {
+          onErrorRef.current?.(code);
+          setEnErreur(true);
+        },
+        'timeout-callback': () => {
+          onErrorRef.current?.('timeout');
+          setEnErreur(true);
+        },
+        // Laisse Cloudflare réessayer tout seul les erreurs transitoires.
+        retry: 'auto',
         // Garde la case anti-robot toujours visible (et son état) plutôt que de
         // la laisser se valider en arrière-plan : l'utilisateurice voit toujours
         // qu'une vérification a lieu et quand elle est terminée.
@@ -139,11 +180,15 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
       annule = true;
       if (timer !== undefined) clearTimeout(timer);
       if (widgetIdRef.current !== null && window.turnstile?.remove !== undefined) {
-        window.turnstile.remove(widgetIdRef.current);
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {
+          // sans effet
+        }
         widgetIdRef.current = null;
       }
     };
-  }, [provider, siteKey, conteneurId]);
+  }, [provider, siteKey, tentative]);
 
   if (provider === 'mock') {
     return (
@@ -159,7 +204,24 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
       />
-      <div id={conteneurId} />
+      {/* max-w pour ne pas déborder sur mobile étroit. */}
+      <div ref={conteneurRef} className="min-h-[65px] w-full max-w-[300px]" />
+      {enErreur ? (
+        <div className="text-xs text-text-2" aria-live="assertive">
+          <p className="text-danger">La vérification anti-robot n’a pas pu se charger.</p>
+          <button
+            type="button"
+            onClick={reessayer}
+            className="mt-1 font-bold text-brand underline underline-offset-2"
+          >
+            Réessayer la vérification
+          </button>
+          <p className="mt-1 text-text-3">
+            Si le problème persiste sur mobile, désactive « Empêcher le suivi entre sites » (Safari)
+            ou essaie un autre navigateur.
+          </p>
+        </div>
+      ) : null}
     </>
   );
 }
