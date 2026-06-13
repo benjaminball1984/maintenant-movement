@@ -1,0 +1,9 @@
+{
+  "name": "maintenant-cron-demosphere",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    // Une fois par jour, à 04h47 UTC (creux de trafic, décalé des autres crons).
+    "crons": ["47 4 * * *"]
+  }
+}
