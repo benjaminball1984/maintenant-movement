@@ -18,8 +18,9 @@ import {
 import { genererMosaiqueSondage } from '@/lib/sondages/mosaique-canvas';
 import { type DonneesCreerSondage, creerSondageFactory } from '@/lib/validations/sondages';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 /** Bornes du nombre d'options (alignées sur le CHECK SQL et le schéma Zod). */
@@ -33,6 +34,14 @@ const OPTIONS_MAX = 20;
  */
 const ROLE_IMAGE_OPTION = 'vignette' as const;
 
+/** Une option du sondage en cours de saisie : libellé + image facultative. */
+interface LigneOption {
+  /** Identifiant stable de la ligne (clé React + remontage du téléverseur). */
+  id: number;
+  libelle: string;
+  image: string | null;
+}
+
 /** Libelles surchargeables admin via CMS (V2.4.151). */
 export interface LibellesCreationSondage {
   alertErreurTitre: string;
@@ -40,9 +49,13 @@ export interface LibellesCreationSondage {
   labelTitre: string;
   labelQuestion: string;
   labelOptions: string;
-  placeholderOptions: string;
-  titreImagesOptions: string;
-  aideImagesOptions: string;
+  aideOptions: string;
+  placeholderOption: string;
+  ariaLibelleOption: string;
+  ariaRetirerOption: string;
+  ctaImageOption: string;
+  ctaAjouterOption: string;
+  maxAtteint: string;
   labelImage: string;
   aideCouverture: string;
   ctaSubmit: string;
@@ -52,14 +65,18 @@ export interface LibellesCreationSondage {
 
 const LIBELLES_DEFAUT: LibellesCreationSondage = {
   alertErreurTitre: 'Création impossible',
-  erreurOptionsHorsLimites: 'Indique entre 2 et 20 options, une par ligne.',
+  erreurOptionsHorsLimites: 'Indique entre 2 et 20 options, chacune avec un nom.',
   labelTitre: 'Titre',
   labelQuestion: 'Question',
-  labelOptions: 'Options (une par ligne, 2 à 20)',
-  placeholderOptions: 'Option 1\nOption 2\nOption 3',
-  titreImagesOptions: 'Illustrer les options (optionnel)',
-  aideImagesOptions:
-    'Chaque option peut recevoir une image. Stabilise d’abord ta liste d’options ci-dessus : les images suivent l’ordre des lignes.',
+  labelOptions: 'Options (2 à 20)',
+  aideOptions:
+    'Ajoute une option, nomme-la, et téléverse une image si tu veux. Les images servent aussi à fabriquer la mosaïque de couverture.',
+  placeholderOption: 'Option',
+  ariaLibelleOption: 'Libellé de l’option',
+  ariaRetirerOption: 'Retirer l’option',
+  ctaImageOption: 'Téléverser une image',
+  ctaAjouterOption: 'Ajouter une option',
+  maxAtteint: 'Maximum 20 options atteint.',
   labelImage: 'Image de couverture (optionnelle) — sinon une mosaïque est créée automatiquement',
   aideCouverture:
     'Laisse vide : une mosaïque (titre + tuiles des options) est générée automatiquement et sert de couverture, de miniature et d’aperçu de partage. Téléverse une image seulement si tu veux la remplacer.',
@@ -91,9 +108,15 @@ export function FormulaireCreationSondage({
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
-  const [optionsTexte, setOptionsTexte] = useState('');
-  // Images d'options, indexées sur la POSITION de la ligne (null = sans image).
-  const [imagesOptions, setImagesOptions] = useState<Record<number, string>>({});
+  // Éditeur d'options : une ligne = un libellé + une image facultative. L'image
+  // vit DANS la ligne (objet), donc elle reste attachée à son option même quand
+  // on en ajoute ou retire d'autres. On démarre avec 3 lignes vides.
+  const idLigneRef = useRef(3);
+  const [lignes, setLignes] = useState<LigneOption[]>(() => [
+    { id: 0, libelle: '', image: null },
+    { id: 1, libelle: '', image: null },
+    { id: 2, libelle: '', image: null },
+  ]);
   const [hydrate, setHydrate] = useState(false);
   // Message d'avancement pendant la génération automatique de la mosaïque.
   const [statutGeneration, setStatutGeneration] = useState<string | null>(null);
@@ -126,11 +149,26 @@ export function FormulaireCreationSondage({
   // qui échouait silencieusement) et un message explique l'attente.
   const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
-  // Options parsées en continu : alimentent la liste des téléverseurs d'images.
-  const optionsParsees = optionsTexte
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l !== '');
+  /** Ajoute une option vide (jusqu'à OPTIONS_MAX). */
+  function ajouterLigne() {
+    setLignes((courant) =>
+      courant.length >= OPTIONS_MAX
+        ? courant
+        : [...courant, { id: idLigneRef.current++, libelle: '', image: null }],
+    );
+  }
+  /** Retire une option (on garde toujours au moins OPTIONS_MIN lignes). */
+  function retirerLigne(id: number) {
+    setLignes((courant) =>
+      courant.length <= OPTIONS_MIN ? courant : courant.filter((l) => l.id !== id),
+    );
+  }
+  function majLibelle(id: number, libelle: string) {
+    setLignes((courant) => courant.map((l) => (l.id === id ? { ...l, libelle } : l)));
+  }
+  function majImage(id: number, image: string | null) {
+    setLignes((courant) => courant.map((l) => (l.id === id ? { ...l, image } : l)));
+  }
 
   /**
    * Génère la mosaïque de couverture dans le navigateur (canvas) puis la
@@ -163,29 +201,31 @@ export function FormulaireCreationSondage({
   async function onSubmit(donnees: DonneesCreerSondage) {
     setErreur(null);
     setEnvoiEnCours(true);
-    if (optionsParsees.length < OPTIONS_MIN || optionsParsees.length > OPTIONS_MAX) {
+
+    // On ne garde que les options réellement nommées ; l'image reste alignée
+    // car elle est portée par la même ligne (objet).
+    const lignesValides = lignes
+      .map((l) => ({ libelle: l.libelle.trim(), image: l.image }))
+      .filter((l) => l.libelle !== '');
+    if (lignesValides.length < OPTIONS_MIN || lignesValides.length > OPTIONS_MAX) {
       setErreur(libelles.erreurOptionsHorsLimites);
       setEnvoiEnCours(false);
       return;
     }
-    // Tableau d'images PARALLÈLE aux options (null = option sans image).
-    const optionsImages = optionsParsees.map((_, index) => imagesOptions[index] ?? null);
+    const options = lignesValides.map((l) => l.libelle);
+    const optionsImages = lignesValides.map((l) => l.image);
 
-    // Couverture systématique (demande Ben 2026-06-13) : sans image
-    // téléversée, on fabrique la mosaïque automatiquement. Une image fournie
-    // par la personne reste prioritaire (l'alternative voulue).
+    // Couverture systématique (demande Ben 2026-06-13) : sans image téléversée,
+    // on fabrique la mosaïque automatiquement. Une image fournie par la personne
+    // reste prioritaire (l'alternative voulue).
     let imageCouverture = (donnees.image_url ?? '').trim();
     if (imageCouverture === '') {
-      imageCouverture = await genererEtTeleverserMosaique(
-        donnees.titre,
-        optionsParsees,
-        optionsImages,
-      );
+      imageCouverture = await genererEtTeleverserMosaique(donnees.titre, options, optionsImages);
     }
 
     const resultat = await creerSondage({
       ...donnees,
-      options: optionsParsees,
+      options,
       options_images: optionsImages,
       image_url: imageCouverture,
     });
@@ -223,52 +263,67 @@ export function FormulaireCreationSondage({
           <p className="mt-1 text-xs text-danger">{errors.question.message}</p>
         ) : null}
       </div>
-      <div>
-        <Label htmlFor="sondage-options" obligatoire>
-          {libelles.labelOptions}
-        </Label>
-        <Textarea
-          id="sondage-options"
-          rows={6}
-          value={optionsTexte}
-          onChange={(e) => setOptionsTexte(e.target.value)}
-          placeholder={libelles.placeholderOptions}
-        />
-      </div>
-
-      {optionsParsees.length >= OPTIONS_MIN ? (
-        <fieldset className="rounded-md border border-border bg-surface-2 p-3">
-          <legend className="px-1 font-body text-sm font-medium text-text-2">
-            {libelles.titreImagesOptions}
-          </legend>
-          <p className="mb-3 text-xs text-text-3">{libelles.aideImagesOptions}</p>
-          <ul className="grid gap-3">
-            {optionsParsees.map((option, index) => (
-              <li
-                key={`option-image-${index}-${option}`}
-                className="flex flex-wrap items-center gap-3 rounded-sm border border-border bg-surface p-2"
-              >
-                <span className="min-w-0 flex-1 break-words text-sm font-bold text-text-1">
-                  {index + 1}. {option}
+      <fieldset className="grid gap-3">
+        <legend className="font-body text-sm font-medium text-text-1">
+          {libelles.labelOptions} <span className="text-danger">*</span>
+        </legend>
+        <p className="-mt-1 text-xs text-text-3">{libelles.aideOptions}</p>
+        <ul className="grid gap-3">
+          {lignes.map((ligne, index) => (
+            <li key={ligne.id} className="rounded-md border border-border bg-surface-2 p-3">
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-sm font-bold text-text-2"
+                >
+                  {index + 1}
                 </span>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    value={ligne.libelle}
+                    onChange={(e) => majLibelle(ligne.id, e.target.value)}
+                    placeholder={`${libelles.placeholderOption} ${index + 1}`}
+                    aria-label={`${libelles.ariaLibelleOption} ${index + 1}`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => retirerLigne(ligne.id)}
+                  disabled={lignes.length <= OPTIONS_MIN}
+                  aria-label={`${libelles.ariaRetirerOption} ${index + 1}`}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-text-2 transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <X size={16} strokeWidth={1.8} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="mt-2 pl-9">
                 <TeleverseurImage
                   role={ROLE_IMAGE_OPTION}
                   prefixeChemin="sondages/options"
-                  valeurInitiale={imagesOptions[index] ?? null}
-                  onChange={(url) =>
-                    setImagesOptions((courant) => {
-                      const suivant = { ...courant };
-                      if (url === null) delete suivant[index];
-                      else suivant[index] = url;
-                      return suivant;
-                    })
-                  }
+                  valeurInitiale={ligne.image}
+                  libelle={libelles.ctaImageOption}
+                  onChange={(url) => majImage(ligne.id, url)}
                 />
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-      ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            taille="sm"
+            onClick={ajouterLigne}
+            disabled={lignes.length >= OPTIONS_MAX}
+          >
+            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+            {libelles.ctaAjouterOption}
+          </Button>
+          {lignes.length >= OPTIONS_MAX ? (
+            <span className="text-xs text-text-3">{libelles.maxAtteint}</span>
+          ) : null}
+        </div>
+      </fieldset>
 
       <div className="grid gap-2">
         <p className="text-xs text-text-3">{libelles.aideCouverture}</p>

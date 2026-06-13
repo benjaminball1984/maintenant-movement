@@ -107,3 +107,25 @@ générée couvre donc les trois d'un coup, sans rien changer à l'affichage.
 - La géométrie pure (`mosaique-layout.ts`) est partageable avec un éventuel
   script Node de rattrapage (le dessin diffère, `sharp` vs `canvas`, mais la
   mise en page est commune).
+
+## Suite V2.6.112 : éditeur d'options ligne par ligne (retour Ben)
+
+Retour de Ben sur le formulaire en ligne : « on ne peut pas téléverser une
+image par option, il ne faut pas un grand cadre, il faut un système avec des
+petits plus pour rajouter des options, nommer chaque option et téléverser une
+image par option ».
+
+- [x] `FormulaireCreationSondage` : le `Textarea` « une option par ligne » et
+  le bloc d'images séparé (qui n'apparaissait qu'après saisie) sont remplacés
+  par un éditeur ligne par ligne. Chaque ligne : badge numéroté + champ nom
+  (`Input`) + `TeleverseurImage` (préfixe `sondages/options`) + bouton retirer
+  (gardé à au moins 2 lignes). Bouton « Ajouter une option » (max 20).
+- [x] L'image est portée par la ligne elle-même (état `lignes:
+  {id,libelle,image}[]`, `id` stable via `useRef`), ce qui supprime le
+  couplage par position de l'ancien éditeur (limite notée en V2.6.88 :
+  réordonner décalait les images). `onSubmit` ne retient que les options
+  nommées (libellés vides ignorés, image toujours alignée) et alimente la
+  génération de mosaïque V2.6.111 sans changement.
+- [x] Libellés CMS adaptés ; typecheck + lint verts ; rendu vérifié au
+  navigateur (Playwright sur le formulaire rendu en isolation, page de test
+  temporaire supprimée). Déployé sur maintenant-le-mouvement.org.
