@@ -46,7 +46,8 @@ async function verifierTurnstile(token: string): Promise<ResultatAction | null> 
   if (!resultat.succes) {
     return {
       ok: false,
-      message: 'La vérification anti-bot a échoué. Recharger la page et réessayer.',
+      message:
+        'La vérification anti-robot a expiré. Un nouveau contrôle vient d’être chargé, réessaie dans un instant.',
     };
   }
   return null;

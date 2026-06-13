@@ -98,6 +98,8 @@ export function FormulaireInscription({
   // qui empeche un clic premature de tomber en GET natif et d'exposer
   // le mot de passe dans l'URL (cf. incident chantier 13.1).
   const [hydrate, setHydrate] = useState(false);
+  // Régénère le jeton Turnstile (usage unique) après chaque tentative.
+  const [resetCaptcha, setResetCaptcha] = useState(0);
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -133,6 +135,8 @@ export function FormulaireInscription({
       if (resultat.dejaInscrit === true) {
         setDejaInscrit(true);
       }
+      setValue('token_turnstile', '');
+      setResetCaptcha((n) => n + 1);
       return;
     }
     if (resultat.redirectVers !== undefined) {
@@ -354,7 +358,10 @@ export function FormulaireInscription({
         </p>
       ) : null}
 
-      <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      <CaptchaTurnstile
+        onChange={(token) => setValue('token_turnstile', token)}
+        resetTrigger={resetCaptcha}
+      />
       {errors.token_turnstile !== undefined ? (
         <p id="ins-turnstile-erreur" className="text-xs text-danger">
           {errors.token_turnstile.message}

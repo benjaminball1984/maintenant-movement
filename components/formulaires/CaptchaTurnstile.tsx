@@ -35,6 +35,16 @@ interface CaptchaTurnstileProps {
   onExpire?: () => void;
   /** Optionnel : appelé en cas d'erreur du widget. */
   onError?: (codeErreur: string) => void;
+  /**
+   * Compteur de réinitialisation : à CHAQUE changement de valeur (> 0), le
+   * widget régénère un jeton frais. Indispensable après une soumission :
+   * le jeton Turnstile est à USAGE UNIQUE et expire en 5 min ; sans reset,
+   * toute nouvelle tentative est rejetée par le serveur (« timeout-or-
+   * duplicate ») alors que le widget affiche encore « Succès » (bug signalé
+   * par Ben 2026-06-13 : connexion impossible, vérification anti-bot
+   * échouée, alors que le captcha est vert).
+   */
+  resetTrigger?: number;
 }
 
 /**
@@ -65,7 +75,12 @@ declare global {
   }
 }
 
-export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnstileProps) {
+export function CaptchaTurnstile({
+  onChange,
+  onExpire,
+  onError,
+  resetTrigger = 0,
+}: CaptchaTurnstileProps) {
   const provider = process.env.NEXT_PUBLIC_TURNSTILE_PROVIDER ?? 'mock';
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const conteneurRef = useRef<HTMLDivElement | null>(null);
@@ -107,6 +122,24 @@ export function CaptchaTurnstile({ onChange, onExpire, onError }: CaptchaTurnsti
     setEnErreur(false);
     setTentative((n) => n + 1);
   }, []);
+
+  // Réinitialisation déclenchée par le parent (après une soumission) : le
+  // jeton précédent est consommé/expiré, on en régénère un frais.
+  const premierRendu = useRef(true);
+  useEffect(() => {
+    if (premierRendu.current) {
+      premierRendu.current = false;
+      return;
+    }
+    if (provider === 'mock') {
+      onChangeRef.current(TOKEN_MOCK_VALIDE);
+      return;
+    }
+    // Invalide le jeton côté formulaire (le bouton se rebloque) puis
+    // remonte le widget Cloudflare pour obtenir un nouveau jeton.
+    onChangeRef.current('');
+    reessayer();
+  }, [resetTrigger, provider, reessayer]);
 
   // Mode cloudflare : on monte le widget dès que l'API Turnstile est prête.
   //

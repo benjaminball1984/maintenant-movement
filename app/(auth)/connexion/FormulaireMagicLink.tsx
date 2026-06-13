@@ -45,6 +45,7 @@ export function FormulaireMagicLink({
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [hydrate, setHydrate] = useState(false);
+  const [resetCaptcha, setResetCaptcha] = useState(0);
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -73,6 +74,8 @@ export function FormulaireMagicLink({
 
     if (!resultat.ok) {
       setErreurServeur(resultat.message);
+      setValue('token_turnstile', '');
+      setResetCaptcha((n) => n + 1);
       return;
     }
     if (resultat.redirectVers !== undefined) {
@@ -112,7 +115,10 @@ export function FormulaireMagicLink({
         ) : null}
       </div>
 
-      <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      <CaptchaTurnstile
+        onChange={(token) => setValue('token_turnstile', token)}
+        resetTrigger={resetCaptcha}
+      />
 
       {hydrate && !captchaValide ? (
         <p className="text-xs text-text-3" aria-live="polite">

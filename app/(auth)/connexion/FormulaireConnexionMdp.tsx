@@ -47,6 +47,9 @@ export function FormulaireConnexionMdp({
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [hydrate, setHydrate] = useState(false);
+  // Incrémenté après chaque tentative pour régénérer le jeton Turnstile
+  // (usage unique) : sans ça, une 2ᵉ tentative échoue « anti-bot ».
+  const [resetCaptcha, setResetCaptcha] = useState(0);
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -75,6 +78,10 @@ export function FormulaireConnexionMdp({
 
     if (!resultat.ok) {
       setErreurServeur(resultat.message);
+      // Jeton consommé : on en régénère un pour permettre une nouvelle
+      // tentative sans recharger la page.
+      setValue('token_turnstile', '');
+      setResetCaptcha((n) => n + 1);
       return;
     }
     if (resultat.redirectVers !== undefined) {
@@ -131,7 +138,10 @@ export function FormulaireConnexionMdp({
         ) : null}
       </div>
 
-      <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
+      <CaptchaTurnstile
+        onChange={(token) => setValue('token_turnstile', token)}
+        resetTrigger={resetCaptcha}
+      />
 
       {hydrate && !captchaValide ? (
         <p className="text-xs text-text-3" aria-live="polite">
