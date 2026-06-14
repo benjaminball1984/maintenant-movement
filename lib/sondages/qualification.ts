@@ -1,20 +1,28 @@
 /**
  * Panel de qualification progressive du profil (sondages V2).
  *
- * Source du contenu : CDC `docs/cdc-v2/CDC-Maintenant-V2/02-Sinformer/
- * sondages-V2.md` §7 (panel de 22 questions, base validée le 26/05),
- * ajusté par Ben le 2026-06-12 :
- *   - Q8 Genre : « Homme · Femme · Non binaire · Autre » (« autre » au
- *     singulier), posée directement dans le formulaire de vote ;
- *   - Q7 Logement : 5 catégories alignées sur l'enquête Logement INSEE 2021
- *     (France portrait social 2023, personnes majeures) avec leurs parts
- *     cibles pour la méthode des quotas : propriétaires 57,1 %, locataires
- *     34,9 %, hébergé·es à titre gratuit ~5 %, logements collectifs ~2,7 %,
- *     sans domicile ~0,3 %.
+ * Refonte 2026-06-14 (demande Ben, validée question par question) : panel
+ * resserré et réécrit avec le **vocabulaire des instituts de sondage** (INSEE
+ * PCS 2020 et grille de densité, enquête Logement, TeO2 INED, CEVIPOF, IFOP,
+ * Ipsos, CRÉDOC, ministère de l'Intérieur pour les libellés électoraux ;
+ * recherche multi-agents documentée dans
+ * `docs/sondages-profil-25-propositions.md`).
  *
- * Règles de tirage (CDC §6) : pondération de la fréquence (les questions
- * les plus utiles à la fiabilité sortent plus souvent), jamais deux fois
- * la même question pour une même personne.
+ * Décisions Ben de cette session :
+ *   - « taille de l'agglomération » (en nb d'habitants) RETIRÉE → remplacée par
+ *     « type de commune » (continuum rural→métropole, avec repère d'habitant·es).
+ *   - Revenu : échelle ÉLARGIE VERS LE BAS (sous le RSA / au RSA) pour capter la
+ *     précarité (RSA personne seule 651,69 € et AAH 1 041,59 €/mois au 1ᵉʳ avril
+ *     2026).
+ *   - Tranche d'âge : ajout des 15-17 ans (lycéen·nes).
+ *   - Ajouts : patrimoine, aisance financière (CRÉDOC), confiance dans les
+ *     institutions (CEVIPOF).
+ *   - Retirées : statut dans l'emploi, origine sociale, législatives 2024, dons,
+ *     intérêt pour la politique.
+ *
+ * Règles de tirage (CDC §6) : pondération de la fréquence (les questions les
+ * plus utiles à la fiabilité sortent plus souvent), jamais deux fois la même
+ * question pour une même personne.
  */
 
 import { calculerAge } from '@/lib/age';
@@ -28,33 +36,33 @@ export interface QuestionQualification {
   intitule: string;
   /** Options proposées (libellés stockés tels quels). */
   options: string[];
-  /**
-   * Poids de tirage (CDC §6 : CSP, type de commune, taille d'agglo,
-   * vote 2022, et logement sortent plus souvent).
-   */
+  /** Poids de tirage (socio-démo de redressement + vote sortent plus souvent). */
   poidsTirage: number;
   /** Forme de la question (choix unique par défaut). */
   type: TypeQuestionQualification;
-  /** Second champ du même écran (Q22 : secteur de bénévolat). */
+  /** Second champ du même écran (ex. domaine de bénévolat, syndicat). */
   secondaire?: {
     intitule: string;
     options: string[];
-    /** Valeur de la réponse principale qui rend le second champ requis. */
-    requisSi: string;
+    /**
+     * Valeur(s) de la réponse principale qui rendent le second champ requis
+     * (une seule valeur, ou plusieurs — ex. « adhérent·e » OU « anciennement »).
+     */
+    requisSi: string | readonly string[];
   };
 }
 
-/** Options de CSP (réutilisées par Q1 et Q11 « origine sociale »). */
+/** Options de CSP (libellés PCS 2020 INSEE, validés Ben 2026-06-14). */
 const OPTIONS_CSP = [
-  'Agriculteur·ice',
-  'Artisan·e, commerçant·e, chef·fe d’entreprise',
-  'Cadre, profession intellectuelle supérieure',
-  'Profession intermédiaire',
+  'Agriculteur·rice exploitant·e',
+  'Artisan·e, commerçant·e ou chef·fe d’entreprise',
+  'Cadre ou profession intellectuelle supérieure',
+  'Profession intermédiaire (technicien·ne, agent·e de maîtrise, enseignant·e du primaire, infirmier·ère…)',
   'Employé·e',
   'Ouvrier·ère',
   'Retraité·e',
-  'Étudiant·e',
-  'Sans activité',
+  'Étudiant·e ou élève',
+  'Sans activité professionnelle (au foyer, recherche d’emploi de longue durée, autre)',
   'Ne souhaite pas répondre',
 ] as const;
 
@@ -65,19 +73,27 @@ const OPTIONS_CSP = [
 export const OPTIONS_GENRE = ['Homme', 'Femme', 'Non binaire', 'Autre'] as const;
 
 /**
- * Options « logement » avec parts cibles INSEE (enquête Logement 2021,
- * personnes majeures ; France portrait social 2023). Les parts servent au
- * redressement par quotas (barèmes modifiables par l'admin à terme,
- * CDC §2 « Référence de population »).
+ * Options « logement » (statut d'occupation INSEE, version 6 postes des
+ * instituts, validée Ben 2026-06-14). Les parts cibles (approx. enquête
+ * Logement INSEE, personnes majeures) servent au redressement par quotas.
  */
 export const OPTIONS_LOGEMENT: ReadonlyArray<{ libelle: string; partCible: number }> = [
-  { libelle: 'Propriétaire', partCible: 0.571 },
-  { libelle: 'Locataire ou sous-locataire', partCible: 0.349 },
-  { libelle: 'Hébergé·e à titre gratuit (par un proche ou un employeur)', partCible: 0.05 },
-  { libelle: 'Logement collectif (EHPAD, foyer, internat, caserne…)', partCible: 0.027 },
-  { libelle: 'Sans domicile', partCible: 0.003 },
+  { libelle: 'Propriétaire (y compris accédant·e à la propriété)', partCible: 0.575 },
+  { libelle: 'Locataire du parc privé', partCible: 0.228 },
+  { libelle: 'Locataire d’un logement social (HLM)', partCible: 0.165 },
+  {
+    libelle: 'Hébergé·e gratuitement en logement privé (proche, famille, employeur)',
+    partCible: 0.022,
+  },
+  {
+    libelle:
+      'Hébergé·e en logement collectif (foyer, résidence sociale, EHPAD, internat, caserne, CADA…)',
+    partCible: 0.007,
+  },
+  { libelle: 'Sans domicile (rue, hébergement d’urgence, habitat de fortune)', partCible: 0.003 },
 ];
 
+/** Listes du bulletin des européennes 2024 (exhaustif, zéro regroupement). */
 const LISTES_EUROPEENNES_2024 = [
   'La France revient ! (RN, Bardella)',
   'Besoin d’Europe (Renaissance, Hayer)',
@@ -124,11 +140,34 @@ const LISTES_EUROPEENNES_2024 = [
 ] as const;
 
 /**
- * Le panel complet (CDC §7). L'ordre est documentaire ; le tirage est
- * aléatoire pondéré parmi les questions non répondues.
+ * Le panel (23 questions, validées une par une avec Ben le 2026-06-14).
+ * L'ordre est documentaire ; le tirage est aléatoire pondéré parmi les
+ * questions non répondues.
  */
 export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
   // ----- Bloc 1 : socle sociologique --------------------------------
+  {
+    cle: 'genre',
+    intitule: 'Quel est ton genre ?',
+    options: [...OPTIONS_GENRE],
+    poidsTirage: 2,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'tranche_age_fine',
+    intitule: 'Quelle est ta tranche d’âge ?',
+    options: [
+      '15-17 ans',
+      '18-24 ans',
+      '25-34 ans',
+      '35-49 ans',
+      '50-64 ans',
+      '65-74 ans',
+      '75 ans et plus',
+    ],
+    poidsTirage: 1,
+    type: 'choix_unique',
+  },
   {
     cle: 'csp',
     intitule: 'Quelle est ta catégorie socioprofessionnelle ?',
@@ -137,14 +176,31 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
     type: 'choix_unique',
   },
   {
-    cle: 'diplome',
-    intitule: 'Quel est ton plus haut diplôme ?',
+    cle: 'secteur_activite',
+    intitule: 'Dans quel secteur travailles-tu (ou as-tu travaillé en dernier) ?',
     options: [
-      'Aucun ou brevet',
-      'CAP-BEP',
-      'Bac',
-      'Bac+2/3',
-      'Bac+5 et plus',
+      'Secteur public (État, collectivités, hôpital public)',
+      'Secteur privé (entreprise, association classique)',
+      'Économie sociale et solidaire (coopérative, mutuelle, association, fondation)',
+      'À mon compte / indépendant·e',
+      'Je n’ai jamais travaillé',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 1,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'diplome',
+    intitule: 'Quel est le plus haut diplôme que tu as obtenu ?',
+    options: [
+      'Aucun diplôme',
+      'Certificat d’études primaires (CEP), brevet des collèges, BEPC',
+      'CAP, BEP ou équivalent',
+      'Baccalauréat (général, technologique ou professionnel), brevet professionnel',
+      'Bac+2 (BTS, BUT/DUT, DEUG, écoles sanitaires et sociales…)',
+      'Bac+3 ou Bac+4 (licence, licence pro, master 1, maîtrise…)',
+      'Bac+5 et plus (master, diplôme d’ingénieur·e, école de commerce, doctorat, médecine…)',
+      'En cours d’études (pas encore de diplôme correspondant)',
       'Ne souhaite pas répondre',
     ],
     poidsTirage: 1,
@@ -154,11 +210,65 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
     cle: 'revenu_foyer',
     intitule: 'Quel est le revenu mensuel net de ton foyer ?',
     options: [
-      'Moins de 1 500 €',
-      '1 500 à 2 500 €',
-      '2 500 à 4 000 €',
-      '4 000 à 6 000 €',
-      'Plus de 6 000 €',
+      'Moins de 650 € (sous le RSA)',
+      '650 à 999 €',
+      '1 000 à 1 499 €',
+      '1 500 à 1 999 €',
+      '2 000 à 2 499 €',
+      '2 500 à 2 999 €',
+      '3 000 à 3 999 €',
+      '4 000 à 5 999 €',
+      '6 000 € et plus',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 2,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'logement',
+    intitule: 'Quel est ton statut d’occupation de ton logement ?',
+    options: OPTIONS_LOGEMENT.map((o) => o.libelle).concat('Ne souhaite pas répondre'),
+    poidsTirage: 3,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'type_commune',
+    intitule: 'Comment décrirais-tu la commune où tu habites ?',
+    options: [
+      'Une grande ville ou une métropole (100 000 habitant·es et plus)',
+      'Une ville moyenne (20 000 à 100 000 habitant·es)',
+      'Une petite ville (2 000 à 20 000 habitant·es)',
+      'Une commune de banlieue ou de périphérie (couronne d’une grande ville)',
+      'Un village ou un bourg rural (moins de 2 000 habitant·es)',
+      'Une commune rurale isolée (habitat dispersé, hameaux)',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 3,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'region_residence',
+    intitule: 'Dans quelle région habites-tu ?',
+    options: [
+      'Auvergne-Rhône-Alpes',
+      'Bourgogne-Franche-Comté',
+      'Bretagne',
+      'Centre-Val de Loire',
+      'Corse',
+      'Grand Est',
+      'Hauts-de-France',
+      'Île-de-France',
+      'Normandie',
+      'Nouvelle-Aquitaine',
+      'Occitanie',
+      'Pays de la Loire',
+      'Provence-Alpes-Côte d’Azur',
+      'Guadeloupe',
+      'Martinique',
+      'Guyane',
+      'La Réunion',
+      'Mayotte',
+      'Hors de France (à l’étranger)',
       'Ne souhaite pas répondre',
     ],
     poidsTirage: 1,
@@ -166,56 +276,31 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
   },
   {
     cle: 'situation_maritale',
-    intitule: 'Quelle est ta situation maritale ?',
-    options: ['Célibataire', 'En couple, marié·e ou pacsé·e', 'Séparé·e ou divorcé·e', 'Veuf·ve'],
+    intitule: 'Quelle est ta situation conjugale ?',
+    options: [
+      'Marié·e',
+      'Pacsé·e',
+      'En couple (union libre, concubinage)',
+      'Célibataire',
+      'Divorcé·e ou séparé·e',
+      'Veuf·ve',
+      'Ne souhaite pas répondre',
+    ],
     poidsTirage: 1,
     type: 'choix_unique',
   },
   {
     cle: 'composition_foyer',
-    intitule: 'Quelle est la composition de ton foyer ?',
-    options: ['Seul·e', 'Couple sans enfant', 'Avec enfant(s)', 'Famille monoparentale', 'Autre'],
-    poidsTirage: 1,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'type_commune',
-    intitule: 'Où habites-tu ?',
+    intitule: 'Comment décrirais-tu la composition de ton foyer ?',
     options: [
-      'Rural',
-      'Petite ville',
-      'Ville moyenne',
-      'Grande ville',
-      'Métropole ou cœur d’agglomération',
-    ],
-    poidsTirage: 3,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'logement',
-    intitule: 'Quelle est ta situation de logement ?',
-    options: OPTIONS_LOGEMENT.map((o) => o.libelle),
-    poidsTirage: 3,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'genre',
-    intitule: 'Quel est ton genre ?',
-    options: [...OPTIONS_GENRE],
-    poidsTirage: 2,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'secteur_activite',
-    intitule: 'Dans quel secteur travailles-tu ?',
-    options: [
-      'Public, fonction publique',
-      'Privé',
-      'Indépendant ou libéral',
-      'Associatif, économie sociale et solidaire',
-      'Sans emploi',
-      'Retraité·e',
-      'Étudiant·e',
+      'Je vis seul·e',
+      'En couple sans enfant',
+      'En couple avec enfant(s)',
+      'Famille monoparentale (seul·e avec enfant(s))',
+      'Je vis chez mes parents ou ma famille',
+      'En colocation ou logement partagé',
+      'Autre configuration',
+      'Ne souhaite pas répondre',
     ],
     poidsTirage: 1,
     type: 'choix_unique',
@@ -225,7 +310,7 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
     intitule: 'Quelle est ta situation d’épargne ?',
     options: [
       'Aucune épargne',
-      'Épargne de précaution (moins de 3 mois)',
+      'Épargne de précaution (moins de 3 mois de revenus)',
       'Épargne confortable',
       'Patrimoine immobilier (hors résidence principale)',
       'Ne souhaite pas répondre',
@@ -234,72 +319,56 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
     type: 'choix_unique',
   },
   {
-    cle: 'origine_sociale',
-    intitule:
-      'Pendant ton enfance, quelle était la catégorie socioprofessionnelle de ton père ou de ta mère ?',
-    options: [...OPTIONS_CSP],
-    poidsTirage: 1,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'taille_agglomeration',
-    intitule: 'Quelle est la taille de ton agglomération ?',
+    cle: 'aisance_financiere',
+    intitule: 'Avec les revenus de ton foyer, dirais-tu que…',
     options: [
-      'Moins de 2 000 habitant·es',
-      '2 000 à 20 000',
-      '20 000 à 100 000',
-      '100 000 à 200 000',
-      'Plus de 200 000',
-      'Agglomération parisienne',
+      'Tu vis confortablement',
+      'Ça va, c’est correct',
+      'C’est juste, il faut faire attention',
+      'Tu y arrives difficilement',
+      'Tu ne t’en sors pas sans t’endetter',
+      'Ne souhaite pas répondre',
     ],
-    poidsTirage: 3,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'statut_emploi',
-    intitule: 'Quel est ton statut dans l’emploi ?',
-    options: [
-      'CDI',
-      'CDD ou intérim',
-      'Fonctionnaire',
-      'Indépendant·e',
-      'Chômage',
-      'Inactif·ve',
-      'Études',
-    ],
-    poidsTirage: 1,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'tranche_age_fine',
-    intitule: 'Quelle est ta tranche d’âge ?',
-    options: ['18-24 ans', '25-34 ans', '35-49 ans', '50-64 ans', '65-74 ans', '75 ans et plus'],
     poidsTirage: 1,
     type: 'choix_unique',
   },
   // ----- Bloc 2 : politique (listes exhaustives, zéro regroupement) --
   {
     cle: 'presidentielle_2022',
-    intitule: 'Au premier tour de la présidentielle 2022, pour qui as-tu voté ?',
+    intitule: 'Au 1er tour de la présidentielle 2022, pour quel·le candidat·e as-tu voté ?',
     options: [
-      'Nathalie Arthaud',
-      'Nicolas Dupont-Aignan',
-      'Anne Hidalgo',
-      'Yannick Jadot',
-      'Jean Lassalle',
-      'Marine Le Pen',
-      'Emmanuel Macron',
-      'Jean-Luc Mélenchon',
-      'Valérie Pécresse',
-      'Philippe Poutou',
-      'Fabien Roussel',
-      'Éric Zemmour',
+      'Nathalie Arthaud (Lutte ouvrière)',
+      'Nicolas Dupont-Aignan (Debout la France)',
+      'Anne Hidalgo (Parti socialiste)',
+      'Yannick Jadot (Europe Écologie-Les Verts)',
+      'Jean Lassalle (Résistons !)',
+      'Marine Le Pen (Rassemblement national)',
+      'Emmanuel Macron (La République en marche)',
+      'Jean-Luc Mélenchon (La France insoumise)',
+      'Valérie Pécresse (Les Républicains)',
+      'Philippe Poutou (Nouveau Parti anticapitaliste)',
+      'Fabien Roussel (Parti communiste français)',
+      'Éric Zemmour (Reconquête !)',
       'Vote blanc ou nul',
-      'N’a pas voté',
-      'Pas en âge de voter',
+      'Je me suis abstenu·e',
+      'Je n’étais pas en âge de voter / pas inscrit·e',
       'Ne souhaite pas répondre',
     ],
     poidsTirage: 3,
+    type: 'choix_unique',
+  },
+  {
+    cle: 'presidentielle_2022_t2',
+    intitule: 'Et au 2nd tour de la présidentielle 2022, pour qui as-tu voté ?',
+    options: [
+      'Emmanuel Macron',
+      'Marine Le Pen',
+      'Vote blanc ou nul',
+      'Je me suis abstenu·e',
+      'Je n’étais pas en âge de voter / pas inscrit·e',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 2,
     type: 'choix_unique',
   },
   {
@@ -311,7 +380,7 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
   },
   {
     cle: 'gauche_droite',
-    intitule: 'Sur un axe gauche-droite de 0 à 10, où te situes-tu ?',
+    intitule: 'Sur un axe de gauche (0) à droite (10), où te situes-tu ?',
     options: [
       '0',
       '1',
@@ -330,71 +399,149 @@ export const QUESTIONS_QUALIFICATION: QuestionQualification[] = [
     type: 'choix_unique',
   },
   {
-    cle: 'interet_politique',
-    intitule: 'À quel point t’intéresses-tu à la politique ?',
-    options: ['Très', 'Assez', 'Peu', 'Pas du tout'],
-    poidsTirage: 1,
-    type: 'choix_unique',
-  },
-  // ----- Bloc 3 : engagement -----------------------------------------
-  {
-    cle: 'formes_engagement',
-    intitule: 'Quelles formes d’engagement pratiques-tu ? (plusieurs choix possibles)',
+    cle: 'source_info_politique',
+    intitule: 'Par quel moyen t’informes-tu le plus souvent sur l’actualité politique ?',
     options: [
-      'Manifestation',
-      'Pétition',
-      'Grève',
-      'Action directe',
-      'Bénévolat',
-      'Adhésion à un parti ou un syndicat',
-      'Mandat local',
-      'Aucune',
-    ],
-    poidsTirage: 1,
-    type: 'choix_multiple',
-  },
-  {
-    cle: 'pratique_syndicale',
-    intitule: 'Es-tu syndiqué·e ?',
-    options: ['Syndiqué·e actuellement', 'Anciennement', 'Jamais', 'Pas concerné·e'],
-    poidsTirage: 1,
-    type: 'choix_unique',
-  },
-  {
-    cle: 'pratique_don',
-    intitule: 'Fais-tu des dons à des associations ou des causes ?',
-    options: [
-      'Donateur·ice régulier·ière (mensuel ou récurrent)',
-      'Ponctuel·le',
-      'A déjà donné 1 ou 2 fois',
-      'Jamais',
+      'La télévision',
+      'La radio',
+      'La presse écrite (journaux, magazines)',
+      'Les sites et applications d’information en ligne',
+      'Les réseaux sociaux (Instagram, TikTok, X, YouTube…)',
+      'Les podcasts ou les vidéos en ligne',
+      'Les discussions avec ton entourage',
+      'Je ne m’informe pas vraiment sur la politique',
       'Ne souhaite pas répondre',
     ],
     poidsTirage: 1,
     type: 'choix_unique',
   },
   {
+    cle: 'confiance_institutions',
+    intitule:
+      'À quelles institutions ou acteurs fais-tu plutôt confiance ? (plusieurs choix possibles)',
+    options: [
+      'La science',
+      'L’hôpital public',
+      'Les associations',
+      'Les syndicats',
+      'La justice',
+      'Les médias',
+      'La police',
+      'L’armée',
+      'Ta mairie / les collectivités locales',
+      'Le gouvernement',
+      'L’Assemblée nationale',
+      'Les partis politiques',
+      'Les banques',
+      'Les grandes entreprises',
+      'Les réseaux sociaux',
+      'L’Union européenne',
+      'Aucune de ces institutions',
+    ],
+    poidsTirage: 1,
+    type: 'choix_multiple',
+  },
+  // ----- Bloc 3 : engagement -----------------------------------------
+  {
+    cle: 'formes_engagement',
+    intitule:
+      'Au cours des deux dernières années, quelles formes d’engagement t’est-il arrivé de pratiquer ? (plusieurs choix possibles)',
+    options: [
+      'Signer une pétition (papier ou en ligne)',
+      'Participer à une manifestation',
+      'Faire grève',
+      'Boycotter des produits ou des marques',
+      'Faire du bénévolat',
+      'Faire un don à une association ou une cause',
+      'Militer dans un parti politique',
+      'Militer dans un syndicat',
+      'Participer à une réunion publique, un conseil de quartier ou un débat citoyen',
+      'Participer à une consultation citoyenne, une votation ou un référendum local',
+      'Interpeller un·e élu·e',
+      'T’exprimer sur un sujet de société sur les réseaux sociaux',
+      'Participer à une action de désobéissance civile (blocage, occupation, ZAD…)',
+      'Aucune de ces formes d’engagement',
+    ],
+    poidsTirage: 1,
+    type: 'choix_multiple',
+  },
+  {
     cle: 'benevolat',
-    intitule: 'Es-tu bénévole ?',
-    options: ['Oui', 'Non'],
+    intitule: 'Donnes-tu de ton temps gratuitement pour une association ou une cause ?',
+    options: [
+      'Oui, régulièrement (chaque semaine ou presque)',
+      'Oui, de temps en temps dans l’année',
+      'Oui, ponctuellement (un événement, une mission courte)',
+      'Non, mais je l’ai déjà fait par le passé',
+      'Non, jamais',
+    ],
     poidsTirage: 1,
     type: 'double',
     secondaire: {
-      intitule: 'Quel secteur ?',
+      intitule: 'Dans quel domaine principal ?',
       options: [
-        'Social, solidarité',
-        'Humanitaire',
-        'Environnement',
-        'Culture',
         'Sport',
-        'Éducation, jeunesse',
+        'Culture, arts, patrimoine',
+        'Loisirs, vie locale',
+        'Action sociale, caritative ou humanitaire',
         'Santé',
-        'Droits humains',
-        'Animaux',
+        'Éducation, jeunesse',
+        'Environnement, protection de la nature et des animaux',
+        'Défense des droits et de causes citoyennes',
+        'Religion',
         'Autre',
       ],
-      requisSi: 'Oui',
+      requisSi: [
+        'Oui, régulièrement (chaque semaine ou presque)',
+        'Oui, de temps en temps dans l’année',
+        'Oui, ponctuellement (un événement, une mission courte)',
+      ],
     },
+  },
+  {
+    cle: 'pratique_syndicale',
+    intitule: 'En ce qui concerne les syndicats, dans quelle situation te trouves-tu ?',
+    options: [
+      'Adhérent·e actuellement',
+      'Anciennement (plus aujourd’hui)',
+      'Jamais',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 1,
+    type: 'double',
+    secondaire: {
+      intitule: 'De quel syndicat s’agit-il (ou s’agissait-il) ?',
+      options: [
+        'CGT',
+        'CFDT',
+        'FO',
+        'CFE-CGC',
+        'CFTC',
+        'UNSA',
+        'Solidaires (SUD)',
+        'FSU',
+        'Syndicat étudiant ou lycéen',
+        'Autre',
+        'Ne souhaite pas répondre',
+      ],
+      requisSi: ['Adhérent·e actuellement', 'Anciennement (plus aujourd’hui)'],
+    },
+  },
+  {
+    cle: 'adhesion_organisation',
+    intitule:
+      'Es-tu adhérent·e ou membre d’une ou plusieurs de ces organisations ? (plusieurs choix possibles)',
+    options: [
+      'Une association (sport, culture, loisirs…)',
+      'Une association caritative, humanitaire ou de solidarité',
+      'Une association de défense des droits ou de l’environnement',
+      'Un syndicat',
+      'Un parti ou un mouvement politique',
+      'Aucune de ces organisations',
+      'Ne souhaite pas répondre',
+    ],
+    poidsTirage: 1,
+    type: 'choix_multiple',
   },
 ];
 

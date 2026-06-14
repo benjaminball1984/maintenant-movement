@@ -108,10 +108,15 @@ export async function repondreQualification(
     reponseStockee = donnees.reponse;
   }
 
-  // Second champ du même écran (Q22) : requis selon la réponse principale.
+  // Second champ du même écran : requis selon la réponse principale (une ou
+  // plusieurs valeurs déclencheuses, ex. bénévolat « Oui… », syndicat
+  // « actuellement »/« anciennement »).
   let reponseSecondaire: string | null = null;
   if (question.secondaire !== undefined) {
-    const requise = reponseStockee === question.secondaire.requisSi;
+    const declencheurs = Array.isArray(question.secondaire.requisSi)
+      ? question.secondaire.requisSi
+      : [question.secondaire.requisSi];
+    const requise = declencheurs.includes(reponseStockee);
     if (requise) {
       if (
         donnees.reponse_secondaire === undefined ||

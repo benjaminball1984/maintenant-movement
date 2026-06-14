@@ -9,11 +9,11 @@ import {
 import { describe, expect, it } from 'vitest';
 
 describe('panel de qualification (CDC sondages-V2 §7)', () => {
-  it('contient exactement 22 questions aux clés uniques', () => {
-    expect(QUESTIONS_QUALIFICATION).toHaveLength(22);
+  it('contient exactement 23 questions aux clés uniques', () => {
+    expect(QUESTIONS_QUALIFICATION).toHaveLength(23);
     const cles = QUESTIONS_QUALIFICATION.map((q) => q.cle);
-    expect(new Set(cles).size).toBe(22);
-    expect(QUESTIONS_PAR_CLE.size).toBe(22);
+    expect(new Set(cles).size).toBe(23);
+    expect(QUESTIONS_PAR_CLE.size).toBe(23);
   });
 
   it('chaque question a un intitulé et au moins 2 options non vides', () => {
@@ -39,17 +39,26 @@ describe('panel de qualification (CDC sondages-V2 §7)', () => {
     expect([...OPTIONS_GENRE]).toEqual(['Homme', 'Femme', 'Non binaire', 'Autre']);
   });
 
-  it('les parts cibles logement (INSEE 2021) somment à 1', () => {
+  it('les parts cibles logement (statut d’occupation INSEE, 6 postes) somment à 1', () => {
     const somme = OPTIONS_LOGEMENT.reduce((s, o) => s + o.partCible, 0);
     expect(somme).toBeCloseTo(1, 3);
-    expect(OPTIONS_LOGEMENT[0]?.partCible).toBeCloseTo(0.571, 3);
+    expect(OPTIONS_LOGEMENT).toHaveLength(6);
+    expect(OPTIONS_LOGEMENT[0]?.partCible).toBeCloseTo(0.575, 3);
   });
 
-  it('la question bénévolat exige son second champ quand la réponse est Oui', () => {
+  it('la question bénévolat exige son second champ quand la réponse commence par « Oui »', () => {
     const q = QUESTIONS_PAR_CLE.get('benevolat');
     expect(q?.type).toBe('double');
-    expect(q?.secondaire?.requisSi).toBe('Oui');
+    expect(Array.isArray(q?.secondaire?.requisSi)).toBe(true);
+    expect(q?.secondaire?.requisSi).toContain('Oui, régulièrement (chaque semaine ou presque)');
     expect(q?.secondaire?.options.length).toBe(10);
+  });
+
+  it('la syndicalisation déclenche son second champ si adhérent·e ou ancien·ne', () => {
+    const q = QUESTIONS_PAR_CLE.get('pratique_syndicale');
+    expect(q?.type).toBe('double');
+    expect(q?.secondaire?.requisSi).toContain('Adhérent·e actuellement');
+    expect(q?.secondaire?.requisSi).toContain('Anciennement (plus aujourd’hui)');
   });
 });
 
