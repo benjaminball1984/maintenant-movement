@@ -1,12 +1,11 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
-import { Alert, Button, Label } from '@/components/ui';
+import { Alert, Button } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
-import { OPTIONS_GENRE } from '@/lib/sondages/qualification';
 import {
   type DonneesVoterSondage,
   type DonneesVoterSondageEntree,
@@ -194,44 +193,10 @@ export function FormulaireVote({
         ) : null}
       </fieldset>
 
-      {/* Revue 2026-06-12 (Ben) : deux champs optionnels seulement, sans
-          friction. Le code postal n'est PAS demandé (il vient du profil,
-          la personne étant connectée pour voter). */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="vote-genre">{libelles.labelGenre}</Label>
-          <select
-            id="vote-genre"
-            {...register('genre_declare')}
-            className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
-          >
-            <option value="">—</option>
-            {OPTIONS_GENRE.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="vote-age">{libelles.labelAge}</Label>
-          <select
-            id="vote-age"
-            {...register('tranche_age')}
-            className="w-full rounded-sm border border-border bg-surface p-2 text-sm"
-          >
-            <option value="">—</option>
-            <option value="moins_18">{libelles.ageMoins18}</option>
-            <option value="18_24">{libelles.age18_24}</option>
-            <option value="25_34">{libelles.age25_34}</option>
-            <option value="35_49">{libelles.age35_49}</option>
-            <option value="50_64">{libelles.age50_64}</option>
-            <option value="65_plus">{libelles.age65Plus}</option>
-          </select>
-        </div>
-      </div>
-      <p className="text-xs text-text-3">{libelles.hintPondere}</p>
-
+      {/* Genre et tranche d'âge ne sont plus demandés au vote (Ben
+          2026-06-14) : ils sont posés dans la qualification de profil. L'âge
+          se déduit de la date de naissance du profil ; sinon le panel le
+          demande. */}
       <CaptchaTurnstile onChange={(token) => setValue('token_turnstile', token)} />
 
       {hydrate && !captchaValide ? (
