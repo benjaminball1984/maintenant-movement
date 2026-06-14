@@ -105,4 +105,40 @@ export const SOURCES_TWITCH: SourceTwitch[] = [
   { handle: 'somosgelatina_', nom: 'Gelatina', theme: 'International', langue: 'es' },
   { handle: 'srevolution', nom: 'Marina Lobo', theme: 'International', langue: 'es' },
   { handle: 'omaranguita', nom: 'Omar Anguita', theme: 'International', langue: 'es' },
+  // Ajouts thématiques 2026-06-14 (décolonial, antifascisme, autogestion /
+  // caisses de grève, économistes/altermondialisme), validés via helix/users.
+  {
+    handle: 'parolesdhonneur_',
+    nom: 'Paroles d’Honneur',
+    theme: 'Décolonial / anti-impérialisme',
+    langue: 'fr',
+  },
+  { handle: 'valeuranarchiste', nom: 'Valeur Anarchiste', theme: 'Antifascisme', langue: 'fr' },
+  { handle: 'la_cgt', nom: 'La CGT', theme: 'Luttes sociales / syndical', langue: 'fr' },
+  {
+    handle: 'misterjday',
+    nom: 'MisterJDay',
+    theme: 'Luttes sociales / caisses de grève',
+    langue: 'fr',
+  },
+  {
+    handle: 'quineapple',
+    nom: 'Quineapple',
+    theme: 'Luttes sociales / anticapitalisme',
+    langue: 'fr',
+  },
+  {
+    handle: 'danycaligula',
+    nom: 'Dany Caligula',
+    theme: 'Philosophie politique de gauche',
+    langue: 'fr',
+  },
+  { handle: 'simonpuech', nom: 'Simon Puech', theme: 'Vulgarisation engagée', langue: 'fr' },
+  {
+    handle: 'canardrefractaire',
+    nom: 'Le Canard Réfractaire',
+    theme: 'Média engagé',
+    langue: 'fr',
+  },
+  { handle: 'mikefrompa', nom: 'Mike from PA', theme: 'International', langue: 'en' },
 ];

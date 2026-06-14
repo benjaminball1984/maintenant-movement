@@ -135,6 +135,21 @@
 | krokoku | Krokoku | Féminisme | Émission « MardiMoiTout » (injonctions faites aux femmes) |
 | aayley | Aayley | Féminisme | Discours féministe sur la place des femmes dans le JV |
 
+## Ajouts thématiques (passage v4 — 2026-06-14)
+| Handle | Nom | Thème |
+|---|---|---|
+| parolesdhonneur_ | Paroles d'Honneur | Décolonial / anti-impérialisme |
+| valeuranarchiste | Valeur Anarchiste | Antifascisme (veille extrême droite) |
+| la_cgt | La CGT | Luttes sociales / syndical |
+| misterjday | MisterJDay | Caisses de grève |
+| quineapple | Quineapple | Caisses de grève / féminisme |
+| danycaligula | Dany Caligula | Philosophie politique de gauche |
+| simonpuech | Simon Puech | Vulgarisation engagée |
+| canardrefractaire | Le Canard Réfractaire | Média engagé |
+| mikefrompa | Mike from PA | International (organizing de gauche US) |
+
+*(Écartés car handle introuvable via l'API : danyetraz, wissamxelka (Haolam Hazeh / UJFP), recondustream — à retrouver.)*
+
 ---
 
 ## Thèmes à étoffer (agents en échec / contenu rare)
