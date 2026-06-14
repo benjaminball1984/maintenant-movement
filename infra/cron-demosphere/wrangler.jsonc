@@ -3,7 +3,10 @@
   "main": "worker.js",
   "compatibility_date": "2026-01-01",
   "triggers": {
-    // Une fois par jour, à 04h47 UTC (creux de trafic, décalé des autres crons).
-    "crons": ["47 4 * * *"]
+    // HORAIRE depuis le 2026-06-14 (demande Ben : actualiser les mobilisations
+    // régulièrement) ; à la 52e minute, décalé des autres crons (brèves :12,
+    // médias :32, agenda :42). La rotation de sites couvre tout le réseau en
+    // quelques heures au lieu de quelques jours.
+    "crons": ["52 * * * *"]
   }
 }
