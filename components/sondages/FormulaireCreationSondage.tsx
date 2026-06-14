@@ -56,6 +56,8 @@ export interface LibellesCreationSondage {
   ctaImageOption: string;
   ctaAjouterOption: string;
   maxAtteint: string;
+  labelChoixMultiple: string;
+  aideChoixMultiple: string;
   labelImage: string;
   aideCouverture: string;
   ctaSubmit: string;
@@ -77,6 +79,9 @@ const LIBELLES_DEFAUT: LibellesCreationSondage = {
   ctaImageOption: 'Téléverser une image',
   ctaAjouterOption: 'Ajouter une option',
   maxAtteint: 'Maximum 20 options atteint.',
+  labelChoixMultiple: 'Autoriser plusieurs réponses (choix multiple)',
+  aideChoixMultiple:
+    'Les votant·es pourront cocher plusieurs options ; les résultats s’affichent en part des votant·es (le total peut dépasser 100 %).',
   labelImage: 'Image de couverture (optionnelle) — sinon une mosaïque est créée automatiquement',
   aideCouverture:
     'Laisse vide : une mosaïque (titre + tuiles des options) est générée automatiquement et sert de couverture, de miniature et d’aperçu de partage. Téléverse une image seulement si tu veux la remplacer.',
@@ -324,6 +329,22 @@ export function FormulaireCreationSondage({
           ) : null}
         </div>
       </fieldset>
+
+      <label
+        htmlFor="sondage-choix-multiple"
+        className="flex items-start gap-2 rounded-md border border-border bg-surface-2 p-3"
+      >
+        <input
+          id="sondage-choix-multiple"
+          type="checkbox"
+          {...register('choix_multiple')}
+          className="mt-0.5 h-4 w-4 accent-brand"
+        />
+        <span className="text-sm text-text-1">
+          {libelles.labelChoixMultiple}
+          <span className="mt-0.5 block text-xs text-text-3">{libelles.aideChoixMultiple}</span>
+        </span>
+      </label>
 
       <div className="grid gap-2">
         <p className="text-xs text-text-3">{libelles.aideCouverture}</p>
