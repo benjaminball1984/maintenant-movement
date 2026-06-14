@@ -385,8 +385,18 @@ export async function importerFormat(
       // exemple) alors que le suivant passe. Pas de filtre d'âge : les
       // contenus anciens sont gardés (décision Ben 2026-06-13), simplement
       // classés plus bas par le tri du flux (date de publication).
+      // Fraîcheur (Ben 2026-06-14) : cadence horaire → on n'importe QUE les
+      // contenus publiés il y a MOINS DE 2 H (fil réellement frais ; plus
+      // d'accumulation de vieux contenus). `articleExploitable` garantit déjà
+      // publieLe !== null.
+      const fraisDepuis = Date.now() - 2 * 3600 * 1000;
       const candidats = articles
-        .filter((a) => !existants.has(a.lien) && articleExploitable(format, a))
+        .filter(
+          (a) =>
+            !existants.has(a.lien) &&
+            articleExploitable(format, a) &&
+            (a.publieLe ?? 0) >= fraisDepuis,
+        )
         .slice(0, 5);
       if (candidats.length === 0) {
         echecs.push(`[${source.nom}] rien de neuf à importer`);

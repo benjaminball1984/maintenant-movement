@@ -592,8 +592,17 @@ export async function importerBreveHoraire(
       // Pré-filtre volontairement bas (40) : une description courte peut
       // encore être étoffée depuis la page de l'article. La règle finale
       // des ~6 lignes est tranchée dans `telechargerEtInsererBreve`.
+      // Fraîcheur (Ben 2026-06-14) : cadence horaire → on n'importe QUE les
+      // contenus publiés il y a MOINS DE 2 H (le fil reste réellement frais ;
+      // les vieux contenus ne s'accumulent plus). L'idempotence par source_url
+      // + la fenêtre 2 h (> 1 h entre deux runs) garantit de ne rien rater.
+      const fraisDepuis = Date.now() - 2 * 3600 * 1000;
       const nouveau = articles.find(
-        (a) => !existants.has(a.lien) && a.publieLe !== null && a.description.length >= 40,
+        (a) =>
+          !existants.has(a.lien) &&
+          a.publieLe !== null &&
+          a.publieLe >= fraisDepuis &&
+          a.description.length >= 40,
       );
       if (nouveau === undefined) continue;
       const resultat = await telechargerEtInsererBreve({ source, article: nouveau }, urlSb, cle);

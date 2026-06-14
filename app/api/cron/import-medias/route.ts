@@ -50,7 +50,9 @@ export async function GET(requete: Request): Promise<NextResponse> {
   const offset = jourDeLAnnee();
   const rapports: Record<string, { crees: number; echecs: number }> = {};
   for (const format of FORMATS) {
-    const r = await importerFormat(format, urlSb, cle, 1, offset);
+    // Quota d'objectif relevé (Ben 2026-06-14) : jusqu'à 2 contenus par
+    // format/heure (atteint seulement s'il y a assez de contenus < 2 h).
+    const r = await importerFormat(format, urlSb, cle, 2, offset);
     rapports[format] = { crees: r.crees.length, echecs: r.echecs.length };
   }
   return NextResponse.json({ ok: true, rapports });

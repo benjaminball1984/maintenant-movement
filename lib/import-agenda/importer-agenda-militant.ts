@@ -171,10 +171,14 @@ async function lirePageEvenement(lien: string): Promise<EvenementSource | null> 
 }
 
 /**
- * Lance l'import. `maxNouveaux` borne le nombre d'événements TRAITÉS
- * (pages détail réellement visitées) par exécution.
+ * Lance l'import. `budgetSousRequetes` borne le COÛT en sous-requêtes (plan
+ * Free Cloudflare : 50 max) : examiner une page coûte 1, créer un événement
+ * ~5. On parcourt donc beaucoup d'événements (en sautant les passés, bon
+ * marché) tout en restant sous la limite.
  */
-export async function importerAgendaMilitant(maxNouveaux = 8): Promise<RapportImportAgenda> {
+export async function importerAgendaMilitant(
+  budgetSousRequetes = 46,
+): Promise<RapportImportAgenda> {
   const urlSb = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const cle = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (urlSb === undefined || urlSb === '' || cle === undefined || cle === '') {
@@ -208,13 +212,21 @@ export async function importerAgendaMilitant(maxNouveaux = 8): Promise<RapportIm
   ];
 
   const maintenant = new Date();
-  let traites = 0;
+  // Budget de SOUS-REQUÊTES (plan Free Cloudflare : 50 max par invocation).
+  // Examiner une page = 1 fetch (bon marché) ; CRÉER un événement = ~5 fetch
+  // (affiche, upload, 2 géocodages, insert). On peut donc PARCOURIR beaucoup
+  // d'événements pour SAUTER les passés (qui ne coûtent qu'un fetch chacun),
+  // tant qu'on ne crée pas trop — sans dépasser 50 (correctif Ben 2026-06-14 :
+  // les événements passés en tête épuisaient l'ancien quota de 7).
+  let cout = 2;
   for (const lien of liens) {
-    if (traites >= maxNouveaux) {
-      rapport.ecartes.push(`budget atteint (${maxNouveaux}) : le reste passera demain`);
+    if (cout + 1 > budgetSousRequetes) {
+      rapport.ecartes.push(
+        'budget de sous-requêtes atteint : le reste passera à la prochaine exécution',
+      );
       break;
     }
-    traites += 1;
+    cout += 1;
 
     const ev = await lirePageEvenement(lien);
     if (ev === null) {
@@ -239,6 +251,15 @@ export async function importerAgendaMilitant(maxNouveaux = 8): Promise<RapportIm
       rapport.ignores += 1;
       continue;
     }
+
+    // Création coûteuse (~5 fetch) : ne la lancer que si le budget le permet.
+    if (cout + 5 > budgetSousRequetes) {
+      rapport.ecartes.push(
+        'budget de sous-requêtes atteint avant création : le reste passera ensuite',
+      );
+      break;
+    }
+    cout += 5;
 
     const rImg = await fetch(ev.afficheUrl);
     if (!rImg.ok) {

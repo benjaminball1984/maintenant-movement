@@ -25,7 +25,10 @@ export async function GET(requete: Request): Promise<NextResponse> {
     return NextResponse.json({ ok: false, message: 'Non autorisé.' }, { status: 401 });
   }
 
-  const rapport = await importerAgendaMilitant(7);
+  // Budget en sous-requêtes (plan Free : 50 max) : on parcourt largement la
+  // liste pour sauter les événements passés et atteindre les à venir, sans
+  // dépasser la limite (Ben 2026-06-14).
+  const rapport = await importerAgendaMilitant(46);
   return NextResponse.json({
     ok: true,
     crees: rapport.crees,

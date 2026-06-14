@@ -18,8 +18,8 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-/** Nombre de brèves importées à chaque exécution horaire (Ben 2026-06-13). */
-const BREVES_PAR_HEURE = 4;
+/** Nombre de brèves importées à chaque exécution horaire (doublé, Ben 2026-06-14). */
+const BREVES_PAR_HEURE = 8;
 
 export async function GET(requete: Request): Promise<NextResponse> {
   const secret = process.env.CRON_SECRET;
