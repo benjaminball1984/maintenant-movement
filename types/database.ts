@@ -2370,7 +2370,8 @@ export type Database = {
           created_at: string;
           genre_declare: string | null;
           id: string;
-          option_index: number;
+          option_index: number | null;
+          options_choisies: number[] | null;
           personne_id: string;
           pronom: string | null;
           sondage_id: string;
@@ -2381,7 +2382,8 @@ export type Database = {
           created_at?: string;
           genre_declare?: string | null;
           id?: string;
-          option_index: number;
+          option_index?: number | null;
+          options_choisies?: number[] | null;
           personne_id: string;
           pronom?: string | null;
           sondage_id: string;
@@ -2392,7 +2394,8 @@ export type Database = {
           created_at?: string;
           genre_declare?: string | null;
           id?: string;
-          option_index?: number;
+          option_index?: number | null;
+          options_choisies?: number[] | null;
           personne_id?: string;
           pronom?: string | null;
           sondage_id?: string;
@@ -2550,6 +2553,7 @@ export type Database = {
       };
       sondage: {
         Row: {
+          choix_multiple: boolean;
           commune_id: string | null;
           created_at: string;
           createurice_id: string;
@@ -2568,6 +2572,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          choix_multiple?: boolean;
           commune_id?: string | null;
           created_at?: string;
           createurice_id: string;
@@ -2586,6 +2591,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          choix_multiple?: boolean;
           commune_id?: string | null;
           created_at?: string;
           createurice_id?: string;

@@ -35,6 +35,8 @@ interface ResultatsSondageProps {
   totalPondere: number;
   /** Vrai dès 300 répondant·es : la vue pondérée devient la vue PAR DÉFAUT. */
   pondereDisponible: boolean;
+  /** Choix multiple : pas de bascule pondéré, total pouvant dépasser 100 %. */
+  choixMultiple?: boolean;
   libelles?: LibellesResultatsSondage;
 }
 
@@ -51,9 +53,12 @@ export function ResultatsSondage({
   resultatsPonderes,
   totalPondere,
   pondereDisponible,
+  choixMultiple = false,
   libelles = LIBELLES_DEFAUT,
 }: ResultatsSondageProps) {
-  const [vue, setVue] = useState<'brut' | 'pondere'>(pondereDisponible ? 'pondere' : 'brut');
+  const [vue, setVue] = useState<'brut' | 'pondere'>(
+    pondereDisponible && !choixMultiple ? 'pondere' : 'brut',
+  );
 
   const enPondere = vue === 'pondere' && resultatsPonderes !== null;
   const compteurs = enPondere ? (resultatsPonderes ?? resultatsBruts) : resultatsBruts;
@@ -61,29 +66,36 @@ export function ResultatsSondage({
 
   return (
     <div className="grid gap-3">
-      <fieldset>
-        <legend className="sr-only">{libelles.legendeBascule}</legend>
-        <div className="flex flex-wrap items-center gap-2">
-          <BoutonVue
-            actif={vue === 'brut'}
-            libelle={libelles.vueBrute}
-            onClick={() => setVue('brut')}
-          />
-          <BoutonVue
-            actif={vue === 'pondere'}
-            libelle={libelles.vuePonderee}
-            onClick={() => setVue('pondere')}
-            desactive={!pondereDisponible}
-          />
-        </div>
-        <p className="mt-1 text-xs text-text-3" aria-live="polite">
-          {pondereDisponible
-            ? vue === 'pondere'
-              ? libelles.aidePondere
-              : libelles.aideBrut
-            : libelles.pondereIndisponible.replace('{total}', String(totalBrut))}
+      {choixMultiple ? (
+        <p className="text-xs text-text-3">
+          Plusieurs réponses possibles : le total des pourcentages peut dépasser 100 % (chaque
+          pourcentage est la part des votant·es ayant coché cette option).
         </p>
-      </fieldset>
+      ) : (
+        <fieldset>
+          <legend className="sr-only">{libelles.legendeBascule}</legend>
+          <div className="flex flex-wrap items-center gap-2">
+            <BoutonVue
+              actif={vue === 'brut'}
+              libelle={libelles.vueBrute}
+              onClick={() => setVue('brut')}
+            />
+            <BoutonVue
+              actif={vue === 'pondere'}
+              libelle={libelles.vuePonderee}
+              onClick={() => setVue('pondere')}
+              desactive={!pondereDisponible}
+            />
+          </div>
+          <p className="mt-1 text-xs text-text-3" aria-live="polite">
+            {pondereDisponible
+              ? vue === 'pondere'
+                ? libelles.aidePondere
+                : libelles.aideBrut
+              : libelles.pondereIndisponible.replace('{total}', String(totalBrut))}
+          </p>
+        </fieldset>
+      )}
 
       <ul className="grid gap-2">
         {options.map((opt, index) => {

@@ -59,6 +59,8 @@ interface FormulaireVoteProps {
   options: string[];
   /** Images des options (tableau parallèle, null = pas d'image), ou null. */
   optionsImages?: (string | null)[] | null;
+  /** Choix multiple : cases à cocher plutôt que boutons radio. */
+  choixMultiple?: boolean;
   voterSondage: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   libelles?: LibellesVote;
   messages?: MessagesValidationSondages;
@@ -73,6 +75,7 @@ export function FormulaireVote({
   sondageId,
   options,
   optionsImages = null,
+  choixMultiple = false,
   voterSondage,
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
@@ -81,6 +84,7 @@ export function FormulaireVote({
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [hydrate, setHydrate] = useState(false);
+  const [choisies, setChoisies] = useState<number[]>([]);
   useEffect(() => {
     setHydrate(true);
   }, []);
@@ -108,6 +112,14 @@ export function FormulaireVote({
   // qui échouait silencieusement) et un message explique l'attente.
   const captchaValide = (watch('token_turnstile') ?? '') !== '';
 
+  function basculerChoix(index: number) {
+    const suivant = choisies.includes(index)
+      ? choisies.filter((i) => i !== index)
+      : [...choisies, index];
+    setChoisies(suivant);
+    setValue('options_choisies', suivant, { shouldValidate: false });
+  }
+
   async function onSubmit(donnees: DonneesVoterSondage) {
     setErreur(null);
     setEnvoiEnCours(true);
@@ -132,24 +144,36 @@ export function FormulaireVote({
       <fieldset>
         <legend className="mb-2 font-body text-sm font-medium text-text-2">
           {libelles.legendeVote}
+          {choixMultiple ? ' — plusieurs réponses possibles' : ''}
         </legend>
         <div className="grid gap-2">
           {options.map((opt, index) => {
             const image = optionsImages?.[index] ?? null;
             return (
+              // biome-ignore lint/a11y/noLabelWithoutControl: l'input (radio ou case à cocher) est rendu dans la ternaire ci-dessous
               <label
                 key={`${index}-${opt}`}
                 className="flex cursor-pointer items-center gap-3 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2"
               >
-                {/* Pas de `valueAsNumber` : sur des radios il renvoie NaN
-                    (vote bloqué, vu en prod le 2026-06-12). La conversion
-                    chaîne -> nombre est faite par le schéma Zod. */}
-                <input
-                  type="radio"
-                  value={index}
-                  {...register('option_index')}
-                  className="accent-brand"
-                />
+                {/* Choix multiple : cases à cocher (état local → champ
+                    `options_choisies`). Choix unique : boutons radio (pas de
+                    `valueAsNumber`, qui renvoie NaN ; la conversion est faite
+                    par le schéma Zod). */}
+                {choixMultiple ? (
+                  <input
+                    type="checkbox"
+                    checked={choisies.includes(index)}
+                    onChange={() => basculerChoix(index)}
+                    className="accent-brand"
+                  />
+                ) : (
+                  <input
+                    type="radio"
+                    value={index}
+                    {...register('option_index')}
+                    className="accent-brand"
+                  />
+                )}
                 {image !== null ? (
                   <img
                     src={image}
@@ -165,7 +189,7 @@ export function FormulaireVote({
             );
           })}
         </div>
-        {errors.option_index !== undefined ? (
+        {!choixMultiple && errors.option_index !== undefined ? (
           <p className="mt-1 text-xs text-danger">{errors.option_index.message}</p>
         ) : null}
       </fieldset>
@@ -216,7 +240,12 @@ export function FormulaireVote({
         </p>
       ) : null}
 
-      <Button type="submit" disabled={envoiEnCours || !hydrate || !captchaValide}>
+      <Button
+        type="submit"
+        disabled={
+          envoiEnCours || !hydrate || !captchaValide || (choixMultiple && choisies.length === 0)
+        }
+      >
         {envoiEnCours ? libelles.ctaEnCours : libelles.ctaSubmit}
       </Button>
     </form>

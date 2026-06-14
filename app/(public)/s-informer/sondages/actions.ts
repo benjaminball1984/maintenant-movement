@@ -64,6 +64,7 @@ export async function creerSondage(
     question: donnees.question,
     options: donnees.options,
     options_images: optionsImages,
+    choix_multiple: donnees.choix_multiple ?? false,
     image_url:
       donnees.image_url === '' || donnees.image_url === undefined ? null : donnees.image_url,
     commune_id:
@@ -100,7 +101,7 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
   const supabase = await getSupabaseServer();
   const { data: sondage } = await supabase
     .from('sondage')
-    .select('id, options, statut')
+    .select('id, options, statut, choix_multiple')
     .eq('id', donnees.sondage_id)
     .maybeSingle();
   if (sondage === null) {
@@ -109,8 +110,25 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
   if (sondage.statut !== 'ouvert') {
     return { ok: false, message: 'Ce sondage n’est plus ouvert au vote.' };
   }
-  if (donnees.option_index >= sondage.options.length) {
-    return { ok: false, message: 'Option hors plage pour ce sondage.' };
+
+  // Choix unique → un index ; choix multiple → une liste d'index (dédupliquée).
+  const nbOptions = sondage.options.length;
+  let optionIndex: number | null = null;
+  let optionsChoisies: number[] | null = null;
+  if (sondage.choix_multiple === true) {
+    const choisies = [...new Set(donnees.options_choisies ?? [])];
+    if (choisies.length === 0) {
+      return { ok: false, message: 'Choisis au moins une option.' };
+    }
+    if (choisies.some((i) => i < 0 || i >= nbOptions)) {
+      return { ok: false, message: 'Option hors plage pour ce sondage.' };
+    }
+    optionsChoisies = choisies;
+  } else {
+    if (donnees.option_index === undefined || donnees.option_index >= nbOptions) {
+      return { ok: false, message: 'Option hors plage pour ce sondage.' };
+    }
+    optionIndex = donnees.option_index;
   }
 
   // Données « gratuites » du profil (revue 2026-06-12, Ben) : le code
@@ -134,7 +152,8 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
   const { error } = await supabase.from('reponse_sondage').insert({
     sondage_id: sondage.id,
     personne_id: session.userId,
-    option_index: donnees.option_index,
+    option_index: optionIndex,
+    options_choisies: optionsChoisies,
     code_postal: profil?.code_postal ?? null,
     tranche_age: trancheAge,
     pronom: null,

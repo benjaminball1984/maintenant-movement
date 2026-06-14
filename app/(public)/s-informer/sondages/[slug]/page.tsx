@@ -222,6 +222,7 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
               sondageId={sondage.id}
               options={sondage.options}
               optionsImages={sondage.options_images}
+              choixMultiple={sondage.choix_multiple}
               voterSondage={voterSondage}
             />
           </Card>
@@ -302,6 +303,7 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
               resultatsPonderes={sondage.resultats_ponderes}
               totalPondere={sondage.total_pondere}
               pondereDisponible={sondage.pondere_disponible}
+              choixMultiple={sondage.choix_multiple}
             />
           </section>
         ) : null}

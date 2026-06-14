@@ -108,13 +108,26 @@ export async function sondageParSlugAvecResultats(
     totalPondere = pondere.total;
   }
 
+  // Base d'affichage = nombre de VOTANT·ES. En choix multiple, un·e votant·e
+  // coche plusieurs options : la somme des compteurs dépasse alors le nombre de
+  // votant·es, et les pourcentages se calculent sur les votant·es.
+  const { count: nbVotants } = await supabase
+    .from('reponse_sondage')
+    .select('id', { count: 'exact', head: true })
+    .eq('sondage_id', sondageNarrowed.id);
+  const totalVotants = nbVotants ?? total;
+
   return {
     ...sondageNarrowed,
-    total_votes: total,
+    total_votes: totalVotants,
     resultats_par_option: compteurs,
     resultats_ponderes: resultatsPonderes,
     total_pondere: totalPondere,
-    pondere_disponible: total >= SEUIL_PONDERATION && resultatsPonderes !== null,
+    // Pas de pondération par quotas en choix multiple (v1).
+    pondere_disponible:
+      totalVotants >= SEUIL_PONDERATION &&
+      resultatsPonderes !== null &&
+      sondageNarrowed.choix_multiple !== true,
     createurice_prenom: createuricePrenom,
     createurice_nom: createuriceNom,
   };

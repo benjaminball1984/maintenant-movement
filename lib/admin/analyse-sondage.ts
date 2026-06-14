@@ -98,7 +98,9 @@ export async function analyserSondage(slug: string): Promise<AnalyseSondage | nu
     if (reponses.genre === undefined && v.genre_declare !== null && v.genre_declare !== '') {
       reponses.genre = v.genre_declare;
     }
-    return { optionIndex: v.option_index, reponses };
+    // Choix unique : l'index voté. Choix multiple (option_index null) : -1,
+    // exclu de l'agrégation par option (l'analyse de vote vise le choix unique).
+    return { optionIndex: v.option_index ?? -1, reponses };
   });
 
   // Résultat brut.

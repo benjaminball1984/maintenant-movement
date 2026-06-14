@@ -30,6 +30,8 @@ export function creerSondageFactory(
         .array(z.string().url().refine(estUrlImageDurable, messages.imageUrlEphemere).nullable())
         .max(20, messages.optionsMax)
         .optional(),
+      // Choix multiple : cases à cocher plutôt que boutons radio (Ben 2026-06-14).
+      choix_multiple: z.boolean().optional(),
       // Refus des CDN éphémères (Facebook/Instagram) : liens signés qui expirent.
       image_url: z
         .string()
@@ -76,6 +78,8 @@ export function creerVoterSondageSchema(
       // `valueAsNumber` de react-hook-form renvoie NaN sur des radios
       // (bug du vote vu en prod le 2026-06-12 : « Invalid input »). On
       // accepte donc chaîne OU nombre, converti puis borné en nombre.
+      // Choix UNIQUE : un index (optionnel ici car le choix multiple utilise
+      // `options_choisies` ; le refine final exige l'un OU l'autre).
       option_index: z
         .union([z.number(), z.string().min(1, messages.optionRequise)], {
           error: messages.optionRequise,
@@ -87,7 +91,20 @@ export function creerVoterSondageSchema(
             .int(messages.optionIndexEntier)
             .min(0, messages.optionIndexInvalide)
             .max(19, messages.optionIndexInvalide),
-        ),
+        )
+        .optional(),
+      // Choix MULTIPLE : liste d'index choisis (au moins un).
+      options_choisies: z
+        .array(
+          z.coerce
+            .number()
+            .int(messages.optionIndexEntier)
+            .min(0, messages.optionIndexInvalide)
+            .max(19, messages.optionIndexInvalide),
+        )
+        .min(1, messages.optionRequise)
+        .max(20, messages.optionIndexInvalide)
+        .optional(),
       /**
        * Variables sociodémo optionnelles (mode pondéré).
        * La personne peut refuser de les renseigner.
@@ -108,7 +125,13 @@ export function creerVoterSondageSchema(
       genre_declare: z.string().trim().max(100).optional().or(z.literal('')),
       token_turnstile: z.string().min(1, messages.turnstileRequis),
     })
-    .strict();
+    .strict()
+    .refine(
+      (d) =>
+        d.option_index !== undefined ||
+        (d.options_choisies !== undefined && d.options_choisies.length > 0),
+      { message: messages.optionRequise, path: ['option_index'] },
+    );
 }
 export const voterSondageSchema = creerVoterSondageSchema();
 
