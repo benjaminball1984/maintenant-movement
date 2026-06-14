@@ -8,10 +8,12 @@ import {
   type DonneesCreerMedia,
   type DonneesMettreAJourMedia,
   type DonneesPublierMedia,
+  type DonneesReclasserMedia,
   type DonneesRetirerMedia,
   creerMediaSchema,
   mettreAJourMediaSchema,
   publierMediaSchema,
+  reclasserMediaSchema,
   retirerMediaSchema,
 } from '@/lib/validations/media';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
@@ -126,6 +128,48 @@ export async function mettreAJourMedia(
     return {
       ok: false,
       message: `Modification impossible : ${error?.message ?? 'média introuvable'}`,
+    };
+  }
+
+  revalidatePath('/s-informer/media');
+  revalidatePath(`/s-informer/media/${maj.slug}`);
+  return { ok: true, slug: maj.slug };
+}
+
+/**
+ * Reclassement inline (type + tags) d'un média par un·e admin, déclenché
+ * directement depuis sa carte (demande Ben 2026-06-14). Action MINIMALE et
+ * sûre : elle n'écrit QUE `type` et `tags`, donc ne peut pas effacer le
+ * titre, le corps, l'image ou la source. Réservé aux admins.
+ */
+export async function reclasserMedia(
+  donneesBrutes: unknown,
+): Promise<ResultatAction<{ slug: string }>> {
+  const parse = reclasserMediaSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesReclasserMedia = parse.data;
+
+  if (!(await estAdminCourant())) {
+    return { ok: false, message: 'Réservé à l’administration.' };
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: maj, error } = await supabase
+    .from('media')
+    .update({
+      type: donnees.type,
+      tags: donnees.tags.length > 0 ? donnees.tags : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', donnees.media_id)
+    .select('slug')
+    .maybeSingle();
+  if (error !== null || maj === null) {
+    return {
+      ok: false,
+      message: `Reclassement impossible : ${error?.message ?? 'média introuvable'}`,
     };
   }
 

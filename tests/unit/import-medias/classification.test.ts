@@ -1,27 +1,43 @@
-import { estLiveDApresTitre } from '@/lib/import-medias/importer-medias';
+import { nettoyerTitreLive } from '@/lib/import-medias/importer-medias';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Classification live/vidéo (V2.6.114) : le flux YouTube n'indique pas le
- * direct, donc on ne marque « live » que si le TITRE le signale (constat Ben
- * 2026-06-13 : trop de vidéos classées « live » à tort).
+ * Nettoyage des badges de direct (V2.6.116) : un flux RSS/YouTube ne sert que
+ * des REDIFFUSIONS (pas de statut « en cours »), donc tout y est stocké en
+ * `video` et le type `live` est réservé à Twitch (temps réel). On se contente
+ * de retirer du titre le badge « direct » trompeur (constat Ben 2026-06-14 :
+ * l'onglet Lives se remplissait de rediffusions YouTube titrées « 🔴 »).
  */
-describe('estLiveDApresTitre', () => {
-  it('reconnaît un direct au titre', () => {
-    expect(estLiveDApresTitre('🔴 EN DIRECT - débat sur les retraites')).toBe(true);
-    expect(estLiveDApresTitre('EN DIRECT : conférence de presse')).toBe(true);
-    expect(estLiveDApresTitre('Notre LIVE de ce soir')).toBe(true);
-    expect(estLiveDApresTitre('Grand débat [DIRECT]')).toBe(true);
+describe('nettoyerTitreLive', () => {
+  it('retire les badges de direct en tête ou en queue', () => {
+    expect(nettoyerTitreLive('🔴 EN DIRECT - débat sur les retraites')).toBe(
+      'débat sur les retraites',
+    );
+    expect(nettoyerTitreLive('EN DIRECT : conférence de presse')).toBe('conférence de presse');
+    expect(nettoyerTitreLive('Grand débat [DIRECT]')).toBe('Grand débat');
+    expect(nettoyerTitreLive('I.A. va-t-elle survivre ? Gilles Babinet [EN DIRECT]')).toBe(
+      'I.A. va-t-elle survivre ? Gilles Babinet',
+    );
+    expect(nettoyerTitreLive('🔴 "Le pouvoir culturel à droite" : l\'enquête')).toBe(
+      '"Le pouvoir culturel à droite" : l\'enquête',
+    );
   });
 
-  it('classe une vidéo normale en NON-live', () => {
-    expect(estLiveDApresTitre('Blocage de Bayer par des paysan·nes près de Rennes')).toBe(false);
-    expect(estLiveDApresTitre('DE NAHEL À LYHANNA : QUI PROTÈGE DARMANIN ?')).toBe(false);
+  it('laisse intact un titre sans badge', () => {
+    expect(nettoyerTitreLive('Blocage de Bayer par des paysan·nes près de Rennes')).toBe(
+      'Blocage de Bayer par des paysan·nes près de Rennes',
+    );
+    expect(nettoyerTitreLive('DE NAHEL À LYHANNA : QUI PROTÈGE DARMANIN ?')).toBe(
+      'DE NAHEL À LYHANNA : QUI PROTÈGE DARMANIN ?',
+    );
   });
 
-  it('ne se laisse pas piéger par les mots contenant « direct » ou « live »', () => {
-    expect(estLiveDApresTitre('La nouvelle directive européenne')).toBe(false);
-    expect(estLiveDApresTitre('Action directe : enquête')).toBe(false);
-    expect(estLiveDApresTitre('Rester en vie, rester alive')).toBe(false);
+  it('ne touche pas au mot « direct » ou « live » employé dans une phrase', () => {
+    expect(nettoyerTitreLive('La nouvelle directive européenne')).toBe(
+      'La nouvelle directive européenne',
+    );
+    expect(nettoyerTitreLive('Action directe : enquête')).toBe('Action directe : enquête');
+    expect(nettoyerTitreLive('Rester en vie, rester alive')).toBe('Rester en vie, rester alive');
+    expect(nettoyerTitreLive('Notre LIVE de ce soir')).toBe('Notre LIVE de ce soir');
   });
 });

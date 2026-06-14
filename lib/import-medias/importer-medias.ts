@@ -39,18 +39,32 @@ export function urlEmbedYoutube(videoId: string): string {
 }
 
 /**
- * Marqueurs de direct dans un titre. Le flux RSS YouTube n'indique PAS le
- * statut « live » : on ne classe en `live` que si le TITRE le signale (🔴,
- * « en direct », « live », « [direct] »), sinon en `video` (constat Ben
- * 2026-06-13 : « plein de vidéos classées live alors que ce ne sont pas des
- * lives »). Une chaîne déclarée `live` dans les sources publie en réalité
- * surtout des vidéos : c'est le titre qui tranche, contenu par contenu.
+ * Badges de « direct » dans un titre de flux RSS/YouTube. ATTENTION : un flux
+ * RSS livre ces items APRÈS la fin du direct (ce sont des REDIFFUSIONS) et
+ * n'expose aucun statut « en cours ». On ne peut donc PAS en déduire un vrai
+ * live (constat Ben 2026-06-14, capture de l'onglet Lives : il se remplissait
+ * de rediffusions YouTube titrées « 🔴 » qui n'étaient plus en direct et ne
+ * se retiraient jamais). Ces marqueurs servent donc UNIQUEMENT à NETTOYER le
+ * titre affiché (un badge « 🔴 / [EN DIRECT] » sur une vidéo enregistrée
+ * induit le lecteur en erreur). Le type `live` est désormais réservé aux
+ * vrais directs Twitch (API Helix temps réel, retrait auto à la fin) : voir
+ * `lib/import-twitch`.
  */
-const MARQUEURS_LIVE = /🔴|\ben\s+direct\b|\blive\b|\[direct\]|\bdirect\b\s*[:–-]/i;
-
-/** Vrai si le titre signale un direct (ou le replay d'un direct). */
-export function estLiveDApresTitre(titre: string): boolean {
-  return MARQUEURS_LIVE.test(titre);
+/**
+ * Retire d'un titre les badges de direct trompeurs (🔴, [EN DIRECT], [LIVE],
+ * « EN DIRECT : … » en tête) pour une rediffusion stockée en `video`.
+ * Conservateur : ne touche pas au mot « direct »/« live » employé au fil d'une
+ * phrase (« directive », « action directe », « alive »…), ni à un « : » de
+ * titre qui n'est pas précédé du badge.
+ */
+export function nettoyerTitreLive(titre: string): string {
+  return titre
+    .replace(/🔴/g, ' ') // pastille rouge de direct
+    .replace(/\[(?:en\s+)?direct\]/gi, ' ') // [DIRECT] / [EN DIRECT]
+    .replace(/\[live\]/gi, ' ') // [LIVE]
+    .replace(/^\s*(?:en\s+direct|live)\s*[:–—-]\s*/i, '') // « EN DIRECT : … » en tête
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 /** Récupère et analyse le flux d'une source ; lève si le flux est en échec. */
@@ -276,16 +290,18 @@ export async function telechargerEtInsererMedia(
     }
   }
 
-  // Type RÉEL (V2.6.114) : une chaîne déclarée « live » publie surtout des
-  // vidéos normales ; on ne garde « live » que si le titre signale un direct.
-  let typeStocke: FormatMedia = format;
-  if (format === 'video' || format === 'live') {
-    typeStocke = estLiveDApresTitre(article.titre) ? 'live' : 'video';
-  }
+  // Type RÉEL (V2.6.116) : un flux RSS/YouTube ne peut PAS attester d'un
+  // direct EN COURS (il ne sert que des rediffusions, sans statut « live »).
+  // On stocke donc TOUJOURS ces contenus en `video` et on nettoie le badge
+  // « direct » trompeur du titre. Le type `live` est réservé aux vrais
+  // directs Twitch (lib/import-twitch, temps réel + retrait à la fin).
+  const estVideoOuLive = format === 'video' || format === 'live';
+  const typeStocke: FormatMedia = estVideoOuLive ? 'video' : format;
+  const titreFinal = estVideoOuLive ? nettoyerTitreLive(article.titre) : article.titre;
 
   const ligne = {
     slug,
-    titre: article.titre.slice(0, 200),
+    titre: titreFinal.slice(0, 200),
     corps,
     type: typeStocke,
     statut: 'publie',

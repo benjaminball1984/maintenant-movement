@@ -97,6 +97,33 @@ export const mettreAJourMediaSchema = creerMettreAJourMediaSchema();
 
 export type DonneesMettreAJourMedia = z.infer<typeof mettreAJourMediaSchema>;
 
+/**
+ * Reclassement inline d'un média par un·e admin (demande Ben 2026-06-14 :
+ * « pouvoir modifier les types, les tags et catégories en mode admin
+ * directement sur chaque contenu »). Volontairement MINIMAL : seuls `type`
+ * et `tags` sont touchés, pour ne JAMAIS risquer d'effacer le titre, le
+ * corps, l'image ou la source en passant par le formulaire complet.
+ */
+export const reclasserMediaSchema = z
+  .object({
+    media_id: z.string().uuid(),
+    type: z.enum([
+      'edito',
+      'tribune',
+      'article',
+      'breve',
+      'dessin',
+      'podcast',
+      'video',
+      'live',
+      'newsletter',
+    ]),
+    tags: z.array(z.string().trim().max(60)).max(20),
+  })
+  .strict();
+
+export type DonneesReclasserMedia = z.infer<typeof reclasserMediaSchema>;
+
 export function creerRetirerMediaSchema(
   messages: MessagesValidationMedia = MESSAGES_VALIDATION_MEDIA_DEFAUT,
 ) {

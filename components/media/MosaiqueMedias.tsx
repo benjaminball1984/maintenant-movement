@@ -1,4 +1,5 @@
 import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
+import { EditeurClassementMedia } from '@/components/media/EditeurClassementMedia';
 import { MediaEmbed } from '@/components/media/MediaEmbed';
 import { ImageAffiche } from '@/components/ui';
 import type { MediaEnrichi } from '@/lib/media/requetes';
@@ -214,6 +215,22 @@ function BoutonUne({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin
   );
 }
 
+/**
+ * Éditeur admin inline du classement (type + tags) d'une carte (demande Ben
+ * 2026-06-14). N'apparaît qu'en mode admin ; replié, c'est un simple bouton
+ * « Classer ».
+ */
+function BoutonReclasser({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin }) {
+  if (admin?.estAdmin !== true) return null;
+  return (
+    <EditeurClassementMedia
+      mediaId={media.id}
+      typeInitial={media.type}
+      tagsInitial={media.tags ?? []}
+    />
+  );
+}
+
 /** Lien de l'item : site source (contenu importé) ou fiche interne (maison). */
 function LienMedia({
   media,
@@ -268,6 +285,7 @@ function CarteUne({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin 
             {libelleAction(media)}
           </LienMedia>
           <BoutonUne media={media} admin={admin} />
+          <BoutonReclasser media={media} admin={admin} />
         </div>
       </div>
     </article>
@@ -299,6 +317,7 @@ function CarteImportante({ media, admin }: { media: MediaEnrichi; admin?: Option
             {libelleAction(media)}
           </LienMedia>
           <BoutonUne media={media} admin={admin} />
+          <BoutonReclasser media={media} admin={admin} />
         </div>
       </div>
     </article>
@@ -339,6 +358,7 @@ function CarteAnnexe({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdm
             {libelleAction(media)}
           </LienMedia>
           <BoutonUne media={media} admin={admin} />
+          <BoutonReclasser media={media} admin={admin} />
         </div>
       </div>
     </article>
