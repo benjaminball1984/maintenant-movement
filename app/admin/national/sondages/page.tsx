@@ -5,7 +5,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateCourte } from '@/lib/format-date';
 import { compter } from '@/lib/pluriel';
-import { ExternalLink, Vote } from 'lucide-react';
+import { BarChart3, ExternalLink, Vote } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -193,13 +193,22 @@ export default async function PageAdminSondages({ searchParams }: Props) {
                     Créé le {formaterDateCourte(s.createdAt)}
                     {s.fermeLe !== null ? ` · fermé le ${formaterDateCourte(s.fermeLe)}` : ''}
                   </span>
-                  <Link
-                    href={`/s-informer/sondages/${s.slug}`}
-                    className="inline-flex items-center gap-1 text-brand hover:underline"
-                  >
-                    <ExternalLink size={12} aria-hidden="true" />
-                    Page publique
-                  </Link>
+                  <span className="flex flex-wrap items-center gap-3">
+                    <Link
+                      href={`/admin/national/sondages/${s.slug}`}
+                      className="inline-flex items-center gap-1 text-brand hover:underline"
+                    >
+                      <BarChart3 size={12} aria-hidden="true" />
+                      Analyse
+                    </Link>
+                    <Link
+                      href={`/s-informer/sondages/${s.slug}`}
+                      className="inline-flex items-center gap-1 text-brand hover:underline"
+                    >
+                      <ExternalLink size={12} aria-hidden="true" />
+                      Page publique
+                    </Link>
+                  </span>
                 </div>
               </Card>
             </li>
