@@ -89,8 +89,17 @@ export function QualificationProgressive({
     return <p className="text-sm text-text-2">{libelles.merciFin}</p>;
   }
 
+  // Le 2ᵉ champ peut être déclenché par UNE ou PLUSIEURS valeurs (ex. bénévolat
+  // « Oui… » ×3, syndicat « actuellement »/« anciennement ») : même logique que
+  // le serveur, sinon le champ ne s'affiche jamais et le vote reste bloqué.
+  const declencheursSecondaire: readonly string[] =
+    question.secondaire === undefined
+      ? []
+      : Array.isArray(question.secondaire.requisSi)
+        ? question.secondaire.requisSi
+        : [question.secondaire.requisSi];
   const secondaireRequise =
-    question.secondaire !== undefined && reponsePrincipale === question.secondaire.requisSi;
+    reponsePrincipale !== null && declencheursSecondaire.includes(reponsePrincipale);
 
   return (
     <Card variant="eleve" className="grid gap-4" aria-live="polite">
