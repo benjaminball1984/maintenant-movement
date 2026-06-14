@@ -3,10 +3,10 @@
 import { Button } from '@/components/ui';
 import { TAGS_BREVES } from '@/lib/import-breves/tags';
 import type { TypeMedia } from '@/types/database';
-import { Check, Tag, X } from 'lucide-react';
+import { Check, Tag, Trash2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { reclasserMedia } from '../../app/(public)/s-informer/media/actions';
+import { reclasserMedia, retirerMedia } from '../../app/(public)/s-informer/media/actions';
 
 /**
  * Éditeur inline admin du CLASSEMENT d'un contenu (demande Ben 2026-06-14 :
@@ -44,6 +44,7 @@ export function EditeurClassementMedia({
   const [type, setType] = useState<TypeMedia>(typeInitial);
   const [tags, setTags] = useState<string[]>(tagsInitial);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [confirmRetrait, setConfirmRetrait] = useState(false);
   const [enCours, demarrer] = useTransition();
 
   function basculerTag(t: string) {
@@ -66,6 +67,23 @@ export function EditeurClassementMedia({
         return;
       }
       setOuvert(false);
+      router.refresh();
+    });
+  }
+
+  // Modération inline (demande Ben 2026-06-14) : retirer un contenu de la
+  // publication directement depuis la carte, sans passer par le dashboard.
+  function retirer() {
+    setErreur(null);
+    demarrer(async () => {
+      const r = await retirerMedia({
+        media_id: mediaId,
+        raison_retrait: 'Retiré en modération depuis le classement.',
+      });
+      if (!r.ok) {
+        setErreur(r.message);
+        return;
+      }
       router.refresh();
     });
   }
@@ -140,6 +158,43 @@ export function EditeurClassementMedia({
             <X size={14} strokeWidth={1.5} className="mr-1.5" aria-hidden="true" />
             Annuler
           </Button>
+        </div>
+
+        {/* Modération : retirer le contenu sans passer par le dashboard. */}
+        <div className="border-border border-t pt-2">
+          {confirmRetrait ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-text-2 text-xs">Retirer ce contenu de la publication ?</span>
+              <Button
+                type="button"
+                variant="ghost"
+                taille="sm"
+                disabled={enCours}
+                onClick={retirer}
+                className="text-danger"
+              >
+                <Trash2 size={14} strokeWidth={1.6} className="mr-1.5" aria-hidden="true" />
+                {enCours ? 'Retrait…' : 'Oui, retirer'}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                taille="sm"
+                disabled={enCours}
+                onClick={() => setConfirmRetrait(false)}
+              >
+                Non
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmRetrait(true)}
+              className="text-danger text-xs underline underline-offset-2 hover:opacity-80"
+            >
+              Retirer ce contenu (modération)
+            </button>
+          )}
         </div>
       </div>
     </div>
