@@ -82,6 +82,11 @@ const ORIGINES = {
   // Miniatures des vidéos YouTube (servies en repli si la copie bucket
   // échoue) et pochettes de podcasts hébergées chez les diffuseurs.
   youtubeImg: 'https://i.ytimg.com',
+  // Lecteur Twitch (rubrique Lives : chaînes engagées en direct, demande Ben
+  // 2026-06-14). L'iframe est servie depuis player.twitch.tv.
+  twitchPlayer: 'https://player.twitch.tv',
+  // Miniatures des directs et avatars Twitch (servis par le CDN jtvnw).
+  twitchImg: 'https://static-cdn.jtvnw.net',
 };
 
 /**
@@ -122,7 +127,7 @@ const directivesCsp = [
   // Images : assets locaux, data URLs (inline base64 utilisés par MapLibre,
   // certains avatars), blob URLs (upload preview), tuiles OSM, médias hébergés
   // sur Supabase Storage.
-  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.tilesOsmNu} ${ORIGINES.tilesCarto} ${ORIGINES.supabaseHttps} ${ORIGINES.youtubeImg}`,
+  `img-src 'self' data: blob: ${ORIGINES.tilesOsm} ${ORIGINES.tilesOsmNu} ${ORIGINES.tilesCarto} ${ORIGINES.supabaseHttps} ${ORIGINES.youtubeImg} ${ORIGINES.twitchImg}`,
 
   // Vocaux et fichiers audio du réseau social (~10 min max, hébergés sur
   // Supabase Storage). Vidéo non hébergée (voir reseau-social-V2.md §3).
@@ -151,7 +156,7 @@ const directivesCsp = [
   // - Turnstile (widget de challenge).
   // - Stripe (Checkout, Elements, 3DS hosted fields).
   // - YouTube sans cookie (embeds vidéo/lives de la revue de presse).
-  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks} ${ORIGINES.youtubeNoCookie}`,
+  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks} ${ORIGINES.youtubeNoCookie} ${ORIGINES.twitchPlayer}`,
 
   // Fonts : auto-hébergées ; data: pour fonts inline éventuelles.
   "font-src 'self' data:",

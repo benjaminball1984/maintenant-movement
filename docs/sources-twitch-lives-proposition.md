@@ -1,128 +1,154 @@
 # Proposition — chaînes Twitch engagées pour la rubrique « Lives »
 
-> Recherche du 2026-06-14 (demande Ben). Twitch = vrai direct, donc bien plus
-> adapté à la rubrique « Lives » que les vidéos YouTube (qui ne sont presque
-> jamais des directs). À VALIDER / ÉLAGUER par Lilou/Ben avant intégration.
-> Chaque chaîne a été trouvée citée dans une source (colonne Source) — aucune
-> n'est inventée. Les handles restent à reconfirmer un par un au branchement.
+> Recherche des 2026-06-14 (2 passages, demande Ben). Twitch = vrai direct, donc
+> adapté à la rubrique « Lives ». Orientation resserrée (consigne Ben) : **gauche
+> radicale / révolutionnaire, anticapitaliste, anarcho-communiste, féminisme
+> INTERSECTIONNEL, antiracisme/décolonial, LGBTQIA+/queer/trans, écologie radicale,
+> woke/intersectionnel, ou élu·es à la gauche de la gauche.**
+>
+> Exclusions appliquées : pas de personnages masqués/anonymes ; on ne retient pas
+> une streameuse juste parce que femme (féminin ≠ féministe) ; Angle Droit et
+> L'AntiStream retirés. À VALIDER / ÉLAGUER par Lilou/Ben.
+>
+> ⚠️ Les **handles** restent à reconfirmer un par un : l'intégration via l'API
+> Twitch ne retiendra de toute façon que ceux qui existent (les invalides sont
+> ignorés). Quelques-uns à vérifier : `berniesanders`, `ultiaa`, `djelib`,
+> `ilhanmn`, `gremloe`, `central_committee`.
 
-**Orientation** : féministe, antiraciste, décolonial, LGBTQIA+, écologiste,
-justice sociale, gauche. Jamais d'extrême droite.
+## Politiques à la gauche de la gauche (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| jlmelenchon | Jean-Luc Mélenchon | Chaîne du leader de La France Insoumise |
+| la_france_insoumise | La France Insoumise | Chaîne officielle du mouvement (meetings, débats) |
+| aleaument | Antoine Léaument | Député LFI, lives depuis sa permanence parlementaire |
+| deputwitch | Ugo Bernalicis | Député LFI « DepuTwitch », lives depuis l'hémicycle, soutien aux grèves |
+| louisboyard | Louis Boyard | Député LFI, lives militants (dont émission Palestine) |
+| revolutionpermanente | Révolution Permanente | Média trotskiste (issu du NPA) : marxisme, grèves, luttes |
 
-## Politique FR (décryptage, éducation populaire)
-| Handle | Nom | Description | Source |
+## Gauche radicale / révolutionnaire / marxiste (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| 7krone | 7Krone | « Communiste, bisexuel·le » : vulgarisation anticapitaliste et queer |
+| bolchegeek | Bolchegeek (B. Patinaud) | Critique pop culture matérialiste/marxiste, lutte des classes |
+| usul2000 | Usul | Chroniqueur marxiste (ex-Mediapart, Backseat) |
+| ostpolitik | Ostpolitik | Matinales d'actu ancrées à gauche (ex-binôme d'Usul) |
+| danyetraz | Dany et Raz | Talk quotidien de gauche radicale et populaire |
+| mdeetz | mDeetz | Vulgarisation politique de gauche, book club |
+| kaleevision | KaLee Vision | Analyse politique ancrée à gauche |
+| ribodanslasauce | RiboDansLaSauce | Lives politiques réguliers avec L'Humanité |
+
+## Antifascisme / analyse des discours (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| clemovitch | Clément Viktorovitch | Rhétorique, alerte sur les dérives fascistes (influenceurs antifascistes, Politis) |
+| emmodem | Emmodem | Commentaire politique de gauche, combat contre l'extrême droite |
+| rivenzi | Rivenzi | Mobilisé contre l'extrême droite, vulgarise l'histoire des luttes sociales |
+
+## Antiracisme / décolonial (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| histoires_crepues | Histoires Crépues | Média antiraciste/décolonial (histoire coloniale) |
+| lemwakast | Samora Curier (LeMwakast) | Créateur décolonial/antiraciste (Histoires Crépues) |
+| rebeudeter | RebeuDeter | Outil de modération solidaire anti-harcèlement raciste/sexiste |
+
+## Afroféminisme & représentation (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| afrogameuses | Afrogameuses (J. Lufau) | Collectif afroféministe, lutte contre racisme/sexisme dans le gaming |
+| sasskeh_ | Sasskeh | Ambassadrice Afrogameuses |
+| choublak | Choublak | Streameuse afro-antillaise, Afrogameuses |
+| delfea | Delfea | Mobilisée contre racisme/sexisme, Afrogameuses |
+| djelib | DjeliB | Streameur·euse afro queer (iel/lui), Afrogameuses |
+
+## Féminisme intersectionnel (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| modiiie | Modiie (A. Garestier) | Politiste, sciences sociales féministes (Furax, NFP) |
+| turbojoul | Joul | Co-fondatrice du marathon féministe Furax |
+| nat_ali | Nat'Ali | Co-fondatrice de Furax, féministe queer + antiraciste |
+| lixiviatio | Lixiviatio | Créatrice du marathon Et Ta Cause (trans-inclusif) |
+| neivee | Neivee | Co-organisatrice d'Et Ta Cause |
+| ettacause | Et Ta Cause (collectif) | Marathon féministe & queer (~80 streameuses, asso trans) |
+| brillantkaiman | Krokoku | Émission féministe MardiMoiTout (injonctions faites aux femmes) |
+| ultiaa | Ultia | Streameuse féministe et inclusive |
+
+## Association féministe gaming trans-inclusive — GameHer (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| lynamess | Lynamess | Présidente de GameHer (féministe, trans-inclusive) |
+| lywen__ | Lywen | Trésorière de GameHer |
+| caitaezul | Caitaezul | Membre de GameHer |
+| violine__ | Violine | Membre de GameHer |
+| shiranamioff | Shiranami | Membre de GameHer |
+
+## LGBTQIA+ / queer / trans & anti-validisme (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| avamind | Ava Mind | Streameuse DJ engagée, communauté LGBTQI+ de gauche |
+| clavtv | ClavTV | Collectif anti-validiste, antiraciste, anticapitaliste, féministe, queer |
+
+## International — gauche radicale anglophone
+| Handle | Nom | Engagement |
+|---|---|---|
+| hasanabi | Hasan Piker | Plus gros streamer politique de gauche de Twitch (socialiste, anticapitaliste, pro-Palestine) |
+| frogan | Frogan | Gauche radicale, voix anticoloniale et pro-Palestine |
+| dylanburnstv | Dylan Burns | Essayiste socialiste (cité par Red Pepper / DSA) |
+| gremloe | Gremloe | Écosystème « overtly leftist » de Twitch |
+| central_committee | Mike from PA | Militant DSA, organisateur syndical |
+| themajorityreport | The Majority Report | Talk-show socialiste (Sam Seder & Emma Vigeland) |
+| theserfstv | The Serfs | Collectif anticapitaliste satirique (Canada) |
+
+## International — élu·es à gauche (anglophone)
+| Handle | Nom | Engagement |
+|---|---|---|
+| aoc | Alexandria Ocasio-Cortez | Élue démocrate-socialiste (DSA), droits trans |
+| berniesanders | Bernie Sanders | Sénateur socialiste démocratique |
+| ilhanmn | Ilhan Omar | Élue du « Squad », antiraciste, pro-Palestine |
+
+## International — gauche radicale hispanophone (1er passage)
+| Handle | Nom | Engagement |
+|---|---|---|
+| facudiazt | Facu Díaz | Humoriste/streamer de gauche (ex-La Tuerka) |
+| somosgelatina_ | Gelatina (P. Rosemblat) | Humour et actu de gauche populaire (Argentine) |
+| tomasrebord | Tomás Rebord | Journaliste/streamer de gauche (Argentine) |
+| srevolution | Marina Lobo | Journaliste féministe/progressiste (Espagne) |
+| omaranguita | Omar Anguita | Élu socialiste, débats de gauche (Espagne) |
+
+## Médias indépendants engagés (FR)
+| Handle | Nom | Engagement |
+|---|---|---|
+| lhumanitefr | L'Humanité | Quotidien communiste, lives (Fête de l'Huma), chroniques anticapitalistes |
+| blastinfo | Blast (Salomé Saqué, Paloma Moritz) | Média indépendant : écologie politique, antifascisme, féminisme |
+| mediapart | Mediapart | Journal d'investigation, émissions « À l'air libre » (luttes, justice) |
+
+## Ajouts via le réseau (passage v3, à ranger par thème)
+| Handle | Nom | Thème | Engagement |
 |---|---|---|---|
-| jeanmassiet | Jean Massiet | Décryptage politique en direct (ex-Accropolis, Backseat), gauche/éduc pop | fr.wikipedia.org/wiki/Jean_Massiet |
-| clemovitch | Clément Viktorovitch | Rhétorique et décryptage du discours politique | politis.fr (HS81 influenceurs antifascistes) |
-| ostpolitik | Ostpolitik | Revue de presse matinale de gauche (ex-Usul), partenariat Mediapart | politis.fr |
-| bolchegeek | Bolchegeek | Cultures pop, politique et JV sous angle anticapitaliste | politis.fr |
-| lantistream | L'AntiStream | Streamer antifasciste/anarchiste, revue de presse, entretiens | politis.fr |
-| histoires_crepues | Histoires Crépues | Éducation décoloniale, histoire (dé)coloniale (Seumboy) | politis.fr |
-| nat_ali | Nat'Ali | Streameuse féministe de gauche, co-fondatrice de Furax | rtbf.be |
-| kaleevision | KaLeeVision | Ex-journaliste radio, décryptage politique « radio libre » | ladn.eu |
-
-## Féminisme FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| lixiviatio | Lixiviatio | Créatrice du marathon féministe « Et ta cause » | rtbf.be |
-| neivee | Neivee | Co-organisatrice du marathon féministe « Et ta cause » | gensdinternet.fr |
-| maghla | Maghla | A dénoncé les violences sexistes et le cyberharcèlement sur Twitch | strategies.fr |
-| ultia | Ultia | Visibilité des créatrices, marathons caritatifs féministes | rtbf.be |
-| modiiie | Modiiie (A. Garestier) | Politologue : patriarcat, féminisme, justice sociale, critique RN | fr.wikipedia.org/wiki/Modiie |
-| angledroit | Angle Droit | Juriste droit du travail, vulgarisation juridique engagée | terrafemina.com |
-| turbojoul | Joul | Psychologue, co-fondatrice du marathon féministe Furax | esport-insights.com |
-| emmodem | Emmodem | Streameuse politique de gauche (société, immigration, Palestine) | leconnardenchaine.fr |
-| aayley | Aayley | Causes progressistes et féminisme dans le JV | socialter.fr |
-| zulzorander | Zul'Zorander | Autrice/streameuse, causes féministes et progressistes | socialter.fr |
-
-## Antiracisme & décolonial FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| afrogameuses | Afrogameuses | Collectif (J. Lufau) : représentation des femmes afrodescendantes | bondyblog.fr |
-| rebeudeter | RebeuDeter | Streamer des quartiers, outil anti-cyberharcèlement « Place de la Paix » | fr.wikipedia.org/wiki/RebeuDeter |
-| 7krone | 7Krone | Streameuse trans anticapitaliste, luttes/sociologie, antiracisme | socialter.fr |
-| mdeetz | mDeetz | Vulgarisation sciences sociales, racisme et discriminations | socialter.fr |
-
-## LGBTQIA+ FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| redfanny_ | RedFanny | Militante féministe/LGBT/antiraciste, diversité dans le JV | gameher.fr |
-| arewilia | Arewilia | Streameuse trans partenaire, visibilité trans | gayvox.fr |
-| lynamess | LynaMess | Présidente d'« Et Ta Cause » (fonds pour les personnes trans) | gameher.fr |
-| lywen__ | Lywen | Trésorière d'« Et Ta Cause » | gameher.fr |
-| caitaezul | Caitaezul | Streameuse queer, JV + politique + vulgarisation | gameher.fr |
-| djelibae | DjeliBae | Streameuse non-binaire, communauté Afrogameuses | afrogameuses.com |
-| caulifla_19 | Caulifla_19 | Streameuse trans, annuaire LGBTQIA+ Stream'Her | stream-her.com |
-| rozozepine | Rozozepine | Streameuse queer, annuaire Stream'Her | stream-her.com |
-
-## Écologie & climat FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| le_reveilleur | Le Réveilleur | Vulgarisation climat/énergie, « Actu Climat » en live | linfodurable.fr |
-| chercheures_de_montagnes | Chercheur·e·s de montagnes | Recherche en montagne en direct : climat, biodiversité | labexittem.fr |
-| pogscience | PogScience | Réseau de vulgarisation scientifique en direct (environnement) | collectifconscience.org |
-| collectifconscience | Collectif Conscience | Conscience Live : culture scientifique, environnement/climat | collectifconscience.org |
-| toutsecomprend | ToutSeComprend | Vulgarisation sciences en direct (R. Isnard) | gostudent.org |
-
-## Justice sociale & travail FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| danyetraz | Dany et Raz | Talk-show politique de gauche populaire/anticapitaliste | socialter.fr |
-| usul2000 | Usul | Vidéaste politique de gauche, Stream reconductible (caisses de grève) | fr.wikipedia.org/wiki/Usul |
-| sanslesmains73 | Sans Les Mains | Streamer tétraplégique, accessibilité du JV, anti-validisme | talenteo.fr |
-| handigamersassociation | Handigamers Association | Accès des personnes handicapées à l'esport, accessibilité | talenteo.fr |
-
-## Partis, élu·es & médias engagés FR
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| victoirespopulaires | Victoires Populaires | Média/chaîne de gauche populaire, directs politiques et sociaux | (exemple fourni par Ben) |
-| mediapart | Mediapart | Journal d'investigation indépendant, émissions « À l'air libre » | twitch.tv/mediapart |
-| _(catégorie à étoffer : agent en timeout — Blast, Le Média, QG, LFI… à reconfirmer)_ | | | |
-
-## International anglophone
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| aoc | Alexandria Ocasio-Cortez | Élue progressiste US, pionnière des town halls/streams politiques | (exemple fourni par Ben) |
-| hasanabi | HasanAbi (Hasan Piker) | Commentateur politique de gauche, figure majeure de Twitch | nbcnews.com |
-| frogan | Frogan | Streameuse politique d'extrême gauche, anti-impérialiste | nbcnews.com |
-| dylanburnstv | Dylan Burns | Journaliste politique de gauche, politique étrangère | redpepper.org.uk |
-| bernie_sanders | Bernie Sanders | Sénateur progressiste US, premier candidat à ouvrir une chaîne Twitch | cnn.com |
-| livagar | Liv Agar | Streameuse/podcasteuse trans, philosophie politique d'extrême gauche | bblloobb.com |
-| theserfstv | The Serfs | Commentaire politique de gauche satirique (Canada) | bblloobb.com |
-| robrousseau | Rob Rousseau | Analyse politique de gauche (Harbinger Media, Montréal) | bblloobb.com |
-| leftflankvets | Left Flank Vets | Vétérans anti-guerre, anti-complexe militaro-industriel | bblloobb.com |
-| themajorityreport | The Majority Report | Talk-show progressiste US (Sam Seder) | bblloobb.com |
-| humanistreport | The Humanist Report | Émission progressiste US (Mike Figueredo) | bblloobb.com |
-
-## International hispanophone & autres
-| Handle | Nom | Description | Source |
-|---|---|---|---|
-| facudiazt | Facu Díaz | Humoriste/streamer de gauche (ex-La Tuerka), actu satirique | es.wikipedia.org |
-| somosgelatina_ | Gelatina (P. Rosemblat) | Humour et actualité de gauche (Argentine) | elplanteo.com |
-| tomasrebord | Tomás Rebord | Journaliste/streamer de gauche, longues interviews (Argentine) | letrap.com.ar |
-| srevolution | Marina Lobo | Journaliste féministe/progressiste (Espagne) | radiocable.com |
-| omaranguita | Omar Anguita | Élu socialiste espagnol, débats politiques de gauche | newtral.es |
+| invincible_jane | Jennifer Lufau | Afroféminisme | Fondatrice d'Afrogameuses, militante anti-misogynoir |
+| mamapaprika | Mamapaprika | Afroféminisme | Ambassadrice Afrogameuses (ARTE, Outremer La 1ère) |
+| sherazland | Sheraz | Antiracisme / féminisme | Dénonce racisme & grossophobie sur Twitch, Afrogameuses |
+| vazek_tomi | Vazek | LGBTQIA+ / drag | Drag queen non-binaire, alliée féministe (Furax) |
+| dofla | Dofla | Antifascisme | Streameuse antifa, a streamé depuis l'Assemblée (R. Arnault) |
+| hugoauperchoir | Hugo Au Perchoir | Vulgarisation politique | Émission « Au Perchoir », actu parlementaire (ciblé TwitchGauchiste) |
+| zulzorander | Zul'Zorander | Gauche / littérature engagée | Débats d'actu + « Des streams et des livres » (auteurs engagés) |
+| julienpaniac | Julien Paniac | Anti-sexisme | Un des rares streamers masculins ouvertement anti-sexisme |
+| krokoku | Krokoku | Féminisme | Émission « MardiMoiTout » (injonctions faites aux femmes) |
+| aayley | Aayley | Féminisme | Discours féministe sur la place des femmes dans le JV |
 
 ---
 
-## Comment les brancher (proposition technique)
+## Thèmes à étoffer (agents en échec / contenu rare)
+- **Écologie / décroissance radicale** : très peu de chaînes Twitch purement
+  « décroissance » militante (le créneau vit surtout sur YouTube). À creuser sur
+  demande (ex. Bon Pote, Partager c'est sympa, Vert de rage en live ?).
+- **Hispanophone** : agent rate-limité au 2ᵉ passage → liste reprise du 1er. Peut
+  être élargie.
 
-Twitch n'a PAS de flux RSS : on ne peut pas réutiliser le pipeline actuel.
-Pour une vraie rubrique « Lives » (= qui est EN DIRECT maintenant), il faut
-l'**API Twitch (Helix)** :
+## Comment les brancher (rappel)
 
-1. **Clé** : créer une application Twitch (console développeur, gratuit) →
-   `TWITCH_CLIENT_ID` + `TWITCH_CLIENT_SECRET`. Conforme au pattern adapter du
-   projet (§0bis.2) : on construit contre un **mock** (rubrique vide tant que
-   la clé n'est pas posée), branchement réel quand Ben fournit la clé.
-2. **Cron horaire** : interroger `helix/streams?user_login=...` pour la liste
-   ci-dessus → récupérer les chaînes actuellement EN DIRECT (titre, jeu/catégorie,
-   miniature, viewers).
-3. **Affichage** : créer/mettre à jour des `media type='live'` pour les chaînes
-   en direct (embed `player.twitch.tv`), et les **retirer quand le live se
-   termine** → la rubrique « Lives » montre en permanence les directs en cours,
-   et elle est vide quand personne ne streame (honnête).
-
-Alternative plus simple sans API : juste lister les chaînes (cartes statiques
-vers leur Twitch), mais sans savoir qui est en direct — moins pertinent pour
-une rubrique « Lives ».
+Twitch n'a pas de RSS : on passe par l'**API Twitch (Helix)** avec la clé que tu
+viens de créer (TWITCH_CLIENT_ID/SECRET). Un cron interroge `helix/streams` pour
+ces handles → crée des `media type='live'` (embed `player.twitch.tv`) pour les
+chaînes EN DIRECT, et les retire quand le live s'arrête. La rubrique « Lives »
+montre donc en permanence les directs en cours (et reste vide si personne ne
+streame). Les handles invalides sont ignorés par l'API (filet anti-erreur).

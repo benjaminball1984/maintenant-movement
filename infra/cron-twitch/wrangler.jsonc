@@ -1,0 +1,10 @@
+{
+  "name": "maintenant-cron-twitch",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    // Toutes les 15 minutes : les directs Twitch sont éphémères, on veut les
+    // afficher vite quand ils commencent et les retirer vite quand ils finissent.
+    "crons": ["*/15 * * * *"]
+  }
+}

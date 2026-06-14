@@ -41,10 +41,18 @@ export function MediaEmbed({ type, mediaUrl, vignetteUrl, titre }: MediaEmbedPro
 
   // vidéo / live : façade puis iframe au clic.
   if (lecture) {
+    // Le lecteur Twitch exige un paramètre `parent` = domaine qui héberge
+    // l'iframe (sinon il refuse de charger), et son URL a déjà un `?channel=`.
+    const estTwitch = mediaUrl.includes('player.twitch.tv');
+    const parent =
+      typeof window !== 'undefined' ? window.location.hostname : 'maintenant-le-mouvement.org';
+    const src = estTwitch
+      ? `${mediaUrl}&parent=${parent}&autoplay=true&muted=true`
+      : `${mediaUrl}?autoplay=1`;
     return (
       <div className="aspect-video w-full overflow-hidden rounded-md">
         <iframe
-          src={`${mediaUrl}?autoplay=1`}
+          src={src}
           title={titre}
           className="h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
