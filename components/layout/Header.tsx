@@ -1,6 +1,6 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { ESPACES } from '@/config/espaces';
+import { RUBRIQUES_MENU } from '@/config/rubriques';
 import { SITE } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
@@ -12,31 +12,46 @@ import { HeaderProfilMenu } from './HeaderProfilMenu';
 
 const FALLBACK_RECHERCHE_ARIA = 'Recherche globale';
 const FALLBACK_CONNEXION = 'Se connecter';
-const FALLBACK_INSCRIPTION = 'Créer un compte';
+const FALLBACK_ADHERER = 'Adhérer';
 
 /**
- * Header du site (chantier 2.1).
+ * Header du site.
  *
- * Structure (cf. 01_ARCHITECTURE.md §3) :
+ * Structure :
  *   - Logo Maintenant! à gauche, lien vers `/`.
- *   - Nav des 5 espaces au centre (épicène, depuis `config/espaces.ts`).
- *   - Bouton profil / connexion à droite.
+ *   - Menu à plat des rubriques actives au centre (depuis
+ *     `config/rubriques.ts`).
+ *   - Recherche, thème, puis bouton profil / connexion à droite.
  *     - Connecté·e : prénom + menu déroulant (profil, déconnexion).
- *     - Déconnecté·e : liens Se connecter + Créer un compte.
+ *     - Déconnecté·e : lien Se connecter + bouton Adhérer.
+ *
+ * ## Pourquoi un menu à plat
+ *
+ * Le header montrait les 5 espaces (S'informer, Mobiliser, S'entraider,
+ * Agir, Comprendre). Depuis la mise en sommeil du 01/08/2026, trois de
+ * ces espaces sont éteints et les deux autres ne mènent plus qu'à une ou
+ * trois rubriques. Un étage de menu qui ne dessert qu'une seule page fait
+ * perdre un clic pour rien. On affiche donc directement les rubriques :
+ * un clic = une page pleine de contenu réel.
+ *
+ * ## Pourquoi « Adhérer » à la place de « Créer un compte »
+ *
+ * Décision de Lilou/Ben (01/08/2026) : l'adhésion est l'action que le
+ * mouvement veut faire grandir, elle prend donc le point le plus visible
+ * du site. La création de compte reste accessible depuis la page de
+ * connexion et depuis les parcours de création (lancer une pétition, une
+ * cagnotte…), qui la demandent au bon moment.
  *
  * Server Component (lit la session côté serveur). Le menu déroulant est
  * isolé en Client Component (`HeaderProfilMenu`).
- *
- * Visibilité « presque tout visible » (cf. spec §3) : aucune nav cachée
- * derrière l'auth, seul le menu profil change.
  */
 export async function Header() {
   const session = await getSession();
-  const [estAdmin, rechercheAria, connexion, inscription] = await Promise.all([
+  const [estAdmin, rechercheAria, connexion, adherer] = await Promise.all([
     session !== null ? estAdminCourant() : Promise.resolve(false),
     lireContenuEditorial('header.recherche_aria', { valeurMd: FALLBACK_RECHERCHE_ARIA }),
     lireContenuEditorial('header.connexion', { valeurMd: FALLBACK_CONNEXION }),
-    lireContenuEditorial('header.inscription', { valeurMd: FALLBACK_INSCRIPTION }),
+    lireContenuEditorial('header.adherer', { valeurMd: FALLBACK_ADHERER }),
   ]);
 
   return (
@@ -49,15 +64,15 @@ export async function Header() {
           {SITE.nom}
         </Link>
 
-        <nav aria-label="Espaces principaux" className="hidden flex-1 items-center md:flex">
+        <nav aria-label="Rubriques du site" className="hidden flex-1 items-center md:flex">
           <ul className="flex gap-1">
-            {ESPACES.map((espace) => (
-              <li key={espace.slug}>
+            {RUBRIQUES_MENU.map((rubrique) => (
+              <li key={rubrique.cle}>
                 <Link
-                  href={`/${espace.slug}`}
+                  href={rubrique.href}
                   className="inline-flex h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 transition-colors duration-fast hover:bg-surface-2 hover:text-text-1"
                 >
-                  {espace.libelle}
+                  {rubrique.libelle}
                 </Link>
               </li>
             ))}
@@ -83,57 +98,61 @@ export async function Header() {
               />
             </>
           ) : (
-            <>
-              <TexteEditableAdmin
-                cle="header.connexion"
-                valeurInitiale={connexion.valeurMd}
-                estAdmin={estAdmin}
-                libelle="CTA Se connecter du header"
-                longueurMax={40}
-              >
-                {(t) => (
-                  <Link
-                    href="/connexion"
-                    className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
-                  >
-                    {t}
-                  </Link>
-                )}
-              </TexteEditableAdmin>
-              <TexteEditableAdmin
-                cle="header.inscription"
-                valeurInitiale={inscription.valeurMd}
-                estAdmin={estAdmin}
-                libelle="CTA Creer un compte du header"
-                longueurMax={40}
-              >
-                {(t) => (
-                  <Link
-                    href="/inscription"
-                    className="inline-flex h-10 items-center rounded-md bg-grad px-4 text-sm font-bold text-white shadow-brand transition hover:brightness-110"
-                  >
-                    {t}
-                  </Link>
-                )}
-              </TexteEditableAdmin>
-            </>
+            <TexteEditableAdmin
+              cle="header.connexion"
+              valeurInitiale={connexion.valeurMd}
+              estAdmin={estAdmin}
+              libelle="CTA Se connecter du header"
+              longueurMax={40}
+            >
+              {(t) => (
+                <Link
+                  href="/connexion"
+                  className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
+                >
+                  {t}
+                </Link>
+              )}
+            </TexteEditableAdmin>
           )}
+
+          {/* Le bouton Adhérer est affiché dans les deux états, connecté
+              ou non : une personne peut avoir un compte sans avoir
+              adhéré. La page d'adhésion reconnaît les adhérent·es déjà à
+              jour et leur affiche leur date d'échéance plutôt qu'une
+              relance. */}
+          <TexteEditableAdmin
+            cle="header.adherer"
+            valeurInitiale={adherer.valeurMd}
+            estAdmin={estAdmin}
+            libelle="CTA Adherer du header"
+            longueurMax={40}
+          >
+            {(t) => (
+              <Link
+                href="/agir/adherer"
+                className="inline-flex h-10 items-center rounded-md bg-grad px-4 text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+              >
+                {t}
+              </Link>
+            )}
+          </TexteEditableAdmin>
         </div>
       </div>
 
       {/* Nav mobile : tiroir simple horizontal scrollable. */}
       <nav
-        aria-label="Espaces principaux (mobile)"
+        aria-label="Rubriques du site (mobile)"
         className="overflow-x-auto border-t border-border bg-surface md:hidden"
       >
         <ul className="mx-auto flex max-w-7xl gap-1 px-4 py-2">
-          {ESPACES.map((espace) => (
-            <li key={espace.slug}>
+          {RUBRIQUES_MENU.map((rubrique) => (
+            <li key={rubrique.cle}>
               <Link
-                href={`/${espace.slug}`}
-                className="inline-flex h-9 items-center rounded-md px-3 text-sm text-text-2"
+                href={rubrique.href}
+                className="inline-flex h-9 items-center whitespace-nowrap rounded-md px-3 text-sm text-text-2"
               >
-                {espace.libelle}
+                {rubrique.libelle}
               </Link>
             </li>
           ))}

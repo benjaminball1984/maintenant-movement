@@ -68,10 +68,10 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   ctaAnnuler: 'Annuler',
   messageCaptchaEnAttente:
     'Vérification anti-robot en cours… le bouton s’activera dès qu’elle est validée.',
-  tunnelTitre: 'Aller plus loin avec Maintenant!',
+  tunnelTitre: 'Aller plus loin',
   tunnelIntro:
-    "Tu viens de t'engager. Si tu veux peser davantage, deux portes simples s'ouvrent à toi :",
-  tunnelCtaAdherer: 'Devenir adhérent·e',
+    "Tu viens de t'engager. Pour peser davantage, tu peux adhérer au mouvement — gratuitement, ou en le soutenant.",
+  tunnelCtaAdherer: 'Adhérer au mouvement',
   tunnelCtaCommune: 'Rejoindre une commune libre',
   tunnelCtaDecouvrir: 'Découvrir les prochaines étapes',
 };
@@ -267,19 +267,21 @@ export function ModaleSignaturePetition({
             <p className="font-display text-2xl font-bold text-text-1">{libelles.merciTitre}</p>
             <p className="text-text-2">{libelles.merciMessage}</p>
 
-            {/* V2.5.6 Phase E : tunnel d'engagement après signature.
-                V2.5.19 — un seul CTA vers la page intermédiaire de bienvenue
-                qui contextualise « tu viens de signer » et propose les 2
-                portes (adhérer + commune). Mieux qu'un choix forcé au
-                milieu de la modale. */}
+            {/* Tunnel d'engagement après signature.
+                01/08/2026 — le CTA pointait vers `/agir/depuis-petition`,
+                une page intermédiaire qui proposait deux portes (adhérer
+                + rejoindre une commune libre). Les communes libres étant
+                en sommeil, cette page l'est aussi : on envoie désormais
+                droit sur l'adhésion, comme décidé par Lilou/Ben (« merci
+                + adhésion seulement »). */}
             <div className="mt-2 grid gap-3 rounded-md border border-border bg-surface-2 p-4 text-left">
               <p className="font-display text-base font-bold text-text-1">{libelles.tunnelTitre}</p>
               <p className="text-sm text-text-2">{libelles.tunnelIntro}</p>
               <a
-                href="/agir/depuis-petition"
+                href="/agir/adherer"
                 className="inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
               >
-                {libelles.tunnelCtaDecouvrir}
+                {libelles.tunnelCtaAdherer}
               </a>
             </div>
 

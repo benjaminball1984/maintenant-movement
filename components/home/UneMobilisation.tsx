@@ -10,84 +10,40 @@ import { cn } from '@/lib/utils';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { UneSection } from './UneSection';
+import { UneNonEpinglee } from './UneNonEpinglee';
 
 const FALLBACKS = {
   badge: 'Mobilisation à venir',
   voirTous: 'Voir toutes les mobilisations',
   cta: 'Rejoindre',
   participantLabel: 'participant·e',
-  emptyAvant: 'Aucune mobilisation annoncée pour le moment.',
-  emptyLien: 'Annonce la prochaine',
 };
 
 /**
  * Une « mobilisation à venir » de la page d'accueil (chantier 3.2).
  *
- * Branchée sur la mobilisation la plus proche (publiee, date_debut >= now).
+ * Branchée sur la mobilisation **épinglée par l'administration** (décision
+ * Lilou/Ben du 15/08/2026 : plus aucune mise à la une automatique). Le
+ * bassin de candidates ne contient que les mobilisations à venir : une
+ * mobilisation épinglée qui vient de passer libère donc l'emplacement.
+ *
  * CTA principal : Rejoindre (mène à la fiche détail où le BoutonParticiper
  * permet de cliquer « je participe » d'un seul geste).
  */
 export async function UneMobilisation() {
-  const [mobilisation, estAdmin, badge, voirTous, cta, participantLabel, emptyAvant, emptyLien] =
-    await Promise.all([
-      mobilisationAlaUne(),
-      estAdminCourant(),
-      lireContenuEditorial('home.une.mobilisation.badge', { valeurMd: FALLBACKS.badge }),
-      lireContenuEditorial('home.une.mobilisation.voir_tous', { valeurMd: FALLBACKS.voirTous }),
-      lireContenuEditorial('home.une.mobilisation.cta', { valeurMd: FALLBACKS.cta }),
-      lireContenuEditorial('home.une.mobilisation.participant_label', {
-        valeurMd: FALLBACKS.participantLabel,
-      }),
-      lireContenuEditorial('home.une.mobilisation.empty_avant', {
-        valeurMd: FALLBACKS.emptyAvant,
-      }),
-      lireContenuEditorial('home.une.mobilisation.empty_lien', { valeurMd: FALLBACKS.emptyLien }),
-    ]);
+  const [mobilisation, estAdmin, badge, voirTous, cta, participantLabel] = await Promise.all([
+    mobilisationAlaUne(),
+    estAdminCourant(),
+    lireContenuEditorial('home.une.mobilisation.badge', { valeurMd: FALLBACKS.badge }),
+    lireContenuEditorial('home.une.mobilisation.voir_tous', { valeurMd: FALLBACKS.voirTous }),
+    lireContenuEditorial('home.une.mobilisation.cta', { valeurMd: FALLBACKS.cta }),
+    lireContenuEditorial('home.une.mobilisation.participant_label', {
+      valeurMd: FALLBACKS.participantLabel,
+    }),
+  ]);
 
   if (mobilisation === null) {
-    return (
-      <UneSection
-        type={badge.valeurMd}
-        cleBadge="home.une.mobilisation.badge"
-        couleur="hue"
-        titre={null}
-        voirTousHref="/mobiliser/mobilisations"
-        voirTousLibelle={voirTous.valeurMd}
-        cleVoirTous="home.une.mobilisation.voir_tous"
-        estAdmin={estAdmin}
-        enAttente={
-          <p>
-            <TexteEditableAdmin
-              cle="home.une.mobilisation.empty_avant"
-              valeurInitiale={emptyAvant.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state mobilisation texte avant le lien"
-              longueurMax={150}
-            >
-              {(t) => <>{t}</>}
-            </TexteEditableAdmin>{' '}
-            <TexteEditableAdmin
-              cle="home.une.mobilisation.empty_lien"
-              valeurInitiale={emptyLien.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state mobilisation libelle du lien"
-              longueurMax={50}
-            >
-              {(t) => (
-                <Link
-                  href="/mobiliser/mobilisations/nouvelle"
-                  className="text-brand hover:underline"
-                >
-                  {t}
-                </Link>
-              )}
-            </TexteEditableAdmin>
-            .
-          </p>
-        }
-      />
-    );
+    return estAdmin ? <UneNonEpinglee type={badge.valeurMd} couleur="hue" /> : null;
   }
 
   return (

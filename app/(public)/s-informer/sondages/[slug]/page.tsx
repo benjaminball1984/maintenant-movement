@@ -7,6 +7,7 @@ import { BoutonSupprimerEntite } from '@/components/admin/BoutonSupprimerEntite'
 import { BoutonAttacherACampagne } from '@/components/campagnes/BoutonAttacherACampagne';
 import { FilCommentaires } from '@/components/commentaires/FilCommentaires';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
 import { QualificationProgressive } from '@/components/sondages/QualificationProgressive';
@@ -16,6 +17,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { aVotePersonne, sondageParSlugAvecResultats } from '@/lib/sondages/requetes';
 import type { Metadata } from 'next';
@@ -108,6 +110,9 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
   // sondage est clos, ils deviennent la vue principale.
   const montrerResultats = dejaVote || sondage.statut !== 'ouvert';
 
+  // Épinglage « à la une » de l'accueil (admin seulement, 15/08/2026).
+  const estEpingleUne = estAdmin ? (await idEpingleUneHome('sondage')) === sondage.id : false;
+
   // Qualification progressive (§6) : juste après le vote, une question du
   // panel est proposée immédiatement (tirée côté serveur, zéro friction).
   let questionQualification = null;
@@ -144,9 +149,21 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
                 <Badge variant="default">{sondage.statut}</Badge>
               ) : null}
             </div>
-            <BoutonAdminEditer href={`/admin/moderation/sondages?id=${sondage.id}`}>
-              Admin
-            </BoutonAdminEditer>
+            <span className="flex flex-wrap items-center gap-2">
+              {/* Épinglage à la une de l'accueil (15/08/2026) : le sondage
+                  a rejoint les emplacements épinglables, comme la pétition
+                  ou la mobilisation. Réservé à l'administration. */}
+              {estAdmin ? (
+                <BoutonMettreALaUne
+                  emplacement="sondage"
+                  objetId={sondage.id}
+                  estEpingleInitial={estEpingleUne}
+                />
+              ) : null}
+              <BoutonAdminEditer href={`/admin/moderation/sondages?id=${sondage.id}`}>
+                Admin
+              </BoutonAdminEditer>
+            </span>
           </div>
           <Heading niveau={1}>{sondage.titre}</Heading>
 

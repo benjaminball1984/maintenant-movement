@@ -16,28 +16,34 @@ import { NavOnglets, type OngletConfig } from './NavOnglets';
  *
  * Le layout sert ici a poser la structure visuelle commune :
  * - header sobre avec lien retour `/` et bouton deconnexion
- * - barre de navigation 11 onglets (`NavOnglets`)
+ * - barre de navigation des onglets (`NavOnglets`)
  * - main centre
  *
  * Tous les libelles d'onglets et le bouton de deconnexion sont editables
  * admin via le CMS (cles `profil.onglet.*` et `profil.deconnexion.*`).
  */
+
+/**
+ * Onglets du profil.
+ *
+ * Ramenés de 11 à 4 le 01/08/2026 (décision Lilou/Ben). Les sept autres
+ * — vue d'ensemble, mes groupes, communes, contributions, réservations,
+ * demandes reçues, notifications — desservaient des rubriques mises en
+ * sommeil : elles n'auraient affiché que des listes vides. Un espace
+ * membre à moitié vide déçoit autant qu'un site à moitié vide.
+ *
+ * Les pages existent toujours dans `app/(membre)/profil/` : les remettre
+ * ici suffit à les rallumer (voir aussi `config/rubriques.ts`).
+ */
 const ONGLETS_FALLBACKS: ReadonlyArray<OngletConfig> = [
-  { slug: 'dashboard', libelle: 'Vue d’ensemble' },
-  { slug: 'informations', libelle: 'Informations' },
-  { slug: 'mes-groupes', libelle: 'Mes groupes' },
+  { slug: 'informations', libelle: 'Mes informations' },
   { slug: 'mes-creations', libelle: 'Mes créations' },
-  { slug: 'communes', libelle: 'Communes' },
-  { slug: 'contributions', libelle: 'Contributions' },
-  { slug: 'reservations', libelle: 'Mes réservations' },
-  { slug: 'demandes-reservations', libelle: 'Demandes reçues' },
-  { slug: 'notifications-recues', libelle: 'Notifications' },
-  { slug: 'notifications', libelle: 'Préférences notif' },
+  { slug: 'contributions', libelle: 'Mes contributions' },
   { slug: 'confidentialite', libelle: 'Confidentialité' },
 ];
 
 export default async function LayoutProfil({ children }: { children: ReactNode }) {
-  // Lecture en parallele : 11 libelles d'onglets + 2 libelles du bouton de deconnexion.
+  // Lecture en parallele : les libelles d'onglets + 2 libelles du bouton de deconnexion.
   const [libellesOnglets, deconnexionLibelle, deconnexionEnCours] = await Promise.all([
     Promise.all(
       ONGLETS_FALLBACKS.map((o) =>

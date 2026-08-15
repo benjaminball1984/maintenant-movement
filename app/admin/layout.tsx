@@ -78,21 +78,23 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
             ) : null}
             {!cmsSeulement ? (
               <>
+                {/* Modération : réduite aux rubriques allumées le
+                    01/08/2026. Les files SEL, Marché solidaire, Moments,
+                    Réseau social, Campagnes, Autres moyens et Réservations
+                    portaient sur des rubriques mises en sommeil : elles
+                    n'auraient affiché que des files vides, et Lilou/Ben
+                    n'a pas plus envie de naviguer dans le vide côté
+                    coulisses que côté public. Les pages existent toujours
+                    dans `app/admin/moderation/`, il suffit de remettre la
+                    ligne ici pour les retrouver. */}
                 <ul className="grid gap-1">
                   {[
                     { href: '/admin/moderation', libelle: '→ File globale' },
                     { href: '/admin/moderation/petitions', libelle: 'Pétitions' },
-                    { href: '/admin/moderation/campagnes', libelle: 'Campagnes' },
                     { href: '/admin/moderation/mobilisations', libelle: 'Mobilisations' },
                     { href: '/admin/moderation/cagnottes', libelle: 'Cagnottes' },
-                    { href: '/admin/moderation/media', libelle: 'Médias' },
-                    { href: '/admin/moderation/sel', libelle: 'SEL' },
-                    { href: '/admin/moderation/marche', libelle: 'Marché solidaire' },
-                    { href: '/admin/moderation/moments', libelle: 'Moments' },
                     { href: '/admin/moderation/sondages', libelle: 'Sondages' },
-                    { href: '/admin/moderation/reseau', libelle: 'Réseau social' },
-                    { href: '/admin/moderation/autres-moyens', libelle: 'Autres moyens' },
-                    { href: '/admin/moderation/reservations', libelle: 'Réservations en litige' },
+                    { href: '/admin/moderation/media', libelle: 'Médias' },
                   ].map((onglet) => (
                     <li key={onglet.href}>
                       <Link
@@ -125,27 +127,25 @@ export default async function LayoutAdmin({ children }: { children: ReactNode })
                 <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-cap text-text-3">
                   Console nationale
                 </p>
+                {/* Console nationale : même ménage que la modération.
+                    Communes, Fédérations, Groupes d'entraide, Moments,
+                    Campagnes, Réservations, Décider et Journal-affiche
+                    pilotent des rubriques endormies ; la démo rich text
+                    est un outil de développement. Tout reste dans
+                    `app/admin/national/`, prêt à revenir. */}
                 <ul className="grid gap-1">
                   {[
                     { href: '/admin/national', libelle: 'Vue nationale' },
                     { href: '/admin/national/personnes', libelle: 'Personnes' },
-                    { href: '/admin/national/communes', libelle: 'Communes' },
-                    { href: '/admin/national/federations', libelle: 'Fédérations' },
-                    { href: '/admin/national/groupes-entraide', libelle: 'Groupes d’entraide' },
                     { href: '/admin/national/sondages', libelle: 'Sondages' },
-                    { href: '/admin/national/moments', libelle: 'Moments solidaires' },
                     { href: '/admin/national/medias', libelle: 'Médias' },
-                    { href: '/admin/national/campagnes', libelle: 'Campagnes' },
-                    { href: '/admin/national/reservations', libelle: 'Réservations' },
-                    { href: '/admin/national/droits', libelle: 'Gestion des droits' },
+                    { href: '/admin/national/une', libelle: 'Une de l’accueil' },
                     { href: '/admin/national/tresorerie', libelle: 'Trésorerie' },
-                    { href: '/admin/national/audit', libelle: 'Audit journal D8' },
+                    { href: '/admin/national/droits', libelle: 'Gestion des droits' },
                     { href: '/admin/national/contenus', libelle: 'Contenus éditoriaux' },
-                    { href: '/admin/national/emails-preview', libelle: 'Aperçu des emails' },
-                    { href: '/admin/national/rich-text-demo', libelle: 'Démo rich text' },
-                    { href: '/admin/national/decider', libelle: 'Décider (salles)' },
-                    { href: '/admin/national/journal', libelle: 'Journal-affiche' },
                     { href: '/admin/national/images', libelle: 'Bibliothèque images' },
+                    { href: '/admin/national/emails-preview', libelle: 'Aperçu des emails' },
+                    { href: '/admin/national/audit', libelle: 'Audit journal D8' },
                   ].map((onglet) => (
                     <li key={onglet.href}>
                       <Link

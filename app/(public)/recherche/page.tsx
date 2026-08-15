@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Recherche',
-  description: 'Rechercher dans pétitions, mobilisations, cagnottes, communes, articles, sondages…',
+  description: 'Rechercher dans les pétitions, mobilisations, cagnottes, sondages et articles.',
 };
 
 interface Props {
@@ -32,8 +32,7 @@ export default async function PageRechercheGlobale({ searchParams }: Props) {
     estAdminCourant(),
     lireContenuEditorial('recherche.titre', { valeurMd: 'Rechercher' }),
     lireContenuEditorial('recherche.intro', {
-      valeurMd:
-        "Pétitions, mobilisations, cagnottes, communes, fédérations, articles, sondages, salles Décider, journal-affiche, groupes d'entraide, campagnes.",
+      valeurMd: 'Pétitions, mobilisations, cagnottes, sondages, articles de Maintenant Médias.',
     }),
     lireContenuEditorial('recherche.placeholder', { valeurMd: 'Tape au moins 2 lettres…' }),
     lireContenuEditorial('recherche.cta', { valeurMd: 'Rechercher' }),
@@ -41,8 +40,7 @@ export default async function PageRechercheGlobale({ searchParams }: Props) {
       valeurMd: 'Tape un mot-clé pour démarrer',
     }),
     lireContenuEditorial('recherche.alert_vide_corps', {
-      valeurMd:
-        'La recherche couvre tous les espaces publics du site. Les résultats sont filtrés par RLS selon ton périmètre.',
+      valeurMd: 'La recherche couvre les rubriques publiées du site.',
     }),
     lireContenuEditorial('recherche.alert_court_titre', { valeurMd: 'Trop court' }),
     lireContenuEditorial('recherche.alert_court_corps', {

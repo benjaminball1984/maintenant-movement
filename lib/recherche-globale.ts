@@ -1,3 +1,4 @@
+import { estEnSommeil } from '@/config/rubriques';
 import { getSupabaseServer } from '@/lib/supabase';
 
 export type TypeResultatRecherche =
@@ -242,5 +243,15 @@ export async function rechercherGlobalement(query: string): Promise<ResultatRech
     });
   }
 
-  return trierParPertinence(resultats, q);
+  // Filtrage par les interrupteurs de rubriques (01/08/2026) : un
+  // résultat qui pointe vers une page endormie renverrait le visiteur à
+  // l'accueil — un clic pour rien, et l'impression d'un site cassé.
+  //
+  // On filtre sur l'adresse plutôt que sur le type : la liste des
+  // rubriques allumées vit à un seul endroit (`config/rubriques.ts`), et
+  // rallumer une rubrique la remet automatiquement dans la recherche,
+  // sans qu'on ait à y penser ici.
+  const resultatsAtteignables = resultats.filter((r) => !estEnSommeil(r.href));
+
+  return trierParPertinence(resultatsAtteignables, q);
 }

@@ -22,6 +22,7 @@ import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
+import { paiementReelDisponible } from '@/lib/payments';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -184,7 +185,12 @@ export default async function PageCagnotteDetail({ params, searchParams }: PageD
 
   const estPubliee = cagnotte.statut === 'publiee';
   const estEpingleUne = estAdmin ? (await idEpingleUneHome('cagnotte')) === cagnotte.id : false;
-  const peutRecevoirEuros = cagnotte.stripe_account_id !== null;
+  // Deux conditions, et pas une seule : le porteur doit avoir terminé son
+  // inscription Stripe (`stripe_account_id`), ET la plateforme doit être
+  // capable d'encaisser réellement. Sans la seconde, le formulaire de don
+  // partait vers le simulateur et enregistrait un don sans qu'un centime
+  // ne bouge (garde-fou posé le 01/08/2026, cf. `paiementReelDisponible`).
+  const peutRecevoirEuros = cagnotte.stripe_account_id !== null && paiementReelDisponible();
   const peutRecevoirT99CP = cagnotte.wallet_t99cp !== null;
 
   return (

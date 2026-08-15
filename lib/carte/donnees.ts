@@ -1,3 +1,4 @@
+import { estEnSommeil } from '@/config/rubriques';
 import { getSupabaseServer } from '@/lib/supabase';
 
 /**
@@ -279,7 +280,16 @@ export async function chargerPointsCarte(): Promise<PointCarte[]> {
     });
   }
 
-  return points;
+  // Filtrage par les interrupteurs de rubriques (01/08/2026) : un point
+  // dont la fiche est endormie renverrait le visiteur à l'accueil. On
+  // filtre sur l'adresse de la fiche, comme la recherche globale : la
+  // liste des rubriques allumées reste à un seul endroit
+  // (`config/rubriques.ts`), et rallumer une rubrique la remet
+  // automatiquement sur la carte.
+  //
+  // En pratique, aujourd'hui, seules les mobilisations et les sondages
+  // subsistent — les autres sources sont toutes dans S'entraider.
+  return points.filter((p) => !estEnSommeil(p.href));
 }
 
 /**

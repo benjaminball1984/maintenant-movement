@@ -1,3 +1,4 @@
+import { estEnSommeil } from '@/config/rubriques';
 import { getSiteUrl } from '@/config/site';
 import { getSupabaseServer } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
@@ -161,7 +162,17 @@ export async function GET() {
   ajouter(editionsR.data, '/s-informer/journal', 0.6);
   ajouter(groupesR.data, '/s-entraider/groupes-locaux', 0.5);
 
-  return new NextResponse(composerSitemap(entrees), {
+  // Filtrage par les interrupteurs de rubriques (01/08/2026). Annoncer à
+  // Google une page endormie serait doublement mauvais : le moteur suit
+  // une redirection pour rien, et un internaute arrive depuis un résultat
+  // de recherche sur une page qui n'est pas celle promise.
+  //
+  // On filtre sur le chemin (l'adresse sans le domaine) avec la même
+  // fonction que le middleware : le sitemap ne peut donc jamais diverger
+  // de ce que le site sert réellement.
+  const entreesAtteignables = entrees.filter((e) => !estEnSommeil(e.loc.slice(base.length) || '/'));
+
+  return new NextResponse(composerSitemap(entreesAtteignables), {
     status: 200,
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',

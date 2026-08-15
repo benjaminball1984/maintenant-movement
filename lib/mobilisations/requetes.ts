@@ -114,11 +114,13 @@ export async function listerMobilisationsPassees(limite = 20): Promise<Mobilisat
 }
 
 /**
- * Mobilisation à la une (la plus proche dans le temps parmi les
- * publiées à venir). Retourne null s'il n'y en a aucune.
+ * Mobilisation mise à la une de l'accueil par l'administration.
+ * Retourne null tant qu'aucune n'est épinglée (ou si celle qui l'était
+ * est désormais passée : elle sort du bassin des mobilisations à venir).
  */
 export async function mobilisationAlaUne(): Promise<MobilisationEnrichie | null> {
-  // V2.6.19 : épinglage admin prioritaire, sinon la plus proche à venir.
+  // V2.6.19, resserré le 15/08/2026 (décision Lilou/Ben) : plus de repli
+  // automatique sur la mobilisation la plus proche, l'épinglage seul décide.
   const [liste, idEpingle] = await Promise.all([
     listerMobilisationsAVenir(60),
     idEpingleUneHome('mobilisation'),

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const FALLBACKS = {
   titre: 'Mes contributions',
   intro:
-    'Pétitions signées, mobilisations rejointes, articles écrits, cagnottes contribuées, votes Décider, services SEL : tout ce que tu fais sur le mouvement apparaît ici.',
+    'Pétitions signées, cagnottes soutenues, adhésion : tout ce que tu apportes au mouvement apparaît ici.',
   sectionFinancieres: 'Mes contributions financières',
   alertVideTitre: 'Aucun don ou adhésion enregistré',
   alertVideCorps:
@@ -36,9 +36,6 @@ const FALLBACKS = {
   alertPetitionsVideTitre: 'Aucune pétition signée pour l’instant',
   alertPetitionsVideCorps:
     'Quand tu signeras une pétition en étant connecté·e, elle apparaîtra ici, avec le réglage pour autoriser ou non la créatrice à te recontacter.',
-  alertBientotTitre: 'Bientôt ici aussi',
-  alertBientotCorps:
-    'Tes mobilisations, votes Décider et services SEL viendront s’ajouter à cette page au fur et à mesure que tu y participes.',
   ligneStatutEnAttente: 'En attente',
   ligneDateLe: 'Le',
 };
@@ -77,8 +74,6 @@ export default async function PageContributions() {
     sectionPetitions,
     alertPetitionsVideTitre,
     alertPetitionsVideCorps,
-    alertBientotTitre,
-    alertBientotCorps,
     ligneStatutEnAttente,
     ligneDateLe,
   ] = await Promise.all([
@@ -119,12 +114,6 @@ export default async function PageContributions() {
     }),
     lireContenuEditorial('profil.contributions.alert_petitions_vide_corps', {
       valeurMd: FALLBACKS.alertPetitionsVideCorps,
-    }),
-    lireContenuEditorial('profil.contributions.alert_bientot_titre', {
-      valeurMd: FALLBACKS.alertBientotTitre,
-    }),
-    lireContenuEditorial('profil.contributions.alert_bientot_corps', {
-      valeurMd: FALLBACKS.alertBientotCorps,
     }),
     lireContenuEditorial('profil.contributions.ligne_statut_en_attente', {
       valeurMd: FALLBACKS.ligneStatutEnAttente,
@@ -323,31 +312,11 @@ export default async function PageContributions() {
         )}
       </section>
 
-      <Alert
-        variant="info"
-        titre={
-          <TexteEditableAdmin
-            cle="profil.contributions.alert_bientot_titre"
-            valeurInitiale={alertBientotTitre.valeurMd}
-            estAdmin={estAdmin}
-            libelle="titre alerte bientot ici aussi"
-            longueurMax={60}
-          >
-            {(t) => <>{t}</>}
-          </TexteEditableAdmin>
-        }
-      >
-        <TexteEditableAdmin
-          cle="profil.contributions.alert_bientot_corps"
-          valeurInitiale={alertBientotCorps.valeurMd}
-          estAdmin={estAdmin}
-          libelle="corps alerte bientot"
-          multilignes
-          longueurMax={300}
-        >
-          {(t) => <>{t}</>}
-        </TexteEditableAdmin>
-      </Alert>
+      {/* L'encart « Bientôt ici aussi » (mobilisations, votes Décider,
+          services SEL à venir) a été retiré le 01/08/2026 : il annonçait
+          des rubriques désormais en sommeil. Les clés CMS
+          `profil.contributions.alert_bientot_*` restent en base, elles
+          resserviront si l'encart revient. */}
     </article>
   );
 }

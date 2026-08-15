@@ -8,74 +8,36 @@ import { getImageObjet } from '@/lib/images';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { UneSection } from './UneSection';
+import { UneNonEpinglee } from './UneNonEpinglee';
 
 const FALLBACKS = {
   badge: 'Cagnotte solidaire',
   voirTous: 'Voir toutes les cagnottes',
   cta: 'Soutenir',
-  emptyAvant: 'Aucune cagnotte mise en avant pour le moment.',
-  emptyLien: 'Ouvre la première',
 };
 
 /**
  * Une « cagnotte solidaire » de la page d'accueil (chantier 3.3).
  *
- * Branchée sur `cagnotteAlaUne()` qui retourne la plus récente cagnotte
- * publiée de type `ouverte` ou `lutte` (les cotisations restent dans
- * leur page dédiée, pas en une).
+ * Branchée sur `cagnotteAlaUne()`, qui retourne la cagnotte **épinglée
+ * par l'administration** parmi les publiées de type `ouverte` ou `lutte`
+ * (les cotisations restent dans leur page dédiée, pas en une). Décision
+ * Lilou/Ben du 15/08/2026 : plus aucune mise à la une automatique.
+ *
+ * Ce composant n'est pas rendu tant que la rubrique Cagnottes dort
+ * (cf. `config/rubriques.ts`) : il attend son retour sur l'accueil.
  */
 export async function UneCagnotte() {
-  const [cagnotte, estAdmin, badge, voirTous, cta, emptyAvant, emptyLien] = await Promise.all([
+  const [cagnotte, estAdmin, badge, voirTous, cta] = await Promise.all([
     cagnotteAlaUne(),
     estAdminCourant(),
     lireContenuEditorial('home.une.cagnotte.badge', { valeurMd: FALLBACKS.badge }),
     lireContenuEditorial('home.une.cagnotte.voir_tous', { valeurMd: FALLBACKS.voirTous }),
     lireContenuEditorial('home.une.cagnotte.cta', { valeurMd: FALLBACKS.cta }),
-    lireContenuEditorial('home.une.cagnotte.empty_avant', { valeurMd: FALLBACKS.emptyAvant }),
-    lireContenuEditorial('home.une.cagnotte.empty_lien', { valeurMd: FALLBACKS.emptyLien }),
   ]);
 
   if (cagnotte === null) {
-    return (
-      <UneSection
-        type={badge.valeurMd}
-        cleBadge="home.une.cagnotte.badge"
-        couleur="vous"
-        titre={null}
-        voirTousHref="/mobiliser/cagnottes"
-        voirTousLibelle={voirTous.valeurMd}
-        cleVoirTous="home.une.cagnotte.voir_tous"
-        estAdmin={estAdmin}
-        enAttente={
-          <p>
-            <TexteEditableAdmin
-              cle="home.une.cagnotte.empty_avant"
-              valeurInitiale={emptyAvant.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state cagnotte texte avant le lien"
-              longueurMax={150}
-            >
-              {(t) => <>{t}</>}
-            </TexteEditableAdmin>{' '}
-            <TexteEditableAdmin
-              cle="home.une.cagnotte.empty_lien"
-              valeurInitiale={emptyLien.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state cagnotte libelle du lien"
-              longueurMax={50}
-            >
-              {(t) => (
-                <Link href="/mobiliser/cagnottes/nouvelle" className="text-brand hover:underline">
-                  {t}
-                </Link>
-              )}
-            </TexteEditableAdmin>
-            .
-          </p>
-        }
-      />
-    );
+    return estAdmin ? <UneNonEpinglee type={badge.valeurMd} couleur="vous" /> : null;
   }
 
   return (

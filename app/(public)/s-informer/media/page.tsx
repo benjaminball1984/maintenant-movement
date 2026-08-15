@@ -24,7 +24,7 @@ const FALLBACKS = {
   ongletTous: 'À la une',
   emptyTitre: 'Aucun média publié pour ce filtre',
   emptyCorps:
-    "La rédaction publiera bientôt. Les éditos et la newsletter sont produits par l'équipe nationale ; tribunes et articles sont ouverts à toustes (modération a posteriori).",
+    "Les tribunes et les articles sont ouverts à toustes : proposez le vôtre, la rédaction le relit avant publication. Les éditos et la newsletter sont produits par l'équipe nationale.",
   rédactionDefault: 'Rédaction',
 };
 
@@ -61,7 +61,7 @@ const LIBELLE_TYPE: Record<TypeMedia, string> = {
  * onglets séparés : ils sont regroupés dans l'onglet « Rédaction »
  * (demande Ben 2026-06-13).
  */
-const TYPES_ONGLETS: TypeMedia[] = ['dessin', 'podcast', 'video', 'live'];
+const TYPES_ONGLETS: TypeMedia[] = ['dessin', 'podcast', 'video'];
 
 /** Tous les types acceptés en paramètre `?type=` (liens directs inclus). */
 const LISTE_TYPES: TypeMedia[] = [
@@ -129,12 +129,12 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
   } else {
     const [flux, maison] = await Promise.all([listerFluxMedias(tagActif), listerMediasMaison()]);
     if (tagActif === undefined) {
-      // La une : l'épingle admin si elle existe (N'IMPORTE QUEL contenu,
+      // La une : UNIQUEMENT l'épingle admin (N'IMPORTE QUEL contenu,
       // podcast/dessin/vidéo ou même une brève choisie explicitement,
-      // demande Ben 2026-06-13) ; sinon, en automatique, le contenu
-      // maison le plus récent (jamais une brève importée).
-      const epingle = idUneEpingle !== null ? await mediaPublieParId(idUneEpingle) : null;
-      une = epingle ?? maison[0] ?? null;
+      // demande Ben 2026-06-13). Depuis le 15/08/2026 (décision Ben),
+      // plus de repli automatique sur le contenu maison le plus récent :
+      // sans épinglage, la page démarre directement sur « La rédaction ».
+      une = idUneEpingle !== null ? await mediaPublieParId(idUneEpingle) : null;
       // Page générale : la rédaction est BORNÉE (Ben 2026-06-13, 3 max) ;
       // tout le reste de la rédaction est dans l'onglet « Rédaction ».
       redaction = maison.filter((m) => m.id !== une?.id).slice(0, MAX_REDACTION_GENERALE);

@@ -90,13 +90,34 @@ export default async function PageRetour({ searchParams }: PageRetourProps) {
           <Alert variant="success" titre="Don confirmé" className="my-6">
             {recapMontant}
           </Alert>
+          {/* Proposition d'adhésion après un don (décision Lilou/Ben du
+              01/08/2026, même logique qu'après une signature) : la
+              personne vient de poser un geste, c'est le moment où l'on
+              peut lui proposer d'entrer dans le mouvement. Un seul appel,
+              sans concurrence avec le partage. */}
+          <section className="my-8 grid gap-3 rounded-md border border-border bg-surface-2 p-6">
+            <Heading niveau={2} apparenceComme={4}>
+              Aller plus loin
+            </Heading>
+            <p className="text-sm text-text-2">
+              Tu viens de soutenir un combat. Tu peux aussi adhérer au mouvement — gratuitement, ou
+              en le soutenant.
+            </p>
+            <Link
+              href="/agir/adherer"
+              className={cn(
+                'inline-flex h-11 w-fit items-center justify-center rounded-md bg-grad px-5',
+                'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+              )}
+            >
+              Adhérer au mouvement
+            </Link>
+          </section>
+
           {slugCagnotte !== null ? (
             <Link
               href={`/mobiliser/cagnottes/${slugCagnotte}?succes=1`}
-              className={cn(
-                'inline-flex h-11 items-center justify-center rounded-md bg-grad px-5',
-                'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
-              )}
+              className="text-brand hover:underline"
             >
               Retour à la cagnotte
             </Link>

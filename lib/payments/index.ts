@@ -14,9 +14,9 @@ export type {
 /**
  * Factory du service de paiement (chantier 3.3).
  *
- * `PAYMENT_PROVIDER=mock` (défaut) → MockPaymentService.
- * `PAYMENT_PROVIDER=stripe_test`   → StripePaymentService (stub pour l'instant).
- * `PAYMENT_PROVIDER=stripe_live`   → StripePaymentService (stub pour l'instant).
+ * `PAYMENT_PROVIDER=mock` (défaut) → MockPaymentService (simulateur).
+ * `PAYMENT_PROVIDER=stripe_test`   → StripePaymentService, clés `sk_test_…`.
+ * `PAYMENT_PROVIDER=stripe_live`   → StripePaymentService, clés `sk_live_…`.
  */
 let instance: PaymentService | null = null;
 
@@ -60,3 +60,8 @@ export {
   calculerFraisT99CP,
   totalAvecFraisEuros,
 } from './frais';
+
+// Idem pour le garde-fou de disponibilité : extrait dans `./disponibilite`
+// pour être importable depuis le middleware, qui ne peut pas tirer
+// `node:crypto`. Réexporté ici pour préserver l'API publique.
+export { paiementReelDisponible } from './disponibilite';

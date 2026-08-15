@@ -5,32 +5,25 @@ import { adhesionActive } from '@/lib/adhesion/requetes';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { getSession } from '@/lib/auth/session';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
+import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Adhérer',
-  description:
-    'Adhérer à Maintenant! — 3 chemins (gratuit, 12 €, 12 99-coin). Page sobre, sans argumentaire pesant.',
+  description: 'Adhérer à Maintenant! : une adhésion, gratuite, sans barrière financière.',
 };
 
 const FALLBACKS = {
-  intro:
-    'On entre dans Maintenant!, on en sort, on revient. 3 chemins : **gratuit**, **12 €**, **12 99-coin**.',
+  intro: 'On entre dans Maintenant!, on en sort, on revient. L’adhésion est **gratuite**.',
   alertActiveTitre: 'Tu es déjà adhérent·e',
-  cheminGratuitLabel: 'Chemin 1',
-  cheminGratuitDescription:
-    'Adhésion sans barrière financière. Toute personne intéressée peut entrer.',
-  cheminEurosLabel: 'Chemin 2',
-  cheminEurosDescription: 'Paiement par carte (Stripe). Soutient le fonctionnement du mouvement.',
-  cheminT99cpLabel: 'Chemin 3',
-  cheminT99cpDescription:
-    'Transaction T99CP (Polygon). Pour les personnes déjà équipées en wallet.',
-  ctaCarte: 'Choisir ce chemin →',
+  adhesionTitre: 'Adhésion gratuite',
+  adhesionDescription: 'Adhésion sans barrière financière. Toute personne intéressée peut entrer.',
+  cta: 'Adhérer',
   renouvellementTitre: 'Renouvellement automatique',
   renouvellementCorps:
-    "L'adhésion dure 365 jours. Un mail de rappel est envoyé à l'approche de l'échéance. Aucun prélèvement récurrent : on revient ici pour renouveler par le chemin de son choix.",
+    "L'adhésion dure 365 jours. Un mail de rappel est envoyé à l'approche de l'échéance. Aucun prélèvement récurrent : on revient ici pour renouveler.",
 };
 
 const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
@@ -40,7 +33,22 @@ const FORMATEUR_DATE = new Intl.DateTimeFormat('fr-FR', {
 });
 
 /**
- * Page d'accueil Adhérer : 3 chemins en cartes.
+ * Page Adhérer : une seule adhésion, gratuite.
+ *
+ * Histoire de cette page : elle a d'abord proposé **trois chemins**
+ * d'adhésion (gratuit, 12 €, 12 99-coin), puis deux (le 99-coin est parti
+ * le 01/08/2026). Décision de Lilou/Ben du 15/08/2026 : **on supprime
+ * l'idée même de chemins**. Une personne qui veut adhérer ne doit pas
+ * avoir à choisir une formule : elle adhère, point. L'adhésion est
+ * gratuite pour tout le monde.
+ *
+ * Le soutien financier ne disparaît pas du site pour autant : il passe
+ * par les dons et les cagnottes, qui sont des gestes distincts de
+ * l'adhésion. Les parcours de paiement `/agir/adherer/euros` et
+ * `/agir/adherer/t99cp` existent toujours dans le code mais sont mis en
+ * sommeil (`config/rubriques.ts`), conformément à la doctrine de greffe
+ * (CLAUDE.md §0.3 : on éteint, on ne supprime pas). Les adhésions déjà
+ * payées restent valides et s'affichent normalement ci-dessous.
  *
  * Cf. spec §7A : « Page sobre, doctrine ouverte. Pas d'argumentaire
  * pesant : on entre dans le mouvement, on en sort, on revient. »
@@ -55,15 +63,11 @@ export default async function PageAdherer() {
     estAdmin,
     intro,
     alertActiveTitre,
-    cheminGratuitLabel,
-    cheminGratuitDescription,
-    cheminEurosLabel,
-    cheminEurosDescription,
-    cheminT99cpLabel,
-    cheminT99cpDescription,
+    adhesionTitre,
+    adhesionDescription,
     renouvellementTitre,
     renouvellementCorps,
-    ctaCarte,
+    cta,
   ] = await Promise.all([
     session !== null ? adhesionActive(session.userId) : Promise.resolve(null),
     estAdminCourant(),
@@ -71,23 +75,11 @@ export default async function PageAdherer() {
     lireContenuEditorial('agir.adherer.alert_active_titre', {
       valeurMd: FALLBACKS.alertActiveTitre,
     }),
-    lireContenuEditorial('agir.adherer.chemin_gratuit.label', {
-      valeurMd: FALLBACKS.cheminGratuitLabel,
+    lireContenuEditorial('agir.adherer.adhesion_titre', {
+      valeurMd: FALLBACKS.adhesionTitre,
     }),
-    lireContenuEditorial('agir.adherer.chemin_gratuit.description', {
-      valeurMd: FALLBACKS.cheminGratuitDescription,
-    }),
-    lireContenuEditorial('agir.adherer.chemin_euros.label', {
-      valeurMd: FALLBACKS.cheminEurosLabel,
-    }),
-    lireContenuEditorial('agir.adherer.chemin_euros.description', {
-      valeurMd: FALLBACKS.cheminEurosDescription,
-    }),
-    lireContenuEditorial('agir.adherer.chemin_t99cp.label', {
-      valeurMd: FALLBACKS.cheminT99cpLabel,
-    }),
-    lireContenuEditorial('agir.adherer.chemin_t99cp.description', {
-      valeurMd: FALLBACKS.cheminT99cpDescription,
+    lireContenuEditorial('agir.adherer.adhesion_description', {
+      valeurMd: FALLBACKS.adhesionDescription,
     }),
     lireContenuEditorial('agir.adherer.renouvellement_titre', {
       valeurMd: FALLBACKS.renouvellementTitre,
@@ -95,8 +87,8 @@ export default async function PageAdherer() {
     lireContenuEditorial('agir.adherer.renouvellement_corps', {
       valeurMd: FALLBACKS.renouvellementCorps,
     }),
-    lireContenuEditorial('agir.adherer.cta_carte', {
-      valeurMd: FALLBACKS.ctaCarte,
+    lireContenuEditorial('agir.adherer.cta', {
+      valeurMd: FALLBACKS.cta,
     }),
   ]);
 
@@ -147,145 +139,61 @@ export default async function PageAdherer() {
           }
         >
           Ton adhésion est active jusqu'au{' '}
-          <strong>{FORMATEUR_DATE.format(new Date(adhesion.expire_le))}</strong> (chemin{' '}
-          {libelleChemin(adhesion.chemin as 'gratuit' | 'euros' | 't99cp')}). Renouvelle quand tu
-          veux ci-dessous.
+          <strong>{FORMATEUR_DATE.format(new Date(adhesion.expire_le))}</strong>
+          {/* Les adhésions payées avant le passage au tout-gratuit gardent
+              la mention de ce qui a été réglé : elle disparaît d'elle-même
+              pour les adhésions gratuites. */}
+          {mentionAncienneFormule(adhesion.chemin)}. Renouvelle quand tu veux ci-dessous.
         </Alert>
       ) : null}
 
-      <ul className="mt-8 grid gap-6 sm:grid-cols-3">
-        <li>
-          <Link
-            href="/agir/adherer/gratuit"
-            className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_gratuit.label"
-                valeurInitiale={cheminGratuitLabel.valeurMd}
-                estAdmin={estAdmin}
-                libelle="label chemin gratuit"
-                longueurMax={30}
-              >
-                {(t) => (
-                  <p className="text-xs font-bold uppercase tracking-cap text-success">{t}</p>
-                )}
-              </TexteEditableAdmin>
-              <Heading niveau={2} apparenceComme={3}>
-                Gratuit
-              </Heading>
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_gratuit.description"
-                valeurInitiale={cheminGratuitDescription.valeurMd}
-                estAdmin={estAdmin}
-                libelle="description chemin gratuit"
-                multilignes
-                longueurMax={200}
-              >
-                {(t) => <p className="text-sm text-text-2">{t}</p>}
-              </TexteEditableAdmin>
-              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
-              <div className="mt-auto pt-2">
-                <TexteEditableAdmin
-                  cle="agir.adherer.cta_carte"
-                  valeurInitiale={ctaCarte.valeurMd}
-                  estAdmin={estAdmin}
-                  libelle="CTA commun aux 3 cartes chemin"
-                  longueurMax={60}
-                >
-                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
-                </TexteEditableAdmin>
-              </div>
-            </Card>
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/agir/adherer/euros"
-            className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_euros.label"
-                valeurInitiale={cheminEurosLabel.valeurMd}
-                estAdmin={estAdmin}
-                libelle="label chemin euros"
-                longueurMax={30}
-              >
-                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-brand">{t}</p>}
-              </TexteEditableAdmin>
-              <Heading niveau={2} apparenceComme={3}>
-                12 €
-              </Heading>
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_euros.description"
-                valeurInitiale={cheminEurosDescription.valeurMd}
-                estAdmin={estAdmin}
-                libelle="description chemin euros"
-                multilignes
-                longueurMax={200}
-              >
-                {(t) => <p className="text-sm text-text-2">{t}</p>}
-              </TexteEditableAdmin>
-              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
-              <div className="mt-auto pt-2">
-                <TexteEditableAdmin
-                  cle="agir.adherer.cta_carte"
-                  valeurInitiale={ctaCarte.valeurMd}
-                  estAdmin={estAdmin}
-                  libelle="CTA commun aux 3 cartes chemin"
-                  longueurMax={60}
-                >
-                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
-                </TexteEditableAdmin>
-              </div>
-            </Card>
-          </Link>
-        </li>
-        <li>
-          <Link
-            href="/agir/adherer/t99cp"
-            className="block h-full transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          >
-            <Card variant="ombre" className="flex h-full flex-col gap-2 hover:border-border-dark">
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_t99cp.label"
-                valeurInitiale={cheminT99cpLabel.valeurMd}
-                estAdmin={estAdmin}
-                libelle="label chemin t99cp"
-                longueurMax={30}
-              >
-                {(t) => <p className="text-xs font-bold uppercase tracking-cap text-accent">{t}</p>}
-              </TexteEditableAdmin>
-              <Heading niveau={2} apparenceComme={3}>
-                12 99-coin
-              </Heading>
-              <TexteEditableAdmin
-                cle="agir.adherer.chemin_t99cp.description"
-                valeurInitiale={cheminT99cpDescription.valeurMd}
-                estAdmin={estAdmin}
-                libelle="description chemin t99cp"
-                multilignes
-                longueurMax={200}
-              >
-                {(t) => <p className="text-sm text-text-2">{t}</p>}
-              </TexteEditableAdmin>
-              {/* Affordance de clic : la carte entière est un lien, on le rend visible. */}
-              <div className="mt-auto pt-2">
-                <TexteEditableAdmin
-                  cle="agir.adherer.cta_carte"
-                  valeurInitiale={ctaCarte.valeurMd}
-                  estAdmin={estAdmin}
-                  libelle="CTA commun aux 3 cartes chemin"
-                  longueurMax={60}
-                >
-                  {(t) => <p className="text-sm font-bold text-brand">{t}</p>}
-                </TexteEditableAdmin>
-              </div>
-            </Card>
-          </Link>
-        </li>
-      </ul>
+      {/* Une seule entrée, donc pas de grille de comparaison : un bloc, un
+          bouton. Rien à choisir, rien à comparer. */}
+      <Card variant="ombre" className="mt-8 grid gap-3">
+        <TexteEditableAdmin
+          cle="agir.adherer.adhesion_titre"
+          valeurInitiale={adhesionTitre.valeurMd}
+          estAdmin={estAdmin}
+          libelle="titre du bloc adhesion"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Heading niveau={2} apparenceComme={3}>
+              {t}
+            </Heading>
+          )}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="agir.adherer.adhesion_description"
+          valeurInitiale={adhesionDescription.valeurMd}
+          estAdmin={estAdmin}
+          libelle="description du bloc adhesion"
+          multilignes
+          longueurMax={300}
+        >
+          {(t) => <p className="max-w-2xl text-text-2">{t}</p>}
+        </TexteEditableAdmin>
+        <TexteEditableAdmin
+          cle="agir.adherer.cta"
+          valeurInitiale={cta.valeurMd}
+          estAdmin={estAdmin}
+          libelle="libelle du bouton Adherer"
+          longueurMax={60}
+        >
+          {(t) => (
+            <Link
+              href="/agir/adherer/gratuit"
+              className={cn(
+                'mt-2 inline-flex h-11 w-fit items-center justify-center rounded-md bg-grad px-6',
+                'font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+              )}
+            >
+              {t}
+            </Link>
+          )}
+        </TexteEditableAdmin>
+      </Card>
 
       <section className="mt-12 grid gap-3 rounded-md border border-border bg-surface-2 p-6 text-sm text-text-2">
         <TexteEditableAdmin
@@ -316,8 +224,17 @@ export default async function PageAdherer() {
   );
 }
 
-function libelleChemin(chemin: 'gratuit' | 'euros' | 't99cp'): string {
-  if (chemin === 'gratuit') return 'gratuit';
-  if (chemin === 'euros') return '12 €';
-  return '12 99-coin';
+/**
+ * Rappelle la formule d'une adhésion souscrite AVANT le passage à
+ * l'adhésion unique et gratuite (15/08/2026).
+ *
+ * Retourne une chaîne vide pour une adhésion gratuite : il n'y a plus
+ * qu'une formule, la nommer n'apprendrait rien. Pour les adhésions payées
+ * (12 € ou 12 99-coin), on garde la mention : la personne a versé quelque
+ * chose, l'effacer de son écran serait malhonnête.
+ */
+function mentionAncienneFormule(chemin: string): string {
+  if (chemin === 'euros') return ' (adhésion à 12 €)';
+  if (chemin === 't99cp') return ' (adhésion à 12 99-coin)';
+  return '';
 }

@@ -4,71 +4,31 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { articleAlaUne } from '@/lib/home/une';
 import Link from 'next/link';
-import { UneSection } from './UneSection';
+import { UneNonEpinglee } from './UneNonEpinglee';
 
 const FALLBACKS = {
   badge: 'Article éditorial',
   voirTous: 'Voir Maintenant Médias',
-  emptyText: 'Aucun article publié pour le moment.',
-  emptyLien: 'Découvrir Maintenant Médias',
 };
 
 /**
  * Une « article éditorial » de la page d'accueil (chantier V2.6.19).
  *
- * Branche sur les articles de Maintenant Médias (table media) : l'épinglé
- * par l'admin s'il existe, sinon le dernier publié. État vide propre sinon.
+ * Branche sur les contenus de Maintenant Médias (table media) **épinglés
+ * par l'administration** (décision Lilou/Ben du 15/08/2026 : plus aucune
+ * mise à la une automatique, ce qui écarte de fait tout contenu importé
+ * par les routines horaires). Sans épinglage, le bloc n'apparaît pas.
  */
 export async function UneArticle() {
-  const [article, estAdmin, badge, voirTous, emptyText, emptyLien] = await Promise.all([
+  const [article, estAdmin, badge, voirTous] = await Promise.all([
     articleAlaUne(),
     estAdminCourant(),
     lireContenuEditorial('home.une.article.badge', { valeurMd: FALLBACKS.badge }),
     lireContenuEditorial('home.une.article.voir_tous', { valeurMd: FALLBACKS.voirTous }),
-    lireContenuEditorial('home.une.article.empty_text', { valeurMd: FALLBACKS.emptyText }),
-    lireContenuEditorial('home.une.article.empty_lien', { valeurMd: FALLBACKS.emptyLien }),
   ]);
 
   if (article === null) {
-    return (
-      <UneSection
-        type={badge.valeurMd}
-        cleBadge="home.une.article.badge"
-        couleur="accent"
-        titre={null}
-        voirTousHref="/s-informer/media"
-        voirTousLibelle={voirTous.valeurMd}
-        cleVoirTous="home.une.article.voir_tous"
-        estAdmin={estAdmin}
-        enAttente={
-          <p>
-            <TexteEditableAdmin
-              cle="home.une.article.empty_text"
-              valeurInitiale={emptyText.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state Une article (texte avant le lien)"
-              longueurMax={200}
-            >
-              {(t) => <>{t}</>}
-            </TexteEditableAdmin>{' '}
-            <TexteEditableAdmin
-              cle="home.une.article.empty_lien"
-              valeurInitiale={emptyLien.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state Une article (libelle du lien)"
-              longueurMax={60}
-            >
-              {(t) => (
-                <Link href="/s-informer/media" className="text-brand hover:underline">
-                  {t}
-                </Link>
-              )}
-            </TexteEditableAdmin>
-            .
-          </p>
-        }
-      />
-    );
+    return estAdmin ? <UneNonEpinglee type={badge.valeurMd} couleur="accent" /> : null;
   }
 
   return (

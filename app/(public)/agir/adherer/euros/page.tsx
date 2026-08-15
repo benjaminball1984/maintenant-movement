@@ -2,12 +2,22 @@ import { adhererEuros } from '@/app/(public)/agir/adherer/actions';
 import { FormulaireAdhesionEuros } from '@/components/adhesion/FormulaireAdhesionEuros';
 import { Container, Heading } from '@/components/ui';
 import { getSessionOuRediriger } from '@/lib/auth/session';
+import { paiementReelDisponible } from '@/lib/payments';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = { title: 'Adhésion 12 €' };
 
 export default async function PageAdhererEuros() {
+  // Tant que Stripe n'encaisse pas réellement, ce parcours est fermé et on
+  // renvoie vers le choix des chemins (où seul « gratuit » sera proposé).
+  // Sans ce garde-fou, l'adhésion partait vers le simulateur : la personne
+  // devenait adhérente sans avoir payé et sans le savoir.
+  if (!paiementReelDisponible()) {
+    redirect('/agir/adherer');
+  }
+
   await getSessionOuRediriger('/agir/adherer/euros');
   return (
     <Container taille="md" className="py-12">

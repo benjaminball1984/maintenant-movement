@@ -1,12 +1,7 @@
 'use client';
 
 import { Alert, Button } from '@/components/ui';
-import {
-  LIBELLES_PROVIDERS,
-  PROVIDERS_ETHIQUES,
-  PROVIDERS_GAFAM,
-  type ProviderOAuth,
-} from '@/lib/validations/auth';
+import { LIBELLES_PROVIDERS, PROVIDERS_GAFAM, type ProviderOAuth } from '@/lib/validations/auth';
 import { useState } from 'react';
 import { ouvrirOAuth } from '../actions';
 
@@ -16,9 +11,9 @@ import { ouvrirOAuth } from '../actions';
  * - **GAFAM** (Google / Apple / Microsoft) : supportés nativement par
  *   Supabase Auth. Nécessitent la configuration des credentials OAuth
  *   côté projet Supabase (dashboard > Auth > Providers).
- * - **Éthiques** (Mastodon / Framasoft / Solid) : posés en UI désactivée
- *   avec infobulle, branchement à un chantier dédié (OAuth custom via
- *   Supabase ou couche Keycloak intermédiaire). Voir MANIFEST 1.2.
+ * - **Éthiques** (Mastodon / Framasoft / Solid) : prévus, mais retirés de
+ *   l'affichage tant qu'ils ne fonctionnent pas (cf. commentaire en fin
+ *   de composant).
  */
 export function BoutonsOAuth() {
   const [erreur, setErreur] = useState<string | null>(null);
@@ -72,28 +67,12 @@ export function BoutonsOAuth() {
         </div>
       </div>
 
-      <div>
-        <p
-          id="oauth-ethique-titre"
-          className="mb-2 text-xs font-bold uppercase tracking-cap text-text-3"
-        >
-          OAuth éthique (à brancher au chantier dédié)
-        </p>
-        {/* biome-ignore lint/a11y/useSemanticElements: groupe de boutons relié à son titre via aria-labelledby ; un <fieldset> imposerait un <legend> et un style par défaut indésirables. */}
-        <div className="grid gap-2" role="group" aria-labelledby="oauth-ethique-titre">
-          {PROVIDERS_ETHIQUES.map((provider) => (
-            <Button
-              key={provider}
-              type="button"
-              variant="outline"
-              disabled
-              title={`Cette porte d'authentification sera branchée à un chantier dédié (${LIBELLES_PROVIDERS[provider]}).`}
-            >
-              {LIBELLES_PROVIDERS[provider]} (bientôt)
-            </Button>
-          ))}
-        </div>
-      </div>
+      {/* Les portes « OAuth éthique » (Mastodon, Framasoft, Solid) étaient
+          affichées ici en boutons désactivés marqués « (bientôt) ». Elles
+          ont été retirées le 01/08/2026 : un bouton qui ne fait rien
+          déçoit plus qu'il n'informe. Le code de branchement reste prévu
+          dans `lib/validations/auth` (PROVIDERS_ETHIQUES) ; il suffira de
+          rétablir ce bloc le jour où ces portes fonctionnent. */}
     </div>
   );
 }

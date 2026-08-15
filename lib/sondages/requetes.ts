@@ -1,3 +1,4 @@
+import { choisirALaUne, idEpingleUneHome } from '@/lib/home/une';
 import { SEUIL_PONDERATION, pondererResultats } from '@/lib/sondages/ponderation';
 import { getSupabaseServer } from '@/lib/supabase';
 import type { Sondage, SondageResultats } from '@/types/database';
@@ -42,6 +43,25 @@ export async function listerSondagesOuverts(limite = 50): Promise<Sondage[]> {
     .order('created_at', { ascending: false })
     .limit(limite);
   return (data ?? []) as Sondage[];
+}
+
+/**
+ * Sondage mis à la une de l'accueil par l'administration.
+ *
+ * Ajouté le 15/08/2026 (décision Lilou/Ben) : le bloc « sondage » de la
+ * page d'accueil prenait d'office le dernier sondage ouvert, alors que
+ * les quatre autres blocs sont choisis à la main. Il rejoint donc le même
+ * mécanisme d'épinglage (`une_home`, emplacement `sondage`).
+ *
+ * Retourne null tant qu'aucun sondage n'est épinglé, ou si l'épinglé
+ * n'est plus dans le bassin des sondages ouverts ou fermés.
+ */
+export async function sondageAlaUne(): Promise<Sondage | null> {
+  const [liste, idEpingle] = await Promise.all([
+    listerSondagesOuverts(60),
+    idEpingleUneHome('sondage'),
+  ]);
+  return choisirALaUne(liste, idEpingle, (s) => s.id);
 }
 
 export async function sondageParSlugAvecResultats(

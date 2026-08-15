@@ -102,12 +102,14 @@ export async function listerPetitionsPubliees(limite = 50): Promise<PetitionAvec
 }
 
 /**
- * Pétition la plus récente publiée : pour la « Une » d'accueil.
- * Retourne null s'il n'y en a aucune.
+ * Pétition mise à la une de l'accueil par l'administration.
+ * Retourne null tant qu'aucune n'est épinglée.
  */
 export async function petitionAlaUne(): Promise<PetitionAvecCompteur | null> {
-  // V2.6.19 : l'admin peut épingler une pétition précise ; sinon, la plus
-  // récente. On charge les 60 dernières publiées comme bassin de candidates.
+  // V2.6.19, resserré le 15/08/2026 (décision Lilou/Ben) : SEULE la
+  // pétition épinglée par l'admin monte à la une, il n'y a plus de repli
+  // sur la plus récente. On charge les 60 dernières publiées comme bassin
+  // de candidates.
   const [liste, idEpingle] = await Promise.all([
     listerPetitionsPubliees(60),
     idEpingleUneHome('petition'),

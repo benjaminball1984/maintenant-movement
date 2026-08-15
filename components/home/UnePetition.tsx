@@ -10,7 +10,7 @@ import { getImageObjet } from '@/lib/images';
 import { petitionAlaUne } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { UneSection } from './UneSection';
+import { UneNonEpinglee } from './UneNonEpinglee';
 
 const FALLBACKS = {
   badge: 'Pétition en cours',
@@ -18,16 +18,15 @@ const FALLBACKS = {
   ctaPrincipal: 'Signer en quelques secondes',
   ctaSecondaire: 'Lire la pétition',
   preposition: 'À',
-  emptyAvant: 'Aucune pétition publiée pour le moment.',
-  emptyLien: 'Lance la première',
 };
 
 /**
  * Une « pétition » de la page d'accueil (chantier 2.1 + 3.1).
  *
- * Branche désormais sur la pétition publiée la plus récente. Si aucune
- * n'existe, on retombe sur l'état vide hérité du chantier 2.1 (lien
- * `voir toutes` qui pointe sur la liste).
+ * Branchée sur la pétition **épinglée par l'administration** (décision
+ * Lilou/Ben du 15/08/2026 : plus aucune mise à la une automatique). Sans
+ * épinglage, le bloc disparaît de la page publique et laisse la place à
+ * un rappel visible de l'administration seule (`UneNonEpinglee`).
  *
  * Le CTA principal est un bouton qui ouvre `<ModaleSignaturePetition>`,
  * le secondaire est un lien vers la fiche détail. Cohérent avec la spec
@@ -43,8 +42,6 @@ export async function UnePetition() {
     ctaPrincipal,
     ctaSecondaire,
     preposition,
-    emptyAvant,
-    emptyLien,
   ] = await Promise.all([
     petitionAlaUne(),
     estAdminCourant(),
@@ -60,50 +57,10 @@ export async function UnePetition() {
     lireContenuEditorial('home.une.petition.preposition_destinataire', {
       valeurMd: FALLBACKS.preposition,
     }),
-    lireContenuEditorial('home.une.petition.empty_avant', { valeurMd: FALLBACKS.emptyAvant }),
-    lireContenuEditorial('home.une.petition.empty_lien', { valeurMd: FALLBACKS.emptyLien }),
   ]);
 
   if (petition === null) {
-    return (
-      <UneSection
-        type={badge.valeurMd}
-        cleBadge="home.une.petition.badge"
-        couleur="brand"
-        titre={null}
-        voirTousHref="/mobiliser/petitions"
-        voirTousLibelle={voirTous.valeurMd}
-        cleVoirTous="home.une.petition.voir_tous"
-        estAdmin={estAdmin}
-        enAttente={
-          <p>
-            <TexteEditableAdmin
-              cle="home.une.petition.empty_avant"
-              valeurInitiale={emptyAvant.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state texte avant le lien"
-              longueurMax={150}
-            >
-              {(t) => <>{t}</>}
-            </TexteEditableAdmin>{' '}
-            <TexteEditableAdmin
-              cle="home.une.petition.empty_lien"
-              valeurInitiale={emptyLien.valeurMd}
-              estAdmin={estAdmin}
-              libelle="empty state libelle du lien"
-              longueurMax={50}
-            >
-              {(t) => (
-                <Link href="/mobiliser/petitions/nouvelle" className="text-brand hover:underline">
-                  {t}
-                </Link>
-              )}
-            </TexteEditableAdmin>
-            .
-          </p>
-        }
-      />
-    );
+    return estAdmin ? <UneNonEpinglee type={badge.valeurMd} couleur="brand" /> : null;
   }
 
   const createuricePrenomAffiche =

@@ -1,4 +1,5 @@
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
+import { RUBRIQUES_MENU } from '@/config/rubriques';
 import { SITE } from '@/config/site';
 import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
@@ -6,8 +7,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const FALLBACK_BASELINE = SITE.descriptionCourte;
-const FALLBACK_RESEAUX =
-  'Bientôt : Mastodon, PeerTube, autres plateformes éthiques. Pas de Twitter / X, pas de Facebook / Meta.';
 const FALLBACK_RGPD =
   'Données hébergées en région UE (Supabase Francfort). Pas de cookie publicitaire, pas de traceur tiers, pas de bandeau de consentement (cookies strictement techniques).';
 
@@ -15,18 +14,24 @@ const FALLBACK_RGPD =
 // est éditable indépendamment via le CMS (clés `footer.section.X` et
 // `footer.lien.X`). Les `href` restent en dur (changer une URL casse
 // la navigation, on ne laisse pas ça à l'admin éditorial).
+//
+// Mise en sommeil du 01/08/2026 : les liens vers « Qui sommes-nous »,
+// « Décider », « Le Peuple à l'Affiche » et « Organisations » ont été
+// retirés — leurs pages sont endormies (cf. `config/rubriques.ts`), un
+// lien vers elles renverrait à l'accueil. La colonne « Sur les réseaux »
+// a été supprimée : elle n'annonçait que des comptes à venir.
 const SECTION_APROPOS = {
   cleSection: 'footer.section.apropos',
-  fallbackSection: 'À propos',
+  fallbackSection: 'Le mouvement',
   liens: [
-    { cle: 'footer.lien.qui', href: '/a-propos', fallback: 'Qui sommes-nous' },
+    { cle: 'footer.lien.adherer', href: '/agir/adherer', fallback: 'Adhérer' },
+    { cle: 'footer.lien.contact', href: '/contact', fallback: 'Contact' },
     { cle: 'footer.lien.mentions', href: '/mentions-legales', fallback: 'Mentions légales' },
     {
       cle: 'footer.lien.confidentialite',
       href: '/confidentialite',
       fallback: 'Politique de confidentialité',
     },
-    { cle: 'footer.lien.contact', href: '/contact', fallback: 'Contact' },
   ],
 };
 
@@ -34,20 +39,21 @@ const SECTION_EXPLORER = {
   cleSection: 'footer.section.explorer',
   fallbackSection: 'Explorer',
   liens: [
-    { cle: 'footer.lien.recherche', href: '/recherche', fallback: 'Recherche globale' },
-    { cle: 'footer.lien.agenda', href: '/agenda', fallback: 'Agenda (tous les événements)' },
-    { cle: 'footer.lien.cartes', href: '/cartes', fallback: 'Cartes' },
-    { cle: 'footer.lien.decider', href: '/s-informer/decider', fallback: 'Décider (réunions)' },
-    { cle: 'footer.lien.media', href: '/s-informer/media', fallback: 'Maintenant Médias' },
-    { cle: 'footer.lien.journal', href: '/s-informer/journal', fallback: "Le Peuple à l'Affiche" },
-    { cle: 'footer.lien.organisations', href: '/organisations', fallback: 'Organisations' },
+    { cle: 'footer.lien.agenda', href: '/agenda', fallback: 'Agenda des mobilisations' },
+    // Le lien « Carte des mobilisations » (`/cartes`) est retiré depuis la
+    // mise en sourdine du 15/08/2026 (voir `config/rubriques.ts`). Le
+    // rétablir ici quand la carte revient.
+    { cle: 'footer.lien.recherche', href: '/recherche', fallback: 'Recherche' },
   ],
 };
 
-const SECTION_RESEAUX = {
-  cleSection: 'footer.section.reseaux',
-  fallbackSection: 'Sur les réseaux',
-};
+// Colonne « Rubriques » : reprise directe du menu principal, pour qu'un
+// visiteur arrivé en bas de page n'ait pas à remonter. Les libellés
+// viennent de `config/rubriques.ts` et ne sont donc pas éditables un par
+// un ici — ils le sont à un seul endroit, ce qui évite qu'un même lien
+// porte deux noms différents en haut et en bas de page.
+const CLE_SECTION_RUBRIQUES = 'footer.section.rubriques';
+const FALLBACK_SECTION_RUBRIQUES = 'Rubriques';
 
 /**
  * Footer commun aux pages publiques.
@@ -61,10 +67,9 @@ export async function Footer() {
 
   // Lecture en parallèle de tous les textes éditables.
   const allLiens = [...SECTION_APROPOS.liens, ...SECTION_EXPLORER.liens];
-  const [baseline, reseauxTxt, rgpd, sectionApropos, sectionExplorer, sectionReseaux, ...liens] =
+  const [baseline, rgpd, sectionApropos, sectionExplorer, sectionRubriques, ...liens] =
     await Promise.all([
       lireContenuEditorial('footer.baseline', { valeurMd: FALLBACK_BASELINE }),
-      lireContenuEditorial('footer.reseaux', { valeurMd: FALLBACK_RESEAUX }),
       lireContenuEditorial('footer.rgpd', { valeurMd: FALLBACK_RGPD }),
       lireContenuEditorial(SECTION_APROPOS.cleSection, {
         valeurMd: SECTION_APROPOS.fallbackSection,
@@ -72,9 +77,7 @@ export async function Footer() {
       lireContenuEditorial(SECTION_EXPLORER.cleSection, {
         valeurMd: SECTION_EXPLORER.fallbackSection,
       }),
-      lireContenuEditorial(SECTION_RESEAUX.cleSection, {
-        valeurMd: SECTION_RESEAUX.fallbackSection,
-      }),
+      lireContenuEditorial(CLE_SECTION_RUBRIQUES, { valeurMd: FALLBACK_SECTION_RUBRIQUES }),
       ...allLiens.map((l) => lireContenuEditorial(l.cle, { valeurMd: l.fallback })),
     ]);
 
@@ -114,12 +117,29 @@ export async function Footer() {
           </TexteEditableAdmin>
         </div>
 
-        <nav aria-label="Pages du site" className="grid gap-2 text-sm">
+        <nav aria-label="Rubriques du site" className="grid content-start gap-2 text-sm">
+          <TexteEditableAdmin
+            cle={CLE_SECTION_RUBRIQUES}
+            valeurInitiale={sectionRubriques.valeurMd}
+            estAdmin={estAdmin}
+            libelle="titre section Rubriques du footer"
+            longueurMax={50}
+          >
+            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
+          </TexteEditableAdmin>
+          {RUBRIQUES_MENU.map((rubrique) => (
+            <Link key={rubrique.cle} href={rubrique.href} className="text-text-2 hover:text-brand">
+              {rubrique.libelle}
+            </Link>
+          ))}
+        </nav>
+
+        <nav aria-label="Le mouvement" className="grid content-start gap-2 text-sm">
           <TexteEditableAdmin
             cle={SECTION_APROPOS.cleSection}
             valeurInitiale={sectionApropos.valeurMd}
             estAdmin={estAdmin}
-            libelle="titre section À propos du footer"
+            libelle="titre section Le mouvement du footer"
             longueurMax={50}
           >
             {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
@@ -169,28 +189,6 @@ export async function Footer() {
             </TexteEditableAdmin>
           ))}
         </nav>
-
-        <div className="grid gap-2 text-sm">
-          <TexteEditableAdmin
-            cle={SECTION_RESEAUX.cleSection}
-            valeurInitiale={sectionReseaux.valeurMd}
-            estAdmin={estAdmin}
-            libelle="titre section Sur les réseaux du footer"
-            longueurMax={50}
-          >
-            {(t) => <p className="text-xs font-bold uppercase tracking-cap text-text-3">{t}</p>}
-          </TexteEditableAdmin>
-          <TexteEditableAdmin
-            cle="footer.reseaux"
-            valeurInitiale={reseauxTxt.valeurMd}
-            estAdmin={estAdmin}
-            libelle="texte colonne réseaux sociaux"
-            multilignes
-            longueurMax={500}
-          >
-            {(t) => <p className="text-text-3">{t}</p>}
-          </TexteEditableAdmin>
-        </div>
       </div>
 
       <div className="border-t border-border">

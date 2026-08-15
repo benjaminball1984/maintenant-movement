@@ -12,11 +12,16 @@ export const metadata: Metadata = {
 /**
  * Console « À la une » (revue 2026-06-11, demande Lilou/Ben).
  *
- * Un seul endroit pour choisir ce qui s'affiche dans les 4 blocs « à la
- * une » de la page d'accueil : pétition, article (Maintenant Médias),
- * mobilisation, cagnotte. Pour chaque emplacement :
- *   - l'élément actuellement épinglé (ou « automatique » : le plus récent) ;
+ * Un seul endroit pour choisir ce qui s'affiche dans les blocs « à la
+ * une » de la page d'accueil : pétition, mobilisation, sondage, article
+ * (Maintenant Médias), cagnotte. Pour chaque emplacement :
+ *   - l'élément actuellement épinglé, s'il y en a un ;
  *   - la liste des contenus publiés candidats, avec le bouton d'épinglage.
+ *
+ * Depuis le 15/08/2026 (décision Lilou/Ben), **un emplacement sans
+ * épinglage reste vide sur la page d'accueil** : plus rien n'y monte
+ * automatiquement. Cette console devient donc le seul endroit qui décide
+ * de ce que voit un visiteur en arrivant sur le site.
  *
  * Réutilise la même table `une_home` et les mêmes Server Actions que les
  * boutons « Mettre à la une » présents sur les fiches. L'accès admin est
@@ -52,10 +57,12 @@ export default async function PageAdminUne() {
     medias,
     mobilisations,
     cagnottes,
+    sondages,
     ePetition,
     eArticle,
     eMobilisation,
     eCagnotte,
+    eSondage,
   ] = await Promise.all([
     supabase
       .from('petition')
@@ -82,12 +89,20 @@ export default async function PageAdminUne() {
       .eq('statut', 'publiee')
       .order('created_at', { ascending: false })
       .limit(20),
+    supabase
+      .from('sondage')
+      .select('id, titre, slug, statut, created_at')
+      .in('statut', ['ouvert', 'ferme'])
+      .order('created_at', { ascending: false })
+      .limit(20),
     idEpingleUneHome('petition'),
     idEpingleUneHome('article'),
     idEpingleUneHome('mobilisation'),
     idEpingleUneHome('cagnotte'),
+    idEpingleUneHome('sondage'),
   ]);
 
+  // Ordre des sections = ordre d'affichage des blocs sur la page d'accueil.
   const sections: SectionUne[] = [
     {
       emplacement: 'petition',
@@ -101,17 +116,6 @@ export default async function PageAdminUne() {
       })),
     },
     {
-      emplacement: 'article',
-      libelle: 'Article à la une (Maintenant Médias)',
-      idEpingle: eArticle,
-      candidats: (medias.data ?? []).map((m) => ({
-        id: m.id,
-        titre: m.titre,
-        href: `/s-informer/media/${m.slug}`,
-        detail: m.publie_le !== null ? FORMAT_DATE.format(new Date(m.publie_le)) : null,
-      })),
-    },
-    {
       emplacement: 'mobilisation',
       libelle: 'Mobilisation à la une',
       idEpingle: eMobilisation,
@@ -120,6 +124,28 @@ export default async function PageAdminUne() {
         titre: m.titre,
         href: `/mobiliser/mobilisations/${m.slug}`,
         detail: FORMAT_DATE.format(new Date(m.date_debut)),
+      })),
+    },
+    {
+      emplacement: 'sondage',
+      libelle: 'Sondage à la une',
+      idEpingle: eSondage,
+      candidats: (sondages.data ?? []).map((s) => ({
+        id: s.id,
+        titre: s.titre,
+        href: `/s-informer/sondages/${s.slug}`,
+        detail: s.statut === 'ferme' ? 'fermé' : null,
+      })),
+    },
+    {
+      emplacement: 'article',
+      libelle: 'Article à la une (Maintenant Médias)',
+      idEpingle: eArticle,
+      candidats: (medias.data ?? []).map((m) => ({
+        id: m.id,
+        titre: m.titre,
+        href: `/s-informer/media/${m.slug}`,
+        detail: m.publie_le !== null ? FORMAT_DATE.format(new Date(m.publie_le)) : null,
       })),
     },
     {
@@ -142,9 +168,10 @@ export default async function PageAdminUne() {
           À la une de l’accueil
         </Heading>
         <p className="mt-2 text-text-2">
-          Choisis ce qui s’affiche dans chaque bloc « à la une » de la page d’accueil. Sans
-          épinglage, le bloc est en mode automatique : il montre le contenu publié le plus récent
-          (la prochaine mobilisation pour le bloc mobilisation).
+          Choisis ce qui s’affiche dans chaque bloc « à la une » de la page d’accueil. Rien n’y
+          monte tout seul : <strong>sans épinglage, le bloc n’apparaît pas</strong> pour les
+          visiteur·ses (toi, en administration, tu vois un cadre en pointillés à la place). Une
+          mobilisation épinglée dont la date est passée libère son emplacement.
         </p>
       </header>
 
@@ -155,15 +182,15 @@ export default async function PageAdminUne() {
               {section.libelle}
             </Heading>
             {section.idEpingle === null ? (
-              <Badge variant="default">Automatique (le plus récent)</Badge>
+              <Badge variant="default">Rien d’épinglé : bloc masqué</Badge>
             ) : (
-              <Badge variant="brand">Épinglage manuel actif</Badge>
+              <Badge variant="brand">Épinglé</Badge>
             )}
           </div>
 
           {section.candidats.length === 0 ? (
             <Alert variant="info" titre="Aucun contenu publié">
-              Ce bloc restera en état vide sur l’accueil tant qu’aucun contenu n’est publié.
+              Rien à épingler ici pour l’instant : ce bloc n’apparaîtra pas sur l’accueil.
             </Alert>
           ) : (
             <ul className="grid gap-2">
