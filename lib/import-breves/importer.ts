@@ -560,7 +560,10 @@ export async function importerBreveHoraire(
   urlSb: string,
   cle: string,
   tirerSource: () => SourceBreve,
-  maxEssaisSources = 4,
+  // Relevé de 4 à 6 (Ben 2026-06-15) : la nuit, le tirage puise dans les
+  // sources d'autres fuseaux ; essayer un peu plus de sources avant
+  // d'abandonner garantit d'en atteindre une qui a du frais (< 2 h).
+  maxEssaisSources = 6,
 ): Promise<ResultatInsertionBreve & { source?: string }> {
   const entetes = { apikey: cle, Authorization: `Bearer ${cle}` };
   const existants = await lienSourcesExistants(urlSb, cle);

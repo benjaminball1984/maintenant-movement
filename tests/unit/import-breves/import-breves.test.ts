@@ -9,7 +9,9 @@ import {
 } from '@/lib/import-breves/rss';
 import {
   SOURCES_COMPLEMENTAIRES,
+  SOURCES_NUIT,
   SOURCES_PRIORITAIRES,
+  estHeureCreuseParis,
   tirerSourceHoraire,
 } from '@/lib/import-breves/sources';
 import { MAX_TAGS_PAR_BREVE, TAGS_BREVES, assignerTags } from '@/lib/import-breves/tags';
@@ -249,12 +251,40 @@ describe('selectionnerPourUnJour', () => {
   });
 });
 
+describe('estHeureCreuseParis', () => {
+  it('reconnaît la nuit (23h-6h) et exclut la journée (7h-22h)', () => {
+    for (const h of [23, 0, 1, 3, 6]) expect(estHeureCreuseParis(h)).toBe(true);
+    for (const h of [7, 9, 12, 18, 22]) expect(estHeureCreuseParis(h)).toBe(false);
+  });
+});
+
 describe('tirerSourceHoraire', () => {
-  it('80 % prioritaires, 20 % complémentaires (aléa injecté)', () => {
+  it('JOUR : 80 % prioritaires, 20 % complémentaires (aléa injecté)', () => {
     const suite = [0.1, 0.0, 0.9, 0.0];
     let i = 0;
     const aleatoire = () => suite[i++ % suite.length] as number;
-    expect(tirerSourceHoraire(aleatoire)).toBe(SOURCES_PRIORITAIRES[0]);
-    expect(tirerSourceHoraire(aleatoire)).toBe(SOURCES_COMPLEMENTAIRES[0]);
+    // Heure de jour fixée (12h) pour un test déterministe.
+    expect(tirerSourceHoraire(aleatoire, 12)).toBe(SOURCES_PRIORITAIRES[0]);
+    expect(tirerSourceHoraire(aleatoire, 12)).toBe(SOURCES_COMPLEMENTAIRES[0]);
+  });
+
+  it('NUIT : tire dans les sources d’autres fuseaux (idée Ben 2026-06-15)', () => {
+    // 0.0 < 0.85 -> pool = SOURCES_NUIT ; index 0 -> première source de nuit.
+    expect(tirerSourceHoraire(() => 0.0, 3)).toBe(SOURCES_NUIT[0]);
+    // La source tirée la nuit a toujours une zone (amériques ou outre-mer).
+    expect(tirerSourceHoraire(() => 0.0, 3).zone).toBeDefined();
+  });
+
+  it('NUIT : repli (15 %) sur l’ensemble pour un contenu européen tardif', () => {
+    // 1er tirage 0.9 (>= 0.85) -> pool = TOUTES_LES_SOURCES ; 2e tirage 0.0 -> index 0.
+    const suite = [0.9, 0.0];
+    let i = 0;
+    const aleatoire = () => suite[i++ % suite.length] as number;
+    expect(tirerSourceHoraire(aleatoire, 2)).toBe(SOURCES_PRIORITAIRES[0]);
+  });
+
+  it('toutes les sources de nuit déclarent bien une zone', () => {
+    expect(SOURCES_NUIT.length).toBeGreaterThan(0);
+    expect(SOURCES_NUIT.every((s) => s.zone === 'ameriques' || s.zone === 'outre-mer')).toBe(true);
   });
 });
