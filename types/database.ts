@@ -3554,6 +3554,86 @@ export type Database = {
           },
         ];
       };
+      cagnotte_externe: {
+        Row: {
+          id: string;
+          titre: string;
+          resume: string | null;
+          organisateur: string | null;
+          plateforme: string;
+          source_url: string;
+          objectif_centimes: number | null;
+          collecte_centimes: number | null;
+          devise: string;
+          pourcentage: number | null;
+          echeance: string | null;
+          vignette_url: string | null;
+          themes: string[];
+          type_collecte: string | null;
+          statut: string;
+          modere_par: string | null;
+          modere_le: string | null;
+          raison_refus: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          titre: string;
+          resume?: string | null;
+          organisateur?: string | null;
+          plateforme: string;
+          source_url: string;
+          objectif_centimes?: number | null;
+          collecte_centimes?: number | null;
+          devise?: string;
+          pourcentage?: number | null;
+          echeance?: string | null;
+          vignette_url?: string | null;
+          themes?: string[];
+          type_collecte?: string | null;
+          statut?: string;
+          modere_par?: string | null;
+          modere_le?: string | null;
+          raison_refus?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          titre?: string;
+          resume?: string | null;
+          organisateur?: string | null;
+          plateforme?: string;
+          source_url?: string;
+          objectif_centimes?: number | null;
+          collecte_centimes?: number | null;
+          devise?: string;
+          pourcentage?: number | null;
+          echeance?: string | null;
+          vignette_url?: string | null;
+          themes?: string[];
+          type_collecte?: string | null;
+          statut?: string;
+          modere_par?: string | null;
+          modere_le?: string | null;
+          raison_refus?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'cagnotte_externe_modere_par_fkey';
+            columns: ['modere_par'];
+            isOneToOne: false;
+            referencedRelation: 'personne';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       transaction_entrante: {
         Row: {
           id: string;

@@ -1,0 +1,10 @@
+{
+  "name": "maintenant-cron-cagnottes",
+  "main": "worker.js",
+  "compatibility_date": "2026-01-01",
+  "triggers": {
+    // Une fois par jour : les collectes externes ne sont pas urgentes, et
+    // chaque exécution dépose des propositions à modérer a priori.
+    "crons": ["37 4 * * *"]
+  }
+}

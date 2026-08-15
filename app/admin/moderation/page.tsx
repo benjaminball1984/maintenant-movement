@@ -97,6 +97,13 @@ export default async function PageModerationGlobale() {
       icone: IconeImage,
     },
     {
+      slug: 'cagnottes-externes',
+      libelle: 'Collectes externes à valider (a priori)',
+      href: '/admin/moderation/cagnottes-externes',
+      nb: c.cagnottesExternesEnAttente,
+      icone: Wallet,
+    },
+    {
       slug: 'sondages',
       libelle: 'Sondages en modération',
       href: '/admin/moderation/sondages',

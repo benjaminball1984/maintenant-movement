@@ -26,6 +26,7 @@ export interface CompteursFileModeration {
   marcheProduitsSignales: number;
   momentsAModerer: number;
   contenusEditoriauxARediger: number;
+  cagnottesExternesEnAttente: number;
 }
 
 const PAGES_EDITORIALES_CONNUES = 10;
@@ -54,6 +55,7 @@ export async function chargerCompteursFileModeration(): Promise<CompteursFileMod
     groupesEntRes,
     momentsRes,
     contenusRes,
+    cagnotteExterneRes,
   ] = await Promise.all([
     requete('petition', 'statut', 'en_moderation'),
     requete('campagne', 'statut', 'en_moderation'),
@@ -67,6 +69,7 @@ export async function chargerCompteursFileModeration(): Promise<CompteursFileMod
     requete('groupe_entraide_local', 'statut', 'en_moderation'),
     requete('moment_solidaire', 'statut', 'retire'),
     supabase.from('contenu_editorial').select('cle', { count: 'exact', head: true }),
+    requete('cagnotte_externe', 'statut', 'propose'),
   ]);
 
   // Le modèle réseau pratique la modération a posteriori : on compte les posts
@@ -105,5 +108,6 @@ export async function chargerCompteursFileModeration(): Promise<CompteursFileMod
     marcheProduitsSignales,
     momentsAModerer: momentsRes.count ?? 0,
     contenusEditoriauxARediger,
+    cagnottesExternesEnAttente: cagnotteExterneRes.count ?? 0,
   };
 }

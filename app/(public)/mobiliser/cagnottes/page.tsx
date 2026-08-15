@@ -1,4 +1,5 @@
 import { CarteCagnotte } from '@/components/cagnottes/CarteCagnotte';
+import { SectionCagnottesExternes } from '@/components/cagnottes/SectionCagnottesExternes';
 import { MarkdownLeger } from '@/components/contenu/MarkdownLeger';
 import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { Alert, Container, Heading } from '@/components/ui';
@@ -187,6 +188,10 @@ export default async function PageCagnottes({ searchParams }: PageCagnottesProps
           ))}
         </ul>
       )}
+
+      {/* Collectes externes curées (modération a priori), distinctes des
+          cagnottes maison. La section disparaît si aucune n'est validée. */}
+      <SectionCagnottesExternes />
 
       <footer className="mt-12 border-t border-border pt-6 text-sm text-text-3">
         <TexteEditableAdmin
