@@ -21,7 +21,6 @@ import { reclasserMedia, retirerMedia } from '../../app/(public)/s-informer/medi
 const TYPES: { valeur: TypeMedia; libelle: string }[] = [
   { valeur: 'breve', libelle: 'Brève' },
   { valeur: 'video', libelle: 'Vidéo' },
-  { valeur: 'live', libelle: 'Live' },
   { valeur: 'podcast', libelle: 'Podcast' },
   { valeur: 'dessin', libelle: 'Dessin' },
   { valeur: 'article', libelle: 'Article' },

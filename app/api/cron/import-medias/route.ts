@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server';
 
 /**
  * Endpoint d'import HORAIRE de la revue de presse multi-format (demande
- * Ben 2026-06-13 : « 4 brèves, un podcast, une vidéo, un live et un
- * dessin par heure »). Chaque heure, on importe UN contenu de CHAQUE
- * format (les brèves sont gérées par `import-breves`). Une source par
+ * Ben 2026-06-13, mise à jour 2026-06-15 : la rubrique « Lives » est
+ * supprimée). Chaque heure, on importe UN contenu de CHAQUE format
+ * (podcast, vidéo, dessin ; les brèves sont gérées par `import-breves`).
+ * Une source par
  * contenu, en sautant ce qui est déjà importé et les sources déjà
  * servies dans les 24 h. La rotation des SOURCES (par jour) évite de
  * toujours puiser en tête de liste.
@@ -18,8 +19,11 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-/** Un contenu de chacun de ces formats est importé à chaque heure. */
-const FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
+/**
+ * Un contenu de chacun de ces formats est importé à chaque heure. La rubrique
+ * « Lives » a été supprimée (Ben 2026-06-15) : plus de format `live`.
+ */
+const FORMATS: FormatMedia[] = ['podcast', 'video', 'dessin'];
 
 /** Quantième du jour (1-366), pour faire tourner l'ordre des sources. */
 function jourDeLAnnee(): number {
@@ -45,8 +49,8 @@ export async function GET(requete: Request): Promise<NextResponse> {
   }
 
   // Un contenu de chaque format cette heure-ci. Un format temporairement
-  // épuisé (ex. lives : 9 sources, parfois toutes servies dans les 24 h)
-  // renvoie simplement 0 ; les autres passent quand même.
+  // épuisé (toutes ses sources servies dans les 24 h) renvoie simplement 0 ;
+  // les autres passent quand même.
   const offset = jourDeLAnnee();
   const rapports: Record<string, { crees: number; echecs: number }> = {};
   for (const format of FORMATS) {

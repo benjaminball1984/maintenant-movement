@@ -30,7 +30,6 @@ const TYPES: Array<{ value: string; label: string }> = [
   { value: 'dessin', label: 'Dessin' },
   { value: 'podcast', label: 'Podcast' },
   { value: 'video', label: 'Vidéo' },
-  { value: 'live', label: 'Live' },
   { value: 'newsletter', label: 'Newsletter' },
 ];
 

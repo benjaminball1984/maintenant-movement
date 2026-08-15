@@ -7,22 +7,13 @@ test.describe('Maintenant Médias', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Maintenant Médias' })).toBeVisible();
   });
 
-  test('a 10 onglets (Tous + 9 types)', async ({ page }) => {
+  test('a les onglets de format, sans rubrique « Lives »', async ({ page }) => {
     await page.goto('/s-informer/media');
-    for (const libelle of [
-      'Tous',
-      'Éditos',
-      'Tribunes',
-      'Articles',
-      'Brèves',
-      'Dessins',
-      'Podcasts',
-      'Vidéos',
-      'Lives',
-      'Newsletter',
-    ]) {
+    for (const libelle of ['Rédaction', 'Dessins', 'Podcasts', 'Vidéos']) {
       await expect(page.getByRole('link', { name: libelle, exact: true })).toBeVisible();
     }
+    // Rubrique « Lives » supprimée (Ben 2026-06-15).
+    await expect(page.getByRole('link', { name: 'Lives', exact: true })).toHaveCount(0);
   });
 
   test('slug inexistant → 404', async ({ page }) => {

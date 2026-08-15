@@ -20,7 +20,6 @@ const TYPES: Array<{ valeur: string; libelle: string }> = [
   { valeur: 'dessin', libelle: 'Dessin' },
   { valeur: 'podcast', libelle: 'Podcast' },
   { valeur: 'video', libelle: 'Vidéo' },
-  { valeur: 'live', libelle: 'Live' },
   { valeur: 'newsletter', libelle: 'Newsletter' },
 ];
 

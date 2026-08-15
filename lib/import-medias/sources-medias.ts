@@ -14,7 +14,7 @@
  * une ligne).
  */
 
-export type FormatMedia = 'podcast' | 'video' | 'live' | 'dessin';
+export type FormatMedia = 'podcast' | 'video' | 'dessin';
 
 export interface SourceMedia {
   /** Nom affiché (colonne `provenance_externe`). */
@@ -194,39 +194,47 @@ function fluxYoutube(channelId: string): string {
 }
 
 /**
- * Chaînes vidéo + lives (27 au total). Distinction `format` :
- *   - `live` : médias à diffusion régulière / émissions en direct
- *     (onglet « Lives »).
- *   - `video` : vidéastes et formats produits (onglet « Vidéos »).
- * 18 FR vidéo + 9 live (dont 2 internationaux), 5 internationaux au total.
+ * Chaînes vidéo (médias à diffusion régulière + vidéastes/formats produits).
+ *
+ * NOTE (Ben 2026-06-15) : la rubrique « Lives » a été supprimée. Un flux
+ * RSS/YouTube ne peut PAS attester d'un direct EN COURS (il ne sert que des
+ * rediffusions), donc toutes ces chaînes sont importées en `video`. Les
+ * chaînes anciennement taguées `live` sont conservées ici comme sources
+ * vidéo (rien n'est perdu) ; seul l'import de vrais directs (Twitch) a été
+ * coupé.
  */
 export const SOURCES_VIDEOS: SourceMedia[] = [
-  // Lives (9) : médias à diffusion régulière / émissions en direct.
-  { nom: 'Blast', flux: fluxYoutube('UC__xRB5L4toU9yYawt_lIKg'), langue: 'fr', format: 'live' },
-  { nom: 'Le Média', flux: fluxYoutube('UCT67YOMntJxfRnO_9bXDpvw'), langue: 'fr', format: 'live' },
-  { nom: 'Au Poste', flux: fluxYoutube('UC8-FN_ftL-crIaXMouuykyQ'), langue: 'fr', format: 'live' },
-  { nom: 'Mediapart', flux: fluxYoutube('UCdnaDhU-LDQrIEEmSIfq0-Q'), langue: 'fr', format: 'live' },
-  { nom: 'QG TV', flux: fluxYoutube('UCCDPdHuBGfjMxlM3xZANgGQ'), langue: 'fr', format: 'live' },
-  { nom: 'Backseat', flux: fluxYoutube('UC2ijB3_Fg2pIW1g6FeIiYKA'), langue: 'fr', format: 'live' },
+  // Médias à diffusion régulière / émissions (ex-« lives »).
+  { nom: 'Blast', flux: fluxYoutube('UC__xRB5L4toU9yYawt_lIKg'), langue: 'fr', format: 'video' },
+  { nom: 'Le Média', flux: fluxYoutube('UCT67YOMntJxfRnO_9bXDpvw'), langue: 'fr', format: 'video' },
+  { nom: 'Au Poste', flux: fluxYoutube('UC8-FN_ftL-crIaXMouuykyQ'), langue: 'fr', format: 'video' },
+  {
+    nom: 'Mediapart',
+    flux: fluxYoutube('UCdnaDhU-LDQrIEEmSIfq0-Q'),
+    langue: 'fr',
+    format: 'video',
+  },
+  { nom: 'QG TV', flux: fluxYoutube('UCCDPdHuBGfjMxlM3xZANgGQ'), langue: 'fr', format: 'video' },
+  { nom: 'Backseat', flux: fluxYoutube('UC2ijB3_Fg2pIW1g6FeIiYKA'), langue: 'fr', format: 'video' },
   {
     nom: 'Le Canard Réfractaire',
     flux: fluxYoutube('UCWGsN59FON3vOtXCozQPsZQ'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Novara Media',
     flux: fluxYoutube('UCOzMAa6IhV6uwYQATYG_2kg'),
     langue: 'en',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Democracy Now!',
     flux: fluxYoutube('UCzuqE7-t13O4NIDYJfakrhw'),
     langue: 'en',
-    format: 'live',
+    format: 'video',
   },
-  // Vidéos (18) : vidéastes et formats produits.
+  // Vidéastes et formats produits.
   {
     nom: 'Là-bas si j’y suis',
     flux: fluxYoutube('UCMAT1VA7o6bD6qnpBBZ_New'),
@@ -325,151 +333,151 @@ export const SOURCES_VIDEOS: SourceMedia[] = [
     langue: 'en',
     format: 'video',
   },
-  // === Lives étoffés (validés par Ben 2026-06-13 : personnalités
+  // === Chaînes engagées (validées par Ben 2026-06-13 : personnalités
   // politiques, syndicats de gauche hors CFDT, ONG/assos/collectifs,
-  // international). Channel_id vérifiés actifs. ===
+  // international). Channel_id vérifiés actifs. Importées en vidéo. ===
   // Syndicats de gauche.
-  { nom: 'La CGT', flux: fluxYoutube('UCXbA6-9E-w1m5SwUVuC9VQw'), langue: 'fr', format: 'live' },
+  { nom: 'La CGT', flux: fluxYoutube('UCXbA6-9E-w1m5SwUVuC9VQw'), langue: 'fr', format: 'video' },
   {
     nom: 'Union syndicale Solidaires',
     flux: fluxYoutube('UCrhskh-RXjJPUXlfCMui6Cw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
-  { nom: 'FSU', flux: fluxYoutube('UCS5yhSOqIFUQY8H-UAWHODQ'), langue: 'fr', format: 'live' },
+  { nom: 'FSU', flux: fluxYoutube('UCS5yhSOqIFUQY8H-UAWHODQ'), langue: 'fr', format: 'video' },
   {
     nom: 'Confédération paysanne',
     flux: fluxYoutube('UCbWqDhRCUHRuZkZYvYga4Og'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
-  { nom: 'SUD-Rail', flux: fluxYoutube('UCnJQN4DOteKb4B6l9RHxaWg'), langue: 'fr', format: 'live' },
+  { nom: 'SUD-Rail', flux: fluxYoutube('UCnJQN4DOteKb4B6l9RHxaWg'), langue: 'fr', format: 'video' },
   {
     nom: 'SUD éducation',
     flux: fluxYoutube('UCojHfRNjWh6S30smdLLWYkw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Réseau Salariat',
     flux: fluxYoutube('UCwdrNdnPSkE7HEAiuRG8Tcw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   // Partis et mouvements.
   {
     nom: 'Révolution Permanente',
     flux: fluxYoutube('UCwLLr_Fo9dpdJ9UHq4A7PjA'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
-  { nom: 'NPA', flux: fluxYoutube('UCAKzgWr5laB3Yf44hvqqZZQ'), langue: 'fr', format: 'live' },
+  { nom: 'NPA', flux: fluxYoutube('UCAKzgWr5laB3Yf44hvqqZZQ'), langue: 'fr', format: 'video' },
   {
     nom: 'Sandrine Rousseau',
     flux: fluxYoutube('UCA8JG3JY883RjCmAU9lABzw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Clémentine Autain / L’Après',
     flux: fluxYoutube('UCZgJ_r_Ewlu1Ck-RzNCHuUQ'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'François Ruffin',
     flux: fluxYoutube('UCIQGSp79vVch0vO3Efqif_w'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
-  { nom: 'Debout !', flux: fluxYoutube('UCQcOjAB27zVvTq7WPost9hA'), langue: 'fr', format: 'live' },
+  { nom: 'Debout !', flux: fluxYoutube('UCQcOjAB27zVvTq7WPost9hA'), langue: 'fr', format: 'video' },
   {
     nom: 'Lutte Ouvrière',
     flux: fluxYoutube('UCZsh-MrJftAOP_-ZgRgLScw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   // ONG, associations, collectifs.
   {
     nom: 'Les Soulèvements de la Terre',
     flux: fluxYoutube('UC4FwrM-0Zr3okIUs8DW9SMA'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Attac France',
     flux: fluxYoutube('UCe0hOiy0uE2ck3zSYkBV1UA'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Extinction Rebellion France',
     flux: fluxYoutube('UCSJFmDCxyjkxVsZNJUymZWQ'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Oxfam France',
     flux: fluxYoutube('UCf1p5jaYrOEUG5j0wzGPckw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'ATD Quart Monde',
     flux: fluxYoutube('UCIGpedPUvBjyLJ4rba2QvzA'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Banlieues Climat',
     flux: fluxYoutube('UCJl9enlQdVCHfFoCCfrhUzw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   // Personnalités et médias engagés.
   {
     nom: 'Camille Étienne',
     flux: fluxYoutube('UCyjXo7RjhDQ1oX7Q7CPUUIQ'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Reporterre',
     flux: fluxYoutube('UCDn6zvBZNEWUv44xjgELicA'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
-  { nom: 'Politis', flux: fluxYoutube('UCtjc5x0RIiTsdYS4IFMjCGQ'), langue: 'fr', format: 'live' },
+  { nom: 'Politis', flux: fluxYoutube('UCtjc5x0RIiTsdYS4IFMjCGQ'), langue: 'fr', format: 'video' },
   {
     nom: 'Off Investigation',
     flux: fluxYoutube('UCEFGCs68E9Vr5te5qZuJsbg'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Thinkerview',
     flux: fluxYoutube('UCQgWpmt02UtJkyO32HGUASQ'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Radio Nova',
     flux: fluxYoutube('UCGvjUWz3mGV9cssraATuEsw'),
     langue: 'fr',
-    format: 'live',
+    format: 'video',
   },
   // International.
   {
     nom: 'Alexandria Ocasio-Cortez',
     flux: fluxYoutube('UCElqfal0wzzpLsHlRuqZjaA'),
     langue: 'en',
-    format: 'live',
+    format: 'video',
   },
   {
     nom: 'Bernie Sanders',
     flux: fluxYoutube('UCH1dpzjCEiGAt8CXkryhkZg'),
     langue: 'en',
-    format: 'live',
+    format: 'video',
   },
 ];
 
@@ -587,8 +595,6 @@ export const SOURCES_DESSINS: SourceMedia[] = [
 /** Toutes les sources multi-format, par format. */
 export const SOURCES_PAR_FORMAT: Record<FormatMedia, SourceMedia[]> = {
   podcast: SOURCES_PODCASTS,
-  // Vidéos et lives partagent la liste SOURCES_VIDEOS, distinguées par `format`.
-  video: SOURCES_VIDEOS.filter((s) => s.format === 'video'),
-  live: SOURCES_VIDEOS.filter((s) => s.format === 'live'),
+  video: SOURCES_VIDEOS,
   dessin: SOURCES_DESSINS,
 };

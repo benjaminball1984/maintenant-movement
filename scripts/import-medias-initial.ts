@@ -23,7 +23,7 @@ if (!estDryRun && !estConfirme) {
   process.exit(1);
 }
 const argFormat = process.argv.find((a) => a.startsWith('--format='))?.split('=')[1];
-const FORMATS: FormatMedia[] = ['podcast', 'video', 'live', 'dessin'];
+const FORMATS: FormatMedia[] = ['podcast', 'video', 'dessin'];
 const formats = argFormat ? FORMATS.filter((f) => f === argFormat) : FORMATS;
 
 async function main(): Promise<void> {

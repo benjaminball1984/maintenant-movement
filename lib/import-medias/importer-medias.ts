@@ -90,7 +90,6 @@ export function articleExploitable(format: FormatMedia, article: ArticleFlux): b
     case 'podcast':
       return article.audioUrl !== null;
     case 'video':
-    case 'live':
       return article.videoId !== null;
     case 'dessin':
       // L'image peut être dans le flux OU récupérée en og:image de la
@@ -262,7 +261,7 @@ export async function telechargerEtInsererMedia(
   // n'en ont pas (l'image suffit).
   let mediaUrl: string | null = null;
   if (format === 'podcast') mediaUrl = article.audioUrl;
-  else if (format === 'video' || format === 'live')
+  else if (format === 'video')
     mediaUrl = article.videoId !== null ? urlEmbedYoutube(article.videoId) : null;
 
   let corps = extrairePremieresLignes(article.description, 650);
@@ -282,7 +281,7 @@ export async function telechargerEtInsererMedia(
   // porte ce sujet, la vidéo absorbe son texte (6-7 lignes sous la vidéo) et
   // la brève sera retirée après l'insertion.
   let breveAabsorber: string | null = null;
-  if (format === 'video' || format === 'live') {
+  if (format === 'video') {
     const breve = await chercherBreveMemeSujet(article.titre, source.nom, urlSb, cle);
     if (breve !== null) {
       if ((breve.corps?.length ?? 0) > corps.length) corps = breve.corps ?? corps;
@@ -290,14 +289,12 @@ export async function telechargerEtInsererMedia(
     }
   }
 
-  // Type RÉEL (V2.6.116) : un flux RSS/YouTube ne peut PAS attester d'un
-  // direct EN COURS (il ne sert que des rediffusions, sans statut « live »).
-  // On stocke donc TOUJOURS ces contenus en `video` et on nettoie le badge
-  // « direct » trompeur du titre. Le type `live` est réservé aux vrais
-  // directs Twitch (lib/import-twitch, temps réel + retrait à la fin).
-  const estVideoOuLive = format === 'video' || format === 'live';
-  const typeStocke: FormatMedia = estVideoOuLive ? 'video' : format;
-  const titreFinal = estVideoOuLive ? nettoyerTitreLive(article.titre) : article.titre;
+  // Rubrique « Lives » supprimée (Ben 2026-06-15) : on n'importe plus aucun
+  // direct. Les chaînes vidéo sont stockées en `video` ; on nettoie le badge
+  // « direct » trompeur (🔴 / [EN DIRECT]) que certaines rediffusions YouTube
+  // gardent dans leur titre.
+  const typeStocke: FormatMedia = format;
+  const titreFinal = format === 'video' ? nettoyerTitreLive(article.titre) : article.titre;
 
   const ligne = {
     slug,
