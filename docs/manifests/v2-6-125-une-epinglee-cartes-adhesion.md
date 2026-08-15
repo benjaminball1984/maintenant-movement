@@ -90,25 +90,38 @@ Le code de paiement n'est pas touché : il reste en place, protégé par le gard
 
 ---
 
-## 6. Reste à faire — à traiter en premier
+## 6. Mise en ligne (16/08/2026) et reste à faire
 
-- [ ] **Confirmer que la migration `20260815100000` est passée sur le distant.** Elle n'a pas pu
-      être vérifiée : le `SUPABASE_ACCESS_TOKEN` du `.env.local` est refusé par l'API de gestion
-      Supabase (*HTTP 401 Unauthorized*, jeton expiré ou révoqué), et la table `une_home` ne
-      contient à ce jour aucune ligne `sondage`. **Tant que ce n'est pas confirmé, épingler un
-      sondage depuis l'administration échouera** : `definir_une_home()` retournerait `false`
-      (liste blanche) ou la contrainte rejetterait l'insertion. Renouveler le jeton, puis :
-      `node --env-file=.env.local --import tsx scripts/appliquer-sql-distant.ts supabase/migrations/20260815100000_une_home_sondage.sql`
-      (la migration est idempotente : la rejouer ne coûte rien).
-- [ ] **Déployer.** Le dernier build OpenNext date du **01/08 18h47** : ni ce chantier ni celui
-      du 01/08 ne sont en ligne sur `maintenant-le-mouvement.org`. `npm run cf:deploy`.
-- [ ] **Épingler les emplacements.** `une_home` ne contient aujourd'hui que trois épinglages
-      (article, mobilisation, pétition). Depuis ce chantier, un emplacement non épinglé **reste
-      vide** : sans épinglage de sondage et de cagnotte, ces deux blocs n'apparaîtront pas sur
-      l'accueil. C'est le comportement voulu, mais il faut le savoir.
-- [ ] Hérités du chantier du 01/08, toujours ouverts : poser les clés Stripe
-      (`npx wrangler secret put STRIPE_SECRET_KEY` et `PAYMENT_PROVIDER`), et tester de bout en
-      bout l'envoi réel des emails Brevo.
+- [x] **Migration `20260815100000` appliquée au distant** le 16/08. Elle ne l'avait jamais été :
+      la contrainte n'acceptait que `petition, article, mobilisation, cagnotte`. Vérifié après
+      coup — la contrainte et la liste blanche de `definir_une_home()` acceptent désormais
+      `sondage`, et les trois épinglages existants sont intacts. Le `SUPABASE_ACCESS_TOKEN` du
+      `.env.local` était expiré (401) ; il a été renouvelé.
+- [x] **Les quatre emplacements de la une sont épinglés** (pétition, mobilisation, sondage,
+      article). Le sondage a été épinglé en base : il n'y en a qu'un, et l'ancienne version du
+      site l'affichait déjà automatiquement — l'épinglage ne fait donc que préserver ce que
+      voyaient les visiteur·ses. Le bloc cagnotte n'existe pas sur l'accueil (rubrique en
+      sommeil), il n'y a donc rien à y épingler.
+- [x] **Déployé** le 16/08 sur `maintenant-le-mouvement.org` (version Worker
+      `fa5acb87-206e-4b9d-ba02-9a6f4cc3ea80`). Vérifié en ligne : les 11 adresses gardées
+      répondent 200, les 15 adresses endormies renvoient 307 vers l'accueil, l'accueil affiche
+      bien ses quatre unes (dont le sondage) sans aucun cadre « non épinglé », le lien vers la
+      carte a disparu, et la page d'adhésion ne mentionne plus ni 12 € ni 99-coin.
+- [ ] **Emails Brevo** : les clés sont posées en ligne, mais l'envoi réel n'a jamais été testé de
+      bout en bout. À confirmer avant de compter sur les emails de confirmation.
+- [ ] **Petite porte à refermer** : `definir_une_home()` accorde encore `execute` à `anon`, par
+      un droit direct antérieur qu'un `revoke ... from public` ne retire pas. Sans risque réel
+      (la fonction commence par `if not est_admin_general() then return false`), mais sans raison
+      d'être ouverte non plus. Une migration d'une ligne :
+      `revoke execute on function public.definir_une_home(text, uuid) from anon;`
+- [ ] **`/dons/retour` est resté actif** alors que le paiement est éteint. La page n'est liée
+      depuis nulle part, donc personne n'y arrive. Laissée allumée volontairement : l'endormir
+      créerait un piège le jour où les dons reviendront.
+
+**Stripe : hors sujet, et c'est voulu.** Décision Lilou/Ben du 16/08 : il n'y a plus de cagnotte,
+plus d'adhésion payante, donc plus de système de paiement — tout est en sommeil et le garde-fou
+`paiementReelDisponible()` masque déjà toute interface de paiement tant qu'aucune clé n'existe.
+Les clés Stripe ne sont **pas** à poser. Le code reste en place, dormant, pour le jour où.
 
 ## 7. Note d'historique — pourquoi ce chantier partage un commit avec celui du 01/08
 
@@ -133,4 +146,9 @@ sont restés deux mois non commités, ce qui a aussi rendu leur relecture plus d
   `app/(public)/agir/adherer/page.tsx` (issue de ce chantier) et
   `infra/cron-twitch/wrangler.jsonc` (retour à la ligne final manquant, antérieur au chantier).
   Les 66 avertissements restants sont antérieurs et inchangés.
-- **Non vérifié** : rien n'a été testé en ligne, puisque rien n'est déployé (voir §6).
+- **En ligne, le 16/08** : 11 adresses gardées en 200, 15 adresses endormies en 307, quatre unes
+  remplies sur l'accueil, aucun cadre « non épinglé » visible, lien carte absent, page d'adhésion
+  sans mention de 12 € ni de 99-coin. Détail en §6.
+- **Incident de build à connaître** : deux `next build` lancés en parallèle sur le même dossier
+  `.next` se cassent mutuellement (`ENOENT: build-manifest.json`). Ce n'est pas une erreur de
+  code — il faut simplement ne jamais compiler à deux en même temps.
