@@ -49,7 +49,10 @@ export default async function PageCreationPetition() {
             Le texte décrit le problème et la demande. Pas de propos haineux ni d'attaque
             personnelle.
           </li>
-          <li>L'objectif chiffré est réaliste. Au franchissement de 90 %, il sera étiré ×1,5.</li>
+          <li>
+            L'objectif chiffré est réaliste. Au franchissement de 90 %, il est automatiquement
+            relevé.
+          </li>
         </ul>
       </Alert>
 

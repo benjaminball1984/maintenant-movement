@@ -46,9 +46,13 @@ export function CompteurStretch({
             / {FORMATTER.format(etat.objectifEffectif)} signataires
           </span>
         </p>
+        {/* Décision Ben du 16/08/2026 : le facteur d'étirement se calcule,
+            mais ne s'écrit pas. On dit seulement que l'objectif a été
+            dépassé — le nouveau total est déjà lisible juste à côté, dans le
+            compteur. */}
         {etat.estEtire ? (
           <Badge variant="accent" aria-label="Objectif initial dépassé">
-            Objectif ×1,5
+            Objectif dépassé
           </Badge>
         ) : null}
       </div>
