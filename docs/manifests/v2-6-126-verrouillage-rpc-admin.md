@@ -82,12 +82,51 @@ révoquer aurait cassé les pages pour les visiteurs. Idem pour les compteurs pu
   répondent toujours 200.
 - 1186 tests verts, `tsc --noEmit` vert.
 
+## Audit complémentaire (même séance) — les journaux, les 5 fonctions restantes, les tables
+
+### La fuite a-t-elle été exploitée ? Réponse partielle
+
+Les journaux de Supabase ont été interrogés. **Contrôle de fiabilité fait d'abord** : mes six
+appels de test y figurent bien (cinq en HTTP 200 avant le correctif, un en 401 après), donc une
+absence de résultat est significative — et non le signe d'une requête mal formée.
+
+Sur la fenêtre disponible, **les seuls appels à `adhesions_a_relancer` sont les miens**.
+
+⚠️ **Mais la rétention des journaux est de 24 heures** (fenêtre constatée : 15/08 00 h 32 →
+16/08 00 h 30). Rien ne peut être dit de la période antérieure, et la fonction était exposée
+depuis bien plus longtemps. **Absence de preuve n'est pas preuve d'absence.**
+
+### Les 5 fonctions restantes : sans danger, vérifiées une par une
+
+| Fonction | Renvoie | Verdict |
+|---|---|---|
+| `personne_id_par_numero` | un uuid | demande de connaître le numéro public, affiché sur les profils — par construction |
+| `personne_cover_url` | une URL d'image | image de profil publique — par construction |
+| `compteurs_cagnotte` | 3 totaux | agrégats, aucun donateur nommé |
+| `compteurs_commune` | 3 nombres | agrégats |
+| `nombre_communes_actives` | un nombre | un compteur pour une personne déjà identifiée |
+
+Aucune ne renvoie d'ensemble de lignes personnelles, et toutes exigent un identifiant qu'il faut
+déjà posséder. **Rien à corriger.**
+
+### Les tables : protection en place
+
+- **Aucune table sans RLS n'est lisible par `anon`** (0 sur 78). La protection est active partout.
+- 21 tables sont lisibles publiquement par une règle `using (true)`. Vérification faite : ce sont
+  soit du contenu délibérément public (communes, fédérations, contenu éditorial, une de
+  l'accueil, groupes de travail, salles et réunions), soit des tables **vides**.
+- `vote_decider` a été regardée de près à cause de son nom : elle contient les questions et les
+  résultats, **pas les bulletins individuels** — aucun identifiant de votant·e. Pas de problème
+  de secret du vote.
+
 ## Reste à faire
 
-- [ ] **Auditer les fonctions restantes** de la liste « aucun contrôle d'identité » :
-      `personne_id_par_numero`, `personne_cover_url`, `compteurs_cagnotte`, `compteurs_commune`,
-      `nombre_communes_actives`. Elles paraissent inoffensives (un identifiant, une URL d'image,
-      des compteurs) et sont probablement utilisées par le site public, mais elles n'ont pas été
-      vérifiées une par une dans ce chantier.
-- [ ] **Se demander si d'autres tables sont lisibles trop largement.** Cet audit n'a porté que
-      sur les *fonctions*. Les politiques RLS des tables elles-mêmes n'ont pas été relues.
+- [ ] **Point de vigilance pour plus tard, pas un défaut aujourd'hui** : trois tables lisibles
+      publiquement contiennent une colonne `personne_id` — `appartenance_campagne`,
+      `gestionnaire_espace`, `mandat_confederal`. Elles sont **vides**, parce que les
+      fonctionnalités correspondantes (campagnes, espaces, mandats confédéraux) ne sont pas
+      utilisées. Le jour où elles se rempliront, « qui appartient à quoi » et « qui détient quel
+      mandat » deviendront publiquement lisibles. À décider **avant** d'allumer ces
+      fonctionnalités, pas après.
+- [ ] **Rétention des journaux** : 24 h seulement. Si la traçabilité compte pour ce site (données
+      de membres), c'est court — à arbitrer avec l'offre Supabase.
