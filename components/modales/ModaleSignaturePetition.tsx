@@ -9,6 +9,7 @@ import {
 import { type DonneesSignerPetition, creerSignerPetitionSchema } from '@/lib/validations/petition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -59,10 +60,14 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   labelEmail: 'Email',
   labelCodePostal: 'Code postal',
   labelTelephone: 'Téléphone (optionnel)',
-  labelNewsletter: 'Je veux recevoir la newsletter Maintenant! (mardi récap + vendredi édito).',
+  labelNewsletter: 'Je veux recevoir la newsletter Maintenant!',
+  // Demande Ben du 16/08/2026 : ne plus nommer la personne qui a créé la
+  // pétition. Le prénom seul (« J'autorise Benjamin ») ne dit rien à qui
+  // signe — il peut même inquiéter : qui est ce Benjamin, et pourquoi
+  // aurait-il mon adresse ? La fonction est plus claire que le prénom.
   labelContactCreatricePrefixe: "J'autorise",
   labelContactCreatriceSuffixe:
-    '(qui a créé cette pétition) à me contacter par email pour des actualités liées.',
+    'le créateur ou la créatrice de la pétition à me contacter par email pour des actualités liées.',
   ctaSubmit: 'Signer maintenant',
   ctaEnCours: 'Envoi en cours...',
   ctaAnnuler: 'Annuler',
@@ -93,8 +98,13 @@ interface ModaleSignaturePetitionProps {
   petitionId: string;
   /** Titre de la pétition (affiché dans le header de la modale). */
   petitionTitre: string;
-  /** Nom de la personne qui a créé la pétition (pour la case d'autorisation). */
-  createuricePrenom: string;
+  /**
+   * @deprecated Depuis le 16/08/2026, la case d'autorisation ne nomme plus
+   * personne : elle parle du « créateur ou de la créatrice de la pétition »
+   * (demande Ben). Ce prop n'est plus affiché. Il reste accepté pour ne pas
+   * casser les appelants, et pourra disparaître quand ils seront nettoyés.
+   */
+  createuricePrenom?: string;
   /** Server Action à appeler pour la signature. */
   signerPetition: (donnees: unknown) => Promise<{ ok: true } | { ok: false; message: string }>;
   /** Élément déclencheur du dialog (par défaut un Button gradient). */
@@ -122,7 +132,6 @@ interface ModaleSignaturePetitionProps {
 export function ModaleSignaturePetition({
   petitionId,
   petitionTitre,
-  createuricePrenom,
   signerPetition,
   declencheur,
   libelles = LIBELLES_DEFAUT,
@@ -130,6 +139,7 @@ export function ModaleSignaturePetition({
   prefil,
 }: ModaleSignaturePetitionProps) {
   const refDialog = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
   const [merci, setMerci] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -201,6 +211,14 @@ export function ModaleSignaturePetition({
 
   function fermer() {
     refDialog.current?.close();
+    // Le compteur de signatures est rafraîchi ICI, et non dans la Server
+    // Action (cf. le commentaire dans `signerPetition`) : rafraîchir la
+    // route pendant que la fenêtre est ouverte la referme aussitôt, et le
+    // tunnel d'adhésion disparaissait avant d'avoir été lu. On ne rafraîchit
+    // qu'après une signature réussie — inutile si la personne renonce.
+    if (merci) {
+      router.refresh();
+    }
   }
 
   // Restaurer le scroll quand la modale se ferme (clic backdrop, Escape,
@@ -417,8 +435,8 @@ export function ModaleSignaturePetition({
                 {...register('accepte_contact_createurice')}
               />
               <span>
-                {libelles.labelContactCreatricePrefixe} <strong>{createuricePrenom}</strong>{' '}
-                {libelles.labelContactCreatriceSuffixe}
+                {libelles.labelContactCreatricePrefixe}{' '}
+                <strong>{libelles.labelContactCreatriceSuffixe}</strong>
               </span>
             </label>
 

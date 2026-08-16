@@ -26,6 +26,7 @@ import type { ResultatEnvoi } from '@/lib/email/types';
  *  utilisateurice (digest hebdo / opt-in par type) decidera quand
  *  basculer une notification cloche en email. */
 export type TypeEmail =
+  | 'petition_signee'
   | 'rgpd_export_demande'
   | 'rgpd_suppression_demande'
   | 'adhesion_relance'
@@ -41,6 +42,39 @@ interface TemplateEmail {
 
 /** Templates par defaut. Surchargeables admin via le CMS. */
 const TEMPLATES_DEFAUT: Record<TypeEmail, TemplateEmail> = {
+  // Confirmation de signature (16/08/2026). Jusqu'ici la modale de signature
+  // annonçait « Tu vas recevoir un email pour confirmer » alors que rien
+  // n'était envoyé : le site promettait ce qu'il ne faisait pas. Décision
+  // Ben : envoyer l'email pour de vrai.
+  //
+  // Ton : on remercie, on donne une trace de l'engagement (le titre signé,
+  // le nombre de signataires), et on propose d'aller plus loin — sans
+  // insister, conformément à la doctrine « pas de captation d'attention ».
+  petition_signee: {
+    sujet: 'Ta signature est enregistrée : {petition_titre}',
+    html: `<p>Bonjour {prenom},</p>
+<p>Ta signature vient d’être enregistrée sur la pétition <strong>{petition_titre}</strong>.</p>
+<p>Vous êtes désormais <strong>{nombre_signatures}</strong> à l’avoir signée. Chaque signature compte : elle rend le rapport de force visible.</p>
+<p><a href="{petition_url}">Voir la pétition</a></p>
+<p>Pour peser davantage, tu peux rejoindre le mouvement — l’adhésion est gratuite et sans engagement.</p>
+<p><a href="https://maintenant-le-mouvement.org/agir/adherer">Adhérer à Maintenant!</a></p>
+<p>À bientôt,<br/>L’équipe Maintenant!</p>`,
+    texte: `Bonjour {prenom},
+
+Ta signature vient d’être enregistrée sur la pétition « {petition_titre} ».
+
+Vous êtes désormais {nombre_signatures} à l’avoir signée. Chaque signature
+compte : elle rend le rapport de force visible.
+
+Voir la pétition : {petition_url}
+
+Pour peser davantage, tu peux rejoindre le mouvement — l’adhésion est
+gratuite et sans engagement :
+https://maintenant-le-mouvement.org/agir/adherer
+
+À bientôt,
+L’équipe Maintenant!`,
+  },
   rgpd_export_demande: {
     sujet: 'Demande d’export de tes données enregistrée',
     html: `<p>Bonjour,</p>

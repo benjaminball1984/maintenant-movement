@@ -1,8 +1,10 @@
 'use server';
 
+import { getSiteUrl } from '@/config/site';
 import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getEmailService } from '@/lib/email';
+import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -118,7 +120,7 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
 
   const { data: petition, error: erreurLecture } = await supabase
     .from('petition')
-    .select('id, statut, createurice_id, slug')
+    .select('id, statut, createurice_id, slug, titre')
     .eq('id', donnees.petition_id)
     .maybeSingle();
 
@@ -173,7 +175,40 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
     }
   }
 
-  revalidatePath(`/mobiliser/petitions/${petition.slug}`);
+  // Confirmation de signature (16/08/2026, demande Ben). La modale annonçait
+  // « Tu vas recevoir un email pour confirmer » alors qu'aucun email ne
+  // partait : le site promettait ce qu'il ne faisait pas.
+  //
+  // Best-effort, comme la newsletter juste au-dessus : si Brevo est
+  // indisponible, la signature reste enregistrée. On ne perd jamais un
+  // signal politique pour un échec d'envoi.
+  try {
+    const { data: total } = await supabase.rpc('nombre_signatures', {
+      petition_a_compter: petition.id,
+    });
+    await envoyerEmailTemplee('petition_signee', donnees.email, {
+      prenom: donnees.prenom,
+      petition_titre: petition.titre,
+      petition_url: `${getSiteUrl()}/mobiliser/petitions/${petition.slug}`,
+      nombre_signatures:
+        typeof total === 'number' ? new Intl.NumberFormat('fr-FR').format(total) : '',
+    });
+  } catch (erreur) {
+    console.warn('[signerPetition] email de confirmation non envoyé :', erreur);
+  }
+
+  // PAS de `revalidatePath` ici — volontaire, corrigé le 16/08/2026.
+  //
+  // Signalé par Ben : « quand on signe, la page adhérer apparaît un dixième
+  // de seconde et hop, disparu ». Cause : revalider la page depuis l'action
+  // déclenche un rafraîchissement de la route **pendant que la fenêtre de
+  // remerciement est ouverte**. Le `<dialog>` est reconstruit par React,
+  // perd son état « ouvert », et le tunnel d'adhésion disparaît avant
+  // d'avoir pu être lu.
+  //
+  // Le compteur de signatures est donc rafraîchi à la FERMETURE de la
+  // fenêtre, par `router.refresh()` dans `ModaleSignaturePetition`. La
+  // personne voit son remerciement en entier, puis le compteur à jour.
   return { ok: true };
 }
 
