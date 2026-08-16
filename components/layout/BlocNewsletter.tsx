@@ -38,10 +38,6 @@ export function BlocNewsletter() {
           <h2 id="newsletter-titre" className="font-display text-xl font-bold text-text-1">
             Recevoir les nouvelles
           </h2>
-          <p className="mt-1 text-sm text-text-2">
-            Le récap du mardi, l'édito du vendredi. Désinscription en un clic, jamais de revente
-            d'adresse.
-          </p>
         </div>
 
         {message !== null ? (
