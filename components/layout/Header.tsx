@@ -104,8 +104,11 @@ export async function Header() {
                d'atteindre /connexion — ni ici, ni dans le pied de page, et le
                site n'a pas de menu burger. Les sondages, qui exigent un compte
                (doctrine §4D), devenaient inatteignables : 1 vote en deux mois
-               malgré un mailing à 10 680 personnes. Le lien est donc visible à
-               toutes les tailles. */
+               malgré un mailing à 10 680 personnes. CE lien-ci reste réservé
+               aux écrans ≥ 640 px : le rendre visible sur mobile faisait déborder
+               la barre du haut (mesuré : 449 px de contenu pour 375 px d'écran,
+               page qui défile latéralement). L'accès mobile passe donc par la
+               barre de rubriques, en bas de cet en-tête. */
             <TexteEditableAdmin
               cle="header.connexion"
               valeurInitiale={connexion.valeurMd}
@@ -116,7 +119,7 @@ export async function Header() {
               {(t) => (
                 <Link
                   href="/connexion"
-                  className="inline-flex h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1"
+                  className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
                 >
                   {t}
                 </Link>
@@ -164,6 +167,23 @@ export async function Header() {
               </Link>
             </li>
           ))}
+          {/* « Se connecter » vit ICI sur mobile, et non dans la barre du
+              haut. Premier essai (18/08/2026) : rendre visible le lien du
+              haut en retirant son `hidden`. Résultat mesuré sur un écran de
+              375 px : la barre réclamait 449 px (122 pour le logo, 287 pour
+              les actions), la page se mettait à défiler latéralement sur
+              tous les téléphones. Cette barre-ci est faite pour ça — elle
+              défile déjà horizontalement et a la place. */}
+          {session === null ? (
+            <li>
+              <Link
+                href="/connexion"
+                className="inline-flex h-9 items-center whitespace-nowrap rounded-md px-3 text-sm font-medium text-text-1"
+              >
+                {connexion.valeurMd}
+              </Link>
+            </li>
+          ) : null}
         </ul>
       </nav>
     </header>
