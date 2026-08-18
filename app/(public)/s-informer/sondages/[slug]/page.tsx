@@ -26,9 +26,10 @@ import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
   retour: 'Retour',
-  alertConnecteTitre: 'Vote connecté obligatoire',
-  alertConnecteLien: 'Connecte-toi',
-  alertConnecteFin: 'pour voter (cf. doctrine §4D).',
+  alertConnecteTitre: 'Le vote est réservé aux comptes',
+  alertConnecteLien: 'Se connecter pour voter',
+  alertConnecteFin:
+    'Créer un compte prend une minute. Cette exigence garantit un résultat honnête : une personne, une voix.',
   alertVoteTitre: 'Vote enregistré',
   alertVoteCorps: 'Tu as déjà voté pour ce sondage. Merci. Les résultats sont visibles ci-dessous.',
   sectionResultats: 'Résultats',
@@ -207,30 +208,37 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
               </TexteEditableAdmin>
             }
           >
+            {/* 18/08/2026 — signalé par Ben : « sur smartphone je ne peux pas
+                voter aux sondages ». Le vote exige un compte (doctrine §4D),
+                mais l'appel à se connecter était un simple mot souligné perdu
+                dans une phrase. Sur un mailing qui amène des milliers de
+                personnes, ça ne convertit pas : 1 vote en deux mois. On en
+                fait un vrai bouton, et on explique la raison en français
+                plutôt qu'en renvoyant à un numéro de doctrine. */}
+            <TexteEditableAdmin
+              cle="sondages.fiche.alert_connecte_fin"
+              valeurInitiale={alertConnecteFin.valeurMd}
+              estAdmin={estAdmin}
+              libelle="explication du vote connecte"
+              longueurMax={200}
+            >
+              {(t) => <p className="text-sm">{t}</p>}
+            </TexteEditableAdmin>
             <TexteEditableAdmin
               cle="sondages.fiche.alert_connecte_lien"
               valeurInitiale={alertConnecteLien.valeurMd}
               estAdmin={estAdmin}
-              libelle="libelle lien Connecte-toi"
+              libelle="libelle du bouton de connexion"
               longueurMax={40}
             >
               {(t) => (
                 <Link
                   href={`/connexion?prochaine=/s-informer/sondages/${sondage.slug}`}
-                  className="underline"
+                  className="mt-3 inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
                 >
                   {t}
                 </Link>
               )}
-            </TexteEditableAdmin>{' '}
-            <TexteEditableAdmin
-              cle="sondages.fiche.alert_connecte_fin"
-              valeurInitiale={alertConnecteFin.valeurMd}
-              estAdmin={estAdmin}
-              libelle="fin alerte vote connecte"
-              longueurMax={100}
-            >
-              {(t) => <>{t}</>}
             </TexteEditableAdmin>
           </Alert>
         ) : dejaVote || sondage.statut !== 'ouvert' ? null : (

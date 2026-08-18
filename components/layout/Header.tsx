@@ -98,6 +98,14 @@ export async function Header() {
               />
             </>
           ) : (
+            /* Le lien « Se connecter » était masqué sous 640 px (`hidden …
+               sm:inline-flex`). Conséquence signalée par Ben le 18/08/2026 :
+               depuis un téléphone, un visiteur déconnecté n'avait AUCUN moyen
+               d'atteindre /connexion — ni ici, ni dans le pied de page, et le
+               site n'a pas de menu burger. Les sondages, qui exigent un compte
+               (doctrine §4D), devenaient inatteignables : 1 vote en deux mois
+               malgré un mailing à 10 680 personnes. Le lien est donc visible à
+               toutes les tailles. */
             <TexteEditableAdmin
               cle="header.connexion"
               valeurInitiale={connexion.valeurMd}
@@ -108,7 +116,7 @@ export async function Header() {
               {(t) => (
                 <Link
                   href="/connexion"
-                  className="hidden h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1 sm:inline-flex"
+                  className="inline-flex h-10 items-center rounded-md px-3 text-sm font-medium text-text-2 hover:text-text-1"
                 >
                   {t}
                 </Link>
