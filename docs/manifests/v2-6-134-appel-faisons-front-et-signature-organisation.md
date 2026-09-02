@@ -15,7 +15,8 @@ organisation, (3) vérifier que tout fonctionne.
 
 - [x] **Le texte d'appel est en ligne**, publié, à l'adresse
       `/mobiliser/petitions/faisons-front-par-la-rue`. Texte enregistré **mot pour
-      mot**, sans correction ni reformulation. Fichier de contenu rejouable :
+      mot**, sans reformulation — seules les deux coquilles signalées plus bas
+      ont été corrigées, sur demande. Fichier de contenu rejouable :
       `scripts/sql/appel-faisons-front-par-la-rue.sql`.
 
 - [x] **Un appel est une pétition, avec un autre habillage.** Migration
@@ -106,16 +107,17 @@ organisation, (3) vérifier que tout fonctionne.
       veut afficher une jauge avec un cap (« 500 organisations »), c'est une
       décision politique à prendre, et ça se recode en peu de temps.
 
-- [ ] **Deux coquilles du texte source, conservées telles quelles** (règle de
-      non-invention) : « nos luttes doivent aussi devenir systémiques Avec une
-      réponse commune » (point manquant), et « Mobilisons-nous Le 20 septembre »
-      (majuscule au milieu de phrase). Dire si on corrige : c'est une
-      modification dans `/admin/petitions`, ou une relance du fichier
-      `scripts/sql/appel-faisons-front-par-la-rue.sql` corrigé.
+- [x] **Les deux coquilles du texte source ont été corrigées**, sur demande
+      explicite de Lilou/Ben le 02/09/2026, et elles seules : le point manquant
+      avant « Avec une réponse commune », et la majuscule au milieu de
+      « Mobilisons-nous Le 20 septembre ». Aucun autre mot n'a bougé.
 
-- [ ] **Pas d'image d'illustration** sur l'appel (aucune n'a été fournie). La
-      fiche est propre sans, mais le partage sur les réseaux sociaux reprendra
-      l'image par défaut du site. Fournir un visuel améliorerait le partage.
+- [x] **Photo de couverture posée** (fournie par Lilou/Ben le 02/09/2026) :
+      vue aérienne d'un rassemblement. Téléversée dans le bucket Supabase
+      `media`, chemin `petitions/couverture/faisons-front-par-la-rue.jpg`.
+      Elle est affichée entière (`object-contain` sur fond flouté), donc aucun
+      recadrage ne coupe l'image, et elle sert aussi de visuel de partage sur
+      les réseaux sociaux.
 
 ## Décisions techniques prises
 
