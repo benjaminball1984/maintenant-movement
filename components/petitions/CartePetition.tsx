@@ -5,6 +5,9 @@ import type { PetitionAvecCompteur } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+/** Séparateur de milliers français, comme dans `<CompteurStretch>`. */
+const FORMATTER_SIGNATURES = new Intl.NumberFormat('fr-FR');
+
 interface CartePetitionProps {
   petition: PetitionAvecCompteur;
   /** Si true, la carte occupe toute la largeur (mise en avant). */
@@ -46,7 +49,11 @@ export function CartePetition({ petition, enAvant = false }: CartePetitionProps)
 
       <header className="flex flex-col gap-1">
         <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-          Pétition à {petition.destinataire}
+          {/* V2.6.134 : un appel n'interpelle pas un destinataire, il est
+              proposé et ouvert à la signature. La carte le dit comme la fiche. */}
+          {petition.est_appel === true
+            ? 'Appel ouvert à la signature'
+            : `Pétition à ${petition.destinataire}`}
         </p>
         <h3 className="text-xl font-bold leading-tight text-text-1">
           <Link
@@ -60,13 +67,26 @@ export function CartePetition({ petition, enAvant = false }: CartePetitionProps)
 
       <p className="text-sm text-text-2">{accroche}</p>
 
-      <CompteurStretch
-        signatures={petition.nombre_signatures}
-        objectif={petition.objectif}
-        taille="sm"
-      />
+      {petition.est_appel === true ? (
+        <p className="text-base font-bold text-text-1">
+          {FORMATTER_SIGNATURES.format(petition.nombre_signatures)}{' '}
+          <span className="text-sm font-normal text-text-3">
+            {petition.nombre_signatures > 1 ? 'signataires' : 'signataire'}
+          </span>
+        </p>
+      ) : (
+        <CompteurStretch
+          signatures={petition.nombre_signatures}
+          objectif={petition.objectif}
+          taille="sm"
+        />
+      )}
 
-      {nomCreaturice !== null ? (
+      {petition.est_appel === true &&
+      petition.propose_par !== null &&
+      petition.propose_par.trim() !== '' ? (
+        <p className="text-xs text-text-3">Texte proposé par {petition.propose_par}</p>
+      ) : nomCreaturice !== null ? (
         <p className="text-xs text-text-3">Lancée par {nomCreaturice}</p>
       ) : null}
     </Card>

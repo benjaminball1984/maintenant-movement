@@ -7,6 +7,7 @@ import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePet
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
+import { ListeOrganisationsSignataires } from '@/components/petitions/ListeOrganisationsSignataires';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
 import { Alert, Card, Container, Heading, ImageAffiche } from '@/components/ui';
@@ -17,7 +18,11 @@ import { listerCampagnesPubliees } from '@/lib/campagnes/requetes';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
-import { petitionParSlug } from '@/lib/petitions/requetes';
+import {
+  compterOrganisationsSignataires,
+  listerOrganisationsSignataires,
+  petitionParSlug,
+} from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -27,6 +32,17 @@ import { signerPetition } from '../actions';
 const FALLBACKS = {
   retour: 'Retour',
   preheaderAmorce: 'Pétition à',
+  /** V2.6.134 — surtitre d'un appel : il n'est adressé à personne, il est ouvert. */
+  preheaderAppel: 'Appel ouvert à la signature',
+  /** V2.6.134 — amorce de la ligne d'auteur collectif d'un appel. */
+  proposeParAmorce: 'Texte proposé par',
+  /** V2.6.134 — bloc « organisations signataires ». */
+  organisationsTitre: 'Organisations signataires',
+  organisationsVide:
+    'Aucune organisation n’a encore signé. Assemblées, collectifs, syndicats et organisations peuvent le faire depuis le bouton de signature.',
+  compteurAppelSignataires: 'signataires',
+  compteurAppelSignataireSingulier: 'signataire',
+  compteurAppelOrganisations: 'dont organisations :',
   alertModerationTitre: 'En attente de modération',
   alertModerationCorps:
     "L'équipe Maintenant! examine ta pétition. Délai habituel : 24 à 48 heures.",
@@ -37,6 +53,7 @@ const FALLBACKS = {
   alertArchiveeTitre: 'Pétition archivée',
   alertArchiveeCorps: "Cette pétition n'accepte plus de signatures (archivage manuel).",
   ctaSigner: 'Signer cette pétition',
+  ctaSignerAppel: 'Signer l’appel',
   sectionTexte: 'Le texte',
   footerAmorce: 'Lancée par',
   footerMilieu: 'le',
@@ -85,6 +102,13 @@ export default async function PagePetition({ params }: PagePetitionProps) {
     prefilSignature,
     retour,
     preheaderAmorce,
+    preheaderAppel,
+    proposeParAmorce,
+    organisationsTitre,
+    organisationsVide,
+    compteurAppelSignataires,
+    compteurAppelSignataireSingulier,
+    compteurAppelOrganisations,
     alertModerationTitre,
     alertModerationCorps,
     alertRejeteeTitre,
@@ -94,6 +118,7 @@ export default async function PagePetition({ params }: PagePetitionProps) {
     alertArchiveeTitre,
     alertArchiveeCorps,
     ctaSigner,
+    ctaSignerAppel,
     sectionTexte,
     footerAmorce,
     footerMilieu,
@@ -104,6 +129,27 @@ export default async function PagePetition({ params }: PagePetitionProps) {
     lireContenuEditorial('petitions.fiche.retour', { valeurMd: FALLBACKS.retour }),
     lireContenuEditorial('petitions.fiche.preheader_amorce', {
       valeurMd: FALLBACKS.preheaderAmorce,
+    }),
+    lireContenuEditorial('petitions.fiche.preheader_appel', {
+      valeurMd: FALLBACKS.preheaderAppel,
+    }),
+    lireContenuEditorial('petitions.fiche.propose_par_amorce', {
+      valeurMd: FALLBACKS.proposeParAmorce,
+    }),
+    lireContenuEditorial('petitions.fiche.organisations_titre', {
+      valeurMd: FALLBACKS.organisationsTitre,
+    }),
+    lireContenuEditorial('petitions.fiche.organisations_vide', {
+      valeurMd: FALLBACKS.organisationsVide,
+    }),
+    lireContenuEditorial('petitions.fiche.compteur_appel_signataires', {
+      valeurMd: FALLBACKS.compteurAppelSignataires,
+    }),
+    lireContenuEditorial('petitions.fiche.compteur_appel_signataire_singulier', {
+      valeurMd: FALLBACKS.compteurAppelSignataireSingulier,
+    }),
+    lireContenuEditorial('petitions.fiche.compteur_appel_organisations', {
+      valeurMd: FALLBACKS.compteurAppelOrganisations,
     }),
     lireContenuEditorial('petitions.fiche.alert_moderation_titre', {
       valeurMd: FALLBACKS.alertModerationTitre,
@@ -130,6 +176,9 @@ export default async function PagePetition({ params }: PagePetitionProps) {
       valeurMd: FALLBACKS.alertArchiveeCorps,
     }),
     lireContenuEditorial('petitions.fiche.cta_signer', { valeurMd: FALLBACKS.ctaSigner }),
+    lireContenuEditorial('petitions.fiche.cta_signer_appel', {
+      valeurMd: FALLBACKS.ctaSignerAppel,
+    }),
     lireContenuEditorial('petitions.fiche.section_texte', { valeurMd: FALLBACKS.sectionTexte }),
     lireContenuEditorial('petitions.fiche.footer_amorce', { valeurMd: FALLBACKS.footerAmorce }),
     lireContenuEditorial('petitions.fiche.footer_milieu', { valeurMd: FALLBACKS.footerMilieu }),
@@ -145,6 +194,18 @@ export default async function PagePetition({ params }: PagePetitionProps) {
 
   // V2.6.19 : épinglage « à la une » (admin seulement).
   const estEpingleUne = estAdmin ? (await idEpingleUneHome('petition')) === petition.id : false;
+
+  // V2.6.134 : un appel est une pétition qui n'interpelle pas un destinataire
+  // mais qui est proposée par un collectif et ouverte à la signature. Même
+  // objet, même modération, même export : seul l'habillage change.
+  const estAppel = petition.est_appel === true;
+
+  // Organisations co-signataires : la liste n'affiche que celles qui l'ont
+  // accepté, le compteur les compte toutes.
+  const [organisationsSignataires, nombreOrganisations] = await Promise.all([
+    listerOrganisationsSignataires(petition.id),
+    compterOrganisationsSignataires(petition.id),
+  ]);
 
   const createuricePrenomAffiche =
     petition.createurice_prenom !== null && petition.createurice_prenom.trim() !== ''
@@ -173,16 +234,30 @@ export default async function PagePetition({ params }: PagePetitionProps) {
         <header className="grid gap-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <p className="text-xs font-bold uppercase tracking-cap text-text-3">
-              <TexteEditableAdmin
-                cle="petitions.fiche.preheader_amorce"
-                valeurInitiale={preheaderAmorce.valeurMd}
-                estAdmin={estAdmin}
-                libelle="amorce preheader (defaut : Petition a)"
-                longueurMax={30}
-              >
-                {(t) => <>{t}</>}
-              </TexteEditableAdmin>{' '}
-              <strong className="text-text-2">{petition.destinataire}</strong>
+              {estAppel ? (
+                <TexteEditableAdmin
+                  cle="petitions.fiche.preheader_appel"
+                  valeurInitiale={preheaderAppel.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="surtitre d'un appel (defaut : Appel ouvert a la signature)"
+                  longueurMax={60}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>
+              ) : (
+                <>
+                  <TexteEditableAdmin
+                    cle="petitions.fiche.preheader_amorce"
+                    valeurInitiale={preheaderAmorce.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="amorce preheader (defaut : Petition a)"
+                    longueurMax={30}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>{' '}
+                  <strong className="text-text-2">{petition.destinataire}</strong>
+                </>
+              )}
             </p>
             <span className="flex flex-wrap items-center gap-2">
               {estAdmin && estPubliee ? (
@@ -198,6 +273,25 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             </span>
           </div>
           <Heading niveau={1}>{petition.titre}</Heading>
+
+          {/* Auteur collectif d'un appel : « Texte proposé par ... ». Affiché
+              seulement quand la colonne est renseignée — une pétition
+              ordinaire garde sa signature de créatrice, en pied de page. */}
+          {estAppel && petition.propose_par !== null && petition.propose_par.trim() !== '' ? (
+            <p className="text-text-2">
+              <TexteEditableAdmin
+                cle="petitions.fiche.propose_par_amorce"
+                valeurInitiale={proposeParAmorce.valeurMd}
+                estAdmin={estAdmin}
+                libelle="amorce auteur collectif (defaut : Texte propose par)"
+                longueurMax={40}
+              >
+                {(t) => <>{t}</>}
+              </TexteEditableAdmin>{' '}
+              <strong className="text-text-1">{petition.propose_par}</strong>
+            </p>
+          ) : null}
+
           <BlocOrganisationPorteuse objetType="petition" objetId={petition.id} />
 
           {/* V2.5.11.b Phase G : bouton admin "Intégrer à une campagne".
@@ -320,11 +414,55 @@ export default async function PagePetition({ params }: PagePetitionProps) {
         ) : null}
 
         <Card variant="ombre" className="grid gap-6">
-          <CompteurStretch
-            signatures={petition.nombre_signatures}
-            objectif={petition.objectif}
-            taille="md"
-          />
+          {/* Un appel n'a pas d'objectif chiffré public : on montre ce qui est
+              vrai et vérifiable — le nombre de signataires, et parmi eux le
+              nombre d'organisations. Une pétition garde sa jauge d'objectif. */}
+          {estAppel ? (
+            <div className="grid gap-1">
+              <p className="font-bold text-text-1 text-2xl">
+                {new Intl.NumberFormat('fr-FR').format(petition.nombre_signatures)}{' '}
+                <span className="text-sm font-normal text-text-3">
+                  {/* Accord en nombre : « 1 signataire », « 2 signataires ».
+                      Les deux formes sont des cles CMS distinctes, editables. */}
+                  <TexteEditableAdmin
+                    cle={
+                      petition.nombre_signatures > 1
+                        ? 'petitions.fiche.compteur_appel_signataires'
+                        : 'petitions.fiche.compteur_appel_signataire_singulier'
+                    }
+                    valeurInitiale={
+                      petition.nombre_signatures > 1
+                        ? compteurAppelSignataires.valeurMd
+                        : compteurAppelSignataireSingulier.valeurMd
+                    }
+                    estAdmin={estAdmin}
+                    libelle="mot apres le compteur d'un appel (defaut : signataire / signataires)"
+                    longueurMax={40}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>
+                </span>
+              </p>
+              <p className="text-sm text-text-3">
+                <TexteEditableAdmin
+                  cle="petitions.fiche.compteur_appel_organisations"
+                  valeurInitiale={compteurAppelOrganisations.valeurMd}
+                  estAdmin={estAdmin}
+                  libelle="amorce du sous-compteur organisations (defaut : dont organisations :)"
+                  longueurMax={60}
+                >
+                  {(t) => <>{t}</>}
+                </TexteEditableAdmin>{' '}
+                <strong className="text-text-2">{nombreOrganisations}</strong>
+              </p>
+            </div>
+          ) : (
+            <CompteurStretch
+              signatures={petition.nombre_signatures}
+              objectif={petition.objectif}
+              taille="md"
+            />
+          )}
 
           {estPubliee ? (
             <ModaleSignaturePetition
@@ -333,10 +471,11 @@ export default async function PagePetition({ params }: PagePetitionProps) {
               createuricePrenom={createuricePrenomAffiche}
               signerPetition={signerPetition}
               prefil={prefilSignature}
+              estAppel={estAppel}
               declencheur={
                 <TexteEditableAdmin
-                  cle="petitions.fiche.cta_signer"
-                  valeurInitiale={ctaSigner.valeurMd}
+                  cle={estAppel ? 'petitions.fiche.cta_signer_appel' : 'petitions.fiche.cta_signer'}
+                  valeurInitiale={estAppel ? ctaSignerAppel.valeurMd : ctaSigner.valeurMd}
                   estAdmin={estAdmin}
                   libelle="CTA Signer (declenche la modale)"
                   longueurMax={60}
@@ -385,6 +524,18 @@ export default async function PagePetition({ params }: PagePetitionProps) {
           })()}
         </section>
 
+        {/* V2.6.134 : organisations co-signataires. Affiché dès qu'au moins une
+            a signé, et systématiquement sur un appel — un appel ouvert à la
+            signature des organisations doit montrer sa liste, même vide, sinon
+            personne ne sait que c'est possible. */}
+        {estAppel || organisationsSignataires.length > 0 ? (
+          <ListeOrganisationsSignataires
+            organisations={organisationsSignataires}
+            titre={organisationsTitre.valeurMd}
+            messageVide={organisationsVide.valeurMd}
+          />
+        ) : null}
+
         {/* V2.5.7 Phase F : moteur d'invitation virale.
             Affiché seulement quand la pétition est publiée (sinon rien
             à partager). Le message pré-rempli reste sobre et factuel. */}
@@ -399,7 +550,20 @@ export default async function PagePetition({ params }: PagePetitionProps) {
         ) : null}
 
         <footer className="border-t border-border pt-4 text-sm text-text-3">
-          {petition.createurice_prenom !== null || petition.createurice_nom !== null ? (
+          {/* Un appel porte un auteur collectif, déjà affiché sous le titre :
+              signer le pied de page du nom de la personne qui l'a mis en ligne
+              tromperait sur sa provenance. On n'y met alors que la date. */}
+          {estAppel && petition.propose_par !== null && petition.propose_par.trim() !== '' ? (
+            <p>
+              <time dateTime={petition.created_at}>
+                {new Date(petition.created_at).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </time>
+            </p>
+          ) : petition.createurice_prenom !== null || petition.createurice_nom !== null ? (
             <p>
               <TexteEditableAdmin
                 cle="petitions.fiche.footer_amorce"

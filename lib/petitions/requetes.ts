@@ -181,6 +181,64 @@ export async function listerToutesPetitionsAdmin(): Promise<PetitionAvecCompteur
 }
 
 /**
+ * Une organisation signataire, telle qu'elle peut être montrée publiquement
+ * (V2.6.134). Aucun champ personnel : ni email, ni nom de personne, ni code
+ * postal, ni fonction — la fonction SQL `signataires_organisations` ne les
+ * renvoie pas.
+ */
+export interface OrganisationSignataire {
+  nom: string;
+  categorie: string;
+  territoire: string | null;
+  signee_le: string;
+}
+
+/**
+ * Nombre total d'organisations signataires — y compris celles qui ont refusé
+ * d'apparaître dans la liste publique. Le décompte est public, l'identité ne
+ * l'est pas : une organisation discrète compte quand même dans le rapport de
+ * force affiché.
+ */
+export async function compterOrganisationsSignataires(petitionId: string): Promise<number> {
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase.rpc('nombre_signatures_organisations', {
+    petition_a_compter: petitionId,
+  });
+  if (error !== null || data === null) {
+    return 0;
+  }
+  // `bigint` sérialisé tantôt en number, tantôt en string (cf. compterSignatures).
+  return typeof data === 'string' ? Number.parseInt(data, 10) : data;
+}
+
+/**
+ * Liste publique des organisations ayant co-signé une pétition ou un appel,
+ * dans l'ordre où elles ont signé, et seulement celles qui ont accepté d'être
+ * affichées.
+ *
+ * Passe par la fonction SQL `signataires_organisations` (SECURITY DEFINER)
+ * pour la même raison que `nombre_signatures` : la RLS interdit la lecture
+ * directe de `signature_petition`, mais cette projection-là est publique.
+ */
+export async function listerOrganisationsSignataires(
+  petitionId: string,
+): Promise<OrganisationSignataire[]> {
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase.rpc('signataires_organisations', {
+    petition_a_lister: petitionId,
+  });
+  if (error !== null || data === null) {
+    return [];
+  }
+  return data.map((ligne) => ({
+    nom: ligne.organisation_nom,
+    categorie: ligne.organisation_categorie,
+    territoire: ligne.organisation_territoire,
+    signee_le: ligne.signee_le,
+  }));
+}
+
+/**
  * Une signature de la personne connectée, accompagnée des infos de la
  * pétition concernée. Sert à l'espace « Mes contributions ».
  */

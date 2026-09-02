@@ -137,6 +137,24 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
   // remonteront dans « Mes contributions ».
   const profilUnifieId = await rattacherProfilUnifie(donnees.email);
 
+  // V2.6.134 : signature au nom d'une organisation. Les champs `organisation_*`
+  // ne sont écrits que dans ce cas — la contrainte SQL `signature_type_coherent`
+  // exige qu'ils soient nuls pour une signature individuelle.
+  const signeAuNomDUneOrganisation = donnees.type_signataire === 'organisation';
+  const champsOrganisation = signeAuNomDUneOrganisation
+    ? {
+        type_signataire: 'organisation' as const,
+        organisation_nom: donnees.organisation_nom?.trim() ?? null,
+        organisation_categorie:
+          donnees.organisation_categorie === '' ? null : (donnees.organisation_categorie ?? null),
+        organisation_territoire:
+          donnees.organisation_territoire === '' ? null : (donnees.organisation_territoire ?? null),
+        signataire_fonction:
+          donnees.signataire_fonction === '' ? null : (donnees.signataire_fonction ?? null),
+        organisation_affichage_public: donnees.organisation_affichage_public !== false,
+      }
+    : { type_signataire: 'individu' as const };
+
   const { error: erreurInsert } = await supabase.from('signature_petition').insert({
     petition_id: petition.id,
     personne_id: session?.userId ?? null,
@@ -148,13 +166,20 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
     telephone: donnees.telephone === '' ? null : (donnees.telephone ?? null),
     accepte_newsletter: donnees.accepte_newsletter,
     accepte_contact_createurice: donnees.accepte_contact_createurice,
+    ...champsOrganisation,
   });
 
   if (erreurInsert !== null) {
-    // Code Postgres 23505 = violation contrainte unique : la personne a
-    // déjà signé. On retourne un message clair, pas une erreur technique.
+    // Code Postgres 23505 = violation contrainte unique : le signal a déjà
+    // été enregistré. Le message diffère selon ce qui est en doublon : une
+    // adresse email pour un individu, un nom d'organisation sinon.
     if (erreurInsert.code === '23505') {
-      return { ok: false, message: 'Tu as déjà signé cette pétition avec cet email.' };
+      return {
+        ok: false,
+        message: signeAuNomDUneOrganisation
+          ? 'Cette organisation a déjà signé. Si c’est une erreur, écris-nous.'
+          : 'Tu as déjà signé cette pétition avec cet email.',
+      };
     }
     return { ok: false, message: `Signature impossible : ${erreurInsert.message}` };
   }

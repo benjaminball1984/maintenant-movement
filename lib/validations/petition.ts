@@ -15,7 +15,37 @@ import { z } from 'zod';
  * Signature **anonyme** (non connectée) autorisée : la modale ne requiert
  * pas d'authentification. Tag de la signature avec l'ID de la pétition
  * et l'origine pour la newsletter (taggage à 3 axes, cf. spec §10).
+ *
+ * V2.6.134 — On peut désormais signer **au nom d'une organisation**. Les
+ * champs d'identité de la personne restent demandés dans les deux cas :
+ * une organisation signe toujours par la main de quelqu'un·e, et c'est cette
+ * personne qu'on recontacte. S'ajoutent alors le nom de l'organisation, sa
+ * famille, son territoire et la fonction de la personne signataire.
  */
+
+/**
+ * Les quatre familles d'organisations nommées par l'appel lui-même
+ * (« ouvert à la signature des assemblées, collectifs, syndicats et
+ * organisations »). Sert à la fois au schéma Zod, au `<select>` de la
+ * modale et à la contrainte SQL `signature_type_coherent`.
+ */
+export const CATEGORIES_ORGANISATION = [
+  'assemblee',
+  'collectif',
+  'syndicat',
+  'organisation',
+] as const;
+
+export type CategorieOrganisation = (typeof CATEGORIES_ORGANISATION)[number];
+
+/** Libellés affichés des familles d'organisations, dans l'ordre du texte. */
+export const LIBELLES_CATEGORIE_ORGANISATION: Record<CategorieOrganisation, string> = {
+  assemblee: 'Assemblée',
+  collectif: 'Collectif',
+  syndicat: 'Syndicat',
+  organisation: 'Organisation',
+};
+
 export function creerSignerPetitionSchema(
   messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
 ) {
@@ -37,9 +67,51 @@ export function creerSignerPetitionSchema(
         .or(z.literal('')),
       accepte_newsletter: z.boolean(),
       accepte_contact_createurice: z.boolean(),
+
+      // --- Signature au nom d'une organisation (V2.6.134) ---------------
+      // Champ optionnel plutôt que `.default()` : une signature qui ne
+      // l'envoie pas se comporte exactement comme avant (individu), et le
+      // schéma garde le même type en entrée et en sortie — react-hook-form
+      // exige cette symétrie.
+      type_signataire: z
+        .enum(['individu', 'organisation'], messages.typeSignataireInvalide)
+        .optional(),
+      organisation_nom: z.string().trim().max(200, messages.organisationNomMax).optional(),
+      // Chaîne vide tolérée : c'est la valeur du `<select>` tant que rien
+      // n'est choisi. Le `superRefine` ci-dessous la refuse pour une
+      // organisation, avec un message clair.
+      organisation_categorie: z.enum(CATEGORIES_ORGANISATION).optional().or(z.literal('')),
+      organisation_territoire: z
+        .string()
+        .trim()
+        .max(120, messages.organisationTerritoireMax)
+        .optional(),
+      signataire_fonction: z.string().trim().max(120, messages.signataireFonctionMax).optional(),
+      // Absent = affichage accepté : c'est le sens d'une co-signature, et la
+      // case est cochée d'office dans la modale.
+      organisation_affichage_public: z.boolean().optional(),
+
       token_turnstile: z.string().min(1, messages.turnstileRequis),
     })
-    .strict();
+    .strict()
+    .superRefine((donnees, ctx) => {
+      if (donnees.type_signataire !== 'organisation') return;
+
+      if (donnees.organisation_nom === undefined || donnees.organisation_nom === '') {
+        ctx.addIssue({
+          code: 'custom',
+          message: messages.organisationNomRequis,
+          path: ['organisation_nom'],
+        });
+      }
+      if (donnees.organisation_categorie === undefined || donnees.organisation_categorie === '') {
+        ctx.addIssue({
+          code: 'custom',
+          message: messages.organisationCategorieRequise,
+          path: ['organisation_categorie'],
+        });
+      }
+    });
 }
 export const signerPetitionSchema = creerSignerPetitionSchema();
 

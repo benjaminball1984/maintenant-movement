@@ -50,15 +50,32 @@ export default async function PageGestionPetitions() {
                   </Badge>
                   <p className="mt-1 font-bold text-text-1">{petition.titre}</p>
                   <p className="text-xs text-text-3">
-                    Objectif : {formateurNombre.format(petition.objectif)} signataires
+                    {petition.est_appel === true
+                      ? 'Appel ouvert à la signature'
+                      : `Objectif : ${formateurNombre.format(petition.objectif)} signataires`}
+                    {' · '}
+                    {formateurNombre.format(petition.nombre_signatures)} signature
+                    {petition.nombre_signatures > 1 ? 's' : ''}
                   </p>
                 </div>
-                <Link
-                  href={`/admin/petitions/${petition.slug}`}
-                  className="text-sm font-bold text-brand underline-offset-4 hover:underline"
-                >
-                  Éditer
-                </Link>
+                <span className="flex items-center gap-4">
+                  {/* V2.6.134 : la liste nominative des signataires (dont les
+                      organisations et leur contact) ne sort que par cet export,
+                      sous droit admin. */}
+                  <a
+                    href={`/admin/petitions/${petition.slug}/signatures.csv`}
+                    className="text-sm text-brand underline-offset-4 hover:underline"
+                    download
+                  >
+                    Signatures CSV ↓
+                  </a>
+                  <Link
+                    href={`/admin/petitions/${petition.slug}`}
+                    className="text-sm font-bold text-brand underline-offset-4 hover:underline"
+                  >
+                    Éditer
+                  </Link>
+                </span>
               </Card>
             </li>
           ))}

@@ -120,6 +120,13 @@ export interface MessagesValidationPetition {
   dateFormat: string;
   dateCoherence: string;
   raisonRejetRequise: string;
+  /** V2.6.134 — signature au nom d'une organisation. */
+  typeSignataireInvalide: string;
+  organisationNomRequis: string;
+  organisationNomMax: string;
+  organisationCategorieRequise: string;
+  organisationTerritoireMax: string;
+  signataireFonctionMax: string;
 }
 
 export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
@@ -146,6 +153,13 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
   dateCoherence: "L'échéance ne peut pas précéder la date de lancement.",
   raisonRejetRequise:
     'Une raison de rejet d’au moins 10 caractères est requise pour rejeter une pétition.',
+  typeSignataireInvalide: 'Il faut choisir : signer en son nom, ou au nom d’une organisation.',
+  organisationNomRequis: 'Le nom de l’organisation est requis.',
+  organisationNomMax: 'Le nom de l’organisation doit faire 200 caractères maximum.',
+  organisationCategorieRequise:
+    'Il faut préciser s’il s’agit d’une assemblée, d’un collectif, d’un syndicat ou d’une organisation.',
+  organisationTerritoireMax: 'Le territoire doit faire 120 caractères maximum.',
+  signataireFonctionMax: 'La fonction doit faire 120 caractères maximum.',
 };
 
 // ============================================================

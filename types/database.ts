@@ -2020,11 +2020,15 @@ export type Database = {
           date_echeance: string | null;
           date_lancement: string | null;
           destinataire: string;
+          /** V2.6.134 — true = appel ouvert à signature, pas pétition adressée. */
+          est_appel: boolean;
           id: string;
           image_url: string | null;
           modere_le: string | null;
           modere_par: string | null;
           objectif: number;
+          /** V2.6.134 — auteur collectif affiché d'un appel. */
+          propose_par: string | null;
           raison_rejet: string | null;
           slug: string;
           statut: string;
@@ -2040,11 +2044,13 @@ export type Database = {
           date_echeance?: string | null;
           date_lancement?: string | null;
           destinataire: string;
+          est_appel?: boolean;
           id?: string;
           image_url?: string | null;
           modere_le?: string | null;
           modere_par?: string | null;
           objectif: number;
+          propose_par?: string | null;
           raison_rejet?: string | null;
           slug: string;
           statut?: string;
@@ -2059,11 +2065,13 @@ export type Database = {
           date_echeance?: string | null;
           date_lancement?: string | null;
           destinataire?: string;
+          est_appel?: boolean;
           id?: string;
           image_url?: string | null;
           modere_le?: string | null;
           modere_par?: string | null;
           objectif?: number;
+          propose_par?: string | null;
           raison_rejet?: string | null;
           slug?: string;
           statut?: string;
@@ -2482,43 +2490,73 @@ export type Database = {
           accepte_contact_createurice: boolean;
           accepte_newsletter: boolean;
           code_postal: string;
+          /** D9 — la signature compte dès l'insertion. */
+          compte_immediatement: boolean;
           created_at: string;
           email: string;
           id: string;
           nom: string;
+          /** V2.6.134 — le nom de l'organisation peut-il être affiché publiquement ? */
+          organisation_affichage_public: boolean;
+          /** V2.6.134 — assemblee | collectif | syndicat | organisation. */
+          organisation_categorie: string | null;
+          organisation_nom: string | null;
+          organisation_territoire: string | null;
           personne_id: string | null;
           petition_id: string;
           prenom: string;
           profil_unifie_id: string | null;
+          /** V2.6.134 — fonction de la personne signant au nom de l'organisation. */
+          signataire_fonction: string | null;
+          /** D9 — capture probante des champs saisis. */
+          snapshot: Json | null;
           telephone: string | null;
+          /** V2.6.134 — individu (défaut) | organisation. */
+          type_signataire: string;
         };
         Insert: {
           accepte_contact_createurice?: boolean;
           accepte_newsletter?: boolean;
           code_postal: string;
+          compte_immediatement?: boolean;
           created_at?: string;
           email: string;
           id?: string;
           nom: string;
+          organisation_affichage_public?: boolean;
+          organisation_categorie?: string | null;
+          organisation_nom?: string | null;
+          organisation_territoire?: string | null;
           personne_id?: string | null;
           petition_id: string;
           prenom: string;
           profil_unifie_id?: string | null;
+          signataire_fonction?: string | null;
+          snapshot?: Json | null;
           telephone?: string | null;
+          type_signataire?: string;
         };
         Update: {
           accepte_contact_createurice?: boolean;
           accepte_newsletter?: boolean;
           code_postal?: string;
+          compte_immediatement?: boolean;
           created_at?: string;
           email?: string;
           id?: string;
           nom?: string;
+          organisation_affichage_public?: boolean;
+          organisation_categorie?: string | null;
+          organisation_nom?: string | null;
+          organisation_territoire?: string | null;
           personne_id?: string | null;
           petition_id?: string;
           prenom?: string;
           profil_unifie_id?: string | null;
+          signataire_fonction?: string | null;
+          snapshot?: Json | null;
           telephone?: string | null;
+          type_signataire?: string;
         };
         Relationships: [
           {
@@ -4362,6 +4400,21 @@ export type Database = {
       nombre_signatures: {
         Args: { petition_a_compter: string };
         Returns: number;
+      };
+      /** V2.6.134 — décompte public des organisations signataires. */
+      nombre_signatures_organisations: {
+        Args: { petition_a_compter: string };
+        Returns: number;
+      };
+      /** V2.6.134 — liste publique des organisations signataires (sans donnée personnelle). */
+      signataires_organisations: {
+        Args: { petition_a_lister: string };
+        Returns: {
+          organisation_nom: string;
+          organisation_categorie: string;
+          organisation_territoire: string | null;
+          signee_le: string;
+        }[];
       };
       rattacher_profil_unifie: {
         Args: never;

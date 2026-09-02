@@ -56,3 +56,59 @@ test.describe('fiche pétition introuvable', () => {
     expect(reponse?.status()).toBe(404);
   });
 });
+
+/**
+ * Appel « Faisons Front par la Rue ! » (V2.6.134).
+ *
+ * L'appel est une pétition portant le drapeau « est_appel » : même objet,
+ * habillage différent. Ces tests vérifient que l'habillage est bien celui d'un
+ * appel (surtitre, auteur collectif, bouton) et que la fenêtre de signature
+ * bascule au nom d'une organisation, avec ses champs propres.
+ *
+ * Ils tolèrent l'absence de la ligne en base (environnement CI avec base
+ * bouchonnée) : la page renvoie alors 404 et le test se saute, plutôt que
+ * d'échouer pour une raison qui n'est pas un bug de code.
+ */
+test.describe('appel ouvert à la signature', () => {
+  const CHEMIN_APPEL = '/mobiliser/petitions/faisons-front-par-la-rue';
+
+  test('affiche l’appel avec son surtitre et son auteur collectif', async ({ page }) => {
+    const reponse = await page.goto(CHEMIN_APPEL);
+    test.skip(reponse?.status() === 404, 'appel absent de cette base');
+    expect(reponse?.status()).toBe(200);
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Faisons Front par la Rue');
+    await expect(page.getByText('Appel ouvert à la signature').first()).toBeVisible();
+    await expect(page.getByText('Texte proposé par')).toBeVisible();
+    // Un appel n'affiche pas de jauge d'objectif chiffré.
+    await expect(page.locator('[data-testid="compteur-stretch"]')).toHaveCount(0);
+    // Le bloc des organisations signataires est toujours présent sur un appel.
+    await expect(page.getByRole('heading', { name: /Organisations signataires/ })).toBeVisible();
+  });
+
+  test('la fenêtre de signature bascule au nom d’une organisation', async ({ page }) => {
+    const reponse = await page.goto(CHEMIN_APPEL);
+    test.skip(reponse?.status() === 404, 'appel absent de cette base');
+
+    await page.getByRole('button', { name: /Ouvrir la fenêtre de signature de l’appel/ }).click();
+
+    // La page contient plusieurs `<dialog>` (signature, invitation de
+    // contacts...) : on cible celui de la signature par son libellé.
+    const dialogue = page.getByRole('dialog', { name: /Signer l’appel/ });
+    await expect(dialogue).toBeVisible();
+
+    // Par défaut : signature individuelle, aucun champ d'organisation.
+    await expect(dialogue.locator('#sig-org-nom')).toHaveCount(0);
+
+    await dialogue.getByText('Au nom d’une organisation').click();
+
+    await expect(dialogue.locator('#sig-org-nom')).toBeVisible();
+    await expect(dialogue.locator('#sig-org-categorie')).toBeVisible();
+    // La case d'affichage public est cochée d'office : c'est le sens même
+    // d'une co-signature d'appel.
+    await expect(dialogue.locator('#sig-org-public')).toBeChecked();
+    await expect(
+      dialogue.getByRole('button', { name: 'Signer au nom de l’organisation' }),
+    ).toBeVisible();
+  });
+});
