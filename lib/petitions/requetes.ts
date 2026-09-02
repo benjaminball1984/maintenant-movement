@@ -194,6 +194,34 @@ export interface OrganisationSignataire {
 }
 
 /**
+ * Slug de l'appel publié le plus récent, ou `null` s'il n'y en a aucun.
+ *
+ * Sert l'adresse courte `/appel` (V2.6.136), faite pour être diffusée à la
+ * voix, sur une affiche ou dans un message. On résout le slug au moment de la
+ * demande plutôt que de l'écrire en dur : le jour où un autre appel prendra la
+ * suite, l'adresse courte suivra toute seule, sans intervention dans le code.
+ *
+ * La RLS fait le tri : une personne du public ne voit que les appels publiés.
+ */
+export async function slugDernierAppelPublie(): Promise<string | null> {
+  const supabase = await getSupabaseServer();
+
+  const { data, error } = await supabase
+    .from('petition')
+    .select('slug')
+    .eq('statut', 'publiee')
+    .eq('est_appel', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error !== null || data === null) {
+    return null;
+  }
+  return data.slug;
+}
+
+/**
  * Nombre total d'organisations signataires — y compris celles qui ont refusé
  * d'apparaître dans la liste publique. Le décompte est public, l'identité ne
  * l'est pas : une organisation discrète compte quand même dans le rapport de

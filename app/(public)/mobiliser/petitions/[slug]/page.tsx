@@ -22,6 +22,7 @@ import {
   compterOrganisationsSignataires,
   listerOrganisationsSignataires,
   petitionParSlug,
+  slugDernierAppelPublie,
 } from '@/lib/petitions/requetes';
 import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
@@ -202,10 +203,20 @@ export default async function PagePetition({ params }: PagePetitionProps) {
 
   // Organisations co-signataires : la liste n'affiche que celles qui l'ont
   // accepté, le compteur les compte toutes.
-  const [organisationsSignataires, nombreOrganisations] = await Promise.all([
+  const [organisationsSignataires, nombreOrganisations, slugAppelCourt] = await Promise.all([
     listerOrganisationsSignataires(petition.id),
     compterOrganisationsSignataires(petition.id),
+    estAppel ? slugDernierAppelPublie() : Promise.resolve(null),
   ]);
+
+  // V2.6.136 : on partage l'adresse courte /appel plutot que l'adresse longue
+  // de la fiche — elle se dicte, s'affiche sur un tract, se retient. Mais
+  // seulement si CET appel est bien celui vers lequel /appel renvoie : sinon le
+  // lien partage emmenerait ailleurs, ce qui serait pire que long.
+  const urlPartage =
+    estAppel && slugAppelCourt === petition.slug
+      ? `${getSiteUrl()}/appel`
+      : `${getSiteUrl()}/mobiliser/petitions/${petition.slug}`;
 
   const createuricePrenomAffiche =
     petition.createurice_prenom !== null && petition.createurice_prenom.trim() !== ''
@@ -542,8 +553,12 @@ export default async function PagePetition({ params }: PagePetitionProps) {
         {estPubliee ? (
           <BoutonsPartage
             titre={petition.titre}
-            url={`${getSiteUrl()}/mobiliser/petitions/${petition.slug}`}
-            message={`Cette pétition mérite d'être vue : ${petition.titre}.`}
+            url={urlPartage}
+            message={
+              estAppel
+                ? `Cet appel mérite d'être signé : ${petition.titre}.`
+                : `Cette pétition mérite d'être vue : ${petition.titre}.`
+            }
             titreBloc="Faire signer aussi"
             intro="Plus on est nombreuses et nombreux à signer, plus le message porte. Partage à celles et ceux que la cause peut toucher."
           />

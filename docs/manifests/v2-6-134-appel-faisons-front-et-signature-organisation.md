@@ -70,6 +70,24 @@ organisation, (3) vérifier que tout fonctionne.
       `compteur_appel_signataire_singulier`, `compteur_appel_organisations`, et
       les six messages de validation `validation.petition.organisation*`.
 
+- [x] **Adresse courte `/appel`** (V2.6.136, demandée le 02/09/2026) :
+      `maintenant-le-mouvement.org/appel` renvoie vers la fiche de l'appel.
+      Le slug n'est pas écrit en dur — on lit l'appel publié le plus récent —
+      donc l'adresse suivra toute seule le jour où un autre appel prendra la
+      suite. Sans aucun appel publié, elle renvoie vers la liste des pétitions
+      plutôt que sur une erreur. Les boutons de partage de l'appel diffusent
+      désormais cette adresse courte (et seulement si `/appel` pointe bien vers
+      cet appel-là), avec le mot juste : « Cet appel mérite d'être signé ».
+      Fichier : `app/(public)/appel/route.ts`.
+
+      **Piège Next.js à retenir** : une *page* qui appelle `redirect()` ne fait
+      PAS une vraie redirection. Next répond 200 avec une balise
+      `<meta http-equiv="refresh" content="1;url=...">` — une seconde de page
+      blanche, et une redirection qu'aucun outil en ligne de commande ni robot
+      ne suit. Il faut un **gestionnaire de route** (`route.ts` +
+      `NextResponse.redirect`) pour obtenir un vrai 307. Constaté et corrigé
+      ici ; à refaire pareil pour toute future adresse courte.
+
 ## Livré partiellement
 
 - [ ] **Les libellés de la fenêtre de signature** (« Je signe », « Au nom d'une
@@ -78,13 +96,6 @@ organisation, (3) vérifier que tout fonctionne.
       c'était déjà le cas avant ce chantier pour tous ses libellés. Les
       modifier demande donc encore une intervention dans le code. À traiter
       globalement pour cette modale, pas seulement pour les nouveaux champs.
-
-## Non livré (et pourquoi)
-
-- [ ] **Adresse courte pour l'appel** (type `/appel`) : non demandée, non faite.
-      L'adresse actuelle est `/mobiliser/petitions/faisons-front-par-la-rue`.
-      Si Lilou/Ben la veut plus courte pour la diffusion, c'est une redirection
-      à ajouter — dire lequel.
 
 ## Mise en ligne
 

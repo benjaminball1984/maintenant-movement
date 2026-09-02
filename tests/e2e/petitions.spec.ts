@@ -86,6 +86,20 @@ test.describe('appel ouvert à la signature', () => {
     await expect(page.getByRole('heading', { name: /Organisations signataires/ })).toBeVisible();
   });
 
+  test('l’adresse courte /appel redirige vers la fiche de l’appel', async ({ page }) => {
+    const reponse = await page.goto('/appel');
+    expect(reponse?.status()).toBe(200);
+
+    // On ne reste jamais sur /appel : c'est un raccourci, pas une page.
+    // Sans appel publié (base bouchonnée en CI), le repli est la liste des
+    // pétitions — jamais une impasse.
+    await expect(page).toHaveURL(/\/mobiliser\/petitions(\/[a-z0-9-]+)?$/);
+
+    if (/\/mobiliser\/petitions\/[a-z0-9-]+$/.test(page.url())) {
+      await expect(page.getByText('Appel ouvert à la signature').first()).toBeVisible();
+    }
+  });
+
   test('la fenêtre de signature bascule au nom d’une organisation', async ({ page }) => {
     const reponse = await page.goto(CHEMIN_APPEL);
     test.skip(reponse?.status() === 404, 'appel absent de cette base');
