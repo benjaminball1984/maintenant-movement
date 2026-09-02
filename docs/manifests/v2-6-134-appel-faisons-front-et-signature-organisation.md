@@ -119,11 +119,23 @@ organisation, (3) vérifier que tout fonctionne.
       n'est jamais affiché publiquement** (il ne sert plus qu'en admin et dans
       l'export). À changer dans `/admin/petitions` si le mot ne convient pas.
 
-- [ ] **`objectif` de l'appel** : fixé à 100, le minimum autorisé, et **jamais
-      affiché** — un appel ne montre pas de jauge, seulement son nombre de
-      signataires. Je n'ai pas inventé d'objectif chiffré public. Si Lilou/Ben
-      veut afficher une jauge avec un cap (« 500 organisations »), c'est une
-      décision politique à prendre, et ça se recode en peu de temps.
+- [x] **Pas de jauge d'objectif sur un appel** (tranché par Lilou/Ben le
+      02/09/2026) : un appel affiche son nombre de signataires, sans barre de
+      progression et sans cap chiffré, ni pour les personnes ni pour les
+      organisations. La jauge reste réservée aux pétitions ordinaires.
+
+- [x] **Le sous-compteur « dont organisations : N » n'apparaît qu'à partir de
+      3 organisations** (V2.6.137, décision de Lilou/Ben du 02/09/2026).
+      Au démarrage d'un appel, « dont organisations : 0 » donnait à voir un
+      vide là où le silence ne dit rien. Sous le seuil, les premières
+      organisations restent nommées dans la liste plus bas — c'est seulement
+      le chiffre qu'on tait. Seuil dans
+      `app/(public)/mobiliser/petitions/[slug]/page.tsx`, constante
+      `SEUIL_AFFICHAGE_COMPTEUR_ORGANISATIONS`.
+
+- [x] **`objectif` de l'appel** : fixé à 100, le minimum autorisé par la
+      contrainte de base, et **jamais affiché** nulle part. Aucun objectif
+      chiffré public n'a été inventé, et il n'y en aura pas (voir ci-dessus).
 
 - [x] **Les deux coquilles du texte source ont été corrigées**, sur demande
       explicite de Lilou/Ben le 02/09/2026, et elles seules : le point manquant

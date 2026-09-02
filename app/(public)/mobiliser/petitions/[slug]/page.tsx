@@ -60,6 +60,18 @@ const FALLBACKS = {
   footerMilieu: 'le',
 };
 
+/**
+ * Nombre d'organisations à partir duquel le sous-compteur « dont
+ * organisations : N » s'affiche sur un appel (décision de Lilou/Ben,
+ * 02/09/2026).
+ *
+ * En dessous, la ligne reste masquée : un appel qui démarre afficherait
+ * « dont organisations : 0 », ce qui montre un vide au lieu de ne rien dire.
+ * Les premières organisations signataires ne disparaissent pas pour autant —
+ * elles sont nommées dans la liste, plus bas dans la page.
+ */
+const SEUIL_AFFICHAGE_COMPTEUR_ORGANISATIONS = 3;
+
 interface ParamsPetition {
   slug: string;
 }
@@ -454,18 +466,26 @@ export default async function PagePetition({ params }: PagePetitionProps) {
                   </TexteEditableAdmin>
                 </span>
               </p>
-              <p className="text-sm text-text-3">
-                <TexteEditableAdmin
-                  cle="petitions.fiche.compteur_appel_organisations"
-                  valeurInitiale={compteurAppelOrganisations.valeurMd}
-                  estAdmin={estAdmin}
-                  libelle="amorce du sous-compteur organisations (defaut : dont organisations :)"
-                  longueurMax={60}
-                >
-                  {(t) => <>{t}</>}
-                </TexteEditableAdmin>{' '}
-                <strong className="text-text-2">{nombreOrganisations}</strong>
-              </p>
+              {/* Le sous-compteur d'organisations n'apparaît qu'à partir du
+                  seuil (décision de Lilou/Ben, 02/09/2026) : afficher
+                  « dont organisations : 0 » au démarrage d'un appel donne à voir
+                  un vide, là où le silence ne dit rien. Sous le seuil, les
+                  premières organisations restent visibles — nommées, dans la
+                  liste plus bas — mais on n'en fait pas un chiffre. */}
+              {nombreOrganisations >= SEUIL_AFFICHAGE_COMPTEUR_ORGANISATIONS ? (
+                <p className="text-sm text-text-3">
+                  <TexteEditableAdmin
+                    cle="petitions.fiche.compteur_appel_organisations"
+                    valeurInitiale={compteurAppelOrganisations.valeurMd}
+                    estAdmin={estAdmin}
+                    libelle="amorce du sous-compteur organisations (defaut : dont organisations :)"
+                    longueurMax={60}
+                  >
+                    {(t) => <>{t}</>}
+                  </TexteEditableAdmin>{' '}
+                  <strong className="text-text-2">{nombreOrganisations}</strong>
+                </p>
+              ) : null}
             </div>
           ) : (
             <CompteurStretch
