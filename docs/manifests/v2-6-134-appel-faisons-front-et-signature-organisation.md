@@ -81,17 +81,24 @@ organisation, (3) vérifier que tout fonctionne.
 
 ## Non livré (et pourquoi)
 
-- [ ] **Mise en ligne sur maintenant-le-mouvement.org** : le garde-fou de
-      Claude Code refuse `npm run cf:deploy`. **Le contenu, lui, est déjà en
-      ligne côté base** (la base Supabase est la même en local et en
-      production) : c'est le **code** de l'affichage et du formulaire qui reste
-      à déployer par Lilou/Ben. Commande, dans PowerShell, à la racine du
-      dépôt : `npx opennextjs-cloudflare deploy`.
-
 - [ ] **Adresse courte pour l'appel** (type `/appel`) : non demandée, non faite.
       L'adresse actuelle est `/mobiliser/petitions/faisons-front-par-la-rue`.
       Si Lilou/Ben la veut plus courte pour la diffusion, c'est une redirection
       à ajouter — dire lequel.
+
+## Mise en ligne
+
+- [x] **Déployé sur maintenant-le-mouvement.org** le 02/09/2026, sur demande
+      explicite de Lilou/Ben (`npx opennextjs-cloudflare deploy`, version
+      `351934f1`). Vérifié en ligne : surtitre « Appel ouvert à la signature »,
+      auteur collectif, photo, texte corrigé, et la fenêtre de signature qui
+      bascule bien sur les champs d'organisation.
+
+      **Piège constaté** : pendant environ une minute après le déploiement, le
+      domaine servait encore l'ANCIENNE page, alors que l'adresse
+      `*.workers.dev` servait déjà la nouvelle. Les en-têtes annoncent pourtant
+      `no-cache`. Ne pas conclure à un échec : recharger, ou vérifier avec un
+      paramètre bidon dans l'adresse.
 
 ## Contenus à arbitrer
 
