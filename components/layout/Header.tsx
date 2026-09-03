@@ -157,6 +157,30 @@ export async function Header() {
         className="overflow-x-auto border-t border-border bg-surface md:hidden"
       >
         <ul className="mx-auto flex max-w-7xl gap-1 px-4 py-2">
+          {/* « Se connecter » vit ICI sur mobile, et non dans la barre du haut.
+              Premier essai (18/08/2026) : rendre visible le lien du haut en
+              retirant son `hidden`. Résultat mesuré sur un écran de 375 px : la
+              barre réclamait 449 px (122 pour le logo, 287 pour les actions), la
+              page se mettait à défiler latéralement sur tous les téléphones.
+              Cette barre-ci est faite pour ça, elle défile déjà horizontalement.
+
+              MAIS il était placé en DERNIER, donc hors écran : mesuré le
+              03/09/2026 sur maintenant-le-mouvement.org, il commençait à 464 px
+              sur un écran de 375, soit 89 px au-delà du bord droit. Personne ne
+              pouvait le voir sans faire défiler cette barre latéralement, ce que
+              rien n'indique. Signalé par Ben, qui n'arrivait pas à se connecter
+              depuis son téléphone. Il passe donc EN PREMIER, et porte une
+              bordure pour se lire comme une action, pas comme une rubrique. */}
+          {session === null ? (
+            <li>
+              <Link
+                href="/connexion"
+                className="inline-flex h-9 items-center whitespace-nowrap rounded-md border border-border px-3 text-sm font-bold text-text-1"
+              >
+                {connexion.valeurMd}
+              </Link>
+            </li>
+          ) : null}
           {RUBRIQUES_MENU.map((rubrique) => (
             <li key={rubrique.cle}>
               <Link
@@ -167,23 +191,6 @@ export async function Header() {
               </Link>
             </li>
           ))}
-          {/* « Se connecter » vit ICI sur mobile, et non dans la barre du
-              haut. Premier essai (18/08/2026) : rendre visible le lien du
-              haut en retirant son `hidden`. Résultat mesuré sur un écran de
-              375 px : la barre réclamait 449 px (122 pour le logo, 287 pour
-              les actions), la page se mettait à défiler latéralement sur
-              tous les téléphones. Cette barre-ci est faite pour ça — elle
-              défile déjà horizontalement et a la place. */}
-          {session === null ? (
-            <li>
-              <Link
-                href="/connexion"
-                className="inline-flex h-9 items-center whitespace-nowrap rounded-md px-3 text-sm font-medium text-text-1"
-              >
-                {connexion.valeurMd}
-              </Link>
-            </li>
-          ) : null}
         </ul>
       </nav>
     </header>
