@@ -7,6 +7,7 @@ import { ModaleSignaturePetition } from '@/components/modales/ModaleSignaturePet
 import { BlocOrganisationPorteuse } from '@/components/organisations/BlocOrganisationPorteuse';
 import { BoutonsPartage } from '@/components/partage/BoutonsPartage';
 import { CompteurStretch } from '@/components/petitions/CompteurStretch';
+import { GestionSignatures } from '@/components/petitions/GestionSignatures';
 import { ListeOrganisationsSignataires } from '@/components/petitions/ListeOrganisationsSignataires';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { RenduRiche } from '@/components/rich-text/RenduRiche';
@@ -19,6 +20,10 @@ import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { idEpingleUneHome } from '@/lib/home/une';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import {
+  droitsGestionSignatures,
+  listerSignaturesAGerer,
+} from '@/lib/petitions/gestion-signatures';
+import {
   compterOrganisationsSignataires,
   listerOrganisationsSignataires,
   petitionParSlug,
@@ -28,7 +33,13 @@ import { cn } from '@/lib/utils';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { signerPetition } from '../actions';
+import {
+  modifierSignature,
+  restaurerSignature,
+  retirerSignature,
+  signerPetition,
+  supprimerSignatureDefinitivement,
+} from '../actions';
 
 const FALLBACKS = {
   retour: 'Retour',
@@ -215,11 +226,21 @@ export default async function PagePetition({ params }: PagePetitionProps) {
 
   // Organisations co-signataires : la liste n'affiche que celles qui l'ont
   // accepté, le compteur les compte toutes.
-  const [organisationsSignataires, nombreOrganisations, slugAppelCourt] = await Promise.all([
-    listerOrganisationsSignataires(petition.id),
-    compterOrganisationsSignataires(petition.id),
-    estAppel ? slugDernierAppelPublie() : Promise.resolve(null),
-  ]);
+  const [organisationsSignataires, nombreOrganisations, slugAppelCourt, droitsSignatures] =
+    await Promise.all([
+      listerOrganisationsSignataires(petition.id),
+      compterOrganisationsSignataires(petition.id),
+      estAppel ? slugDernierAppelPublie() : Promise.resolve(null),
+      droitsGestionSignatures(petition.id),
+    ]);
+
+  // V2.6.139 : l'équipe et la personne qui a lancé le texte voient, sous la
+  // liste publique, les mêmes signatures mais cliquables — pour corriger un
+  // nom ou retirer une signature. La liste n'est chargée que si le droit est
+  // là : personne d'autre ne déclenche cette lecture.
+  const signaturesAGerer = droitsSignatures.peutGerer
+    ? await listerSignaturesAGerer(petition.id)
+    : [];
 
   // V2.6.136 : on partage l'adresse courte /appel plutot que l'adresse longue
   // de la fiche — elle se dicte, s'affiche sur un tract, se retient. Mais
@@ -564,6 +585,17 @@ export default async function PagePetition({ params }: PagePetitionProps) {
             organisations={organisationsSignataires}
             titre={organisationsTitre.valeurMd}
             messageVide={organisationsVide.valeurMd}
+          />
+        ) : null}
+
+        {droitsSignatures.peutGerer ? (
+          <GestionSignatures
+            signatures={signaturesAGerer}
+            estAdministration={droitsSignatures.estAdministration}
+            modifierSignature={modifierSignature}
+            retirerSignature={retirerSignature}
+            restaurerSignature={restaurerSignature}
+            supprimerSignatureDefinitivement={supprimerSignatureDefinitivement}
           />
         ) : null}
 

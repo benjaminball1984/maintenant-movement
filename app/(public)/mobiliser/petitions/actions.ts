@@ -5,6 +5,8 @@ import { journaliser } from '@/lib/admin/national/journal';
 import { getSession } from '@/lib/auth/session';
 import { getEmailService } from '@/lib/email';
 import { envoyerEmailTemplee } from '@/lib/email-templates';
+import { MESSAGES_VALIDATION_PETITION_DEFAUT } from '@/lib/messages-validation';
+import { droitsGestionSignatures } from '@/lib/petitions/gestion-signatures';
 import { sanitizeRichHtml } from '@/lib/rich-text/sanitize';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
@@ -16,6 +18,9 @@ import {
   creerPetitionSchema,
   editerPetitionSchema,
   modererPetitionSchema,
+  modifierSignatureSchema,
+  retirerSignatureSchema,
+  signatureCibleSchema,
   signerPetitionSchema,
   slugifierTitre,
 } from '@/lib/validations/petition';
@@ -480,4 +485,334 @@ async function genererSlugUnique(titre: string, supabase: ClientSupabase): Promi
  */
 export async function redirectVersPetition(slug: string): Promise<never> {
   redirect(`/mobiliser/petitions/${slug}`);
+}
+
+// ============================================================
+// Gestion des signatures (V2.6.139) : corriger, retirer, supprimer
+// ============================================================
+//
+// Demande de Lilou/Ben du 03/09/2026. Deux niveaux de droit :
+//   - administration (admin général ou modération « petitions ») : tout,
+//     y compris la suppression définitive ;
+//   - créateurice de la pétition : corriger et retirer, rien de plus.
+//
+// Le RETRAIT est réversible et conserve la ligne (doctrine de greffe §0.3).
+// La SUPPRESSION définitive existe pour le seul cas qui l'exige : une demande
+// d'effacement au titre du RGPD. Elle est réservée à l'administration.
+//
+// Chaque geste est tracé dans le journal d'audit, y compris quand il vient
+// d'une créatrice non-admin : une signature qui disparaît doit toujours
+// pouvoir être expliquée.
+
+/** Signature lue avant modification, avec le slug de sa pétition. */
+interface SignatureCiblee {
+  id: string;
+  petition_id: string;
+  petition_slug: string;
+  type_signataire: string;
+  nom: string | null;
+  prenom: string | null;
+  pseudonyme: string | null;
+  organisation_nom: string | null;
+  organisation_categorie: string | null;
+  organisation_territoire: string | null;
+  organisation_affichage_public: boolean;
+  retiree_le: string | null;
+}
+
+/**
+ * Charge la signature visée et vérifie que la personne courante a le droit
+ * d'agir dessus. Facteur commun des quatre actions ci-dessous.
+ */
+async function chargerSignatureAutorisee(
+  signatureId: string,
+): Promise<
+  | { ok: true; signature: SignatureCiblee; estAdministration: boolean }
+  | { ok: false; message: string }
+> {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('signature_petition')
+    .select(
+      'id, petition_id, type_signataire, nom, prenom, pseudonyme, organisation_nom, organisation_categorie, organisation_territoire, organisation_affichage_public, retiree_le, petition(slug)',
+    )
+    .eq('id', signatureId)
+    .maybeSingle();
+
+  if (error !== null || data === null) {
+    return { ok: false, message: 'Signature introuvable.' };
+  }
+
+  const droits = await droitsGestionSignatures(data.petition_id);
+  if (!droits.peutGerer) {
+    return {
+      ok: false,
+      message: 'Seule l’équipe ou la personne qui a lancé ce texte peut gérer ses signatures.',
+    };
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: jointure imbriquée non typée précisément.
+  const petitionJointe = (data as any).petition as { slug: string } | null;
+
+  return {
+    ok: true,
+    estAdministration: droits.estAdministration,
+    signature: {
+      id: data.id,
+      petition_id: data.petition_id,
+      petition_slug: petitionJointe?.slug ?? '',
+      type_signataire: data.type_signataire,
+      nom: data.nom,
+      prenom: data.prenom,
+      pseudonyme: data.pseudonyme,
+      organisation_nom: data.organisation_nom,
+      organisation_categorie: data.organisation_categorie,
+      organisation_territoire: data.organisation_territoire,
+      organisation_affichage_public: data.organisation_affichage_public,
+      retiree_le: data.retiree_le,
+    },
+  };
+}
+
+/** Rafraîchit la fiche publique et la console admin après un geste de gestion. */
+function revaliderApresGestion(slug: string): void {
+  if (slug !== '') {
+    revalidatePath(`/mobiliser/petitions/${slug}`);
+  }
+  revalidatePath('/mobiliser/petitions');
+  revalidatePath('/admin/petitions');
+}
+
+/** Chaîne vide ou absente devient `null` : c'est ce que la base attend. */
+function texteOuNull(valeur: string | undefined): string | null {
+  return valeur === undefined || valeur.trim() === '' ? null : valeur.trim();
+}
+
+/**
+ * Corrige l'identité affichée d'une signature (faute de frappe dans un nom
+ * d'organisation, prénom mal orthographié, territoire à préciser).
+ *
+ * Ni l'email ni le type de signataire ne sont modifiables : voir le
+ * commentaire du schéma `modifierSignatureSchema`.
+ */
+export async function modifierSignature(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = modifierSignatureSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees = parse.data;
+
+  const cible = await chargerSignatureAutorisee(donnees.signature_id);
+  if (!cible.ok) return cible;
+
+  const messages = MESSAGES_VALIDATION_PETITION_DEFAUT;
+  const nom = texteOuNull(donnees.nom);
+  const prenom = texteOuNull(donnees.prenom);
+  const pseudonyme = texteOuNull(donnees.pseudonyme);
+  const organisationNom = texteOuNull(donnees.organisation_nom);
+  const organisationCategorie = texteOuNull(donnees.organisation_categorie);
+
+  // La cohérence se vérifie contre le type RÉEL de la signature, lu en base,
+  // et non contre un champ envoyé par le navigateur.
+  if (cible.signature.type_signataire === 'organisation') {
+    if (nom === null || prenom === null) {
+      return { ok: false, message: messages.prenomRequis };
+    }
+    if (pseudonyme !== null) {
+      return { ok: false, message: messages.pseudonymeInterditOrganisation };
+    }
+    if (organisationNom === null) {
+      return { ok: false, message: messages.organisationNomRequis };
+    }
+    if (organisationCategorie === null) {
+      return { ok: false, message: messages.organisationCategorieRequise };
+    }
+  } else if ((nom === null || prenom === null) && pseudonyme === null) {
+    return { ok: false, message: messages.identiteOuPseudonymeRequis };
+  }
+
+  const nouvelEtat =
+    cible.signature.type_signataire === 'organisation'
+      ? {
+          nom,
+          prenom,
+          pseudonyme: null,
+          organisation_nom: organisationNom,
+          organisation_categorie: organisationCategorie,
+          organisation_territoire: texteOuNull(donnees.organisation_territoire),
+          organisation_affichage_public: donnees.organisation_affichage_public !== false,
+        }
+      : { nom, prenom, pseudonyme };
+
+  const admin = getSupabaseAdmin();
+  const { error } = await admin
+    .from('signature_petition')
+    .update(nouvelEtat)
+    .eq('id', donnees.signature_id);
+
+  if (error !== null) {
+    if (error.code === '23505') {
+      return {
+        ok: false,
+        message: 'Une autre signature porte déjà ce nom d’organisation sur ce texte.',
+      };
+    }
+    return { ok: false, message: `Correction impossible : ${error.message}` };
+  }
+
+  await journaliser({
+    action: 'signature_petition.modifiee',
+    cibleTable: 'signature_petition',
+    cibleId: donnees.signature_id,
+    ancienEtat: {
+      nom: cible.signature.nom,
+      prenom: cible.signature.prenom,
+      pseudonyme: cible.signature.pseudonyme,
+      organisation_nom: cible.signature.organisation_nom,
+      organisation_categorie: cible.signature.organisation_categorie,
+      organisation_territoire: cible.signature.organisation_territoire,
+      organisation_affichage_public: cible.signature.organisation_affichage_public,
+    },
+    nouvelEtat,
+  });
+
+  revaliderApresGestion(cible.signature.petition_slug);
+  return { ok: true };
+}
+
+/**
+ * Retire une signature : elle ne compte plus, elle disparaît des listes, mais
+ * sa ligne reste en base et le geste est réversible.
+ */
+export async function retirerSignature(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = retirerSignatureSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees = parse.data;
+
+  const cible = await chargerSignatureAutorisee(donnees.signature_id);
+  if (!cible.ok) return cible;
+
+  if (cible.signature.retiree_le !== null) {
+    return { ok: false, message: 'Cette signature est déjà retirée.' };
+  }
+
+  const session = await getSession();
+  const admin = getSupabaseAdmin();
+  const { error } = await admin
+    .from('signature_petition')
+    .update({
+      retiree_le: new Date().toISOString(),
+      retiree_par: session?.userId ?? null,
+      raison_retrait: donnees.raison,
+    })
+    .eq('id', donnees.signature_id);
+
+  if (error !== null) {
+    return { ok: false, message: `Retrait impossible : ${error.message}` };
+  }
+
+  await journaliser({
+    action: 'signature_petition.retiree',
+    cibleTable: 'signature_petition',
+    cibleId: donnees.signature_id,
+    nouvelEtat: { raison_retrait: donnees.raison },
+  });
+
+  revaliderApresGestion(cible.signature.petition_slug);
+  return { ok: true };
+}
+
+/** Annule un retrait : la signature recompte, comme avant. */
+export async function restaurerSignature(donneesBrutes: unknown): Promise<ResultatAction> {
+  const parse = signatureCibleSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+
+  const cible = await chargerSignatureAutorisee(parse.data.signature_id);
+  if (!cible.ok) return cible;
+
+  const admin = getSupabaseAdmin();
+  const { error } = await admin
+    .from('signature_petition')
+    .update({ retiree_le: null, retiree_par: null, raison_retrait: null })
+    .eq('id', parse.data.signature_id);
+
+  if (error !== null) {
+    // 23505 : quelqu'un a re-signé entre-temps avec la même adresse (ou le
+    // même nom d'organisation), et l'anti-doublon ne laisse pas deux
+    // signatures actives identiques.
+    if (error.code === '23505') {
+      return {
+        ok: false,
+        message:
+          'Impossible de restaurer : une signature active porte déjà cette adresse ou ce nom d’organisation.',
+      };
+    }
+    return { ok: false, message: `Restauration impossible : ${error.message}` };
+  }
+
+  await journaliser({
+    action: 'signature_petition.restauree',
+    cibleTable: 'signature_petition',
+    cibleId: parse.data.signature_id,
+  });
+
+  revaliderApresGestion(cible.signature.petition_slug);
+  return { ok: true };
+}
+
+/**
+ * Supprime définitivement une signature. Irréversible.
+ *
+ * Réservé à l'administration, et pensé pour un seul cas : une personne demande
+ * l'effacement de ses données. Pour tout le reste (insulte, doublon, erreur),
+ * le retrait suffit et se répare.
+ */
+export async function supprimerSignatureDefinitivement(
+  donneesBrutes: unknown,
+): Promise<ResultatAction> {
+  const parse = signatureCibleSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+
+  const cible = await chargerSignatureAutorisee(parse.data.signature_id);
+  if (!cible.ok) return cible;
+
+  if (!cible.estAdministration) {
+    return {
+      ok: false,
+      message:
+        'La suppression définitive est réservée à l’équipe. Tu peux retirer la signature : elle ne compte plus, et le geste reste réparable.',
+    };
+  }
+
+  // Journalisé AVANT la suppression : après, la ligne n'existe plus et on ne
+  // saurait plus dire ce qui a disparu.
+  await journaliser({
+    action: 'signature_petition.supprimee_definitivement',
+    cibleTable: 'signature_petition',
+    cibleId: parse.data.signature_id,
+    ancienEtat: {
+      type_signataire: cible.signature.type_signataire,
+      organisation_nom: cible.signature.organisation_nom,
+      pseudonyme: cible.signature.pseudonyme,
+    },
+  });
+
+  const admin = getSupabaseAdmin();
+  const { error } = await admin
+    .from('signature_petition')
+    .delete()
+    .eq('id', parse.data.signature_id);
+
+  if (error !== null) {
+    return { ok: false, message: `Suppression impossible : ${error.message}` };
+  }
+
+  revaliderApresGestion(cible.signature.petition_slug);
+  return { ok: true };
 }

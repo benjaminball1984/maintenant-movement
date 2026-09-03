@@ -119,6 +119,46 @@ organisation, (3) vérifier que tout fonctionne.
       aucune ligne existante, la règle stricte demandée (nom ET prénom, ou
       pseudonyme) étant appliquée à la saisie. Aucune donnée n'a été modifiée.
 
+- [x] **Corriger ou retirer une signature, en cliquant dessus** (V2.6.139,
+      demandé le 03/09/2026). Sous la liste publique, l'équipe et la personne
+      qui a lancé le texte voient un bloc « Gérer les signatures » : les mêmes
+      signatures, en pastilles, mais cliquables. Un clic ouvre sur place de quoi
+      corriger l'identité (nom d'organisation, type, territoire, prénom/nom ou
+      pseudonyme) et retirer la signature.
+
+      **Le retrait n'est pas une suppression** : la ligne reste en base, elle ne
+      compte plus et n'apparaît nulle part, et un bouton « Restaurer » annule le
+      geste. Un motif est obligatoire au retrait — c'est ce qui rend la décision
+      relisible plus tard. La **suppression définitive** existe aussi, mais
+      **réservée à l'équipe** et pensée pour un seul cas : une demande
+      d'effacement au titre du RGPD.
+
+      **Deux garde-fous de vie privée :**
+      1. La créatrice **ne voit pas les adresses email** de ses signataires,
+         seulement une forme masquée (`ca***@exemple.fr`) qui suffit à repérer
+         un doublon. Lancer une pétition ne donne pas accès au carnet
+         d'adresses ; la règle historique reste celle de la migration 013 (elle
+         ne joint que les personnes ayant coché « j'autorise le créateur ou la
+         créatrice à me contacter »).
+      2. **Ni l'email ni le type de signataire ne sont modifiables.** L'email
+         identifie la personne, porte l'anti-doublon et relie la signature au
+         profil durable : le corriger reviendrait à attribuer une signature à
+         quelqu'un d'autre. Changer le type transformerait la signature d'une
+         personne en signature d'organisation, ce qui change le sens de son
+         engagement.
+
+      **Chaque geste est tracé** dans le journal d'audit (`journal_admin`),
+      y compris quand il vient d'une créatrice non-admin, avec l'état avant et
+      après : une signature qui disparaît doit toujours pouvoir être expliquée.
+
+      Migration `20260903100000_signature_retrait.sql` : colonnes
+      `retiree_le`, `retiree_par`, `raison_retrait` ; tous les compteurs et
+      toutes les listes ignorent les signatures retirées ; les index
+      anti-doublon aussi, pour qu'un retrait ne condamne pas à ne plus jamais
+      pouvoir signer. Fichiers : `lib/petitions/gestion-signatures.ts`,
+      `components/petitions/GestionSignatures.tsx`, quatre Server Actions dans
+      `app/(public)/mobiliser/petitions/actions.ts`.
+
 ## Livré partiellement
 
 - [ ] **Les libellés de la fenêtre de signature** (« Je signe », « Au nom d'une

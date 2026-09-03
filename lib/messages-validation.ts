@@ -131,6 +131,8 @@ export interface MessagesValidationPetition {
   identiteOuPseudonymeRequis: string;
   pseudonymeMax: string;
   pseudonymeInterditOrganisation: string;
+  /** V2.6.139 — retrait d'une signature. */
+  raisonRetraitRequise: string;
 }
 
 export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
@@ -169,6 +171,7 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
   pseudonymeMax: 'Le pseudonyme doit faire 100 caractères maximum.',
   pseudonymeInterditOrganisation:
     'Une organisation ne signe pas sous pseudonyme : indique le prénom et le nom de la personne qui signe pour elle.',
+  raisonRetraitRequise: 'Indique en quelques mots pourquoi cette signature est retirée.',
 };
 
 // ============================================================

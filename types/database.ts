@@ -2509,6 +2509,11 @@ export type Database = {
           profil_unifie_id: string | null;
           /** V2.6.138 — nom d'emprunt, signatures individuelles uniquement. */
           pseudonyme: string | null;
+          /** V2.6.139 — motif du retrait, saisi par qui retire. Jamais public. */
+          raison_retrait: string | null;
+          /** V2.6.139 — non nul = signature retirée : ne compte plus, réversible. */
+          retiree_le: string | null;
+          retiree_par: string | null;
           /** V2.6.134 — fonction de la personne signant au nom de l'organisation. */
           signataire_fonction: string | null;
           /** D9 — capture probante des champs saisis. */
@@ -2535,6 +2540,9 @@ export type Database = {
           prenom?: string | null;
           profil_unifie_id?: string | null;
           pseudonyme?: string | null;
+          raison_retrait?: string | null;
+          retiree_le?: string | null;
+          retiree_par?: string | null;
           signataire_fonction?: string | null;
           snapshot?: Json | null;
           telephone?: string | null;
@@ -2558,6 +2566,9 @@ export type Database = {
           prenom?: string | null;
           profil_unifie_id?: string | null;
           pseudonyme?: string | null;
+          raison_retrait?: string | null;
+          retiree_le?: string | null;
+          retiree_par?: string | null;
           signataire_fonction?: string | null;
           snapshot?: Json | null;
           telephone?: string | null;

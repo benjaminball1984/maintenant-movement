@@ -163,6 +163,74 @@ export const signerPetitionSchema = creerSignerPetitionSchema();
 export type DonneesSignerPetition = z.infer<typeof signerPetitionSchema>;
 
 // ============================================================
+// Gestion d'une signature (V2.6.139) : corriger, retirer, supprimer
+// ============================================================
+
+/**
+ * Correction d'une signature par l'administration ou par la créatrice de la
+ * pétition.
+ *
+ * Ce schéma ne valide que la FORME des champs (longueurs, valeurs permises).
+ * La cohérence — « un individu a un nom et un prénom, ou un pseudonyme » ;
+ * « une organisation a un nom et une famille, et pas de pseudonyme » — est
+ * vérifiée dans la Server Action, contre le type réel lu en base. Le type de
+ * signataire n'est volontairement PAS modifiable : transformer la signature
+ * d'une personne en signature d'organisation (ou l'inverse) changerait le sens
+ * de son engagement.
+ *
+ * L'**email n'est pas modifiable** non plus, délibérément : il identifie la
+ * personne, il porte l'anti-doublon et il relie la signature à son profil
+ * durable. Le corriger reviendrait à attribuer une signature à quelqu'un
+ * d'autre.
+ */
+export function creerModifierSignatureSchema(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      signature_id: z.string().uuid(),
+      nom: z.string().trim().max(100).optional(),
+      prenom: z.string().trim().max(100).optional(),
+      pseudonyme: z.string().trim().max(100, messages.pseudonymeMax).optional(),
+      organisation_nom: z.string().trim().max(200, messages.organisationNomMax).optional(),
+      organisation_categorie: z.enum(CATEGORIES_ORGANISATION).optional().or(z.literal('')),
+      organisation_territoire: z
+        .string()
+        .trim()
+        .max(120, messages.organisationTerritoireMax)
+        .optional(),
+      organisation_affichage_public: z.boolean().optional(),
+    })
+    .strict();
+}
+export const modifierSignatureSchema = creerModifierSignatureSchema();
+
+export type DonneesModifierSignature = z.infer<typeof modifierSignatureSchema>;
+
+/**
+ * Retrait d'une signature. Le motif est obligatoire : c'est ce qui rend le
+ * geste relisible plus tard, par quelqu'un d'autre que celui qui l'a fait.
+ */
+export function creerRetirerSignatureSchema(
+  messages: MessagesValidationPetition = MESSAGES_VALIDATION_PETITION_DEFAUT,
+) {
+  return z
+    .object({
+      signature_id: z.string().uuid(),
+      raison: z.string().trim().min(3, messages.raisonRetraitRequise).max(300),
+    })
+    .strict();
+}
+export const retirerSignatureSchema = creerRetirerSignatureSchema();
+
+export type DonneesRetirerSignature = z.infer<typeof retirerSignatureSchema>;
+
+/** Restauration (annule un retrait) et suppression définitive : juste un id. */
+export const signatureCibleSchema = z.object({ signature_id: z.string().uuid() }).strict();
+
+export type DonneesSignatureCible = z.infer<typeof signatureCibleSchema>;
+
+// ============================================================
 // Création de pétition (auth requise + modération a priori)
 // ============================================================
 
