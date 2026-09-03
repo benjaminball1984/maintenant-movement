@@ -47,6 +47,10 @@ export interface LibellesSignaturePetition {
   ctaDeclencheurAppel: string;
   ariaOuvrirAppel: string;
   ariaModaleAppel: string;
+  /** V2.6.138 : signature sous pseudonyme (individus seulement). */
+  casePseudonyme: string;
+  labelPseudonyme: string;
+  aidePseudonyme: string;
   /** V2.6.134 : signature au nom d'une organisation. */
   choixTypeLegende: string;
   choixTypeIndividu: string;
@@ -102,6 +106,10 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
   ctaDeclencheurAppel: 'Signer l’appel',
   ariaOuvrirAppel: 'Ouvrir la fenêtre de signature de l’appel :',
   ariaModaleAppel: 'Signer l’appel :',
+  casePseudonyme: 'Je préfère signer sous un pseudonyme',
+  labelPseudonyme: 'Pseudonyme',
+  aidePseudonyme:
+    'Ton prénom et ton nom ne seront pas demandés. Ton adresse email reste nécessaire pour confirmer la signature, et elle n’est jamais rendue publique.',
   choixTypeLegende: 'Je signe',
   choixTypeIndividu: 'En mon nom',
   choixTypeOrganisation: 'Au nom d’une organisation',
@@ -133,6 +141,7 @@ const LIBELLES_DEFAUT: LibellesSignaturePetition = {
  * saisi lors d'un essai précédent.
  */
 const VALEURS_ORGANISATION_VIDES = {
+  pseudonyme: '',
   type_signataire: 'individu',
   organisation_nom: '',
   organisation_categorie: '',
@@ -269,6 +278,28 @@ export function ModaleSignaturePetition({
   const typeSignataire = watch('type_signataire');
   const signeAuNomDUneOrganisation = autoriseOrganisation && typeSignataire === 'organisation';
 
+  // V2.6.138 : signer sous pseudonyme. Réservé aux signatures individuelles —
+  // une organisation s'affiche publiquement et la personne qui signe pour elle
+  // doit rester joignable nommément (décision de Lilou/Ben, 02/09/2026).
+  const [sousPseudonyme, setSousPseudonyme] = useState(false);
+  const signeSousPseudonyme = sousPseudonyme && !signeAuNomDUneOrganisation;
+
+  /**
+   * Bascule entre identité civile et pseudonyme. On VIDE les champs de l'autre
+   * mode : sans ça, un prénom saisi puis masqué partirait quand même en base,
+   * et la personne qui a choisi le pseudonyme aurait donné son nom sans le
+   * vouloir.
+   */
+  function basculerPseudonyme(actif: boolean) {
+    setSousPseudonyme(actif);
+    if (actif) {
+      setValue('prenom', '');
+      setValue('nom', '');
+    } else {
+      setValue('pseudonyme', '');
+    }
+  }
+
   // La vérification anti-robot fournit son jeton de façon asynchrone. Tant
   // qu'il n'est pas là, le bouton reste bloqué (évite le clic « dans le vide »
   // qui échouait silencieusement) et un message explique l'attente.
@@ -277,6 +308,7 @@ export function ModaleSignaturePetition({
   function ouvrir() {
     setMerci(false);
     setErreur(null);
+    setSousPseudonyme(false);
     reset({
       petition_id: petitionId,
       ...valeursIdentite,
@@ -441,7 +473,15 @@ export function ModaleSignaturePetition({
                         type="radio"
                         value={valeur}
                         className="sr-only"
-                        {...register('type_signataire')}
+                        {...register('type_signataire', {
+                          // Une organisation ne signe jamais sous pseudonyme :
+                          // basculer sur cet onglet referme le mode.
+                          onChange: (evenement) => {
+                            if (evenement.target.value === 'organisation') {
+                              basculerPseudonyme(false);
+                            }
+                          },
+                        })}
                       />
                       {libelle}
                     </label>
@@ -539,42 +579,88 @@ export function ModaleSignaturePetition({
               </div>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            {signeSousPseudonyme ? (
               <div>
-                <Label htmlFor="sig-prenom" obligatoire>
-                  {libelles.labelPrenom}
+                <Label htmlFor="sig-pseudonyme" obligatoire>
+                  {libelles.labelPseudonyme}
                 </Label>
                 <Input
-                  id="sig-prenom"
-                  autoComplete="given-name"
-                  aria-invalid={errors.prenom !== undefined ? true : undefined}
-                  aria-describedby={errors.prenom !== undefined ? 'sig-prenom-erreur' : undefined}
-                  {...register('prenom')}
+                  id="sig-pseudonyme"
+                  autoComplete="nickname"
+                  aria-invalid={errors.pseudonyme !== undefined ? true : undefined}
+                  aria-describedby={
+                    errors.pseudonyme !== undefined
+                      ? 'sig-pseudonyme-erreur'
+                      : 'sig-pseudonyme-aide'
+                  }
+                  {...register('pseudonyme')}
                 />
-                {errors.prenom !== undefined ? (
-                  <p id="sig-prenom-erreur" className="mt-1 text-xs text-danger">
-                    {errors.prenom.message}
+                {errors.pseudonyme !== undefined ? (
+                  <p id="sig-pseudonyme-erreur" className="mt-1 text-xs text-danger">
+                    {errors.pseudonyme.message}
                   </p>
-                ) : null}
+                ) : (
+                  <p id="sig-pseudonyme-aide" className="mt-1 text-xs text-text-3">
+                    {libelles.aidePseudonyme}
+                  </p>
+                )}
               </div>
-              <div>
-                <Label htmlFor="sig-nom" obligatoire>
-                  {libelles.labelNom}
-                </Label>
-                <Input
-                  id="sig-nom"
-                  autoComplete="family-name"
-                  aria-invalid={errors.nom !== undefined ? true : undefined}
-                  aria-describedby={errors.nom !== undefined ? 'sig-nom-erreur' : undefined}
-                  {...register('nom')}
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="sig-prenom" obligatoire>
+                    {libelles.labelPrenom}
+                  </Label>
+                  <Input
+                    id="sig-prenom"
+                    autoComplete="given-name"
+                    aria-invalid={errors.prenom !== undefined ? true : undefined}
+                    aria-describedby={errors.prenom !== undefined ? 'sig-prenom-erreur' : undefined}
+                    {...register('prenom')}
+                  />
+                  {errors.prenom !== undefined ? (
+                    <p id="sig-prenom-erreur" className="mt-1 text-xs text-danger">
+                      {errors.prenom.message}
+                    </p>
+                  ) : null}
+                </div>
+                <div>
+                  <Label htmlFor="sig-nom" obligatoire>
+                    {libelles.labelNom}
+                  </Label>
+                  <Input
+                    id="sig-nom"
+                    autoComplete="family-name"
+                    aria-invalid={errors.nom !== undefined ? true : undefined}
+                    aria-describedby={errors.nom !== undefined ? 'sig-nom-erreur' : undefined}
+                    {...register('nom')}
+                  />
+                  {errors.nom !== undefined ? (
+                    <p id="sig-nom-erreur" className="mt-1 text-xs text-danger">
+                      {errors.nom.message}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {/* La case n'existe pas quand on signe pour une organisation :
+                proposer un pseudonyme qu'on refuserait ensuite serait un piège. */}
+            {!signeAuNomDUneOrganisation ? (
+              <label
+                htmlFor="sig-mode-pseudonyme"
+                className="flex cursor-pointer items-start gap-2 text-sm text-text-2"
+              >
+                <input
+                  id="sig-mode-pseudonyme"
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded-xs accent-brand"
+                  checked={sousPseudonyme}
+                  onChange={(evenement) => basculerPseudonyme(evenement.target.checked)}
                 />
-                {errors.nom !== undefined ? (
-                  <p id="sig-nom-erreur" className="mt-1 text-xs text-danger">
-                    {errors.nom.message}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+                <span>{libelles.casePseudonyme}</span>
+              </label>
+            ) : null}
 
             <div>
               <Label htmlFor="sig-email" obligatoire>

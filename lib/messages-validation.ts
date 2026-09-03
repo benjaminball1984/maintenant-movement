@@ -127,6 +127,10 @@ export interface MessagesValidationPetition {
   organisationCategorieRequise: string;
   organisationTerritoireMax: string;
   signataireFonctionMax: string;
+  /** V2.6.138 — signature sous pseudonyme. */
+  identiteOuPseudonymeRequis: string;
+  pseudonymeMax: string;
+  pseudonymeInterditOrganisation: string;
 }
 
 export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
@@ -160,6 +164,11 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
     'Il faut préciser s’il s’agit d’une assemblée, d’un collectif, d’un syndicat ou d’une organisation.',
   organisationTerritoireMax: 'Le territoire doit faire 120 caractères maximum.',
   signataireFonctionMax: 'La fonction doit faire 120 caractères maximum.',
+  identiteOuPseudonymeRequis:
+    'Indique soit ton prénom et ton nom, soit un pseudonyme. L’un des deux suffit.',
+  pseudonymeMax: 'Le pseudonyme doit faire 100 caractères maximum.',
+  pseudonymeInterditOrganisation:
+    'Une organisation ne signe pas sous pseudonyme : indique le prénom et le nom de la personne qui signe pour elle.',
 };
 
 // ============================================================

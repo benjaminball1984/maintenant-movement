@@ -1,3 +1,4 @@
+import { inscriptionSchema } from '@/lib/validations/auth';
 import {
   CATEGORIES_ORGANISATION,
   LIBELLES_CATEGORIE_ORGANISATION,
@@ -214,5 +215,108 @@ describe('signerPetitionSchema — signature au nom d’une organisation', () =>
     for (const categorie of CATEGORIES_ORGANISATION) {
       expect(LIBELLES_CATEGORIE_ORGANISATION[categorie]).toBeTruthy();
     }
+  });
+});
+
+/**
+ * Tests de la signature sous pseudonyme (V2.6.138).
+ *
+ * Demande de Lilou/Ben : on ne peut pas exiger un nom civil pour signer un
+ * texte politique. Ces tests fixent la regle des deux cotes : le pseudonyme
+ * remplace prenom et nom pour un individu, et il est refuse pour une
+ * organisation, qui doit rester joignable nommement.
+ */
+describe('signerPetitionSchema — signature sous pseudonyme', () => {
+  const base = {
+    petition_id: '11111111-1111-4111-8111-111111111111',
+    email: 'camille@exemple.fr',
+    code_postal: '75011',
+    accepte_newsletter: false,
+    accepte_contact_createurice: false,
+    token_turnstile: 'mock-valid-token',
+  } as const;
+
+  it('accepte un pseudonyme seul, sans prenom ni nom', () => {
+    const r = signerPetitionSchema.safeParse({ ...base, pseudonyme: 'Rosa des villes' });
+    expect(r.success).toBe(true);
+  });
+
+  it('accepte prenom et nom seuls, sans pseudonyme (comportement historique)', () => {
+    const r = signerPetitionSchema.safeParse({ ...base, prenom: 'Camille', nom: 'Ball' });
+    expect(r.success).toBe(true);
+  });
+
+  it('refuse une signature sans aucune identite', () => {
+    expect(signerPetitionSchema.safeParse(base).success).toBe(false);
+  });
+
+  it('refuse un prenom seul sans nom ni pseudonyme', () => {
+    const r = signerPetitionSchema.safeParse({ ...base, prenom: 'Camille' });
+    expect(r.success).toBe(false);
+  });
+
+  it('refuse le pseudonyme pour une signature au nom d’une organisation', () => {
+    const r = signerPetitionSchema.safeParse({
+      ...base,
+      type_signataire: 'organisation',
+      organisation_nom: 'Syndicat des quartiers',
+      organisation_categorie: 'syndicat',
+      pseudonyme: 'Rosa des villes',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('exige prenom ET nom pour une signature au nom d’une organisation', () => {
+    const r = signerPetitionSchema.safeParse({
+      ...base,
+      type_signataire: 'organisation',
+      organisation_nom: 'Syndicat des quartiers',
+      organisation_categorie: 'syndicat',
+      prenom: 'Camille',
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+/**
+ * Garde-fou demande par Lilou/Ben le 02/09/2026 : le pseudonyme s'arrete a la
+ * signature. **L'adhesion continue d'exiger prenom et nom**, et n'offre aucune
+ * possibilite de pseudonyme.
+ *
+ * L'adhesion passe par un compte (les trois chemins exigent une session), donc
+ * la porte d'entree reelle est le schema d'inscription : c'est lui qu'on
+ * verrouille ici. Si quelqu'un ajoutait un jour un champ `pseudonyme` a
+ * l'inscription, ce test tomberait.
+ */
+describe('l’adhésion n’accepte pas de pseudonyme', () => {
+  const inscriptionValide = {
+    nom: 'Ball',
+    prenom: 'Camille',
+    pronom: 'iel',
+    email: 'camille@exemple.fr',
+    code_postal: '75011',
+    date_naissance: '1990-01-01',
+    mot_de_passe: 'MotDePasseSolide1',
+    cgu_acceptees: true,
+    token_turnstile: 'mock-valid-token',
+  } as const;
+
+  it('accepte une inscription avec prénom et nom', () => {
+    expect(inscriptionSchema.safeParse(inscriptionValide).success).toBe(true);
+  });
+
+  it('refuse une inscription sans nom', () => {
+    const { nom: _nom, ...sansNom } = inscriptionValide;
+    expect(inscriptionSchema.safeParse(sansNom).success).toBe(false);
+  });
+
+  it('refuse une inscription sans prénom', () => {
+    const { prenom: _prenom, ...sansPrenom } = inscriptionValide;
+    expect(inscriptionSchema.safeParse(sansPrenom).success).toBe(false);
+  });
+
+  it('refuse un champ pseudonyme à l’inscription', () => {
+    const r = inscriptionSchema.safeParse({ ...inscriptionValide, pseudonyme: 'Rosa des villes' });
+    expect(r.success).toBe(false);
   });
 });

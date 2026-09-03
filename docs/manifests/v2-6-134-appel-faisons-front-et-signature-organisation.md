@@ -88,6 +88,37 @@ organisation, (3) vérifier que tout fonctionne.
       `NextResponse.redirect`) pour obtenir un vrai 307. Constaté et corrigé
       ici ; à refaire pareil pour toute future adresse courte.
 
+- [x] **Signer sous un pseudonyme** (V2.6.138, demandé le 02/09/2026). Une
+      signature individuelle n'exige plus de nom civil : une case « Je préfère
+      signer sous un pseudonyme » remplace les champs Prénom et Nom par un seul
+      champ Pseudonyme. Basculer vide les champs de l'autre mode, pour qu'un
+      prénom saisi puis masqué ne parte jamais en base à l'insu de la personne.
+      L'email reste demandé (confirmation de signature), il n'est jamais public.
+
+      **Deux limites voulues, demandées par Lilou/Ben :**
+      1. **Les organisations n'y ont pas droit.** Une organisation s'affiche
+         publiquement et la personne qui signe pour elle doit rester joignable
+         nommément : la case disparaît sur cet onglet, et basculer dessus
+         referme le mode pseudonyme. Refusé aussi côté serveur et côté base.
+      2. **L'adhésion n'est pas concernée** : elle passe par un compte, et
+         l'inscription continue d'exiger prénom + nom. **Rien n'a été touché de
+         ce côté**, et quatre tests le verrouillent — si quelqu'un ajoutait un
+         jour un champ pseudonyme à l'inscription, ils tomberaient.
+
+      Migration `20260902200000_signature_pseudonyme.sql` : colonne
+      `pseudonyme`, `nom` et `prenom` deviennent facultatifs, contrainte de
+      cohérence par type de signataire. Le pseudonyme figure dans l'export CSV
+      admin. Fichiers : `lib/validations/petition.ts`,
+      `components/modales/ModaleSignaturePetition.tsx`,
+      `app/(public)/mobiliser/petitions/actions.ts`.
+
+      **Découverte en chemin, à savoir** : **5 924 des 17 967 signatures déjà en
+      base ont un prénom vide** (import de l'ancienne plateforme, où seul le nom
+      avait été collecté). La contrainte SQL a donc été posée au niveau du
+      plancher (« au moins un nom, prénom ou pseudonyme ») pour ne rejeter
+      aucune ligne existante, la règle stricte demandée (nom ET prénom, ou
+      pseudonyme) étant appliquée à la saisie. Aucune donnée n'a été modifiée.
+
 ## Livré partiellement
 
 - [ ] **Les libellés de la fenêtre de signature** (« Je signe », « Au nom d'une
@@ -212,6 +243,20 @@ déjà avant, ils ne viennent pas de ce chantier et n'ont pas été touchés.
   production avant de conclure.
 - `/admin/moderation/petitions redirige sans auth` : la redirection n'aboutit
   pas à l'adresse attendue par le test.
+
+## Proposition (non faite, à arbitrer)
+
+- [ ] **Les redirections des pages protégées sont lentes et invisibles des
+      robots.** Constaté le 02/09/2026 en travaillant sur `/appel` : une *page*
+      Next.js qui appelle `redirect()` ne produit pas une vraie redirection HTTP.
+      Le serveur répond 200 avec une balise `<meta http-equiv="refresh"
+      content="1;url=...">` — donc **une seconde de page blanche** pour la
+      personne, et une redirection qu'aucun robot de moteur de recherche ni
+      aucun aperçu de lien ne suit. Ça concerne toutes les pages qui renvoient
+      vers `/connexion` quand on n'est pas connecté·e, et c'est ce qui rend
+      deux tests E2E instables. Le correctif est connu (passer par un
+      gestionnaire de route, comme `/appel`) mais touche beaucoup de pages :
+      à faire en chantier dédié, pas en passant.
 
 ## Notes pour les chantiers suivants
 

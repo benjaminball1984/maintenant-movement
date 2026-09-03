@@ -52,8 +52,12 @@ export function creerSignerPetitionSchema(
   return z
     .object({
       petition_id: z.string().uuid(messages.petitionUuidInvalide),
-      nom: z.string().trim().min(1, messages.nomRequis).max(100),
-      prenom: z.string().trim().min(1, messages.prenomRequis).max(100),
+      // V2.6.138 : nom et prénom ne sont plus exigés en soi. Une signature
+      // individuelle peut porter un pseudonyme à la place. Le `superRefine`
+      // ci-dessous impose la vraie règle, qui dépend du type de signataire.
+      nom: z.string().trim().max(100).optional(),
+      prenom: z.string().trim().max(100).optional(),
+      pseudonyme: z.string().trim().max(100, messages.pseudonymeMax).optional(),
       email: z.string().trim().toLowerCase().email(messages.emailFormat),
       code_postal: z
         .string()
@@ -95,7 +99,48 @@ export function creerSignerPetitionSchema(
     })
     .strict()
     .superRefine((donnees, ctx) => {
-      if (donnees.type_signataire !== 'organisation') return;
+      const aNomEtPrenom =
+        donnees.nom !== undefined &&
+        donnees.nom !== '' &&
+        donnees.prenom !== undefined &&
+        donnees.prenom !== '';
+      const aPseudonyme = donnees.pseudonyme !== undefined && donnees.pseudonyme !== '';
+
+      // --- Signature individuelle : identité civile OU pseudonyme ---------
+      // V2.6.138 : on ne peut pas exiger un nom civil pour signer un texte
+      // politique. Statut administratif fragile, employeur hostile, violences
+      // conjugales : le pseudonyme est parfois la condition pour signer du
+      // tout. Mais il faut choisir l'un ou l'autre, pas rien.
+      if (donnees.type_signataire !== 'organisation') {
+        if (!aNomEtPrenom && !aPseudonyme) {
+          ctx.addIssue({
+            code: 'custom',
+            message: messages.identiteOuPseudonymeRequis,
+            path: ['pseudonyme'],
+          });
+        }
+        return;
+      }
+
+      // --- Signature au nom d'une organisation ----------------------------
+      // Ici le pseudonyme n'a pas cours : l'organisation s'affiche
+      // publiquement, et la personne qui signe pour elle doit pouvoir être
+      // recontactée nommément. Décision de Lilou/Ben du 02/09/2026.
+      if (!aNomEtPrenom) {
+        if (donnees.prenom === undefined || donnees.prenom === '') {
+          ctx.addIssue({ code: 'custom', message: messages.prenomRequis, path: ['prenom'] });
+        }
+        if (donnees.nom === undefined || donnees.nom === '') {
+          ctx.addIssue({ code: 'custom', message: messages.nomRequis, path: ['nom'] });
+        }
+      }
+      if (aPseudonyme) {
+        ctx.addIssue({
+          code: 'custom',
+          message: messages.pseudonymeInterditOrganisation,
+          path: ['pseudonyme'],
+        });
+      }
 
       if (donnees.organisation_nom === undefined || donnees.organisation_nom === '') {
         ctx.addIssue({

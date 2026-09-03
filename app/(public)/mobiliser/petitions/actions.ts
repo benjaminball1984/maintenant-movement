@@ -141,6 +141,14 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
   // ne sont écrits que dans ce cas — la contrainte SQL `signature_type_coherent`
   // exige qu'ils soient nuls pour une signature individuelle.
   const signeAuNomDUneOrganisation = donnees.type_signataire === 'organisation';
+
+  // V2.6.138 : une signature individuelle peut porter un pseudonyme à la place
+  // du nom civil. Le schéma Zod garantit qu'au moins l'un des deux est là ;
+  // ici on se contente de traduire « champ vide » en « absent » pour la base.
+  const enTexteOuNull = (valeur: string | undefined): string | null =>
+    valeur === undefined || valeur.trim() === '' ? null : valeur.trim();
+
+  const pseudonyme = signeAuNomDUneOrganisation ? null : enTexteOuNull(donnees.pseudonyme);
   const champsOrganisation = signeAuNomDUneOrganisation
     ? {
         type_signataire: 'organisation' as const,
@@ -159,8 +167,9 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
     petition_id: petition.id,
     personne_id: session?.userId ?? null,
     profil_unifie_id: profilUnifieId,
-    nom: donnees.nom,
-    prenom: donnees.prenom,
+    nom: enTexteOuNull(donnees.nom),
+    prenom: enTexteOuNull(donnees.prenom),
+    pseudonyme,
     email: donnees.email,
     code_postal: donnees.code_postal,
     telephone: donnees.telephone === '' ? null : (donnees.telephone ?? null),
@@ -212,7 +221,9 @@ export async function signerPetition(donneesBrutes: unknown): Promise<ResultatAc
       petition_a_compter: petition.id,
     });
     await envoyerEmailTemplee('petition_signee', donnees.email, {
-      prenom: donnees.prenom,
+      // On appelle la personne par ce qu'elle a donné : son prénom, ou le
+      // pseudonyme qu'elle a choisi. Jamais un « Bonjour , » vide.
+      prenom: enTexteOuNull(donnees.prenom) ?? pseudonyme ?? '',
       petition_titre: petition.titre,
       petition_url: `${getSiteUrl()}/mobiliser/petitions/${petition.slug}`,
       nombre_signatures:

@@ -13,8 +13,9 @@ import { NextResponse } from 'next/server';
  * — le reste ne sort que par ici, sous droit admin.
  *
  * Colonnes : type de signataire, organisation (nom, type, territoire, accord
- * d'affichage), fonction, identité et contact de la personne, cases cochées,
- * date. Limite 5000 lignes (au-delà, il faudra paginer).
+ * d'affichage), fonction, identité et contact de la personne (prénom et nom,
+ * ou pseudonyme si la personne a choisi de ne pas donner son identité civile),
+ * cases cochées, date. Limite 5000 lignes (au-delà, il faudra paginer).
  */
 const LIMITE = 5000;
 
@@ -47,7 +48,7 @@ export async function GET(
   const { data, error } = await supabase
     .from('signature_petition')
     .select(
-      'type_signataire, organisation_nom, organisation_categorie, organisation_territoire, organisation_affichage_public, signataire_fonction, prenom, nom, email, code_postal, telephone, accepte_newsletter, accepte_contact_createurice, created_at',
+      'type_signataire, organisation_nom, organisation_categorie, organisation_territoire, organisation_affichage_public, signataire_fonction, prenom, nom, pseudonyme, email, code_postal, telephone, accepte_newsletter, accepte_contact_createurice, created_at',
     )
     .eq('petition_id', petition.id)
     .order('created_at', { ascending: true })
@@ -66,6 +67,7 @@ export async function GET(
     'signataire_fonction',
     'prenom',
     'nom',
+    'pseudonyme',
     'email',
     'code_postal',
     'telephone',
@@ -83,6 +85,7 @@ export async function GET(
     signature.signataire_fonction ?? '',
     signature.prenom,
     signature.nom,
+    signature.pseudonyme ?? '',
     signature.email,
     signature.code_postal,
     signature.telephone ?? '',

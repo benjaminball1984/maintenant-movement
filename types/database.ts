@@ -2495,7 +2495,8 @@ export type Database = {
           created_at: string;
           email: string;
           id: string;
-          nom: string;
+          /** V2.6.138 — facultatif : remplacé par le pseudonyme si la personne le choisit. */
+          nom: string | null;
           /** V2.6.134 — le nom de l'organisation peut-il être affiché publiquement ? */
           organisation_affichage_public: boolean;
           /** V2.6.134 — assemblee | collectif | syndicat | organisation. */
@@ -2504,8 +2505,10 @@ export type Database = {
           organisation_territoire: string | null;
           personne_id: string | null;
           petition_id: string;
-          prenom: string;
+          prenom: string | null;
           profil_unifie_id: string | null;
+          /** V2.6.138 — nom d'emprunt, signatures individuelles uniquement. */
+          pseudonyme: string | null;
           /** V2.6.134 — fonction de la personne signant au nom de l'organisation. */
           signataire_fonction: string | null;
           /** D9 — capture probante des champs saisis. */
@@ -2522,15 +2525,16 @@ export type Database = {
           created_at?: string;
           email: string;
           id?: string;
-          nom: string;
+          nom?: string | null;
           organisation_affichage_public?: boolean;
           organisation_categorie?: string | null;
           organisation_nom?: string | null;
           organisation_territoire?: string | null;
           personne_id?: string | null;
           petition_id: string;
-          prenom: string;
+          prenom?: string | null;
           profil_unifie_id?: string | null;
+          pseudonyme?: string | null;
           signataire_fonction?: string | null;
           snapshot?: Json | null;
           telephone?: string | null;
@@ -2544,15 +2548,16 @@ export type Database = {
           created_at?: string;
           email?: string;
           id?: string;
-          nom?: string;
+          nom?: string | null;
           organisation_affichage_public?: boolean;
           organisation_categorie?: string | null;
           organisation_nom?: string | null;
           organisation_territoire?: string | null;
           personne_id?: string | null;
           petition_id?: string;
-          prenom?: string;
+          prenom?: string | null;
           profil_unifie_id?: string | null;
+          pseudonyme?: string | null;
           signataire_fonction?: string | null;
           snapshot?: Json | null;
           telephone?: string | null;
