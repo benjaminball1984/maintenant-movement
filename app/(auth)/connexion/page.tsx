@@ -45,9 +45,14 @@ const FALLBACKS = {
 export default async function PageConnexion({
   searchParams,
 }: {
-  searchParams: Promise<{ erreur?: string }>;
+  searchParams: Promise<{ erreur?: string; prochaine?: string }>;
 }) {
-  const { erreur } = await searchParams;
+  // 08/09/2026 : le site sème des liens `?prochaine=` depuis une quinzaine
+  // d'endroits, mais PERSONNE ne les lisait — après connexion on atterrissait
+  // toujours sur le tableau de bord. Le paramètre est désormais transmis aux
+  // trois portes, qui ramènent la personne sur ce qu'elle était en train de
+  // faire (voter à un sondage, adhérer…).
+  const { erreur, prochaine } = await searchParams;
 
   const [
     estAdmin,
@@ -184,6 +189,7 @@ export default async function PageConnexion({
           )}
         </TexteEditableAdmin>
         <FormulaireConnexionMdp
+          prochaine={prochaine}
           libelles={{
             ctaSubmit: mdpCtaSubmit.valeurMd,
             ctaEnCours: mdpCtaEnCours.valeurMd,
@@ -239,6 +245,7 @@ export default async function PageConnexion({
           {(t) => <p className="mb-3 text-sm text-text-2">{t}</p>}
         </TexteEditableAdmin>
         <FormulaireMagicLink
+          prochaine={prochaine}
           libelles={{
             ctaSubmit: magicCtaSubmit.valeurMd,
             ctaEnCours: magicCtaEnCours.valeurMd,
@@ -264,7 +271,7 @@ export default async function PageConnexion({
             </Heading>
           )}
         </TexteEditableAdmin>
-        <BoutonsOAuth />
+        <BoutonsOAuth prochaine={prochaine} />
       </Card>
 
       <p className="text-sm text-text-3">

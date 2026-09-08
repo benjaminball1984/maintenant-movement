@@ -39,6 +39,7 @@ export interface LibellesVoteSansCompte {
   alertSuccesMessage: string;
   alertLienTitre: string;
   alertLienMessage: string;
+  alertLienCta: string;
   amorceConnexion: string;
   lienConnexion: string;
   messageCaptchaEnAttente?: string;
@@ -66,8 +67,8 @@ const LIBELLES_DEFAUT: LibellesVoteSansCompte = {
   alertSuccesMessage:
     'Un compte vient d’être créé à ton nom : tu vas recevoir un email pour l’activer et choisir ton mot de passe. Recharge la page pour voir les résultats.',
   alertLienTitre: 'Tu as déjà un compte',
-  alertLienMessage:
-    'Un lien de connexion vient de partir vers cette adresse. Clique dessus : tu reviendras sur ce sondage pour voter en un clic.',
+  alertLienMessage: 'Souhaites-tu te connecter ? On te ramène ici pour voter juste après.',
+  alertLienCta: 'Me connecter',
   amorceConnexion: 'Tu as déjà un compte ?',
   lienConnexion: 'Se connecter',
   messageCaptchaEnAttente:
@@ -76,7 +77,7 @@ const LIBELLES_DEFAUT: LibellesVoteSansCompte = {
 
 interface ResultatVoteSansCompte {
   ok: boolean;
-  etat?: 'vote' | 'lien_envoye';
+  etat?: 'vote' | 'deja_compte';
   message?: string;
 }
 
@@ -113,7 +114,7 @@ export function FormulaireVoteSansCompte({
   messages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
 }: FormulaireVoteSansCompteProps) {
   const [erreur, setErreur] = useState<string | null>(null);
-  const [issue, setIssue] = useState<'vote' | 'lien_envoye' | null>(null);
+  const [issue, setIssue] = useState<'vote' | 'deja_compte' | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [hydrate, setHydrate] = useState(false);
   const [choisies, setChoisies] = useState<number[]>([]);
@@ -175,10 +176,20 @@ export function FormulaireVoteSansCompte({
     );
   }
 
-  if (issue === 'lien_envoye') {
+  // Adresse déjà rattachée à un compte : on ne vote pas sous l'identité de
+  // quelqu'un d'autre. On propose la connexion, avec `?prochaine=` qui
+  // ramène sur ce sondage une fois connecté·e — pas d'aller-retour par la
+  // boîte mail (08/09/2026, Ben : « euh, personne ne va faire ça »).
+  if (issue === 'deja_compte') {
     return (
       <Alert variant="info" titre={libelles.alertLienTitre}>
-        {libelles.alertLienMessage}
+        <p>{libelles.alertLienMessage}</p>
+        <Link
+          href={`/connexion?prochaine=${encodeURIComponent(`/s-informer/sondages/${slug}`)}`}
+          className="mt-3 inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+        >
+          {libelles.alertLienCta}
+        </Link>
       </Alert>
     );
   }

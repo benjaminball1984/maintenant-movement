@@ -15,14 +15,19 @@ import { ouvrirOAuth } from '../actions';
  *   l'affichage tant qu'ils ne fonctionnent pas (cf. commentaire en fin
  *   de composant).
  */
-export function BoutonsOAuth() {
+export function BoutonsOAuth({
+  prochaine,
+}: {
+  /** Chemin où ramener la personne après connexion (cf. `?prochaine=`). */
+  prochaine?: string;
+} = {}) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState<ProviderOAuth | null>(null);
 
   async function gererClic(provider: ProviderOAuth) {
     setErreur(null);
     setEnCours(provider);
-    const resultat = await ouvrirOAuth(provider);
+    const resultat = await ouvrirOAuth(provider, prochaine);
     setEnCours(null);
 
     if (!resultat.ok) {

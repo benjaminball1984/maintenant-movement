@@ -42,7 +42,13 @@ const LIBELLES_DEFAUT: LibellesConnexionMdp = {
 export function FormulaireConnexionMdp({
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
-}: { libelles?: LibellesConnexionMdp; messages?: MessagesValidationAuth } = {}) {
+  prochaine,
+}: {
+  libelles?: LibellesConnexionMdp;
+  messages?: MessagesValidationAuth;
+  /** Chemin où ramener la personne après connexion (cf. `?prochaine=`). */
+  prochaine?: string;
+} = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -78,7 +84,7 @@ export function FormulaireConnexionMdp({
     setEmailNonVerifie(false);
     setRenvoiEtat('idle');
     setEnvoiEnCours(true);
-    const resultat = await connecterAvecMotDePasse(donnees);
+    const resultat = await connecterAvecMotDePasse(donnees, prochaine);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {

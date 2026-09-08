@@ -1,4 +1,5 @@
 import { getSiteUrl } from '@/config/site';
+import { cheminInterneOuDefaut } from '@/lib/auth/chemin-retour';
 import { genererPassword } from '@/lib/generer-password';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 
@@ -52,27 +53,28 @@ export interface IdentiteNouveauCompte {
 /**
  * Issue d'une tentative de création.
  *
- * `lien_envoye` n'est pas un échec : c'est le refus délibéré d'écrire sous
- * l'identité de quelqu'un d'autre. Sans lui, n'importe qui pourrait faire
- * adhérer ou faire voter un tiers en tapant son adresse. Le lien de
- * connexion ne peut être suivi que par la personne qui relève cette boîte.
+ * `deja_compte` n'est pas un échec : c'est le refus délibéré d'écrire sous
+ * l'identité de quelqu'un d'autre. Sans lui, connaître l'adresse email de
+ * quelqu'un suffirait à le faire adhérer ou à voter à sa place.
+ *
+ * L'appelant propose alors de se connecter, avec un retour automatique sur
+ * la page du geste (`?prochaine=`). Une première version envoyait un lien
+ * magique par email : abandonnée le 08/09/2026 sur ce constat de Ben,
+ * « euh, personne ne va faire ça » — ouvrir sa boîte mail au milieu d'un
+ * vote, c'est perdre la personne.
  */
 export type ResultatCreationCompte =
   | { etat: 'cree'; personneId: string }
-  | { etat: 'lien_envoye' }
+  | { etat: 'deja_compte' }
   | { etat: 'echec'; message: string };
 
 /**
- * Crée le compte, ou envoie un lien de connexion si l'email en a déjà un.
+ * Crée le compte, ou signale que l'adresse en a déjà un.
  *
  * @param identite Ce que la personne vient de saisir.
- * @param retourApres Chemin INTERNE où la ramener après un clic sur le
- *   lien reçu (ex. `/s-informer/sondages/mon-sondage`) : elle y retrouve
- *   le geste qu'elle était en train de faire, connectée cette fois.
  */
 export async function creerCompteSansMotDePasse(
   identite: IdentiteNouveauCompte,
-  retourApres: string,
 ): Promise<ResultatCreationCompte> {
   const admin = getSupabaseAdmin();
 
@@ -96,19 +98,7 @@ export async function creerCompteSansMotDePasse(
       };
     }
 
-    const supabase = await getSupabaseServer();
-    const { error: erreurLien } = await supabase.auth.signInWithOtp({
-      email: identite.email,
-      options: { emailRedirectTo: urlDeRetour(retourApres) },
-    });
-    if (erreurLien !== null) {
-      return {
-        etat: 'echec',
-        message:
-          'Un compte existe déjà avec cet email, mais le lien de connexion n’a pas pu partir. Réessaie dans un instant, ou connecte-toi depuis la page de connexion.',
-      };
-    }
-    return { etat: 'lien_envoye' };
+    return { etat: 'deja_compte' };
   }
 
   const utilisateur = creation.user;
@@ -165,14 +155,10 @@ export async function envoyerEmailPriseEnMain(email: string, retourApres: string
 /**
  * Construit l'URL de retour du lien reçu par email.
  *
- * Le chemin est forcé INTERNE (même garde-fou que `app/auth/callback`,
- * revue sécurité S1) : sans ça, un `next` fabriqué transformerait un lien
- * de connexion légitime en redirection ouverte, donc en hameçonnage.
+ * Le chemin est forcé INTERNE par `cheminInterneOuDefaut` : sans ça, un
+ * `next` fabriqué transformerait un lien de connexion légitime en
+ * redirection ouverte, donc en hameçonnage (revue sécurité S1).
  */
 function urlDeRetour(retourApres: string): string {
-  const chemin =
-    retourApres.startsWith('/') && !retourApres.startsWith('//') && !retourApres.startsWith('/\\')
-      ? retourApres
-      : '/profil/dashboard';
-  return `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(chemin)}`;
+  return `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(cheminInterneOuDefaut(retourApres))}`;
 }

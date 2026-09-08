@@ -1,6 +1,7 @@
 'use server';
 
 import { getSiteUrl } from '@/config/site';
+import { cheminInterneOuDefaut } from '@/lib/auth/chemin-retour';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -167,7 +168,10 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
 // ============================================================
 // Connexion email + mot de passe
 // ============================================================
-export async function connecterAvecMotDePasse(donneesBrutes: unknown): Promise<ResultatAction> {
+export async function connecterAvecMotDePasse(
+  donneesBrutes: unknown,
+  prochaine?: string,
+): Promise<ResultatAction> {
   const parse = connexionMdpSchema.safeParse(donneesBrutes);
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
@@ -193,7 +197,10 @@ export async function connecterAvecMotDePasse(donneesBrutes: unknown): Promise<R
   }
 
   revalidatePath('/', 'layout');
-  return { ok: true, redirectVers: '/profil/dashboard' };
+  // On ramène la personne là où elle voulait aller (`?prochaine=`), pas
+  // systématiquement au tableau de bord : c'est tout l'intérêt des liens
+  // « connecte-toi pour voter / pour adhérer » (08/09/2026).
+  return { ok: true, redirectVers: cheminInterneOuDefaut(prochaine) };
 }
 
 /**
@@ -224,7 +231,10 @@ export async function renvoyerVerificationEmail(email: string): Promise<Resultat
 // ============================================================
 // Magic link
 // ============================================================
-export async function envoyerMagicLink(donneesBrutes: unknown): Promise<ResultatAction> {
+export async function envoyerMagicLink(
+  donneesBrutes: unknown,
+  prochaine?: string,
+): Promise<ResultatAction> {
   const parse = magicLinkSchema.safeParse(donneesBrutes);
   if (!parse.success) {
     return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
@@ -240,7 +250,7 @@ export async function envoyerMagicLink(donneesBrutes: unknown): Promise<Resultat
   const { error } = await supabase.auth.signInWithOtp({
     email: donnees.email,
     options: {
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(cheminInterneOuDefaut(prochaine))}`,
     },
   });
 
@@ -254,7 +264,10 @@ export async function envoyerMagicLink(donneesBrutes: unknown): Promise<Resultat
 // ============================================================
 // OAuth (GAFAM + éthique)
 // ============================================================
-export async function ouvrirOAuth(provider: ProviderOAuth): Promise<ResultatAction> {
+export async function ouvrirOAuth(
+  provider: ProviderOAuth,
+  prochaine?: string,
+): Promise<ResultatAction> {
   const supabase = await getSupabaseServer();
 
   // OAuth éthique (Mastodon, Framasoft, Solid) : pas branché en 1.2.
@@ -270,7 +283,7 @@ export async function ouvrirOAuth(provider: ProviderOAuth): Promise<ResultatActi
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
+      redirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(cheminInterneOuDefaut(prochaine))}`,
     },
   });
 

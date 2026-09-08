@@ -40,7 +40,13 @@ const LIBELLES_DEFAUT: LibellesMagicLink = {
 export function FormulaireMagicLink({
   libelles = LIBELLES_DEFAUT,
   messages = MESSAGES_VALIDATION_AUTH_DEFAUT,
-}: { libelles?: LibellesMagicLink; messages?: MessagesValidationAuth } = {}) {
+  prochaine,
+}: {
+  libelles?: LibellesMagicLink;
+  messages?: MessagesValidationAuth;
+  /** Chemin où ramener la personne après connexion (cf. `?prochaine=`). */
+  prochaine?: string;
+} = {}) {
   const router = useRouter();
   const [erreurServeur, setErreurServeur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
@@ -69,7 +75,7 @@ export function FormulaireMagicLink({
   async function onSubmit(donnees: DonneesMagicLink) {
     setErreurServeur(null);
     setEnvoiEnCours(true);
-    const resultat = await envoyerMagicLink(donnees);
+    const resultat = await envoyerMagicLink(donnees, prochaine);
     setEnvoiEnCours(false);
 
     if (!resultat.ok) {

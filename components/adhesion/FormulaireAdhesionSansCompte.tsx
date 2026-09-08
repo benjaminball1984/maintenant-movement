@@ -36,6 +36,7 @@ export interface LibellesAdhesionSansCompte {
   alertSuccesMessage: string;
   alertLienTitre: string;
   alertLienMessage: string;
+  alertLienCta: string;
   amorceConnexion: string;
   lienConnexion: string;
   messageCaptchaEnAttente?: string;
@@ -61,8 +62,8 @@ const LIBELLES_DEFAUT: LibellesAdhesionSansCompte = {
   alertSuccesMessage:
     'Ton adhésion gratuite est active pour 365 jours. Un compte vient d’être créé à ton nom : tu vas recevoir un email pour l’activer et choisir ton mot de passe.',
   alertLienTitre: 'Tu as déjà un compte',
-  alertLienMessage:
-    'Un lien de connexion vient de partir vers cette adresse. Clique dessus : tu reviendras ici pour finir ton adhésion en un clic.',
+  alertLienMessage: 'Souhaites-tu te connecter ? On te ramène ici pour adhérer juste après.',
+  alertLienCta: 'Me connecter',
   amorceConnexion: 'Tu as déjà un compte ?',
   lienConnexion: 'Se connecter',
   messageCaptchaEnAttente:
@@ -71,7 +72,7 @@ const LIBELLES_DEFAUT: LibellesAdhesionSansCompte = {
 
 interface ResultatSansCompte {
   ok: boolean;
-  etat?: 'adheree' | 'lien_envoye';
+  etat?: 'adheree' | 'deja_compte';
   message?: string;
 }
 
@@ -98,7 +99,7 @@ export function FormulaireAdhesionSansCompte({
   messages = MESSAGES_VALIDATION_ADHESION_DEFAUT,
 }: FormulaireAdhesionSansCompteProps) {
   const [erreur, setErreur] = useState<string | null>(null);
-  const [issue, setIssue] = useState<'adheree' | 'lien_envoye' | null>(null);
+  const [issue, setIssue] = useState<'adheree' | 'deja_compte' | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [hydrate, setHydrate] = useState(false);
   useEffect(() => {
@@ -150,10 +151,19 @@ export function FormulaireAdhesionSansCompte({
     );
   }
 
-  if (issue === 'lien_envoye') {
+  // Adresse déjà rattachée à un compte : on n'adhère pas sous l'identité
+  // de quelqu'un d'autre. On propose la connexion, avec `?prochaine=` qui
+  // ramène ici une fois connecté·e (08/09/2026).
+  if (issue === 'deja_compte') {
     return (
       <Alert variant="info" titre={libelles.alertLienTitre}>
-        {libelles.alertLienMessage}
+        <p>{libelles.alertLienMessage}</p>
+        <Link
+          href={`/connexion?prochaine=${encodeURIComponent('/agir/adherer/gratuit')}`}
+          className="mt-3 inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
+        >
+          {libelles.alertLienCta}
+        </Link>
       </Alert>
     );
   }

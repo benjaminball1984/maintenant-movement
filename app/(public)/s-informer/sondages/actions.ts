@@ -182,12 +182,12 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
 /**
  * Ce que renvoie `voterSondageSansCompte` en cas de succès.
  *
- * `lien_envoye` : l'adresse a déjà un compte, on n'a donc rien écrit sous
- * l'identité de quelqu'un d'autre ; un lien de connexion est parti, et le
- * vote se fait au retour. Sans cette précaution, connaître l'adresse email
- * de quelqu'un suffirait à voter à sa place.
+ * `deja_compte` : l'adresse a déjà un compte, on n'a donc rien écrit sous
+ * l'identité de quelqu'un d'autre. Le formulaire propose alors de se
+ * connecter, et ramène ici pour voter. Sans cette précaution, connaître
+ * l'adresse email de quelqu'un suffirait à voter à sa place.
  */
-export type IssueVoteSansCompte = { etat: 'vote' | 'lien_envoye' };
+export type IssueVoteSansCompte = { etat: 'vote' | 'deja_compte' };
 
 /**
  * Vote d'une personne sans compte : le compte est créé au passage
@@ -251,23 +251,20 @@ export async function voterSondageSansCompte(
   }
 
   const retour = `/s-informer/sondages/${sondage.slug}`;
-  const compte = await creerCompteSansMotDePasse(
-    {
-      prenom: donnees.prenom,
-      nom: donnees.nom,
-      email: donnees.email,
-      code_postal: donnees.code_postal,
-      telephone: donnees.telephone ?? '',
-      date_naissance: donnees.date_naissance,
-    },
-    retour,
-  );
+  const compte = await creerCompteSansMotDePasse({
+    prenom: donnees.prenom,
+    nom: donnees.nom,
+    email: donnees.email,
+    code_postal: donnees.code_postal,
+    telephone: donnees.telephone ?? '',
+    date_naissance: donnees.date_naissance,
+  });
 
   if (compte.etat === 'echec') {
     return { ok: false, message: compte.message };
   }
-  if (compte.etat === 'lien_envoye') {
-    return { ok: true, etat: 'lien_envoye' };
+  if (compte.etat === 'deja_compte') {
+    return { ok: true, etat: 'deja_compte' };
   }
 
   const genreDeclare =
@@ -316,7 +313,11 @@ export async function voterSondageSansCompte(
     }
   }
 
-  revalidatePath('/s-informer/sondages');
+  // PAS de `revalidatePath` ici, même raison qu'au bout de
+  // `adhererSansCompte` (08/09/2026) : revalider depuis l'action refait la
+  // route avant que le formulaire ait affiché « ton vote est enregistré »,
+  // le composant est reconstruit et la personne ne voit rien. Le compteur
+  // se remet à jour au rechargement de la page.
   return { ok: true, etat: 'vote' };
 }
 

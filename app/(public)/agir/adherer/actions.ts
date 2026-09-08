@@ -86,12 +86,11 @@ export async function adhererGratuit(donneesBrutes: unknown): Promise<ResultatAc
  *
  * Deux issues, parce que deux situations honnêtes :
  *  - `adheree` : le compte et l'adhésion viennent d'être créés.
- *  - `lien_envoye` : l'email a déjà un compte, donc on n'a RIEN créé ;
- *    un lien de connexion vient de partir, l'adhésion se terminera au
- *    retour. C'est le seul moyen sûr : sans cette précaution, n'importe
- *    qui pourrait faire adhérer quelqu'un d'autre en tapant son adresse.
+ *  - `deja_compte` : l'email a déjà un compte, donc on n'a RIEN créé sous
+ *    l'identité de quelqu'un d'autre. Le formulaire propose de se
+ *    connecter et ramène ensuite ici.
  */
-export type IssueAdhesionSansCompte = { etat: 'adheree' | 'lien_envoye' };
+export type IssueAdhesionSansCompte = { etat: 'adheree' | 'deja_compte' };
 
 /**
  * Adhésion d'une personne qui n'a pas de compte : le compte est créé au
@@ -131,23 +130,20 @@ export async function adhererSansCompte(
     return resultat.ok ? { ok: true, etat: 'adheree' } : resultat;
   }
 
-  const compte = await creerCompteSansMotDePasse(
-    {
-      prenom: donnees.prenom,
-      nom: donnees.nom,
-      email: donnees.email,
-      code_postal: donnees.code_postal,
-      telephone: donnees.telephone,
-      date_naissance: donnees.date_naissance,
-    },
-    '/agir/adherer/gratuit',
-  );
+  const compte = await creerCompteSansMotDePasse({
+    prenom: donnees.prenom,
+    nom: donnees.nom,
+    email: donnees.email,
+    code_postal: donnees.code_postal,
+    telephone: donnees.telephone,
+    date_naissance: donnees.date_naissance,
+  });
 
   if (compte.etat === 'echec') {
     return { ok: false, message: compte.message };
   }
-  if (compte.etat === 'lien_envoye') {
-    return { ok: true, etat: 'lien_envoye' };
+  if (compte.etat === 'deja_compte') {
+    return { ok: true, etat: 'deja_compte' };
   }
 
   const { error: erreurAdhesion } = await getSupabaseAdmin().from('adhesion').insert({
@@ -177,7 +173,15 @@ export async function adhererSansCompte(
     }
   }
 
-  revalidatePath('/agir/adherer');
+  // PAS de `revalidatePath` ici, et c'est délibéré (08/09/2026, signalé
+  // par Ben : « je n'ai pas d'écran après avoir cliqué qui dit que j'ai
+  // bien adhéré »). Revalider depuis l'action provoque un rafraîchissement
+  // de la route AVANT que le formulaire ait pu afficher son message de
+  // bienvenue : le composant est reconstruit, son état « adhésion faite »
+  // disparaît, et la personne ne voit rien. Exactement le défaut corrigé
+  // le 16/08/2026 sur la modale de signature de pétition. Rien à revalider
+  // de toute façon : la personne n'est pas connectée, la page d'adhésion
+  // ne montre rien de personnel.
   return { ok: true, etat: 'adheree' };
 }
 
