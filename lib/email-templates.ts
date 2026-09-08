@@ -32,6 +32,7 @@ export type TypeEmail =
   | 'adhesion_relance'
   | 'adhesion_bienvenue'
   | 'vote_enregistre'
+  | 'inscription_bienvenue'
   | 'reseau_message_recu'
   | 'reseau_post_commente'
   | 'reseau_post_soutenu';
@@ -132,12 +133,12 @@ L’équipe Maintenant!`,
   // prise en compte » à quelqu'un qui vient seulement de voter serait faux.
   adhesion_bienvenue: {
     sujet: 'Ton adhésion à Maintenant! est prise en compte',
-    html: `<p>Bonjour {prenom},</p>
+    html: `<p>Bonjour {prenom}</p>
 <p>Ton adhésion à Maintenant! est bien prise en compte.</p>
 <p>Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.</p>
 <p><a href="{lien_confirmation}">Finalise ton inscription en cliquant ici</a></p>
 <p>L’équipe Maintenant!</p>`,
-    texte: `Bonjour {prenom},
+    texte: `Bonjour {prenom}
 
 Ton adhésion à Maintenant! est bien prise en compte.
 
@@ -152,13 +153,13 @@ L’équipe Maintenant!`,
   // même. Éditable admin comme tous les autres.
   vote_enregistre: {
     sujet: 'Ton vote est enregistré',
-    html: `<p>Bonjour {prenom},</p>
+    html: `<p>Bonjour {prenom}</p>
 <p>Ton vote au sondage <strong>{sondage_titre}</strong> est bien enregistré.</p>
 <p>Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.</p>
 <p>Un compte vient d’être créé à ton nom : il te permet de retrouver tes votes et de participer à la suite.</p>
 <p><a href="{lien_confirmation}">Finalise ton inscription en cliquant ici</a></p>
 <p>L’équipe Maintenant!</p>`,
-    texte: `Bonjour {prenom},
+    texte: `Bonjour {prenom}
 
 Ton vote au sondage {sondage_titre} est bien enregistré.
 
@@ -167,6 +168,33 @@ Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, da
 Un compte vient d’être créé à ton nom : il te permet de retrouver tes votes et de participer à la suite.
 
 Finalise ton inscription ici : {lien_confirmation}
+
+L’équipe Maintenant!`,
+  },
+  // Troisième porte qui crée un compte : l'inscription classique, avec mot
+  // de passe choisi. Elle recevait encore le « Confirm your signup » de
+  // Supabase ; Ben : « oui fais aussi l'inscription classique ».
+  //
+  // Le texte diffère volontairement des deux autres : ici la personne n'a
+  // ni adhéré ni voté, elle a ouvert un compte. On ne lui fait pas dire
+  // plus que ce qu'elle a fait.
+  inscription_bienvenue: {
+    sujet: 'Finalise ton inscription à Maintenant!',
+    html: `<p>Bonjour {prenom}</p>
+<p>Ton compte Maintenant! est créé.</p>
+<p>Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.</p>
+<p><a href="{lien_confirmation}">Finalise ton inscription en cliquant ici</a></p>
+<p>Ce clic nous confirme que cette adresse est bien la tienne. Sans lui, la connexion reste fermée.</p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour {prenom}
+
+Ton compte Maintenant! est créé.
+
+Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.
+
+Finalise ton inscription ici : {lien_confirmation}
+
+Ce clic nous confirme que cette adresse est bien la tienne. Sans lui, la connexion reste fermée.
 
 L’équipe Maintenant!`,
   },

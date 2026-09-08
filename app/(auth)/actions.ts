@@ -2,6 +2,11 @@
 
 import { getSiteUrl } from '@/config/site';
 import { cheminInterneOuDefaut } from '@/lib/auth/chemin-retour';
+import {
+  lienConfirmationInscription,
+  lienConnexionUsageUnique,
+} from '@/lib/auth/lien-confirmation';
+import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
@@ -108,21 +113,27 @@ export async function inscrire(donneesBrutes: unknown): Promise<ResultatAction> 
 
   const utilisateurAuth = creation.user;
 
-  // Envoi de l'email de confirmation. `createUser` ne déclenche aucun
-  // email : on le demande explicitement via `resend`. Si l'envoi échoue,
-  // on supprime le compte tout juste créé pour ne pas laisser un compte
-  // orphelin que la personne ne pourrait jamais valider : l'inscription
-  // reste ainsi « tout ou rien ».
-  const supabase = await getSupabaseServer();
-  const { error: emailError } = await supabase.auth.resend({
-    type: 'signup',
-    email: donnees.email,
-    options: {
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
-    },
-  });
-
-  if (emailError !== null) {
+  // Email de confirmation, écrit par NOUS (V2.6.144, demande Ben : « oui
+  // fais aussi l'inscription classique »). Supabase n'envoie plus rien :
+  // `createUser` ne déclenche aucun email, et `generateLink` se contente de
+  // fabriquer l'adresse du lien, que notre gabarit `inscription_bienvenue`
+  // met en forme (sujet et corps éditables admin via le CMS).
+  //
+  // L'inscription reste « tout ou rien » : si l'email ne part pas, on
+  // supprime le compte à peine créé plutôt que de laisser quelqu'un avec un
+  // compte qu'il ne pourra jamais valider.
+  const lienConfirmation = await lienConfirmationInscription(
+    donnees.email,
+    donnees.mot_de_passe,
+    '/profil/dashboard',
+  );
+  try {
+    await envoyerEmailTemplee('inscription_bienvenue', donnees.email, {
+      prenom: donnees.prenom,
+      lien_confirmation: lienConfirmation,
+    });
+  } catch (erreur) {
+    console.warn('[inscrire] email de confirmation non envoyé :', erreur);
     await supabaseAdmin.auth.admin.deleteUser(utilisateurAuth.id);
     return {
       ok: false,
@@ -214,16 +225,32 @@ export async function renvoyerVerificationEmail(email: string): Promise<Resultat
   if (emailNettoye === '' || !emailNettoye.includes('@')) {
     return { ok: false, message: 'Adresse email invalide.' };
   }
-  const supabase = await getSupabaseServer();
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
-    email: emailNettoye,
-    options: {
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/profil/dashboard`,
-    },
-  });
-  if (error !== null) {
-    return { ok: false, message: traduireErreurAuth(error.message) };
+  // Ici le mot de passe n'est pas connu (la personne le tape sur la page de
+  // connexion, pas ici) : on ne peut donc pas refabriquer le lien
+  // d'inscription. On envoie un lien de connexion à usage unique, dont le
+  // suivi vaut vérification de l'adresse — même effet, autre chemin.
+  //
+  // Le message reste le nôtre (`inscription_bienvenue`), pas celui de
+  // Supabase : c'est le même moment du parcours, il doit se lire pareil.
+  const lien = await lienConnexionUsageUnique(emailNettoye, '/profil/dashboard');
+
+  // Le formulaire de renvoi ne demande que l'adresse : on va chercher le
+  // prénom en base plutôt que d'écrire « Bonjour , » (défaut corrigé le
+  // 16/08/2026 sur l'email de signature, à ne pas réintroduire ici).
+  const { data: personne } = await getSupabaseAdmin()
+    .from('personne')
+    .select('prenom')
+    .eq('email', emailNettoye)
+    .maybeSingle();
+
+  try {
+    await envoyerEmailTemplee('inscription_bienvenue', emailNettoye, {
+      prenom: personne?.prenom ?? '',
+      lien_confirmation: lien,
+    });
+  } catch (erreur) {
+    console.warn('[renvoyerVerificationEmail] envoi impossible :', erreur);
+    return { ok: false, message: "L'email n'a pas pu être envoyé. Réessaie dans un instant." };
   }
   return { ok: true };
 }

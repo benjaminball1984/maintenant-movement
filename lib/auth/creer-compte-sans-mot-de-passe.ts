@@ -1,9 +1,7 @@
-import { getSiteUrl } from '@/config/site';
-import { cheminInterneOuDefaut } from '@/lib/auth/chemin-retour';
+import { lienConfirmationInscription } from '@/lib/auth/lien-confirmation';
 import { type TypeEmail, envoyerEmailTemplee } from '@/lib/email-templates';
 import { genererPassword } from '@/lib/generer-password';
 import { getSupabaseAdmin } from '@/lib/supabase';
-
 /**
  * Création d'un compte SANS mot de passe demandé (V2.6.141).
  *
@@ -34,7 +32,6 @@ import { getSupabaseAdmin } from '@/lib/supabase';
  * refuseraient l'insertion. L'usage admin est borné à l'identifiant du
  * compte qu'on vient de créer : aucune identité d'autrui n'est touchée.
  */
-
 /** Identité minimale d'une personne qui entre dans le mouvement. */
 export interface IdentiteNouveauCompte {
   prenom: string;
@@ -50,7 +47,6 @@ export interface IdentiteNouveauCompte {
   /** ISO `AAAA-MM-JJ`. Le seuil des 15 ans est vérifié en amont par Zod. */
   date_naissance: string;
 }
-
 /**
  * Issue d'une tentative de création.
  *
@@ -77,7 +73,6 @@ export type ResultatCreationCompte =
     }
   | { etat: 'deja_compte' }
   | { etat: 'echec'; message: string };
-
 /**
  * Crée le compte, ou signale que l'adresse en a déjà un.
  *
@@ -90,12 +85,10 @@ export async function creerCompteSansMotDePasse(
   retourApres: string,
 ): Promise<ResultatCreationCompte> {
   const admin = getSupabaseAdmin();
-
   // Le mot de passe reste dans cette fonction : il ne sort ni en base
   // applicative, ni dans un email, ni dans un log. Il sert deux fois, à la
   // création puis à la fabrication du lien de confirmation, et disparaît.
   const motDePasse = genererPassword({ longueur: 32 });
-
   const { data: creation, error: erreurCreation } = await admin.auth.admin.createUser({
     email: identite.email,
     password: motDePasse,
@@ -104,7 +97,6 @@ export async function creerCompteSansMotDePasse(
     // ouvre son compte.
     email_confirm: false,
   });
-
   if (erreurCreation !== null) {
     const dejaPris =
       erreurCreation.code === 'email_exists' ||
@@ -115,12 +107,9 @@ export async function creerCompteSansMotDePasse(
         message: `Création du compte impossible : ${erreurCreation.message}`,
       };
     }
-
     return { etat: 'deja_compte' };
   }
-
   const utilisateur = creation.user;
-
   const { error: erreurPersonne } = await admin.from('personne').insert({
     id: utilisateur.id,
     email: identite.email,
@@ -132,60 +121,18 @@ export async function creerCompteSansMotDePasse(
     email_verifie: false,
     statut: 'actif',
   });
-
   if (erreurPersonne !== null) {
     // Rien d'utilisable n'a été créé : on retire le compte auth plutôt que
     // de laisser une coquille sans profil.
     await admin.auth.admin.deleteUser(utilisateur.id);
     return { etat: 'echec', message: `Création du compte impossible : ${erreurPersonne.message}` };
   }
-
   return {
     etat: 'cree',
     personneId: utilisateur.id,
-    lienConfirmation: await genererLienConfirmation(identite.email, motDePasse, retourApres),
+    lienConfirmation: await lienConfirmationInscription(identite.email, motDePasse, retourApres),
   };
 }
-
-/**
- * Fabrique le lien de confirmation SANS envoyer d'email.
- *
- * C'est ce qui nous permet d'écrire nous-mêmes le message (V2.6.144,
- * demande Ben : le « Confirm your signup » de Supabase était trop sec, et
- * surtout il ne disait rien du geste qui venait d'être fait). Supabase
- * n'envoie plus rien : il ne fournit que l'adresse du lien, que nos
- * propres gabarits (`lib/email-templates`) mettent en forme.
- *
- * Best-effort : en cas d'échec on renvoie `null`, l'email part sans lien
- * plutôt que pas du tout. La personne garde la porte « mot de passe
- * oublié » pour prendre son compte en main.
- */
-async function genererLienConfirmation(
-  email: string,
-  motDePasse: string,
-  retourApres: string,
-): Promise<string | null> {
-  try {
-    const { data, error } = await getSupabaseAdmin().auth.admin.generateLink({
-      type: 'signup',
-      email,
-      password: motDePasse,
-      options: { redirectTo: urlDeRetour(retourApres) },
-    });
-    if (error !== null) {
-      console.warn(
-        '[creerCompteSansMotDePasse] lien de confirmation indisponible :',
-        error.message,
-      );
-      return null;
-    }
-    return data.properties?.action_link ?? null;
-  } catch (erreur) {
-    console.warn('[creerCompteSansMotDePasse] lien de confirmation indisponible :', erreur);
-    return null;
-  }
-}
-
 /**
  * Envoie NOTRE email de prise en main (V2.6.144).
  *
@@ -207,15 +154,4 @@ export async function envoyerEmailPriseEnMain(
   } catch (erreur) {
     console.warn('[creerCompteSansMotDePasse] email de prise en main non envoyé :', erreur);
   }
-}
-
-/**
- * Construit l'URL de retour du lien reçu par email.
- *
- * Le chemin est forcé INTERNE par `cheminInterneOuDefaut` : sans ça, un
- * `next` fabriqué transformerait un lien de connexion légitime en
- * redirection ouverte, donc en hameçonnage (revue sécurité S1).
- */
-function urlDeRetour(retourApres: string): string {
-  return `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(cheminInterneOuDefaut(retourApres))}`;
 }
