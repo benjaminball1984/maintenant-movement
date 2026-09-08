@@ -1,6 +1,7 @@
 'use client';
 
 import { CaptchaTurnstile } from '@/components/formulaires/CaptchaTurnstile';
+import { ChoixOptionsSondage } from '@/components/sondages/ChoixOptionsSondage';
 import { Alert, Button } from '@/components/ui';
 import {
   MESSAGES_VALIDATION_SONDAGES_DEFAUT,
@@ -140,58 +141,16 @@ export function FormulaireVote({
         </Alert>
       ) : null}
 
-      <fieldset>
-        <legend className="mb-2 font-body text-sm font-medium text-text-2">
-          {libelles.legendeVote}
-          {choixMultiple ? ' — plusieurs réponses possibles' : ''}
-        </legend>
-        <div className="grid gap-2">
-          {options.map((opt, index) => {
-            const image = optionsImages?.[index] ?? null;
-            return (
-              // biome-ignore lint/a11y/noLabelWithoutControl: l'input (radio ou case à cocher) est rendu dans la ternaire ci-dessous
-              <label
-                key={`${index}-${opt}`}
-                className="flex cursor-pointer items-center gap-3 rounded-sm border border-border bg-surface p-3 text-sm hover:bg-surface-2"
-              >
-                {/* Choix multiple : cases à cocher (état local → champ
-                    `options_choisies`). Choix unique : boutons radio (pas de
-                    `valueAsNumber`, qui renvoie NaN ; la conversion est faite
-                    par le schéma Zod). */}
-                {choixMultiple ? (
-                  <input
-                    type="checkbox"
-                    checked={choisies.includes(index)}
-                    onChange={() => basculerChoix(index)}
-                    className="accent-brand"
-                  />
-                ) : (
-                  <input
-                    type="radio"
-                    value={index}
-                    {...register('option_index')}
-                    className="accent-brand"
-                  />
-                )}
-                {image !== null ? (
-                  <img
-                    src={image}
-                    alt=""
-                    width={48}
-                    height={48}
-                    loading="lazy"
-                    className="h-12 w-12 shrink-0 rounded-sm border border-border object-cover"
-                  />
-                ) : null}
-                <span>{opt}</span>
-              </label>
-            );
-          })}
-        </div>
-        {!choixMultiple && errors.option_index !== undefined ? (
-          <p className="mt-1 text-xs text-danger">{errors.option_index.message}</p>
-        ) : null}
-      </fieldset>
+      <ChoixOptionsSondage
+        options={options}
+        optionsImages={optionsImages}
+        choixMultiple={choixMultiple}
+        legende={libelles.legendeVote}
+        radioProps={register('option_index')}
+        choisies={choisies}
+        onBasculer={basculerChoix}
+        messageErreur={errors.option_index?.message}
+      />
 
       {/* Genre et tranche d'âge ne sont plus demandés au vote (Ben
           2026-06-14) : ils sont posés dans la qualification de profil. L'âge

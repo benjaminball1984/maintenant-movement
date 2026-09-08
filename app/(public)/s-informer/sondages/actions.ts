@@ -1,16 +1,23 @@
 'use server';
 
 import { journaliser } from '@/lib/admin/national/journal';
+import {
+  creerCompteSansMotDePasse,
+  envoyerEmailPriseEnMain,
+} from '@/lib/auth/creer-compte-sans-mot-de-passe';
 import { getSession } from '@/lib/auth/session';
+import { getEmailService } from '@/lib/email';
 import { trancheAgeDepuisDateNaissance } from '@/lib/sondages/qualification';
-import { getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { getTurnstileService } from '@/lib/turnstile';
 import { slugifierTitreMobilisation } from '@/lib/validations/mobilisation';
 import { retirerSondageSchema } from '@/lib/validations/moderation';
 import {
   type DonneesCreerSondage,
   type DonneesVoterSondage,
+  type DonneesVoterSondageSansCompte,
   creerSondageSchema,
+  voterSondageSansCompteSchema,
   voterSondageSchema,
 } from '@/lib/validations/sondages';
 import { revalidatePath } from 'next/cache';
@@ -111,25 +118,11 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
     return { ok: false, message: 'Ce sondage n’est plus ouvert au vote.' };
   }
 
-  // Choix unique → un index ; choix multiple → une liste d'index (dédupliquée).
-  const nbOptions = sondage.options.length;
-  let optionIndex: number | null = null;
-  let optionsChoisies: number[] | null = null;
-  if (sondage.choix_multiple === true) {
-    const choisies = [...new Set(donnees.options_choisies ?? [])];
-    if (choisies.length === 0) {
-      return { ok: false, message: 'Choisis au moins une option.' };
-    }
-    if (choisies.some((i) => i < 0 || i >= nbOptions)) {
-      return { ok: false, message: 'Option hors plage pour ce sondage.' };
-    }
-    optionsChoisies = choisies;
-  } else {
-    if (donnees.option_index === undefined || donnees.option_index >= nbOptions) {
-      return { ok: false, message: 'Option hors plage pour ce sondage.' };
-    }
-    optionIndex = donnees.option_index;
+  const choix = resoudreChoix(sondage, donnees);
+  if ('message' in choix) {
+    return { ok: false, message: choix.message };
   }
+  const { optionIndex, optionsChoisies } = choix;
 
   // Données « gratuites » du profil (revue 2026-06-12, Ben) : le code
   // postal n'est plus demandé au vote, il vient du profil de la personne
@@ -180,6 +173,182 @@ export async function voterSondage(donneesBrutes: unknown): Promise<ResultatActi
 
   revalidatePath('/s-informer/sondages');
   return { ok: true };
+}
+
+// ============================================================
+// Vote SANS COMPTE (V2.6.141)
+// ============================================================
+
+/**
+ * Ce que renvoie `voterSondageSansCompte` en cas de succès.
+ *
+ * `lien_envoye` : l'adresse a déjà un compte, on n'a donc rien écrit sous
+ * l'identité de quelqu'un d'autre ; un lien de connexion est parti, et le
+ * vote se fait au retour. Sans cette précaution, connaître l'adresse email
+ * de quelqu'un suffirait à voter à sa place.
+ */
+export type IssueVoteSansCompte = { etat: 'vote' | 'lien_envoye' };
+
+/**
+ * Vote d'une personne sans compte : le compte est créé au passage
+ * (décision Lilou/Ben du 08/09/2026).
+ *
+ * Ce qui change par rapport au vote connecté : rien, côté urne. La ligne
+ * `reponse_sondage` porte un `personne_id` réel, la contrainte d'unicité
+ * s'applique, le redressement reçoit code postal et tranche d'âge (déduite
+ * de la date de naissance). Le mur tombe, la garantie reste.
+ *
+ * Le vote est enregistré AVANT tout envoi d'email : une panne de mail ne
+ * doit jamais faire perdre une voix.
+ */
+export async function voterSondageSansCompte(
+  donneesBrutes: unknown,
+): Promise<ResultatAction<IssueVoteSansCompte>> {
+  const parse = voterSondageSansCompteSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesVoterSondageSansCompte = parse.data;
+
+  const turnstile = await getTurnstileService().verifier(donnees.token_turnstile);
+  if (!turnstile.succes) {
+    return { ok: false, message: 'La vérification anti-bot a échoué.' };
+  }
+
+  // Déjà connecté·e : c'est le vote connecté qui s'applique, avec
+  // l'identité du compte. Inatteignable par l'UI, mais l'action est
+  // publique : elle doit se tenir seule.
+  const session = await getSession();
+  if (session !== null) {
+    const resultat = await voterSondage({
+      sondage_id: donnees.sondage_id,
+      option_index: donnees.option_index,
+      options_choisies: donnees.options_choisies,
+      genre_declare: donnees.genre_declare,
+      token_turnstile: donnees.token_turnstile,
+    });
+    return resultat.ok ? { ok: true, etat: 'vote' } : resultat;
+  }
+
+  const supabase = await getSupabaseServer();
+  const { data: sondage } = await supabase
+    .from('sondage')
+    .select('id, slug, options, statut, choix_multiple')
+    .eq('id', donnees.sondage_id)
+    .maybeSingle();
+  if (sondage === null) {
+    return { ok: false, message: 'Sondage introuvable.' };
+  }
+  if (sondage.statut !== 'ouvert') {
+    return { ok: false, message: 'Ce sondage n’est plus ouvert au vote.' };
+  }
+
+  // On vérifie le choix AVANT de créer quoi que ce soit : pas de compte
+  // ouvert pour un vote qui n'aboutira pas.
+  const choix = resoudreChoix(sondage, donnees);
+  if ('message' in choix) {
+    return { ok: false, message: choix.message };
+  }
+
+  const retour = `/s-informer/sondages/${sondage.slug}`;
+  const compte = await creerCompteSansMotDePasse(
+    {
+      prenom: donnees.prenom,
+      nom: donnees.nom,
+      email: donnees.email,
+      code_postal: donnees.code_postal,
+      telephone: donnees.telephone,
+      date_naissance: donnees.date_naissance,
+    },
+    retour,
+  );
+
+  if (compte.etat === 'echec') {
+    return { ok: false, message: compte.message };
+  }
+  if (compte.etat === 'lien_envoye') {
+    return { ok: true, etat: 'lien_envoye' };
+  }
+
+  const genreDeclare =
+    donnees.genre_declare === '' || donnees.genre_declare === undefined
+      ? null
+      : donnees.genre_declare;
+
+  const admin = getSupabaseAdmin();
+  const { error } = await admin.from('reponse_sondage').insert({
+    sondage_id: sondage.id,
+    personne_id: compte.personneId,
+    option_index: choix.optionIndex,
+    options_choisies: choix.optionsChoisies,
+    code_postal: donnees.code_postal,
+    tranche_age: trancheAgeDepuisDateNaissance(donnees.date_naissance),
+    pronom: null,
+    genre_declare: genreDeclare,
+  });
+  if (error !== null) {
+    // Le compte est valide : on le garde et on envoie de quoi s'en servir.
+    await envoyerEmailPriseEnMain(donnees.email, retour);
+    return { ok: false, message: `Vote impossible : ${error.message}` };
+  }
+
+  if (genreDeclare !== null) {
+    await admin
+      .from('profil_qualification')
+      .upsert(
+        { personne_id: compte.personneId, question_cle: 'genre', reponse: genreDeclare },
+        { onConflict: 'personne_id,question_cle' },
+      );
+  }
+
+  // Le vote EXISTE. Le reste est best-effort.
+  await envoyerEmailPriseEnMain(donnees.email, retour);
+
+  if (donnees.accepte_newsletter) {
+    try {
+      await getEmailService().inscrireNewsletter(donnees.email, {
+        origine: `sondage-${sondage.slug}`,
+        action: `vote-${sondage.slug}`,
+        departement: donnees.code_postal.slice(0, 2),
+      });
+    } catch (erreur) {
+      console.warn('[voterSondageSansCompte] inscription newsletter échouée :', erreur);
+    }
+  }
+
+  revalidatePath('/s-informer/sondages');
+  return { ok: true, etat: 'vote' };
+}
+
+/**
+ * Traduit ce que la personne a coché en ce qu'attend la base : un index
+ * pour un choix unique, une liste dédupliquée pour un choix multiple.
+ *
+ * Partagé par le vote connecté et le vote sans compte : les bornes et les
+ * messages doivent être les mêmes des deux côtés, sous peine de voir un
+ * sondage accepter par une porte ce qu'il refuse par l'autre.
+ */
+function resoudreChoix(
+  sondage: { options: string[]; choix_multiple: boolean | null },
+  donnees: { option_index?: number; options_choisies?: number[] },
+): { optionIndex: number | null; optionsChoisies: number[] | null } | { message: string } {
+  const nbOptions = sondage.options.length;
+
+  if (sondage.choix_multiple === true) {
+    const choisies = [...new Set(donnees.options_choisies ?? [])];
+    if (choisies.length === 0) {
+      return { message: 'Choisis au moins une option.' };
+    }
+    if (choisies.some((i) => i < 0 || i >= nbOptions)) {
+      return { message: 'Option hors plage pour ce sondage.' };
+    }
+    return { optionIndex: null, optionsChoisies: choisies };
+  }
+
+  if (donnees.option_index === undefined || donnees.option_index >= nbOptions) {
+    return { message: 'Option hors plage pour ce sondage.' };
+  }
+  return { optionIndex: donnees.option_index, optionsChoisies: null };
 }
 
 // ============================================================

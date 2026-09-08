@@ -181,11 +181,27 @@ export const MESSAGES_VALIDATION_PETITION_DEFAUT: MessagesValidationPetition = {
 export interface MessagesValidationAdhesion {
   turnstileRequis: string;
   txHashFormat: string;
+  // Adhésion sans compte (V2.6.141) : la personne donne son identité dans
+  // le formulaire, puisqu'elle n'a pas encore de profil d'où la tirer.
+  prenomRequis: string;
+  nomRequis: string;
+  emailFormat: string;
+  codePostalFormat: string;
+  telephoneFormat: string;
+  dateFormat: string;
+  ageMin: string;
 }
 
 export const MESSAGES_VALIDATION_ADHESION_DEFAUT: MessagesValidationAdhesion = {
   turnstileRequis: 'Vérification anti-bot requise.',
   txHashFormat: 'tx_hash invalide (format 0x + 64 hex attendus).',
+  prenomRequis: 'Le prénom est requis.',
+  nomRequis: 'Le nom est requis.',
+  emailFormat: "Le format de l'email semble incorrect.",
+  codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
+  telephoneFormat: 'Format de téléphone français invalide.',
+  dateFormat: 'Format de date invalide.',
+  ageMin: 'Tu dois avoir 15 ans révolus pour adhérer.',
 };
 
 // ============================================================
@@ -436,6 +452,14 @@ export interface MessagesValidationSondages {
   optionRequise: string;
   codePostalFormat: string;
   turnstileRequis: string;
+  // Vote sans compte (V2.6.141) : le vote crée le compte, il demande donc
+  // la même identité que l'adhésion.
+  prenomRequis: string;
+  nomRequis: string;
+  emailFormat: string;
+  telephoneFormat: string;
+  dateFormat: string;
+  ageMin: string;
 }
 
 export const MESSAGES_VALIDATION_SONDAGES_DEFAUT: MessagesValidationSondages = {
@@ -456,6 +480,12 @@ export const MESSAGES_VALIDATION_SONDAGES_DEFAUT: MessagesValidationSondages = {
   optionRequise: 'Choisis une option pour voter.',
   codePostalFormat: 'Le code postal doit comporter 5 chiffres.',
   turnstileRequis: 'Vérification anti-bot requise.',
+  prenomRequis: 'Le prénom est requis.',
+  nomRequis: 'Le nom est requis.',
+  emailFormat: "Le format de l'email semble incorrect.",
+  telephoneFormat: 'Format de téléphone français invalide.',
+  dateFormat: 'Format de date invalide.',
+  ageMin: 'Tu dois avoir 15 ans révolus pour voter.',
 };
 
 // ============================================================

@@ -3,6 +3,7 @@ import {
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
 import { estUrlImageDurable } from '@/lib/validation-url';
+import { creerIdentiteNouveauCompteSchema } from '@/lib/validations/identite-nouveau-compte';
 import { z } from 'zod';
 
 /**
@@ -136,6 +137,79 @@ export function creerVoterSondageSchema(
 export const voterSondageSchema = creerVoterSondageSchema();
 
 export type DonneesVoterSondage = z.infer<typeof voterSondageSchema>;
+
+// ============================================================
+// Vote SANS COMPTE (V2.6.141)
+// ============================================================
+
+/**
+ * Vote d'une personne qui n'a pas de compte : le compte est créé au
+ * passage, exactement comme pour l'adhésion (décision Lilou/Ben du
+ * 08/09/2026, après « il faut de plus permettre le vote aux sondages sans
+ * compte »).
+ *
+ * Le vote restait réservé aux comptes (doctrine §4D) pour une raison qui
+ * tient toujours : sans identité, un sondage présidentiel se bourre en
+ * quelques minutes. Créer le compte à la volée lève le mur SANS lever la
+ * garantie : la contrainte `reponse_sondage_unique (sondage_id,
+ * personne_id)` continue d'assurer une personne, une voix.
+ *
+ * Les champs d'identité sont ceux de l'adhésion, au même endroit
+ * (`creerIdentiteNouveauCompteSchema`) : une seule définition, un seul
+ * comportement. Le code postal, ici, sert deux fois : il crée le profil et
+ * il alimente le redressement du sondage.
+ */
+export function creerVoterSondageSansCompteSchema(
+  messages: MessagesValidationSondages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
+) {
+  return creerIdentiteNouveauCompteSchema(messages)
+    .extend({
+      sondage_id: z.string().uuid(),
+      option_index: z
+        .union([z.number(), z.string().min(1, messages.optionRequise)], {
+          error: messages.optionRequise,
+        })
+        .transform((v) => (typeof v === 'string' ? Number(v) : v))
+        .pipe(
+          z
+            .number({ error: messages.optionRequise })
+            .int(messages.optionIndexEntier)
+            .min(0, messages.optionIndexInvalide)
+            .max(19, messages.optionIndexInvalide),
+        )
+        .optional(),
+      options_choisies: z
+        .array(
+          z.coerce
+            .number()
+            .int(messages.optionIndexEntier)
+            .min(0, messages.optionIndexInvalide)
+            .max(19, messages.optionIndexInvalide),
+        )
+        .min(1, messages.optionRequise)
+        .max(20, messages.optionIndexInvalide)
+        .optional(),
+      // Le genre reste déclaratif et facultatif, comme pour le vote
+      // connecté : la tranche d'âge, elle, se déduit désormais de la date
+      // de naissance, on ne la redemande donc pas.
+      genre_declare: z.string().trim().max(100).optional().or(z.literal('')),
+      accepte_newsletter: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict()
+    .refine(
+      (d) =>
+        d.option_index !== undefined ||
+        (d.options_choisies !== undefined && d.options_choisies.length > 0),
+      { message: messages.optionRequise, path: ['option_index'] },
+    );
+}
+export const voterSondageSansCompteSchema = creerVoterSondageSansCompteSchema();
+
+export type DonneesVoterSondageSansCompte = z.infer<typeof voterSondageSansCompteSchema>;
+
+/** Type d'ENTRÉE du formulaire (option_index encore en chaîne de radio). */
+export type DonneesVoterSondageSansCompteEntree = z.input<typeof voterSondageSansCompteSchema>;
 
 /**
  * Type d'ENTRÉE du formulaire de vote (avant transformation Zod) :

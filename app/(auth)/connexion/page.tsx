@@ -15,7 +15,12 @@ export const metadata: Metadata = {
 
 const FALLBACKS = {
   titre: 'Se connecter',
-  intro: 'Quatre portes au choix.',
+  // Vide par défaut : la page n'a plus de phrase d'intro (décision Ben du
+  // 08/09/2026). « Quatre portes au choix » annonçait un décompte que la
+  // page ne tient plus depuis le retrait des portes « OAuth éthique »
+  // (01/08/2026), et le titre se suffit. La clé CMS reste en place : poser
+  // un texte dans `connexion.intro` le fait réapparaître.
+  intro: '',
   erreurTitre: 'Connexion impossible',
   erreurCodeManquant: 'Le lien de connexion a expiré ou est incomplet. Recommence le flux.',
   sectionMdp: 'Mot de passe',
@@ -125,7 +130,10 @@ export default async function PageConnexion({
           libelle="intro de la page connexion"
           longueurMax={200}
         >
-          {(t) => <p className="mt-2 text-text-2">{t}</p>}
+          {/* Aucun paragraphe quand le texte est vide : sinon la page garde
+              la marge d'un `<p>` sans contenu sous le titre. Le crayon
+              d'édition admin, lui, reste rendu par TexteEditableAdmin. */}
+          {(t) => (t.trim() === '' ? null : <p className="mt-2 text-text-2">{t}</p>)}
         </TexteEditableAdmin>
       </header>
 

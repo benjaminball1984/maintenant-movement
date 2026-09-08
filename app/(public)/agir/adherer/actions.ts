@@ -1,20 +1,27 @@
 'use server';
 
+import {
+  creerCompteSansMotDePasse,
+  envoyerEmailPriseEnMain,
+} from '@/lib/auth/creer-compte-sans-mot-de-passe';
 import { getSession } from '@/lib/auth/session';
 import { obtenirOuCreerCaisseGlobale, poserEntreeCaisse } from '@/lib/caisse-flux';
+import { getEmailService } from '@/lib/email';
 import { envoyerEmailTemplee } from '@/lib/email-templates';
 import { calculerFraisEuros, getPaymentService, totalAvecFraisEuros } from '@/lib/payments';
-import { getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
 import { enregistrerHashConsomme } from '@/lib/t99cp/hashes-consommes';
 import { getTurnstileService } from '@/lib/turnstile';
 import {
   type DonneesAdhererEuros,
   type DonneesAdhererGratuit,
+  type DonneesAdhererSansCompte,
   type DonneesAdhererT99CP,
   MONTANT_ADHESION_EUR_CENTIMES,
   MONTANT_ADHESION_T99CP_UNITES,
   adhererEurosSchema,
   adhererGratuitSchema,
+  adhererSansCompteSchema,
   adhererT99CPSchema,
 } from '@/lib/validations/adhesion';
 import { revalidatePath } from 'next/cache';
@@ -26,7 +33,9 @@ import { headers } from 'next/headers';
  * Cf. `docs/specs/01_ARCHITECTURE.md §7A` : 3 chemins (gratuit, euros,
  * T99CP). Cf. plan §5.1 : 12 € ou 12 T99CP, relance J+365.
  *
- * Toutes les actions exigent une session : pas d'adhésion anonyme.
+ * Les chemins payants exigent une session. Le chemin gratuit, lui,
+ * s'ouvre aussi aux personnes sans compte depuis le 08/09/2026 :
+ * `adhererSansCompte` crée le compte et l'adhésion d'un même geste.
  */
 
 export type ResultatAction<TPayload = unknown> =
@@ -66,6 +75,110 @@ export async function adhererGratuit(donneesBrutes: unknown): Promise<ResultatAc
   revalidatePath('/profil');
   revalidatePath('/agir/adherer');
   return { ok: true };
+}
+
+// ============================================================
+// Chemin 1 bis : Adhésion gratuite SANS COMPTE (V2.6.141)
+// ============================================================
+
+/**
+ * Ce que renvoie `adhererSansCompte` en cas de succès.
+ *
+ * Deux issues, parce que deux situations honnêtes :
+ *  - `adheree` : le compte et l'adhésion viennent d'être créés.
+ *  - `lien_envoye` : l'email a déjà un compte, donc on n'a RIEN créé ;
+ *    un lien de connexion vient de partir, l'adhésion se terminera au
+ *    retour. C'est le seul moyen sûr : sans cette précaution, n'importe
+ *    qui pourrait faire adhérer quelqu'un d'autre en tapant son adresse.
+ */
+export type IssueAdhesionSansCompte = { etat: 'adheree' | 'lien_envoye' };
+
+/**
+ * Adhésion d'une personne qui n'a pas de compte : le compte est créé au
+ * passage (décision Lilou/Ben du 08/09/2026).
+ *
+ * La mécanique du compte (mot de passe aléatoire jamais divulgué, ligne
+ * `personne` écrite en service_role faute de session, lien de connexion
+ * quand l'adresse a déjà un compte) vit dans
+ * `lib/auth/creer-compte-sans-mot-de-passe`, partagée avec le vote aux
+ * sondages. Ici on ne garde que ce qui est propre à l'adhésion.
+ *
+ * L'ordre compte : le compte, puis l'adhésion, puis SEULEMENT APRÈS les
+ * envois (email de prise en main, newsletter), tous best-effort. Une
+ * panne d'envoi ne doit jamais faire perdre une adhésion, qui est un
+ * signal politique (même doctrine que la signature de pétition).
+ */
+export async function adhererSansCompte(
+  donneesBrutes: unknown,
+): Promise<ResultatAction<IssueAdhesionSansCompte>> {
+  const parse = adhererSansCompteSchema.safeParse(donneesBrutes);
+  if (!parse.success) {
+    return { ok: false, message: parse.error.issues[0]?.message ?? 'Données invalides.' };
+  }
+  const donnees: DonneesAdhererSansCompte = parse.data;
+
+  const turnstile = await getTurnstileService().verifier(donnees.token_turnstile);
+  if (!turnstile.succes) {
+    return { ok: false, message: 'La vérification anti-bot a échoué.' };
+  }
+
+  // Personne déjà connectée : son identité fait foi, pas celle tapée dans
+  // le formulaire. Inatteignable par l'UI (la page sert alors l'autre
+  // formulaire), mais l'action est publique : elle doit se tenir seule.
+  const session = await getSession();
+  if (session !== null) {
+    const resultat = await adhererGratuit({ token_turnstile: donnees.token_turnstile });
+    return resultat.ok ? { ok: true, etat: 'adheree' } : resultat;
+  }
+
+  const compte = await creerCompteSansMotDePasse(
+    {
+      prenom: donnees.prenom,
+      nom: donnees.nom,
+      email: donnees.email,
+      code_postal: donnees.code_postal,
+      telephone: donnees.telephone,
+      date_naissance: donnees.date_naissance,
+    },
+    '/agir/adherer/gratuit',
+  );
+
+  if (compte.etat === 'echec') {
+    return { ok: false, message: compte.message };
+  }
+  if (compte.etat === 'lien_envoye') {
+    return { ok: true, etat: 'lien_envoye' };
+  }
+
+  const { error: erreurAdhesion } = await getSupabaseAdmin().from('adhesion').insert({
+    personne_id: compte.personneId,
+    chemin: 'gratuit',
+  });
+
+  if (erreurAdhesion !== null) {
+    // Le compte, lui, est valide et utilisable : on le garde. La personne
+    // pourra adhérer d'un clic une fois connectée.
+    await envoyerEmailPriseEnMain(donnees.email, '/agir/adherer/gratuit');
+    return { ok: false, message: `Adhésion impossible : ${erreurAdhesion.message}` };
+  }
+
+  // À partir d'ici, l'adhésion EXISTE. Tout ce qui suit est best-effort.
+  await envoyerEmailPriseEnMain(donnees.email, '/profil/dashboard');
+
+  if (donnees.accepte_newsletter) {
+    try {
+      await getEmailService().inscrireNewsletter(donnees.email, {
+        origine: 'adhesion',
+        action: 'adhesion-sans-compte',
+        departement: donnees.code_postal.slice(0, 2),
+      });
+    } catch (erreur) {
+      console.warn('[adhererSansCompte] inscription newsletter échouée :', erreur);
+    }
+  }
+
+  revalidatePath('/agir/adherer');
+  return { ok: true, etat: 'adheree' };
 }
 
 // ============================================================

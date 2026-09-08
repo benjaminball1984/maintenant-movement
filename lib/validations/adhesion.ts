@@ -2,6 +2,7 @@ import {
   MESSAGES_VALIDATION_ADHESION_DEFAUT,
   type MessagesValidationAdhesion,
 } from '@/lib/messages-validation';
+import { creerIdentiteNouveauCompteSchema } from '@/lib/validations/identite-nouveau-compte';
 import { z } from 'zod';
 
 /**
@@ -49,6 +50,39 @@ export function creerAdhererGratuitSchema(
 export const adhererGratuitSchema = creerAdhererGratuitSchema();
 
 export type DonneesAdhererGratuit = z.infer<typeof adhererGratuitSchema>;
+
+// ============================================================
+// Chemin gratuit SANS COMPTE (V2.6.141)
+// ============================================================
+
+/**
+ * Adhésion d'une personne qui n'a pas (encore) de compte.
+ *
+ * Décision Lilou/Ben du 08/09/2026 : « il faut pouvoir adhérer sans
+ * compte, et l'adhésion crée un compte automatiquement ». Jusque-là,
+ * `/agir/adherer/gratuit` renvoyait vers la connexion : il fallait donc
+ * s'inscrire d'abord, adhérer ensuite. Deux murs pour un seul geste, sur
+ * un site où l'adhésion est gratuite et sans condition.
+ *
+ * On demande le minimum qui fait une adhérente identifiable, joignable et
+ * en âge d'adhérer : prénom, nom, email, code postal, téléphone et date de
+ * naissance. Le mot de passe n'est PAS demandé : le compte est créé côté
+ * serveur et la personne reçoit un mail pour en prendre possession (cf.
+ * `adhererSansCompte`).
+ */
+export function creerAdhererSansCompteSchema(
+  messages: MessagesValidationAdhesion = MESSAGES_VALIDATION_ADHESION_DEFAUT,
+) {
+  return creerIdentiteNouveauCompteSchema(messages)
+    .extend({
+      accepte_newsletter: z.boolean(),
+      token_turnstile: z.string().min(1, messages.turnstileRequis),
+    })
+    .strict();
+}
+export const adhererSansCompteSchema = creerAdhererSansCompteSchema();
+
+export type DonneesAdhererSansCompte = z.infer<typeof adhererSansCompteSchema>;
 
 // ============================================================
 // Chemin euros (12 €)

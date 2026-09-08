@@ -1,4 +1,4 @@
-import { voterSondage } from '@/app/(public)/s-informer/sondages/actions';
+import { voterSondage, voterSondageSansCompte } from '@/app/(public)/s-informer/sondages/actions';
 import { fermerSondageAction } from '@/app/actions/archivage';
 import { prochaineQuestionQualification, repondreQualification } from '@/app/actions/qualification';
 import { BoutonAdminEditer } from '@/components/admin/BoutonAdminEditer';
@@ -10,6 +10,7 @@ import { TexteEditableAdmin } from '@/components/contenu/TexteEditableAdmin';
 import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { LienAuteurReseau } from '@/components/reseau/LienAuteurReseau';
 import { FormulaireVote } from '@/components/sondages/FormulaireVote';
+import { FormulaireVoteSansCompte } from '@/components/sondages/FormulaireVoteSansCompte';
 import { QualificationProgressive } from '@/components/sondages/QualificationProgressive';
 import { ResultatsSondage } from '@/components/sondages/ResultatsSondage';
 import { Alert, Badge, Card, Container, Heading, ImageAffiche } from '@/components/ui';
@@ -26,10 +27,6 @@ import { notFound } from 'next/navigation';
 
 const FALLBACKS = {
   retour: 'Retour',
-  alertConnecteTitre: 'Le vote est réservé aux comptes',
-  alertConnecteLien: 'Se connecter pour voter',
-  alertConnecteFin:
-    'Créer un compte prend une minute. Cette exigence garantit un résultat honnête : une personne, une voix.',
   alertVoteTitre: 'Vote enregistré',
   alertVoteCorps: 'Tu as déjà voté pour ce sondage. Merci. Les résultats sont visibles ci-dessous.',
   sectionResultats: 'Résultats',
@@ -65,9 +62,6 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
     sondage,
     estAdmin,
     retour,
-    alertConnecteTitre,
-    alertConnecteLien,
-    alertConnecteFin,
     alertVoteTitre,
     alertVoteCorps,
     sectionResultats,
@@ -77,15 +71,6 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
     sondageParSlugAvecResultats(slug),
     estAdminCourant(),
     lireContenuEditorial('sondages.fiche.retour', { valeurMd: FALLBACKS.retour }),
-    lireContenuEditorial('sondages.fiche.alert_connecte_titre', {
-      valeurMd: FALLBACKS.alertConnecteTitre,
-    }),
-    lireContenuEditorial('sondages.fiche.alert_connecte_lien', {
-      valeurMd: FALLBACKS.alertConnecteLien,
-    }),
-    lireContenuEditorial('sondages.fiche.alert_connecte_fin', {
-      valeurMd: FALLBACKS.alertConnecteFin,
-    }),
     lireContenuEditorial('sondages.fiche.alert_vote_titre', {
       valeurMd: FALLBACKS.alertVoteTitre,
     }),
@@ -193,63 +178,33 @@ export default async function PageDetailSondage({ params }: PageDetailProps) {
           ) : null}
         </header>
 
-        {session === null ? (
-          <Alert
-            variant="info"
-            titre={
-              <TexteEditableAdmin
-                cle="sondages.fiche.alert_connecte_titre"
-                valeurInitiale={alertConnecteTitre.valeurMd}
-                estAdmin={estAdmin}
-                libelle="titre alerte vote connecte"
-                longueurMax={60}
-              >
-                {(t) => <>{t}</>}
-              </TexteEditableAdmin>
-            }
-          >
-            {/* 18/08/2026 — signalé par Ben : « sur smartphone je ne peux pas
-                voter aux sondages ». Le vote exige un compte (doctrine §4D),
-                mais l'appel à se connecter était un simple mot souligné perdu
-                dans une phrase. Sur un mailing qui amène des milliers de
-                personnes, ça ne convertit pas : 1 vote en deux mois. On en
-                fait un vrai bouton, et on explique la raison en français
-                plutôt qu'en renvoyant à un numéro de doctrine. */}
-            <TexteEditableAdmin
-              cle="sondages.fiche.alert_connecte_fin"
-              valeurInitiale={alertConnecteFin.valeurMd}
-              estAdmin={estAdmin}
-              libelle="explication du vote connecte"
-              longueurMax={200}
-            >
-              {(t) => <p className="text-sm">{t}</p>}
-            </TexteEditableAdmin>
-            <TexteEditableAdmin
-              cle="sondages.fiche.alert_connecte_lien"
-              valeurInitiale={alertConnecteLien.valeurMd}
-              estAdmin={estAdmin}
-              libelle="libelle du bouton de connexion"
-              longueurMax={40}
-            >
-              {(t) => (
-                <Link
-                  href={`/connexion?prochaine=/s-informer/sondages/${sondage.slug}`}
-                  className="mt-3 inline-flex h-11 items-center justify-center rounded-md bg-grad px-5 font-body text-sm font-bold text-white shadow-brand transition hover:brightness-110"
-                >
-                  {t}
-                </Link>
-              )}
-            </TexteEditableAdmin>
-          </Alert>
-        ) : dejaVote || sondage.statut !== 'ouvert' ? null : (
+        {/* 08/09/2026 — décision Lilou/Ben : « il faut de plus permettre le
+            vote aux sondages sans compte ». Le mur de connexion posé au
+            titre de la doctrine §4D avait un coût mesuré : 1 seul vote en
+            deux mois pour 10 680 destinataires. Il disparaît au profit du
+            formulaire complet (bulletin + identité), qui crée le compte au
+            passage. La garantie « une personne, une voix » ne bouge pas :
+            elle tient à la contrainte d'unicité en base, pas au mur. */}
+        {dejaVote || sondage.statut !== 'ouvert' ? null : (
           <Card variant="eleve">
-            <FormulaireVote
-              sondageId={sondage.id}
-              options={sondage.options}
-              optionsImages={sondage.options_images}
-              choixMultiple={sondage.choix_multiple}
-              voterSondage={voterSondage}
-            />
+            {session === null ? (
+              <FormulaireVoteSansCompte
+                sondageId={sondage.id}
+                slug={sondage.slug}
+                options={sondage.options}
+                optionsImages={sondage.options_images}
+                choixMultiple={sondage.choix_multiple}
+                voterSondageSansCompte={voterSondageSansCompte}
+              />
+            ) : (
+              <FormulaireVote
+                sondageId={sondage.id}
+                options={sondage.options}
+                optionsImages={sondage.options_images}
+                choixMultiple={sondage.choix_multiple}
+                voterSondage={voterSondage}
+              />
+            )}
           </Card>
         )}
 
