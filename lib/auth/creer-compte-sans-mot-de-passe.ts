@@ -1,7 +1,8 @@
 import { getSiteUrl } from '@/config/site';
 import { cheminInterneOuDefaut } from '@/lib/auth/chemin-retour';
+import { type TypeEmail, envoyerEmailTemplee } from '@/lib/email-templates';
 import { genererPassword } from '@/lib/generer-password';
-import { getSupabaseAdmin, getSupabaseServer } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 /**
  * Création d'un compte SANS mot de passe demandé (V2.6.141).
@@ -64,7 +65,16 @@ export interface IdentiteNouveauCompte {
  * vote, c'est perdre la personne.
  */
 export type ResultatCreationCompte =
-  | { etat: 'cree'; personneId: string }
+  | {
+      etat: 'cree';
+      personneId: string;
+      /**
+       * Lien de confirmation à glisser dans NOTRE email. `null` si Supabase
+       * n'a pas su le fabriquer : le compte et le geste restent valides, la
+       * personne passera par « mot de passe oublié ».
+       */
+      lienConfirmation: string | null;
+    }
   | { etat: 'deja_compte' }
   | { etat: 'echec'; message: string };
 
@@ -72,15 +82,23 @@ export type ResultatCreationCompte =
  * Crée le compte, ou signale que l'adresse en a déjà un.
  *
  * @param identite Ce que la personne vient de saisir.
+ * @param retourApres Chemin INTERNE où la ramener après le clic sur le
+ *   lien de confirmation.
  */
 export async function creerCompteSansMotDePasse(
   identite: IdentiteNouveauCompte,
+  retourApres: string,
 ): Promise<ResultatCreationCompte> {
   const admin = getSupabaseAdmin();
 
+  // Le mot de passe reste dans cette fonction : il ne sort ni en base
+  // applicative, ni dans un email, ni dans un log. Il sert deux fois, à la
+  // création puis à la fabrication du lien de confirmation, et disparaît.
+  const motDePasse = genererPassword({ longueur: 32 });
+
   const { data: creation, error: erreurCreation } = await admin.auth.admin.createUser({
     email: identite.email,
-    password: genererPassword({ longueur: 32 }),
+    password: motDePasse,
     // L'email reste à vérifier : c'est ce qui prouve que l'adresse
     // appartient bien à la personne (RGPD §5E), et c'est le lien qui lui
     // ouvre son compte.
@@ -122,31 +140,70 @@ export async function creerCompteSansMotDePasse(
     return { etat: 'echec', message: `Création du compte impossible : ${erreurPersonne.message}` };
   }
 
-  return { etat: 'cree', personneId: utilisateur.id };
+  return {
+    etat: 'cree',
+    personneId: utilisateur.id,
+    lienConfirmation: await genererLienConfirmation(identite.email, motDePasse, retourApres),
+  };
 }
 
 /**
- * Envoie l'email de prise en main du compte tout juste créé.
+ * Fabrique le lien de confirmation SANS envoyer d'email.
+ *
+ * C'est ce qui nous permet d'écrire nous-mêmes le message (V2.6.144,
+ * demande Ben : le « Confirm your signup » de Supabase était trop sec, et
+ * surtout il ne disait rien du geste qui venait d'être fait). Supabase
+ * n'envoie plus rien : il ne fournit que l'adresse du lien, que nos
+ * propres gabarits (`lib/email-templates`) mettent en forme.
+ *
+ * Best-effort : en cas d'échec on renvoie `null`, l'email part sans lien
+ * plutôt que pas du tout. La personne garde la porte « mot de passe
+ * oublié » pour prendre son compte en main.
+ */
+async function genererLienConfirmation(
+  email: string,
+  motDePasse: string,
+  retourApres: string,
+): Promise<string | null> {
+  try {
+    const { data, error } = await getSupabaseAdmin().auth.admin.generateLink({
+      type: 'signup',
+      email,
+      password: motDePasse,
+      options: { redirectTo: urlDeRetour(retourApres) },
+    });
+    if (error !== null) {
+      console.warn(
+        '[creerCompteSansMotDePasse] lien de confirmation indisponible :',
+        error.message,
+      );
+      return null;
+    }
+    return data.properties?.action_link ?? null;
+  } catch (erreur) {
+    console.warn('[creerCompteSansMotDePasse] lien de confirmation indisponible :', erreur);
+    return null;
+  }
+}
+
+/**
+ * Envoie NOTRE email de prise en main (V2.6.144).
+ *
+ * Le texte dépend du geste : `adhesion_bienvenue` ou `vote_enregistre`,
+ * tous deux éditables admin via le CMS. Supabase n'envoie plus rien.
  *
  * **Best-effort, à appeler APRÈS avoir enregistré le geste** (adhésion,
  * vote) : une panne d'envoi ne doit jamais transformer un signal
  * politique enregistré en message d'erreur. Même doctrine que l'email de
  * confirmation de signature de pétition.
  */
-export async function envoyerEmailPriseEnMain(email: string, retourApres: string): Promise<void> {
+export async function envoyerEmailPriseEnMain(
+  type: TypeEmail,
+  email: string,
+  params: Record<string, string | null | undefined>,
+): Promise<void> {
   try {
-    const supabase = await getSupabaseServer();
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: { emailRedirectTo: urlDeRetour(retourApres) },
-    });
-    if (error !== null) {
-      console.warn(
-        '[creerCompteSansMotDePasse] email de prise en main non envoyé :',
-        error.message,
-      );
-    }
+    await envoyerEmailTemplee(type, email, params);
   } catch (erreur) {
     console.warn('[creerCompteSansMotDePasse] email de prise en main non envoyé :', erreur);
   }

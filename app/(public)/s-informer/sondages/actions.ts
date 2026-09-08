@@ -233,7 +233,7 @@ export async function voterSondageSansCompte(
   const supabase = await getSupabaseServer();
   const { data: sondage } = await supabase
     .from('sondage')
-    .select('id, slug, options, statut, choix_multiple')
+    .select('id, slug, titre, options, statut, choix_multiple')
     .eq('id', donnees.sondage_id)
     .maybeSingle();
   if (sondage === null) {
@@ -251,14 +251,17 @@ export async function voterSondageSansCompte(
   }
 
   const retour = `/s-informer/sondages/${sondage.slug}`;
-  const compte = await creerCompteSansMotDePasse({
-    prenom: donnees.prenom,
-    nom: donnees.nom,
-    email: donnees.email,
-    code_postal: donnees.code_postal,
-    telephone: donnees.telephone ?? '',
-    date_naissance: donnees.date_naissance,
-  });
+  const compte = await creerCompteSansMotDePasse(
+    {
+      prenom: donnees.prenom,
+      nom: donnees.nom,
+      email: donnees.email,
+      code_postal: donnees.code_postal,
+      telephone: donnees.telephone ?? '',
+      date_naissance: donnees.date_naissance,
+    },
+    retour,
+  );
 
   if (compte.etat === 'echec') {
     return { ok: false, message: compte.message };
@@ -285,7 +288,6 @@ export async function voterSondageSansCompte(
   });
   if (error !== null) {
     // Le compte est valide : on le garde et on envoie de quoi s'en servir.
-    await envoyerEmailPriseEnMain(donnees.email, retour);
     return { ok: false, message: `Vote impossible : ${error.message}` };
   }
 
@@ -299,7 +301,11 @@ export async function voterSondageSansCompte(
   }
 
   // Le vote EXISTE. Le reste est best-effort.
-  await envoyerEmailPriseEnMain(donnees.email, retour);
+  await envoyerEmailPriseEnMain('vote_enregistre', donnees.email, {
+    prenom: donnees.prenom,
+    sondage_titre: sondage.titre,
+    lien_confirmation: compte.lienConfirmation,
+  });
 
   if (donnees.accepte_newsletter) {
     try {

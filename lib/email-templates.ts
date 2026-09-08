@@ -30,6 +30,8 @@ export type TypeEmail =
   | 'rgpd_export_demande'
   | 'rgpd_suppression_demande'
   | 'adhesion_relance'
+  | 'adhesion_bienvenue'
+  | 'vote_enregistre'
   | 'reseau_message_recu'
   | 'reseau_post_commente'
   | 'reseau_post_soutenu';
@@ -117,6 +119,54 @@ Ton adhésion à Maintenant! arrive à échéance dans les 14 jours.
 Si tu souhaites rester adhérent·e, tu peux renouveler gratuitement, en euros (12 €) ou en 99-coin (12 T99CP).
 
 https://maintenant-le-mouvement.org/agir/adherer
+
+L’équipe Maintenant!`,
+  },
+  // V2.6.144 (08/09/2026) : premier email reçu par quelqu'un qui adhère sans
+  // compte. Il REMPLACE le « Confirm your signup » de Supabase, jugé trop sec
+  // par Ben, qui a dicté le texte. Le geste est confirmé AVANT la démarche
+  // technique : la personne a adhéré, elle le lit tout de suite ; le clic ne
+  // sert qu'à finaliser.
+  //
+  // Un email par geste, et pas un seul mutualisé : dire « ton adhésion est
+  // prise en compte » à quelqu'un qui vient seulement de voter serait faux.
+  adhesion_bienvenue: {
+    sujet: 'Ton adhésion à Maintenant! est prise en compte',
+    html: `<p>Bonjour {prenom},</p>
+<p>Ton adhésion à Maintenant! est bien prise en compte.</p>
+<p>Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.</p>
+<p><a href="{lien_confirmation}">Finalise ton inscription en cliquant ici</a></p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour {prenom},
+
+Ton adhésion à Maintenant! est bien prise en compte.
+
+Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.
+
+Finalise ton inscription ici : {lien_confirmation}
+
+L’équipe Maintenant!`,
+  },
+  // Pendant du précédent pour le vote aux sondages. Même structure, même
+  // lien ; seul le premier paragraphe change, puisque le geste n'est pas le
+  // même. Éditable admin comme tous les autres.
+  vote_enregistre: {
+    sujet: 'Ton vote est enregistré',
+    html: `<p>Bonjour {prenom},</p>
+<p>Ton vote au sondage <strong>{sondage_titre}</strong> est bien enregistré.</p>
+<p>Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.</p>
+<p>Un compte vient d’être créé à ton nom : il te permet de retrouver tes votes et de participer à la suite.</p>
+<p><a href="{lien_confirmation}">Finalise ton inscription en cliquant ici</a></p>
+<p>L’équipe Maintenant!</p>`,
+    texte: `Bonjour {prenom},
+
+Ton vote au sondage {sondage_titre} est bien enregistré.
+
+Merci pour ton engagement pour une vie digne et heureuse pour toutes et tous, dans un monde vivable.
+
+Un compte vient d’être créé à ton nom : il te permet de retrouver tes votes et de participer à la suite.
+
+Finalise ton inscription ici : {lien_confirmation}
 
 L’équipe Maintenant!`,
   },

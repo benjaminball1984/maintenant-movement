@@ -130,14 +130,17 @@ export async function adhererSansCompte(
     return resultat.ok ? { ok: true, etat: 'adheree' } : resultat;
   }
 
-  const compte = await creerCompteSansMotDePasse({
-    prenom: donnees.prenom,
-    nom: donnees.nom,
-    email: donnees.email,
-    code_postal: donnees.code_postal,
-    telephone: donnees.telephone,
-    date_naissance: donnees.date_naissance,
-  });
+  const compte = await creerCompteSansMotDePasse(
+    {
+      prenom: donnees.prenom,
+      nom: donnees.nom,
+      email: donnees.email,
+      code_postal: donnees.code_postal,
+      telephone: donnees.telephone,
+      date_naissance: donnees.date_naissance,
+    },
+    '/profil/dashboard',
+  );
 
   if (compte.etat === 'echec') {
     return { ok: false, message: compte.message };
@@ -154,12 +157,14 @@ export async function adhererSansCompte(
   if (erreurAdhesion !== null) {
     // Le compte, lui, est valide et utilisable : on le garde. La personne
     // pourra adhérer d'un clic une fois connectée.
-    await envoyerEmailPriseEnMain(donnees.email, '/agir/adherer/gratuit');
     return { ok: false, message: `Adhésion impossible : ${erreurAdhesion.message}` };
   }
 
   // À partir d'ici, l'adhésion EXISTE. Tout ce qui suit est best-effort.
-  await envoyerEmailPriseEnMain(donnees.email, '/profil/dashboard');
+  await envoyerEmailPriseEnMain('adhesion_bienvenue', donnees.email, {
+    prenom: donnees.prenom,
+    lien_confirmation: compte.lienConfirmation,
+  });
 
   if (donnees.accepte_newsletter) {
     try {
