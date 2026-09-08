@@ -39,6 +39,11 @@ export interface IdentiteNouveauCompte {
   nom: string;
   email: string;
   code_postal: string;
+  /**
+   * Chaîne vide acceptée : le téléphone est exigé pour adhérer, facultatif
+   * pour voter (décisions Lilou/Ben du 08/09/2026). Vide = colonne `null`,
+   * jamais une chaîne vide en base.
+   */
   telephone: string;
   /** ISO `AAAA-MM-JJ`. Le seuil des 15 ans est vérifié en amont par Zod. */
   date_naissance: string;
@@ -114,7 +119,7 @@ export async function creerCompteSansMotDePasse(
     nom: identite.nom,
     prenom: identite.prenom,
     code_postal: identite.code_postal,
-    telephone: identite.telephone,
+    telephone: identite.telephone.trim() === '' ? null : identite.telephone,
     date_naissance: identite.date_naissance,
     email_verifie: false,
     statut: 'actif',

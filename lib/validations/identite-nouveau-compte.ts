@@ -34,9 +34,12 @@ export const AGE_MINIMUM_ANS = 15;
  * Les six champs d'identité, en objet Zod « nu » pour pouvoir être
  * étendu (`.extend({...})`) par les schémas qui l'incorporent.
  *
- * Téléphone OBLIGATOIRE, contrairement à l'inscription classique et à la
- * signature de pétition où il reste facultatif : décision Lilou/Ben du
- * 08/09/2026. Entrer dans le mouvement, c'est accepter d'être joignable.
+ * Le téléphone y est OBLIGATOIRE : c'est la règle de l'adhésion. Un
+ * parcours qui veut l'assouplir le remplace explicitement, avec
+ * `.extend({ telephone: champTelephoneFacultatif(messages) })` — voir le
+ * vote aux sondages. Un booléen en paramètre aurait été plus court, mais
+ * TypeScript aurait alors typé le champ `string | undefined` PARTOUT, y
+ * compris là où il est requis : la garantie aurait disparu du typage.
  */
 export function creerIdentiteNouveauCompteSchema(messages: MessagesIdentiteNouveauCompte) {
   return z.object({
@@ -47,12 +50,32 @@ export function creerIdentiteNouveauCompteSchema(messages: MessagesIdentiteNouve
       .string()
       .trim()
       .regex(/^\d{5}$/, messages.codePostalFormat),
-    telephone: z
-      .string()
-      .trim()
-      .regex(/^(\+33|0)[1-9](\d{2}){4}$/, messages.telephoneFormat),
+    telephone: champTelephone(messages),
     date_naissance: creerDateNaissanceSchema(messages),
   });
+}
+
+/** Téléphone français, exigé. */
+function champTelephone(messages: MessagesIdentiteNouveauCompte) {
+  return z
+    .string()
+    .trim()
+    .regex(/^(\+33|0)[1-9](\d{2}){4}$/, messages.telephoneFormat);
+}
+
+/**
+ * Téléphone français, facultatif : la chaîne vide passe (c'est ce
+ * qu'envoie un champ laissé en blanc), mais un numéro saisi reste validé
+ * au format — on ne laisse pas entrer un numéro faux sous prétexte qu'il
+ * était optionnel.
+ *
+ * Décision Lilou/Ben du 08/09/2026 : exigé pour adhérer (entrer dans le
+ * mouvement, c'est accepter d'être joignable), facultatif pour voter — un
+ * vote est un geste plus léger, et sur un mailing chaque champ
+ * obligatoire de plus se paie en votes perdus.
+ */
+export function champTelephoneFacultatif(messages: MessagesIdentiteNouveauCompte) {
+  return champTelephone(messages).optional().or(z.literal(''));
 }
 
 /**

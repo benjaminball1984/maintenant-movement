@@ -54,7 +54,7 @@ const LIBELLES_DEFAUT: LibellesVoteSansCompte = {
   labelEmail: 'Adresse email',
   labelCodePostal: 'Code postal',
   hintCodePostal: 'Il sert à redresser les résultats par territoire.',
-  labelTelephone: 'Téléphone',
+  labelTelephone: 'Téléphone (facultatif)',
   placeholderTelephone: '0612345678',
   labelDateNaissance: 'Date de naissance',
   hintDateNaissance: 'Elle donne ta tranche d’âge, et il faut 15 ans révolus pour voter.',
@@ -293,9 +293,7 @@ export function FormulaireVoteSansCompte({
             )}
           </div>
           <div>
-            <Label htmlFor="vote-telephone" obligatoire>
-              {libelles.labelTelephone}
-            </Label>
+            <Label htmlFor="vote-telephone">{libelles.labelTelephone}</Label>
             <Input
               id="vote-telephone"
               type="tel"

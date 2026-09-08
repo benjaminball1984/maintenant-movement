@@ -3,7 +3,10 @@ import {
   type MessagesValidationSondages,
 } from '@/lib/messages-validation';
 import { estUrlImageDurable } from '@/lib/validation-url';
-import { creerIdentiteNouveauCompteSchema } from '@/lib/validations/identite-nouveau-compte';
+import {
+  champTelephoneFacultatif,
+  creerIdentiteNouveauCompteSchema,
+} from '@/lib/validations/identite-nouveau-compte';
 import { z } from 'zod';
 
 /**
@@ -158,12 +161,20 @@ export type DonneesVoterSondage = z.infer<typeof voterSondageSchema>;
  * (`creerIdentiteNouveauCompteSchema`) : une seule définition, un seul
  * comportement. Le code postal, ici, sert deux fois : il crée le profil et
  * il alimente le redressement du sondage.
+ *
+ * Seule différence avec l'adhésion : le **téléphone reste facultatif**
+ * (décision Lilou/Ben du 08/09/2026). Voter est un geste plus léger
+ * qu'adhérer, et sur un mailing chaque champ obligatoire de plus se paie
+ * en votes perdus.
  */
 export function creerVoterSondageSansCompteSchema(
   messages: MessagesValidationSondages = MESSAGES_VALIDATION_SONDAGES_DEFAUT,
 ) {
   return creerIdentiteNouveauCompteSchema(messages)
     .extend({
+      // Téléphone facultatif ici, contrairement à l'adhésion (cf. le
+      // commentaire de `champTelephoneFacultatif`).
+      telephone: champTelephoneFacultatif(messages),
       sondage_id: z.string().uuid(),
       option_index: z
         .union([z.number(), z.string().min(1, messages.optionRequise)], {

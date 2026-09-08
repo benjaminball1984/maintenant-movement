@@ -257,7 +257,7 @@ export async function voterSondageSansCompte(
       nom: donnees.nom,
       email: donnees.email,
       code_postal: donnees.code_postal,
-      telephone: donnees.telephone,
+      telephone: donnees.telephone ?? '',
       date_naissance: donnees.date_naissance,
     },
     retour,
