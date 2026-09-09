@@ -17,10 +17,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 const FALLBACKS = {
+  // Le « Voir aussi Maintenant Radio et Le Peuple à l'Affiche » qui fermait
+  // cette phrase a été retiré le 09/09/2026 (demande Ben). Les deux
+  // destinations sont en sommeil depuis le 01/08 (`config/rubriques.ts`) :
+  // la phrase envoyait donc les lecteurices sur deux redirections vers
+  // l'accueil. Les clés CMS `intro_milieu` et `intro_fin` disparaissent avec
+  // elle, elles ne servaient qu'à coudre les deux liens.
   introAmorce:
-    'Les articles de la rédaction et la revue de presse de Maintenant! : brèves des médias indépendants et internationaux, dans leur langue, reliées à leur source. Voir aussi',
-  introMilieu: 'et',
-  introFin: '.',
+    'Les articles de la rédaction et la revue de presse de Maintenant! : brèves des médias indépendants et internationaux, dans leur langue, reliées à leur source.',
   ongletTous: 'À la une',
   emptyTitre: 'Aucun média publié pour ce filtre',
   emptyCorps:
@@ -89,16 +93,13 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
   const filtre = estTypeValide(type) ? type : undefined;
   const tagActif = tag !== undefined && TAGS_BREVES.includes(tag) ? tag : undefined;
 
-  const [estAdmin, introAmorce, introMilieu, introFin, ongletTous, emptyTitre, emptyCorps] =
-    await Promise.all([
-      estAdminCourant(),
-      lireContenuEditorial('s-informer.media.intro_amorce', { valeurMd: FALLBACKS.introAmorce }),
-      lireContenuEditorial('s-informer.media.intro_milieu', { valeurMd: FALLBACKS.introMilieu }),
-      lireContenuEditorial('s-informer.media.intro_fin', { valeurMd: FALLBACKS.introFin }),
-      lireContenuEditorial('s-informer.media.onglet_tous', { valeurMd: FALLBACKS.ongletTous }),
-      lireContenuEditorial('s-informer.media.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
-      lireContenuEditorial('s-informer.media.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
-    ]);
+  const [estAdmin, introAmorce, ongletTous, emptyTitre, emptyCorps] = await Promise.all([
+    estAdminCourant(),
+    lireContenuEditorial('s-informer.media.intro_amorce', { valeurMd: FALLBACKS.introAmorce }),
+    lireContenuEditorial('s-informer.media.onglet_tous', { valeurMd: FALLBACKS.ongletTous }),
+    lireContenuEditorial('s-informer.media.empty_titre', { valeurMd: FALLBACKS.emptyTitre }),
+    lireContenuEditorial('s-informer.media.empty_corps', { valeurMd: FALLBACKS.emptyCorps }),
+  ]);
 
   // Toutes les vues (principale ET onglets par format) suivent les 3
   // logiques : une, bandeau « La rédaction », séparateur « Revue de
@@ -159,33 +160,9 @@ export default async function PageMedia({ searchParams }: PageMediaProps) {
             cle="s-informer.media.intro_amorce"
             valeurInitiale={introAmorce.valeurMd}
             estAdmin={estAdmin}
-            libelle="amorce intro media (avant Maintenant Radio)"
+            libelle="intro de la page Maintenant Médias"
             multilignes
             longueurMax={400}
-          >
-            {(t) => <>{t}</>}
-          </TexteEditableAdmin>{' '}
-          <Link href="/s-informer/radio" className="underline">
-            Maintenant Radio
-          </Link>{' '}
-          <TexteEditableAdmin
-            cle="s-informer.media.intro_milieu"
-            valeurInitiale={introMilieu.valeurMd}
-            estAdmin={estAdmin}
-            libelle="conjonction au milieu (et)"
-            longueurMax={20}
-          >
-            {(t) => <>{t}</>}
-          </TexteEditableAdmin>{' '}
-          <Link href="/s-informer/journal" className="underline">
-            Le Peuple à l'Affiche (journal-affiche)
-          </Link>
-          <TexteEditableAdmin
-            cle="s-informer.media.intro_fin"
-            valeurInitiale={introFin.valeurMd}
-            estAdmin={estAdmin}
-            libelle="fin intro (.)"
-            longueurMax={20}
           >
             {(t) => <>{t}</>}
           </TexteEditableAdmin>
