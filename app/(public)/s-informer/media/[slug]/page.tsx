@@ -40,6 +40,26 @@ const LIBELLE_TYPE: Record<TypeMedia, string> = {
   newsletter: 'Newsletter',
 };
 
+/**
+ * Cartes qu'un article peut intégrer (2026-09-21) : quand `media_url` pointe
+ * vers l'une d'elles, l'article l'affiche dans un cadre sous son texte, quel
+ * que soit son type. Premier cas : la carte des mobilisations du 26 septembre.
+ *
+ * ⚠️ Chaque origine ajoutée ici doit AUSSI figurer dans `frame-src` de la CSP
+ * (`next.config.mjs`), sinon le navigateur affiche un cadre vide.
+ */
+const CARTES_INTEGRABLES = new Set(['26septembre.org']);
+
+function carteIntegrable(url: string | null): boolean {
+  if (url === null) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' && CARTES_INTEGRABLES.has(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
 }
@@ -219,6 +239,17 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
               allowFullScreen
             />
           </div>
+        ) : null}
+
+        {carteIntegrable(media.media_url) ? (
+          <iframe
+            src={media.media_url ?? undefined}
+            title={media.titre}
+            width="100%"
+            height={620}
+            loading="lazy"
+            className="w-full rounded-md border border-border"
+          />
         ) : null}
 
         {media.media_url !== null && media.type === 'podcast' ? (

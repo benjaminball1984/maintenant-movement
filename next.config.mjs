@@ -87,6 +87,10 @@ const ORIGINES = {
   twitchPlayer: 'https://player.twitch.tv',
   // Miniatures des directs et avatars Twitch (servis par le CDN jtvnw).
   twitchImg: 'https://static-cdn.jtvnw.net',
+  // Carte des mobilisations du 26 septembre, intégrée dans un article
+  // Maintenant Médias (demande Ben 2026-09-21). Voir CARTES_INTEGRABLES dans
+  // app/(public)/s-informer/media/[slug]/page.tsx.
+  carte26septembre: 'https://26septembre.org',
 };
 
 /**
@@ -156,7 +160,8 @@ const directivesCsp = [
   // - Turnstile (widget de challenge).
   // - Stripe (Checkout, Elements, 3DS hosted fields).
   // - YouTube sans cookie (embeds vidéo/lives de la revue de presse).
-  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks} ${ORIGINES.youtubeNoCookie} ${ORIGINES.twitchPlayer}`,
+  // - La carte des mobilisations du 26 septembre (articles qui l'intègrent).
+  `frame-src ${ORIGINES.turnstileChallenges} ${ORIGINES.stripeJs} ${ORIGINES.stripeHooks} ${ORIGINES.youtubeNoCookie} ${ORIGINES.twitchPlayer} ${ORIGINES.carte26septembre}`,
 
   // Fonts : auto-hébergées ; data: pour fonts inline éventuelles.
   "font-src 'self' data:",
