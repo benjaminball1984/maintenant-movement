@@ -18,6 +18,7 @@
  * sur chaque fiche.
  */
 
+import { texteSansLiens } from '@/lib/media/liens';
 import { getSupabaseServer } from '@/lib/supabase';
 
 export type EmplacementUne = 'petition' | 'article' | 'mobilisation' | 'cagnotte' | 'sondage';
@@ -123,12 +124,13 @@ export async function articleAlaUne(): Promise<ArticleUne | null> {
   if (choisi === null) return null;
   // Aperçu du corps en guise de sous-titre (la table media n'a pas de
   // colonne sous-titre) : première phrase tronquée proprement.
-  const apercu = choisi.corps.trim().slice(0, 180);
+  const corps = texteSansLiens(choisi.corps).trim();
+  const apercu = corps.slice(0, 180);
   return {
     id: choisi.id,
     slug: choisi.slug,
     titre: choisi.titre,
-    sousTitre: apercu === '' ? null : `${apercu}${choisi.corps.trim().length > 180 ? '…' : ''}`,
+    sousTitre: apercu === '' ? null : `${apercu}${corps.length > 180 ? '…' : ''}`,
     numero: null,
     imageCouvertureUrl: choisi.vignette_url,
   };

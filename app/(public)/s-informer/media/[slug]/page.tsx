@@ -9,6 +9,7 @@ import { estAdminCourant } from '@/lib/auth/admin';
 import { lireContenuEditorial } from '@/lib/contenu-editorial';
 import { formaterDateMoyenne } from '@/lib/format-date';
 import { idEpingleUneHome } from '@/lib/home/une';
+import { texteSansLiens } from '@/lib/media/liens';
 import { mediaParSlug } from '@/lib/media/requetes';
 import { metadataPourPartage } from '@/lib/og-metadata';
 import { formaterTempsLecture } from '@/lib/temps-lecture';
@@ -83,8 +84,16 @@ function imageIllustration(url: string | null): boolean {
   }
 }
 
-/** Une adresse web dans le texte d'un article : http(s), jusqu'au prochain blanc. */
-const MOTIF_ADRESSE = /(https?:\/\/[^\s<>"]+)/g;
+/**
+ * Un lien dans le texte d'un article, sous deux formes : `[mot](https://…)`
+ * (2026-09-24, pour que « parue dans Regards et dans Basta! » mène aux deux
+ * journaux dès la première phrase), ou une adresse http(s) nue, jusqu'au
+ * prochain blanc.
+ */
+const MOTIF_ADRESSE = /(\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<>"]+)/g;
+
+/** Un morceau qui est entièrement un lien nommé `[mot](adresse)`. */
+const MORCEAU_LIEN_NOMME = /^\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)$/;
 
 /**
  * Le corps est du texte brut. Pour que les adresses citées (« Tribune publiée
@@ -97,6 +106,17 @@ function CorpsAvecLiens({ texte }: { texte: string }) {
     <>
       {texte.split(MOTIF_ADRESSE).map((morceau, i) => {
         if (i % 2 === 0) return morceau;
+        const nomme = MORCEAU_LIEN_NOMME.exec(morceau);
+        if (nomme !== null) {
+          return (
+            // biome-ignore lint/suspicious/noArrayIndexKey: les morceaux n'ont pas d'identité propre, l'ordre du découpage est stable
+            <span key={i}>
+              <a href={nomme[2]} target="_blank" rel="noopener noreferrer" className="underline">
+                {nomme[1]}
+              </a>
+            </span>
+          );
+        }
         const ponctuation = /[.,;:!?)»]+$/.exec(morceau)?.[0] ?? '';
         const adresse = morceau.slice(0, morceau.length - ponctuation.length);
         return (
@@ -124,7 +144,7 @@ export async function generateMetadata({ params }: PageDetailProps): Promise<Met
   return metadataPourPartage({
     objet: {
       titre: media.titre,
-      description: media.corps,
+      description: texteSansLiens(media.corps),
       // `vignette_url` est le champ image dédié à l'aperçu / OG (V1 chantier média).
       image_url: media.vignette_url,
       type_objet: 'article',

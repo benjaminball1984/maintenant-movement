@@ -2,6 +2,7 @@ import { BoutonMettreALaUne } from '@/components/home/BoutonMettreALaUne';
 import { EditeurClassementMedia } from '@/components/media/EditeurClassementMedia';
 import { MediaEmbed } from '@/components/media/MediaEmbed';
 import { ImageAffiche } from '@/components/ui';
+import { texteSansLiens } from '@/lib/media/liens';
 import type { MediaEnrichi } from '@/lib/media/requetes';
 import { formaterRelativePassee } from '@/lib/mobilisations/dates';
 import Link from 'next/link';
@@ -277,7 +278,9 @@ function CarteUne({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdmin 
             titre={media.titre}
           />
         ) : null}
-        <p className="line-clamp-[10] text-sm leading-relaxed text-text-2">{media.corps}</p>
+        <p className="line-clamp-[10] text-sm leading-relaxed text-text-2">
+          {texteSansLiens(media.corps)}
+        </p>
         <Provenance media={media} />
         <Etiquettes media={media} />
         <div className="flex flex-wrap items-center gap-3">
@@ -308,7 +311,9 @@ function CarteImportante({ media, admin }: { media: MediaEnrichi; admin?: Option
           titre={media.titre}
         />
       ) : null}
-      <p className="line-clamp-[7] text-sm leading-relaxed text-text-2">{media.corps}</p>
+      <p className="line-clamp-[7] text-sm leading-relaxed text-text-2">
+        {texteSansLiens(media.corps)}
+      </p>
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
         <Etiquettes media={media} />
@@ -350,7 +355,9 @@ function CarteAnnexe({ media, admin }: { media: MediaEnrichi; admin?: OptionsAdm
       </div>
       {/* Texte généreux (jusqu'à 9 lignes au lieu de 3-4) : remplit la
           hauteur de la rangée, plus de grand blanc sous la brève. */}
-      <p className="line-clamp-[9] text-sm leading-relaxed text-text-2">{media.corps}</p>
+      <p className="line-clamp-[9] text-sm leading-relaxed text-text-2">
+        {texteSansLiens(media.corps)}
+      </p>
       <div className="mt-auto grid gap-2">
         <Provenance media={media} />
         <div className="flex flex-wrap items-center gap-3">

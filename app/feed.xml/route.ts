@@ -1,4 +1,5 @@
 import { SITE, getSiteUrl } from '@/config/site';
+import { texteSansLiens } from '@/lib/media/liens';
 import { getSupabaseServer } from '@/lib/supabase';
 import { tronquerMots } from '@/lib/texte-apercu';
 import { NextResponse } from 'next/server';
@@ -48,7 +49,7 @@ export async function GET() {
       // V1, la table `media` n'expose pas auteurice_prenom/nom).
       const auteur = 'Rédaction';
       const lien = `${base}/s-informer/media/${m.slug}`;
-      const description = tronquerMots(m.corps, 50);
+      const description = tronquerMots(texteSansLiens(m.corps), 50);
       const pubDate =
         m.publie_le !== null ? new Date(m.publie_le).toUTCString() : new Date().toUTCString();
       const enclosure =
