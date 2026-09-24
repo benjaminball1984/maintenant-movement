@@ -60,6 +60,59 @@ function carteIntegrable(url: string | null): boolean {
   }
 }
 
+/**
+ * Seconde illustration d'un article (2026-09-24) : quand `media_url` pointe
+ * vers une IMAGE de notre propre stockage (bucket public `media`), l'article
+ * l'affiche sous son texte. Premier cas : la tribune « Fin du monde, fin du
+ * mois » parue dans Regards et dans Basta!, chacune avec son illustration.
+ * On n'accepte que notre stockage : une image d'un site tiers pourrait
+ * disparaître ou changer sans prévenir.
+ */
+function imageIllustration(url: string | null): boolean {
+  if (url === null) return false;
+  try {
+    const u = new URL(url);
+    return (
+      u.protocol === 'https:' &&
+      u.hostname.endsWith('.supabase.co') &&
+      u.pathname.startsWith('/storage/v1/object/public/media/') &&
+      /\.(jpe?g|png|webp)$/i.test(u.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Une adresse web dans le texte d'un article : http(s), jusqu'au prochain blanc. */
+const MOTIF_ADRESSE = /(https?:\/\/[^\s<>"]+)/g;
+
+/**
+ * Le corps est du texte brut. Pour que les adresses citées (« Tribune publiée
+ * dans Regards : https://… ») soient cliquables sans ouvrir la porte au HTML,
+ * on découpe le texte autour des adresses et on ne fabrique que des liens.
+ * Un point ou une virgule collés à la fin de l'adresse restent du texte.
+ */
+function CorpsAvecLiens({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split(MOTIF_ADRESSE).map((morceau, i) => {
+        if (i % 2 === 0) return morceau;
+        const ponctuation = /[.,;:!?)»]+$/.exec(morceau)?.[0] ?? '';
+        const adresse = morceau.slice(0, morceau.length - ponctuation.length);
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: les morceaux n'ont pas d'identité propre, l'ordre du découpage est stable
+          <span key={i}>
+            <a href={adresse} target="_blank" rel="noopener noreferrer" className="underline">
+              {adresse}
+            </a>
+            {ponctuation}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 interface PageDetailProps {
   params: Promise<{ slug: string }>;
 }
@@ -226,8 +279,17 @@ export default async function PageDetailMedia({ params }: PageDetailProps) {
         ) : null}
 
         <section className="prose grid gap-4 whitespace-pre-line text-text-2 leading-relaxed">
-          {media.corps}
+          <CorpsAvecLiens texte={media.corps} />
         </section>
+
+        {imageIllustration(media.media_url) ? (
+          <img
+            src={media.media_url ?? undefined}
+            alt=""
+            loading="lazy"
+            className="w-full rounded-md border border-border"
+          />
+        ) : null}
 
         {media.media_url !== null && (media.type === 'video' || media.type === 'live') ? (
           <div className="aspect-video overflow-hidden rounded-md border border-border">
